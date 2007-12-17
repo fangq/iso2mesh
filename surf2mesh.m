@@ -16,6 +16,9 @@ function [node,elem,bound]=surf2mesh(v,f,p0,p1,elemnum,edgelen)
 %      bound: output, mesh surface element list of the tetrahedral mesh 
 %             the last column denotes the boundary ID
 
+exesuff='.exe';
+if(isunix) exesuff=''; end
+
 % first, resample the surface mesh with qslim
 fprintf(1,'resampling surface mesh ...\n');
 [no,el]=meshresample(v,f,elemnum);
@@ -36,7 +39,7 @@ savesurfpoly(no,el,p0,p1,'vesseltmp.poly');
 % call tetgen to create volumetric mesh
 delete('vesseltmp.1.*');
 fprintf(1,'creating volumetric mesh from a surface mesh ...\n');
-eval(['! tetgen -qa',num2str(edgelen), ' vesseltmp.poly']);
+eval(['! tetgen',exesuff,' -qa',num2str(edgelen), ' vesseltmp.poly']);
 
 % read in the generated mesh
 [node,elem,bound]=readtetgen('vesseltmp.1');
