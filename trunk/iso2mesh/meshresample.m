@@ -3,7 +3,7 @@ function [node,elem]=meshresample(v,f,elemnum)
 % by FangQ, 2007/11/21
 
 exesuff='.exe';
-if(isunix) exesuff=mexext; end
+if(isunix) exesuff=['.',mexext]; end
 
 savesmf(v,f,'origmesh.dat')
 delete newmesh.dat;
