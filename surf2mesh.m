@@ -17,7 +17,7 @@ function [node,elem,bound]=surf2mesh(v,f,p0,p1,elemnum,edgelen)
 %             the last column denotes the boundary ID
 
 exesuff='.exe';
-if(isunix) exesuff=mexext; end
+if(isunix) exesuff=['.',mexext]; end
 
 % first, resample the surface mesh with qslim
 fprintf(1,'resampling surface mesh ...\n');
