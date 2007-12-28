@@ -45,12 +45,12 @@ if(length(edges))
     boxnode=[p0;p1(1),p0(2:3);p1(1:2),p0(3);p0(1),p1(2),p0(3);
               p0(1:2),p1(3);p1(1),p0(2),p1(3);p1;p0(1),p1(2:3)];
     boxelem=[
-        4 nn nn+3 nn+7 nn+4 0;   % x=xmin
-        4 nn nn+1 nn+5 nn+4 0;   % y=ymin
-        4 nn nn+1 nn+2 nn+3 0;   % z=zmin
-        4 nn+1 nn+2 nn+6 nn+5 0; % x=xmax
-        4 nn+2 nn+3 nn+7 nn+6 0; % y=ymax
-        4 nn+4 nn+5 nn+6 nn+7 0];% z=zmax
+        4 nn nn+3 nn+7 nn+4;   % x=xmin
+        4 nn nn+1 nn+5 nn+4;   % y=ymin
+        4 nn nn+1 nn+2 nn+3;   % z=zmin
+        4 nn+1 nn+2 nn+6 nn+5; % x=xmax
+        4 nn+2 nn+3 nn+7 nn+6; % y=ymax
+        4 nn+4 nn+5 nn+6 nn+7];% z=zmax
 
     node=[v;boxnode];
 end
@@ -66,8 +66,8 @@ fprintf(fp,'1 0\n%d %d %d %d %d\n',elem');
 
 if(length(edges))
     for i=1:bbxnum
-        fprintf(fp,'%d %d %d\n',1+loopcount(i),loopcount(i),loopcount(i));
-        fprintf(fp,'%d %d %d %d %d %d 1\n',boxelem(i,:));
+        fprintf(fp,'%d %d 1\n',1+loopcount(i),loopcount(i));
+        fprintf(fp,'%d %d %d %d %d\n',boxelem(i,:));
         if(loopcount(i)&&length(find(loopid==i)))
             endid=find(loopid==i);
             for k=1:length(endid)
