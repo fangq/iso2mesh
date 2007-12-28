@@ -1,4 +1,3 @@
-
 function [node,elem,bound]=surf2mesh(v,f,p0,p1,elemnum,edgelen)
 % surf2mesh - create quality volumetric mesh from isosurface patches
 % author: fangq (fangq<at> nmr.mgh.harvard.edu)
@@ -22,6 +21,7 @@ if(isunix) exesuff=['.',mexext]; end
 % first, resample the surface mesh with qslim
 fprintf(1,'resampling surface mesh ...\n');
 [no,el]=meshresample(v,f,elemnum);
+el=unique(sort(el,2),'rows');
 
 % then smooth the resampled surface mesh (Laplace smoothing)
 edges=surfedge(no,el);   
