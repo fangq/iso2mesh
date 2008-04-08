@@ -24,14 +24,14 @@ fprintf(1,'resampling surface mesh ...\n');
 el=unique(sort(el,2),'rows');
 
 % then smooth the resampled surface mesh (Laplace smoothing)
-edges=surfedge(no,el);   
+edges=surfedge(no,el);
 mask=zeros(size(no,1),1);
 mask(unique(edges(:)))=1;  % =1 for edge nodes, =0 otherwise
-[conn,connnum,count]=meshconn(el,length(no));
-no=smoothsurf(no,mask,conn,2);
+%[conn,connnum,count]=meshconn(el,length(no));
+%no=smoothsurf(no,mask,conn,2);
 
 % remove end elements (all nodes are edge nodes)
-el=delendelem(el,mask);
+%el=delendelem(el,mask);
 
 % dump surface mesh to .poly file format
 savesurfpoly(no,el,p0,p1,'vesseltmp.poly');
@@ -40,6 +40,7 @@ savesurfpoly(no,el,p0,p1,'vesseltmp.poly');
 delete('vesseltmp.1.*');
 fprintf(1,'creating volumetric mesh from a surface mesh ...\n');
 eval(['! tetgen',exesuff,' -qa',num2str(edgelen), ' vesseltmp.poly']);
+%eval(['! tetgen',exesuff,' -d' ' vesseltmp.poly']);
 
 % read in the generated mesh
 [node,elem,bound]=readtetgen('vesseltmp.1');

@@ -17,9 +17,13 @@ loopend=edges(1,end);
 edges(1,:)=[];
 
 while(length(edges))
-    idx=[find(edges(:,1)==loopend),find(edges(:,2)==loopend)];
-    if(length(idx)>1) error('topology is unsupported'); end
-    if(length(idx)==1)
+%    if(loopend==2056)
+%        disp(loopend);
+%    end
+    idx=[find(edges(:,1)==loopend)',find(edges(:,2)==loopend)'];
+%    if(length(idx)>1) error('self intersecting curve is unsupported'); end
+%    if(length(idx)==1)
+        idx=idx(1);
         newend=setdiff(edges(idx,:),loopend);
         if(newend==loophead)
             loops=[loops,nan];
@@ -35,6 +39,6 @@ while(length(edges))
         end
         loopend=newend;
         edges(idx,:)=[];
-    end
+%    end
 end
     

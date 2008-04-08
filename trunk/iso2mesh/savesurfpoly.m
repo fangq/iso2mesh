@@ -20,12 +20,21 @@ if(length(edges))
     end
     seg=[0,find(isnan(loops))];
     segnum=length(seg)-1;
+    newloops=[];
+    for i=1:segnum
+       if(seg(i+1)-(seg(i)+1)==0) continue; end
+       newloops=[newloops nan bbxflatsegment(node,loops(seg(i)+1:seg(i+1)-1))];
+    end
+    loops=[newloops nan];
 
+    seg=[0,find(isnan(loops))];
+    segnum=length(seg)-1;seg
     bbxnum=6;
     loopcount=zeros(bbxnum,1);
     loopid=zeros(segnum,1);
     for i=1:segnum     % walk through the edge loops
         subloop=loops(seg(i)+1:seg(i+1)-1);
+        if(length(subloop)==0) continue; end
         boxfacet=find(sum(abs(diff(v(subloop,:))))<1e-2); % find a flat loop
         if(length(boxfacet))   % if the loop is flat along x/y/z dir
             bf=boxfacet(1);    % no degeneracy allowed
@@ -80,7 +89,7 @@ if(length(edges))
             for k=1:length(endid)
                 j=endid(k);
                 subloop=loops(seg(j)+1:seg(j+1)-1);
-                fprintf(fp,'%d %f %f %f\n',k,mean(v(subloop,:)));
+                fprintf(fp,'%d %f %f %f\n',k,internalpoint(v,subloop)); %mean(v(subloop,:)));
             end
         end
     end
