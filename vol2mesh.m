@@ -42,7 +42,8 @@ savesurfpoly(no,el,[],[],'vesseltmp.poly');
 % call tetgen to create volumetric mesh
 delete('vesseltmp.1.*');
 fprintf(1,'creating volumetric mesh from a surface mesh ...\n');
-eval(['! tetgen',exesuff,' -q1.414a',num2str(maxvol), ' vesseltmp.poly']);
+%eval(['! tetgen',exesuff,' -q1.414a',num2str(maxvol), ' vesseltmp.poly']);
+eval(['! tetgen',exesuff,' -d vesseltmp.poly']);
 
 % read in the generated mesh
 [node,elem,bound]=readtetgen('vesseltmp.1');
