@@ -30,5 +30,5 @@ f=removeedgefaces(f,v,idz1);
 
 function f=removeedgefaces(f,v,idx1)
 mask=zeros(length(v),1);
-mask(idz1)=1;
+mask(idx1)=1;
 f(find(sum(mask(f)')==3),:)=[];
