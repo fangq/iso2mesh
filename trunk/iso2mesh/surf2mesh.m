@@ -1,4 +1,4 @@
-function [node,elem,bound]=surf2mesh(v,f,p0,p1,elemnum,edgelen)
+function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol)
 % surf2mesh - create quality volumetric mesh from isosurface patches
 % author: fangq (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/24
@@ -8,8 +8,8 @@ function [node,elem,bound]=surf2mesh(v,f,p0,p1,elemnum,edgelen)
 %      f: input, isosurface face element list, dimension (be,3)
 %      p0: input, coordinates of one corner of the bounding box, p0=[x0 y0 z0]
 %      p1: input, coordinates of the other corner of the bounding box, p1=[x1 y1 z1]
-%      elemnum: input, target surface element number for resampling
-%      edgelen: input, maximum tetrahedral mesh edge length
+%      keepratio: input, percentage of elements being kept after the simplification
+%      maxvol: input, maximum tetrahedra element volume
 %      node: output, node coordinates of the tetrahedral mesh
 %      elem: output, element list of the tetrahedral mesh
 %      bound: output, mesh surface element list of the tetrahedral mesh 
@@ -20,7 +20,7 @@ if(isunix) exesuff=['.',mexext]; end
 
 % first, resample the surface mesh with qslim
 fprintf(1,'resampling surface mesh ...\n');
-[no,el]=meshresample(v,f,elemnum);
+[no,el]=meshresample(v,f,keepratio);
 el=unique(sort(el,2),'rows');
 
 % then smooth the resampled surface mesh (Laplace smoothing)
@@ -39,7 +39,7 @@ savesurfpoly(no,el,p0,p1,'vesseltmp.poly');
 % call tetgen to create volumetric mesh
 delete('vesseltmp.1.*');
 fprintf(1,'creating volumetric mesh from a surface mesh ...\n');
-eval(['! tetgen',exesuff,' -qa',num2str(edgelen), ' vesseltmp.poly']);
+eval(['! tetgen',exesuff,' -qa',num2str(maxvol), ' vesseltmp.poly']);
 %eval(['! tetgen',exesuff,' -d' ' vesseltmp.poly']);
 
 % read in the generated mesh

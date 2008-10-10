@@ -1,6 +1,15 @@
 function newedge=orderloopedge(edge)
+% [newedge]=orderloopedge(edge)
+% order the node list of a simple loop based on connection sequence
+% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% date:   2008/05
+%
+% inputs: 
+%        edge: a loop consisted by a sequence of edges, each row 
+%              is an edge with two integers: start/end node index
+%        newedge: reordered edge node list
 
-% can not process bifercation
+% this subroutine can not process bifercation
 
 ne=size(edge,1);
 newedge=zeros(size(edge));

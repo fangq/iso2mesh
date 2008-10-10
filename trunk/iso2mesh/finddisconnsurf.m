@@ -20,10 +20,10 @@ while(length(f))
 		%ii=unique(ii);
 		subset(end+1:end+length(ii),:)=f(ii,:);
 		f(ii,:)=[];
-        [ii,jj]=find(sum(ismember(f,subset)')');
+	        [ii,jj]=find(sum(ismember(f,subset)')');
 	end
 	if(length(subset))
 		facecell{end+1}=subset;
-        subset=[];
+        	subset=[];
 	end
 end

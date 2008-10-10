@@ -14,7 +14,7 @@ load surfMeshQianqian.mat
 
 % f and v stores the surface patch faces and nodes
 %% perform mesh generation
-[node,elem,bound]=surf2mesh(v,f,[1 1 1],[100 100 100],80,25);
+[node,elem,bound]=surf2mesh(v,f,[1 1 1],[100 100 100],0.1,25);
 
 %% visualize the resulting mesh
 trisurf(bound(:,1:3),node(:,1),node(:,2),node(:,3));
