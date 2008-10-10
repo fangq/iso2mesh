@@ -1,5 +1,5 @@
-function [node,elem,bound]=vol2mesh(img,ix,iy,iz,elemnum,maxvol)
-% [node,elem,bound]=vol2mesh(img,ix,iy,iz,thickness,elemnum,maxvol,A,B)
+function [node,elem,bound]=vol2mesh(img,ix,iy,iz,keepratio,maxvol,dofix)
+% [node,elem,bound]=vol2mesh(img,ix,iy,iz,thickness,keepratio,maxvol,A,B)
 % convert a binary volume to tetrahedral mesh
 % author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
 % date:   2007/12/21
@@ -7,7 +7,7 @@ function [node,elem,bound]=vol2mesh(img,ix,iy,iz,elemnum,maxvol)
 % inputs: 
 %        img: a volumetric binary image 
 %        ix,iy,iz: subvolume selection indices in x,y,z directions
-%        elemnum: target surface element number after simplification
+%        keepratio: target surface element number after simplification
 %        maxvol: target maximum tetrahedral elem volume
 
 img=img(ix,iy,iz);
@@ -21,10 +21,13 @@ if(isunix) exesuff=['.',mexext]; end
 
 [f,v]=isosurface(newimg,0);
 v(:,[1 2])=v(:,[2 1]); % isosurface(V,th) assumes x/y transposed
+if(dofix)
+    [v,f]=meshcheckrepair(v,f);
+end
 
 % first, resample the surface mesh with qslim
 fprintf(1,'resampling surface mesh ...\n');
-[no,el]=meshresample(v,f,elemnum);
+[no,el]=meshresample(v,f,keepratio);
 
 % trisurf(el,no(:,1),no(:,2),no(:,3));
 % waitforbuttonpress;
@@ -42,8 +45,7 @@ savesurfpoly(no,el,[],[],'vesseltmp.poly');
 % call tetgen to create volumetric mesh
 delete('vesseltmp.1.*');
 fprintf(1,'creating volumetric mesh from a surface mesh ...\n');
-%eval(['! tetgen',exesuff,' -q1.414a',num2str(maxvol), ' vesseltmp.poly']);
-eval(['! tetgen',exesuff,' -d vesseltmp.poly']);
+eval(['! tetgen',exesuff,' -q1.414a',num2str(maxvol), ' vesseltmp.poly']);
 
 % read in the generated mesh
 [node,elem,bound]=readtetgen('vesseltmp.1');
