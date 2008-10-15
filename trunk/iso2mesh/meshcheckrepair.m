@@ -29,7 +29,7 @@ if(nargin<3 || strcmp(opt,'isolated'))
 end
 
 if(nargin<3 || strcmp(opt,'open'))
-    eg=surfedge(node,elem);
+    eg=surfedge(elem);
     if(length(eg)>0) 
         error('open surface found, you need to enclose it by padding zeros around the volume');
     end

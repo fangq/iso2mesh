@@ -16,7 +16,7 @@ subset=[];
 while(length(f))
     [ii,jj]=find(sum(ismember(f,f(1,:))')');
 	while(length(ii)>0)
-		if(length(ii)==0) break; end
+		if(isempty(ii)) break; end
 		%ii=unique(ii);
 		subset(end+1:end+length(ii),:)=f(ii,:);
 		f(ii,:)=[];
