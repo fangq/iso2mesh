@@ -24,7 +24,7 @@ fprintf(1,'resampling surface mesh ...\n');
 el=unique(sort(el,2),'rows');
 
 % then smooth the resampled surface mesh (Laplace smoothing)
-edges=surfedge(no,el);
+edges=surfedge(el);
 mask=zeros(size(no,1),1);
 mask(unique(edges(:)))=1;  % =1 for edge nodes, =0 otherwise
 %[conn,connnum,count]=meshconn(el,length(no));

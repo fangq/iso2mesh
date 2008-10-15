@@ -19,7 +19,20 @@ newimg(2:end-1,2:end-1,2:end-1)=img;
 exesuff='.exe';
 if(isunix) exesuff=['.',mexext]; end
 
-[f,v]=isosurface(newimg,0);
+maxlevel=max(newimg(:));
+f=[];
+v=[];
+for i=0:maxlevel
+  [f0,v0]=isosurface(newimg,i);
+  if(i==0)
+      f=f0;
+      v=v0;
+  else
+    f=[f;f0+length(v)];
+    v=[v;v0];
+  end
+end
+
 v(:,[1 2])=v(:,[2 1]); % isosurface(V,th) assumes x/y transposed
 if(dofix)
     [v,f]=meshcheckrepair(v,f);
@@ -28,11 +41,14 @@ end
 % first, resample the surface mesh with qslim
 fprintf(1,'resampling surface mesh ...\n');
 [no,el]=meshresample(v,f,keepratio);
-
+if(dofix)
+%     el=maxsurf(finddisconnsurf(el));
+    [no,el]=meshcheckrepair(no,el);
+end
 % trisurf(el,no(:,1),no(:,2),no(:,3));
 % waitforbuttonpress;
 % then smooth the resampled surface mesh (Laplace smoothing)
-edges=surfedge(no,el);   
+edges=surfedge(el);   
 mask=zeros(size(no,1),1);
 mask(unique(edges(:)))=1;  % =1 for edge nodes, =0 otherwise
 
