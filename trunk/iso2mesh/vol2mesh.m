@@ -1,4 +1,4 @@
-function [node,elem,bound]=vol2mesh(img,ix,iy,iz,keepratio,maxvol,dofix)
+function [node,elem,bound]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix)
 % [node,elem,bound]=vol2mesh(img,ix,iy,iz,thickness,keepratio,maxvol,A,B)
 % convert a binary volume to tetrahedral mesh
 % author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
@@ -7,7 +7,7 @@ function [node,elem,bound]=vol2mesh(img,ix,iy,iz,keepratio,maxvol,dofix)
 % inputs: 
 %        img: a volumetric binary image 
 %        ix,iy,iz: subvolume selection indices in x,y,z directions
-%        keepratio: target surface element number after simplification
+%        opt: target surface element number after simplification
 %        maxvol: target maximum tetrahedral elem volume
 
 img=img(ix,iy,iz);
@@ -20,33 +20,45 @@ exesuff='.exe';
 if(isunix) exesuff=['.',mexext]; end
 
 maxlevel=max(newimg(:));
-f=[];
-v=[];
-for i=0:maxlevel
+el=[];
+no=[];
+for i=0:maxlevel-1
   [f0,v0]=isosurface(newimg,i);
+  v0(:,[1 2])=v0(:,[2 1]); % isosurface(V,th) assumes x/y transposed
+  if(dofix)  [v0,f0]=meshcheckrepair(v0,f0);  end
+  
+  if(isstruct(opt) & length(opt)==maxlevel) keepratio=opt(i+1).keepratio;
+  elseif (isstruct(opt) & length(opt)==1) keepratio=opt.keepratio;
+  else keepratio=opt;  end;
+
+  % first, resample the surface mesh with cgal
+  fprintf(1,'resampling surface mesh for level %d...\n',i);
+  [v0,f0]=meshresample(v0,f0,keepratio);
+  if(dofix) [v0,f0]=meshcheckrepair(v0,f0); end
+  
+  % if a transformation matrix/offset vector supplied, apply them
+  if(isstruct(opt) & length(opt)==maxlevel & isfield(opt(i+1),'A') & isfield(opt(i+1),'B')) 
+      v0=(opt(i+1).A*v0'+repmat(opt(i+1).B(:),1,size(v0,1)))';
+  elseif (isstruct(opt) & length(opt)==1 & isfield(opt,'A') & isfield(opt,'B')) 
+      v0=(opt.A*v0'+repmat(opt.B(:),1,size(v0,1)))';
+  end
+
   if(i==0)
-      f=f0;
-      v=v0;
+      el=f0;
+      no=v0;
   else
-    f=[f;f0+length(v)];
-    v=[v;v0];
+      el=[el;f0+length(no)];
+      no=[no;v0];
   end
 end
 
-v(:,[1 2])=v(:,[2 1]); % isosurface(V,th) assumes x/y transposed
-if(dofix)
-    [v,f]=meshcheckrepair(v,f);
+if(isstruct(opt) & isfield(opt,'surf'))
+   for i=1:length(opt.surf)
+        el=[el;opt.surf(i).elem+length(no)];
+        no=[no;opt.surf(i).node];
+   end
 end
 
-% first, resample the surface mesh with qslim
-fprintf(1,'resampling surface mesh ...\n');
-[no,el]=meshresample(v,f,keepratio);
-if(dofix)
-%     el=maxsurf(finddisconnsurf(el));
-    [no,el]=meshcheckrepair(no,el);
-end
-% trisurf(el,no(:,1),no(:,2),no(:,3));
-% waitforbuttonpress;
 % then smooth the resampled surface mesh (Laplace smoothing)
 edges=surfedge(el);   
 mask=zeros(size(no,1),1);
@@ -67,6 +79,6 @@ eval(['! tetgen',exesuff,' -q1.414a',num2str(maxvol), ' vesseltmp.poly']);
 [node,elem,bound]=readtetgen('vesseltmp.1');
 node=node-1; % because we wrapped the image with a 1 voxel thick null layer in newimg
 
-node(:,1)=node(:,1)*(max(ix)-min(ix))/dim(1)+min(ix);
-node(:,2)=node(:,2)*(max(iy)-min(iy))/dim(2)+min(iy);
-node(:,3)=node(:,3)*(max(iz)-min(iz))/dim(3)+min(iz);
+node(:,1)=node(:,1)*(max(ix)-min(ix)+1)/dim(1)+min(ix);
+node(:,2)=node(:,2)*(max(iy)-min(iy)+1)/dim(2)+min(iy);
+node(:,3)=node(:,3)*(max(iz)-min(iz)+1)/dim(3)+min(iz);
