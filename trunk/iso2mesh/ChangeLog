@@ -1,0 +1,40 @@
+==========================================================
+
+     iso2mesh - a simple yet powerful mesh generator
+
+----------------------------------------------------------
+
+iso2mesh ChangeLog:
+
+2008/10/25 (0.5, alpha release)
+        1. created a sourceforge project, pointing to 
+           the project main page at orbit.
+        2. wrote documents and polish file structures
+        3. included more sample codes and data
+        4. drafted the documentations
+
+2008/10/10 (0.4)
+        1. added subroutines for mesh validation and repairing
+        2. included JMeshLib for non-manifold node removal
+
+2008/01/10 (0.3)
+        1. added vol2mesh and the related scripts
+        2. iso2mesh is able to mesh breast geometry from 3D 
+           tomosynthesis scan and a mouse head model from CT images.
+
+2008/04/08 (0.2)
+        1. qslim produces self-intersecting meshes after 
+           simplification, which is not good. It is now replaced
+           by CGAL mesh simplification module
+        2. modified CGAL mesh simplification code to preserve all
+           edges nodes (keep them co-planar)
+
+2007/12/27 (0.1.1)
+        1. used mexext to distinguish binaries for different platform
+
+2007/11/25 (0.1)
+        1. initial upload to cvs, as a module of redbird2
+        2. used qslim to perform mesh simplification and tetgen 
+         for mesh generation
+        3. supported both win32 and Linux
+        4. added sample data and scripts

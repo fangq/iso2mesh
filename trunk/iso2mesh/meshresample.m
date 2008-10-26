@@ -1,9 +1,14 @@
 function [node,elem]=meshresample(v,f,elemnum)
+% [node,elem]=meshresample(v,f,elemnum)
+%
 % meshresample: resample mesh using CGAL mesh simplification code
 % by FangQ, 2007/11/21
 
 exesuff='.exe';
 if(isunix) exesuff=['.',mexext]; end
+if(strcmp(exesuff,'.mexa64')) % cgalsimp2.mexglx can be used for both
+	exesuff='.mexglx';
+end
 
 %savesmf(v,f,'origmesh.dat')
 saveoff(v,f,'origmesh.off');

@@ -1,20 +1,18 @@
-==========================================================
-      Tetrahedral mesh generator from isosurfaces
-==========================================================
+----------------------------------------------------------
+=      Tetrahedral mesh generator from isosurfaces       =
+----------------------------------------------------------
 
-Author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+'''Author''': Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+::      Martinos Center for Biomedical Imaging
+::      Massachusetts General Hospital (Harvard Medical School)
+::      Bldg. 149, 13th St., Charlestown, MA 02148
+'''Version''': 0.5
+License: GPL v2 or later (see COPYING) 
+::      (this license does not cover the binaries in the bin/ 
+::      directory, see section III for more details)
+'''URL''': http://iso2mesh.sf.net
 
-        Martinos Center for Biomedical Imaging
-        Massachusetts General Hospital (Harvard Medical School)
-        Bldg. 149, 13th St., Charlestown, MA 02148
-
-Version: 0.5
-License: GPL v2 (see COPYING) 
-  (does not cover the binaries in the bin/ directory, 
-  see section III)
-
-
-I. Introduction
+== # Introduction ==
 
 Iso2mesh is a matlab-based meshing toolbox. It is packed
 with a number of important meshing tools, such as 
@@ -29,7 +27,7 @@ images is of great interests for researchers in the field
 of image-based modeling and analysis. Unfortunately, 
 very limited utilities for this purpose can be found
 and they are usually very expensive (such as amira 
-from Mercury Inc.). 
+from Mercury Computer Systems). 
 
 This toolbox was developed as a free alternative to
 the expensive commertial tools and provides researchers 
@@ -43,4 +41,318 @@ subroutines to perform specific meshing task, such as
 closed component extraction or boundary extraction.
 
 
-III. Acknowledgement
+== # List of functions ==
+=== # Streamlined Mesh Generation (wrapper) ===
+
+==== vol2mesh.m ====
+function [node,elem,bound]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix)
+   convert a binary volume to tetrahedral mesh
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   inputs: 
+          img: a volumetric binary image 
+          ix,iy,iz: subvolume selection indices in x,y,z directions
+          opt: target surface element number after simplification
+          maxvol: target maximum tetrahedral elem volume
+
+==== surf2mesh.m ====
+function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol)
+   surf2mesh - create quality volumetric mesh from isosurface patches
+   author: fangq (fangq<at> nmr.mgh.harvard.edu)
+   parameters:
+        v: input, isosurface node list, dimension (nn,3)
+        f: input, isosurface face element list, dimension (be,3)
+        p0: input, coordinates of one corner of the bounding box, p0=[x0 y0 z0]
+        p1: input, coordinates of the other corner of the bounding box, p1=[x1 y1 z1]
+        keepratio: input, percentage of elements being kept after the simplification
+        maxvol: input, maximum tetrahedra element volume
+        node: output, node coordinates of the tetrahedral mesh
+        elem: output, element list of the tetrahedral mesh
+        bound: output, mesh surface element list of the tetrahedral mesh 
+               the last column denotes the boundary ID
+
+=== # Mesh simplification ===
+
+==== meshresample.m ====
+function [node,elem]=meshresample(v,f,elemnum)
+   meshresample: resample mesh using CGAL mesh simplification code
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+
+==== bbxflatsegment.m ====
+function seg=bbxflatsegment(node,loop)
+   bbxflatsegment: decompose edge loops into flat segments
+                    alone x/y/z planes of the bounding box
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters:   
+      node:  x,y,z coordinates of each node of the mesh
+      loop:  input, a single vector separated by NaN, each segment
+               is a close-polygon consisted by node IDs 
+      seg:   output, a single vector separated by NaN, each segment
+               is a close-polygon on x/y/z plane 
+
+=== # Mesh repair ===
+
+==== meshcheckrepair.m ====
+function [node,elem]=meshcheckrepair(node,elem,opt)
+   check and repair a surface mesh
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters:
+        node: input/output, surface node list, dimension (nn,3)
+        elem: input/output, surface face element list, dimension (be,3)
+        opt: options, including
+              'duplicated': remove duplicated elements
+              'isolated': remove isolated nodes
+              'deep': call external jmeshlib to remove non-manifold vertices
+
+==== removedupelem.m ====
+function elem=removedupelem(elem)
+   remove doubly duplicated elements
+
+==== removeisolatednode.m ====
+function [no,el]=removeisolatednode(node,elem)
+   remove isolated nodes: nodes that are not included in any element
+
+==== delendelem.m ====
+function elem=delendelem(elem,mask)
+   delendelem - delete elements whose nodes are all edge nodes
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters: 
+        elem: input/output, surface/volumetric element list
+        mask: node label, =0 for internal nodes, =1 for edge nodes
+
+==== surfaceclean.m ====
+function f=surfaceclean(f,v)
+   surfaceclean: remove surface patches that are located inside 
+                 the bounding box faces
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters: 
+        v: input, surface node list, dimension (nn,3)
+        f: input, surface face element list, dimension (be,3)  
+        f: output, faces free of those on the bounding box
+
+==== smoothsurf.m ====
+function nodenew=smoothsurf(node,mask,conn,iter)
+   smoothsurf: smooth a surface mesh by Laplace smoothing
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters:
+      node:  node coordinates of a surface mesh
+      mask: of length of node number, =0 for internal nodes, =1 for edge nodes
+      conn:  input, a cell structure of length size(node), conn{n}
+             contains a list of all neighboring node ID for node n
+      iter:  smoothing iteration number
+      nodenew: output, the smoothed node coordinates
+
+=== # Mesh decomposition and query ===
+
+==== finddisconnsurf.m ====
+function facecell=finddisconnsurf(f)   
+   subroutine to extract disconnected surfaces from a 
+   cluster of surfaces
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters:
+       facelist: input, node indices for all surface triangles
+       facecell: separated disconnected surface node indices
+
+==== maxsurf.m ====
+function f=maxsurf(facecell)
+   return a surface with contains the most elements in a 
+   collection of surfaces (stored in a cell array)
+
+==== extractloops.m ====
+function loops=extractloops(edges)
+   extractloops: extract individual loops from an edge table of a loop
+                 collection
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters:   
+      edges:  two column matrix recording the starting/ending 
+               points of all edge segments
+      loops:  output, a single vector separated by NaN, each segment
+               is a close-polygon consisted by node IDs
+
+==== flatsegment.m ====
+function mask=flatsegment(node,edge)
+   flatsegment: decompose edge loops into flat segments
+                alone arbitrary planes of the bounding box
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+    this code is fragile: it can not handle curves with many co-linear
+    nodes near the corner point
+  
+   parameters:   
+      node:  x,y,z coordinates of each node of the mesh
+      edge:  input, a single vector separated by NaN, each segment
+             is a close-polygon consisted by node IDs 
+      mask:  output, a cell, each element is a close-polygon 
+             on x/y/z plane 
+
+==== internalpoint.m ====
+function p=internalpoint(v,aloop)
+   internalpoint: imperical function to find an internal point
+                  of a planar polygon
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters:   
+      v:     x,y,z coordinates of each node of the mesh
+      aloop:  input, a single vector separated by NaN, each segment
+               is a close-polygon consisted by node IDs 
+      p:   output, [x y z] of an internal point of aloop
+
+
+==== meshconn.m ====
+function [conn,connnum,count]=meshconn(elem,nn);
+   meshconn: create node neighbor list from a mesh
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters:
+      elem:  element table of a mesh
+      nn  :  total node number of the mesh
+      conn:  output, a cell structure of length nn, conn{n}
+             contains a list of all neighboring node ID for node n
+      connnum: vector of length nn, denotes the neighbor number of each node
+      count: total neighbor numbers
+
+
+==== orderloopedge.m ====
+function newedge=orderloopedge(edge)
+   order the node list of a simple loop based on connection sequence
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   inputs: 
+          edge: a loop consisted by a sequence of edges, each row 
+                is an edge with two integers: start/end node index
+          newedge: reordered edge node list
+   (this subroutine can not process bifercation)
+
+==== surfedge.m ====
+function tri=surfedge(f)
+   surfedge: find the edge of an open surface
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters:
+        v: input, surface node list, dimension (nn,3)
+        f: input, surface face element list, dimension (be,3)
+
+=== # Binary image pre-processing (hole-filling and island removing) ===
+
+==== bwislands.m ====
+function islands=bwislands(img)
+   decompose a 2D binary image into isolated regions
+   and return the indices of the region pixels as a cell array
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters:
+        img: a binary (0-1) 2D image
+        islands:a cell array of length of region numbers, each 
+                element stores all indices in img for that region
+
+==== deislands2d.m ====
+function cleanimg=deislands2d(img,sizelim)
+   remove all small islands smaller than specified size from  
+   a binary image
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters:
+       	img: a binary (0-1) 2D image
+        sizelim: maximum pixel counts of the islands to be removed
+        cleanimg: a binary image after removing the small islands
+
+==== deislands3d.m ====
+function cleanimg=deislands3d(img,sizelim)
+   remove all small islands smaller than specified size from
+   a 3D binary image (it applies deislands2d for each image slice)
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters:
+        img: a binary (0-1) 3D image
+        sizelim: maximum pixel counts of the islands to	be removed
+       	cleanimg: a binary image after removing	the small islands 
+
+=== # File IO ===
+
+==== readoff.m ====
+function [node,elem]=readoff(fname)
+   readsmf: read  Geomview Object File Format
+   by FangQ, 2008/03/28
+
+==== readsmf.m ====
+function [node,elem]=readsmf(fname)
+   readsmf: read simple model format
+   by FangQ, 2007/11/21
+
+==== readtetgen.m ====
+function [node,elem,bound]=readtetgen(fstub)
+   readtetgen: read tetgen output files
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters:
+      fstub: file name stub
+
+==== saveoff.m ====
+function saveoff(v,f,fname)
+   savesmf: save a surface mesh to  Geomview Object File Format
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters:
+        v: input, surface node list, dimension (nn,3)
+        f: input, surface face element list, dimension (be,3)
+        fname: output file name
+
+==== savesmf.m ====
+function savesmf(v,f,fname)
+   savesmf: save a surface mesh to smf format
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters:
+        v: input, surface node list, dimension (nn,3)
+        f: input, surface face element list, dimension (be,3)
+        fname: output file name
+
+==== savesurfpoly.m ====
+function savesurfpoly(v,f,p0,p1,fname)
+   meshconn: create node neighbor list from a mesh
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   parameters:
+        v: input, surface node list, dimension (nn,3)
+        f: input, surface face element list, dimension (be,3)
+        p0: input, coordinates of one corner of the bounding box, p0=[x0 y0 z0]
+        p1: input, coordinates of the other corner of the bounding box, p1=[x1 y1 z1]
+        fname: output file name
+
+
+== # Acknowledgement ==
+
+This toolbox relies a number external meshing tools to perform
+the essential functionalities. These tools are listed below:
+
+=== bin/tetgen ===
+
+*Summary:tetgen is a compact and fast 3D mesh generator, it performs 
+*License: ('''IMPORTANT''') tetgen is free for academic research and non-commertial uses only.
+*URL: http://tetgen.berlios.de/
+*Author: Hang Si <si at wias-berlin.de>
+::Research Group: Numerical Mathematics and Scientific Computing
+::Weierstrass Institute for Applied Analysis and Stochastics
+::Mohrenstr. 39, 10117 Berlin, Germany
+
+=== bin/cgalsimp2 ===
+
+*Summary: cgalsimp2 performs surface mesh simplification in iso2mesh.
+*Source: it is adapted from Surface_mesh_simplification/edge_collapse_enriched_polyhedron CGAL library
+*License: CGAL v3 library is licensed under LGPL v2.1 (Lesser General Public License)
+*URL: http://www.cgal.org/
+
+=== bin/meshfix ===
+
+*Summary: meshfix is adapted from the sample code of JMeshLib
+*License: GPL (GNU General Public License) v2 or later
+*URL:http://jmeshlib.sourceforge.net/
+*Author:Marco Attene <attene at ge.imati.cnr.it>
+::Istituto di Matematica Applicata e Tecnologie Informatiche
+::Consiglio Nazionale delle Ricerche
+::Via De Marini, 6 (Torre di Francia)
+::16149 Genoa - ITALY 
+
+=== bin/tetview ===
+
+*Summary:tetview is a 3D mesh viewer
+*License: see bin/tetgen
+*URL: http://tetgen.berlios.de/tetview.html
+*Author: see bin/tetgen
+
+
+Note: iso2mesh and the above meshing utilities are considered 
+as an "aggregate" rather than "derived work" based on
+the definition in GPL's FAQ (http://www.gnu.org/licenses/gpl-faq.html#MereAggregation)
+Therefore, the license of iso2mesh and these tools are independent.
+The iso2mesh license only applies to the scripts and documents/data
+in this package except those programs stored in the bin/ directory.
+The source codes of the modified meshing utilities are available
+separatly at iso2mesh's website and retain their upstream licenses.
