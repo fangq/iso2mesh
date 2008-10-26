@@ -12,7 +12,7 @@ end
 
 %savesmf(v,f,'origmesh.dat')
 saveoff(v,f,'origmesh.off');
-delete newmesh.dat;
+if(exist('newmesh.dat')) delete('newmesh.dat'); end
 eval(['! cgalsimp2',exesuff,' origmesh.off ', num2str(elemnum), ' newmesh.dat']);
 [node,elem]=readoff('newmesh.dat');
 [node,I,J]=unique(node,'rows');

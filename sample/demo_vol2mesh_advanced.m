@@ -1,21 +1,20 @@
 % load full head image (T1 MRI scan)
 
-fid=fopen('T1.img','rb');
-head = fread(fid, inf,'char');
-fclose(fid);
-head=reshape(head,[256 256 256]);
+fprintf(1,'loading binary head image\n');
+for i=1:256 
+  head(:,:,i)=imread('head.tif',i);
+end
 
 % load segmented brain images (by freesurfer recon_all)
-
-fid=fopen('brain.img','rb');
-brain = fread(fid, inf,'char');
-fclose(fid);
-brain=reshape(brain,[256 256 256]);
+fprintf(1,'loading binary brain image\n');
+for i=1:256
+  brain(:,:,i)=imread('brain.tif',i);
+end
 
 % fill holes in the head image and create the canonical binary volume
 % this may take a few minutes for a 256x256x256 volume
 tic
-cleanimg=deislands3d(logical(head>20));
+cleanimg=deislands3d(logical(head>0));
 toc
 
 % add brain image as additional segment

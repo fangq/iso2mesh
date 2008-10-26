@@ -71,7 +71,7 @@ el=delendelem(el,mask);
 savesurfpoly(no,el,[],[],'vesseltmp.poly');
 
 % call tetgen to create volumetric mesh
-delete('vesseltmp.1.*');
+if(exist('vesseltmp.1.*')) delete('vesseltmp.1.*'); end
 fprintf(1,'creating volumetric mesh from a surface mesh ...\n');
 eval(['! tetgen',exesuff,' -q1.414a',num2str(maxvol), ' vesseltmp.poly']);
 
