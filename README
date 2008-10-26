@@ -12,13 +12,17 @@ License: GPL v2 or later (see COPYING)
 ::      directory, see section III for more details)
 '''URL''': http://iso2mesh.sf.net
 
+
+Table of Content 
+<toc>
+
 == # Introduction ==
 
-Iso2mesh is a matlab-based meshing toolbox. It is packed
-with a number of important meshing tools, such as 
-surface simplifier (based on CGAL), tetgen and mesh
-validation&repair utility (based on JMeshLib), and 
-provide a simple yet powerful way to make quality 
+Iso2mesh is a matlab-based mesh generation toolbox. 
+It is packed with a number of important meshing tools, 
+such as surface simplifier (based on CGAL), tetgen 
+and mesh validation&repair utility (based on JMeshLib), 
+and provide a simple yet powerful way to make quality 
 tetrahedral volumetric mesh from isosurfaces, or a 
 3D binary images (such as threholded MRI/CT images).
 
@@ -325,7 +329,7 @@ the essential functionalities. These tools are listed below:
 === bin/cgalsimp2 ===
 
 *Summary: cgalsimp2 performs surface mesh simplification in iso2mesh.
-*Source: it is adapted from Surface_mesh_simplification/edge_collapse_enriched_polyhedron CGAL library
+*Source: it is adapted from Surface_mesh_simplification example of CGAL library
 *License: CGAL v3 library is licensed under LGPL v2.1 (Lesser General Public License)
 *URL: http://www.cgal.org/
 
