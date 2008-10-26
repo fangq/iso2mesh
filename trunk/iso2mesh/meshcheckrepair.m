@@ -40,7 +40,7 @@ if(isunix) exesuff=['.',mexext]; end
 if(nargin<3 || strcmp(opt,'deep'))
     exesuff='.exe';
     if(isunix) exesuff=['.',mexext]; end
-    delete('cleanedmesh.off');
+    if(exist('cleanedmesh.off')) delete('cleanedmesh.off'); end
     saveoff(node,elem,'cleanmesh.off');
     eval(['! meshfix',exesuff ' cleanmesh.off cleanedmesh.off']);
     [node,elem]=readoff('cleanedmesh.off');
