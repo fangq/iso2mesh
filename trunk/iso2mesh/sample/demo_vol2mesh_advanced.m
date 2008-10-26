@@ -1,3 +1,8 @@
+% sample script to create volumetric mesh from 
+% multiple levelsets of a binary segmented head image.
+%
+% Author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+
 % load full head image (T1 MRI scan)
 
 fprintf(1,'loading binary head image\n');
