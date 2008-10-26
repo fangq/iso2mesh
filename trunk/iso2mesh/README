@@ -2,5 +2,45 @@
       Tetrahedral mesh generator from isosurfaces
 ==========================================================
 
-Author: qianqian fang, (fangq at nmr.mgh.harvard.edu)
-Version: 1.0
+Author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+
+        Martinos Center for Biomedical Imaging
+        Massachusetts General Hospital (Harvard Medical School)
+        Bldg. 149, 13th St., Charlestown, MA 02148
+
+Version: 0.5
+License: GPL v2 (see COPYING) 
+  (does not cover the binaries in the bin/ directory, 
+  see section III)
+
+
+I. Introduction
+
+Iso2mesh is a matlab-based meshing toolbox. It is packed
+with a number of important meshing tools, such as 
+surface simplifier (based on CGAL), tetgen and mesh
+validation&repair utility (based on JMeshLib), and 
+provide a simple yet powerful way to make quality 
+tetrahedral volumetric mesh from isosurfaces, or a 
+3D binary images (such as threholded MRI/CT images).
+
+To be able to create volumetric FEM mesh from 3D binary
+images is of great interests for researchers in the field
+of image-based modeling and analysis. Unfortunately, 
+very limited utilities for this purpose can be found
+and they are usually very expensive (such as amira 
+from Mercury Inc.). 
+
+This toolbox was developed as a free alternative to
+the expensive commertial tools and provides researchers 
+a complete workflow from 3D binary image preprocessing 
+(hole-filling and island-removing), to surface mesh 
+modeling (extraction, remeshing, validation, repairing, 
+and smoothing), to volumetric mesh creation. Users can 
+either choose the streamlined driver script to create
+3D mesh with a fully automated process, or call invidual
+subroutines to perform specific meshing task, such as 
+closed component extraction or boundary extraction.
+
+
+III. Acknowledgement
