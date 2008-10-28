@@ -18,29 +18,34 @@ function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol)
 exesuff='.exe';
 if(isunix) exesuff=['.',mexext]; end
 
-% first, resample the surface mesh with qslim
-fprintf(1,'resampling surface mesh ...\n');
-[no,el]=meshresample(v,f,keepratio);
-el=unique(sort(el,2),'rows');
+% first, resample the surface mesh with cgal
+if(keepratio<1-1e-9)
+	fprintf(1,'resampling surface mesh ...\n');
+	[no,el]=meshresample(v,f,keepratio);
+	el=unique(sort(el,2),'rows');
 
-% then smooth the resampled surface mesh (Laplace smoothing)
-edges=surfedge(el);
-mask=zeros(size(no,1),1);
-mask(unique(edges(:)))=1;  % =1 for edge nodes, =0 otherwise
-%[conn,connnum,count]=meshconn(el,length(no));
-%no=smoothsurf(no,mask,conn,2);
+	% then smooth the resampled surface mesh (Laplace smoothing)
+	edges=surfedge(el);
+	mask=zeros(size(no,1),1);
+	mask(unique(edges(:)))=1;  % =1 for edge nodes, =0 otherwise
+	%[conn,connnum,count]=meshconn(el,length(no));
+	%no=smoothsurf(no,mask,conn,2);
 
-% remove end elements (all nodes are edge nodes)
-%el=delendelem(el,mask);
+	% remove end elements (all nodes are edge nodes)
+	%el=delendelem(el,mask);
+else
+	no=v;
+	el=f;
+end
 
 % dump surface mesh to .poly file format
-savesurfpoly(no,el,p0,p1,'vesseltmp.poly');
+savesurfpoly(no,el,p0,p1,mwpath('post_vmesh.poly'));
 
 % call tetgen to create volumetric mesh
-if(exist('vesseltmp.1.*')) delete('vesseltmp.1.*'); end
+deletemeshfile('post_vmesh.1.*');
 fprintf(1,'creating volumetric mesh from a surface mesh ...\n');
-eval(['! tetgen',exesuff,' -qa',num2str(maxvol), ' vesseltmp.poly']);
-%eval(['! tetgen',exesuff,' -d' ' vesseltmp.poly']);
+eval(['! "', mcpath('tetgen'), exesuff,'" -q1.414a',num2str(maxvol), ' "' mwpath('post_vmesh.poly') '"']);
+%eval(['! tetgen',exesuff,' -d' ' post_vmesh.poly']);
 
 % read in the generated mesh
-[node,elem,bound]=readtetgen('vesseltmp.1');
+[node,elem,bound]=readtetgen(mwpath('post_vmesh.1'));
