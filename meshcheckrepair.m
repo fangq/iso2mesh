@@ -40,8 +40,8 @@ if(isunix) exesuff=['.',mexext]; end
 if(nargin<3 || strcmp(opt,'deep'))
     exesuff='.exe';
     if(isunix) exesuff=['.',mexext]; end
-    if(exist('cleanedmesh.off')) delete('cleanedmesh.off'); end
-    saveoff(node,elem,'cleanmesh.off');
-    eval(['! meshfix',exesuff ' cleanmesh.off cleanedmesh.off']);
-    [node,elem]=readoff('cleanedmesh.off');
+    deletemeshfile('post_sclean.off');
+    saveoff(node,elem,mwpath('pre_sclean.off'));
+    eval(['! "' mcpath('meshfix') exesuff '" "' mwpath('pre_sclean.off') '" "' mwpath('post_sclean.off') '"']);
+    [node,elem]=readoff(mwpath('post_sclean.off'));
 end

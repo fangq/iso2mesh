@@ -10,11 +10,11 @@ if(strcmp(exesuff,'.mexa64')) % cgalsimp2.mexglx can be used for both
 	exesuff='.mexglx';
 end
 
-%savesmf(v,f,'origmesh.dat')
-saveoff(v,f,'origmesh.off');
-if(exist('newmesh.dat')) delete('newmesh.dat'); end
-eval(['! cgalsimp2',exesuff,' origmesh.off ', num2str(elemnum), ' newmesh.dat']);
-[node,elem]=readoff('newmesh.dat');
+saveoff(v,f,mwpath('pre_remesh.off'));
+deletemeshfile('post_remesh.off');
+eval(['! "' mcpath('cgalsimp2') exesuff '" "' mwpath('pre_remesh.off') '" ' num2str(elemnum) ' "' mwpath('post_remesh.off') '"']);
+
+[node,elem]=readoff(mwpath('post_remesh.off'));
 [node,I,J]=unique(node,'rows');
 elem=J(elem);
-saveoff(node,elem,'newmesh.dat');
+saveoff(node,elem,mwpath('post_remesh.off'));
