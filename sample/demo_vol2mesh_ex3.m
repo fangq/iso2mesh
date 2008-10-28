@@ -5,13 +5,13 @@
 
 % load full head image (T1 MRI scan)
 
-fprintf(1,'loading binary head image\n');
+fprintf(1,'loading binary head image...\n');
 for i=1:256 
   head(:,:,i)=imread('head.tif',i);
 end
 
 % load segmented brain images (by freesurfer recon_all)
-fprintf(1,'loading binary brain image\n');
+fprintf(1,'loading binary brain image...\n');
 for i=1:256
   brain(:,:,i)=imread('brain.tif',i);
 end
@@ -27,8 +27,10 @@ cleanimgfull=cleanimg+(brain>0);
 
 % create volumetric tetrahedral mesh from the two-layer 3D images
 % this may take another few minutes for a 256x256x256 volume
+opt(1).keepratio=0.05; % resample levelset 1 to 5%
+opt(2).keepratio=0.1;  % resample levelset 2 to 10%
 tic
-[node,elem,bound]=vol2mesh(cleanimgfull,1:size(cleanimg,1),1:size(cleanimg,2),1:size(cleanimg,3),0.05,100,1);
+[node,elem,bound]=vol2mesh(cleanimgfull,1:size(cleanimg,1),1:size(cleanimg,2),1:size(cleanimg,3),opt,100,1);
 toc
 
 % plot the boundary surface of the generated mesh
