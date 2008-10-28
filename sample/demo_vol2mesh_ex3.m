@@ -27,6 +27,7 @@ cleanimgfull=cleanimg+(brain>0);
 
 % create volumetric tetrahedral mesh from the two-layer 3D images
 % this may take another few minutes for a 256x256x256 volume
+clear opt;
 opt(1).keepratio=0.05; % resample levelset 1 to 5%
 opt(2).keepratio=0.1;  % resample levelset 2 to 10%
 tic
@@ -37,6 +38,6 @@ toc
 h=slice(cleanimgfull,[],[120],[120 180]);
 set(h,'linestyle','none')
 hold on
-hb=trisurf(bound(:,1:3),node(:,2),node(:,1),node(:,3));
+hb=trisurf(bound(:,1:3),node(:,1),node(:,2),node(:,3));
 set(hb,'facealpha',0.7)
 axis equal
