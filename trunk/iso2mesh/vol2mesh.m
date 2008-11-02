@@ -1,14 +1,21 @@
 function [node,elem,bound]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix)
-% [node,elem,bound]=vol2mesh(img,ix,iy,iz,thickness,keepratio,maxvol,A,B)
-% convert a binary volume to tetrahedral mesh
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-% date:   2007/12/21
-%
-% inputs: 
-%        img: a volumetric binary image 
-%        ix,iy,iz: subvolume selection indices in x,y,z directions
-%        opt: target surface element number after simplification
-%        maxvol: target maximum tetrahedral elem volume
+%   convert a binary (or multi-valued) volume to tetrahedral mesh
+%   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+%   inputs:
+%          img: a volumetric binary image
+%          ix,iy,iz: subvolume selection indices in x,y,z directions
+%          opt: additional parameters
+%            opt=a float less than 1: compression rate for surf. simplification
+%            opt.keeyratio=a float less than 1: same as above, same for all surf.
+%            opt(1,2,..).keeyratio: setting compression rate for each levelset
+%            opt(1,2,..).surf.{node,elem}: add additional surfaces
+%            opt(1,2,..).{A,B}: linear transformation for each surface
+%          maxvol: target maximum tetrahedral elem volume
+%          dofix: 1: perform mesh validation&repair, 0: skip repairing
+%          node: output, node coordinates of the tetrahedral mesh
+%          elem: output, element list of the tetrahedral mesh
+%          bound: output, mesh surface element list of the tetrahedral mesh
+%               the last column denotes the boundary ID
 
 %first, convert the binary volume into isosurfaces
 [no,el]=vol2surf(img,ix,iy,iz,opt,dofix);

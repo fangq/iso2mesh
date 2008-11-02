@@ -1,4 +1,10 @@
 function [no,el]=vol2surf(img,ix,iy,iz,opt,dofix)
+%   converting a 3D volumetric image to surfaces
+%   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+%   inputs:
+%          img: a volumetric binary image
+%          ix,iy,iz: subvolume selection indices in x,y,z directions
+%          opt: same as in vol2mesh.m
 
 img=img(ix,iy,iz);
 dim=size(img);
