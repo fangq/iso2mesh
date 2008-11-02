@@ -6,12 +6,22 @@
 
 iso2mesh ChangeLog:
 
-2008/10/25 (0.5, alpha release)
+2008/10/30 (0.5, alpha release, codename: footlong)
         1. created a sourceforge project, pointing to 
            the project main page at orbit.
         2. wrote documents and polish file structures
         3. included more sample codes and data
-        4. drafted the documentations
+        4. defined a global variable "ISO2MESH_TEMP" to control the 
+           temporary file directory; "ISO2MESH_BIN" for bin folder
+           location and "ISO2MESH_SESSION" for temporary file prefix
+           and enable parallel meshing sessions and restricted user 
+           environments
+        5. renamed all temporary files as pre_smesh/post_smesh/
+           pre_remesh/post_remeshpre_vmesh/post_vmesh to identify
+           the processing stage
+        6. split vol2mesh into vol2surf and surf2mesh
+        7. uploading wiki pages with documentation drafts and 
+           examples outputs
 
 2008/10/10 (0.4)
         1. added subroutines for mesh validation and repairing

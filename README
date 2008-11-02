@@ -6,43 +6,42 @@
 ::      Martinos Center for Biomedical Imaging
 ::      Massachusetts General Hospital (Harvard Medical School)
 ::      Bldg. 149, 13th St., Charlestown, MA 02148
-'''Version''': 0.5
+'''Version''': 0.5 (footlong)
 License: GPL v2 or later (see COPYING) 
 ::      (this license does not cover the binaries in the bin/ 
 ::      directory, see section III for more details)
 '''URL''': http://iso2mesh.sf.net
 
 
-Table of Content 
+== Table of Content ==
 <toc>
 
 == # Introduction ==
 
-Iso2mesh is a matlab-based mesh generation toolbox. 
-It is packed with a number of important meshing tools, 
-such as surface simplifier (based on CGAL), tetgen 
-and mesh validation&repair utility (based on JMeshLib), 
+"iso2mesh" is a Matlab-based mesh generation toolbox. 
+It packs with a number of important meshing tools, 
+such as surface mesh simplifier (based on CGAL), tetgen 
+and mesh validation&repairing utility (based on JMeshLib), 
 and provide a simple yet powerful way to make quality 
-tetrahedral volumetric mesh from isosurfaces, or a 
-3D binary images (such as threholded MRI/CT images).
+tetrahedral volumetric mesh from isosurfaces, or 3D 
+binary (even multi-valued) images such as from a 
+segmented MRI/CT image.
 
 To be able to create volumetric FEM mesh from 3D binary
-images is of great interests for researchers in the field
+images is of great interest for researchers in the field
 of image-based modeling and analysis. Unfortunately, 
 very limited utilities for this purpose can be found
 and they are usually very expensive (such as amira 
-from Mercury Computer Systems). 
-
-This toolbox was developed as a free alternative to
-the expensive commertial tools and provides researchers 
-a complete workflow from 3D binary image preprocessing 
-(hole-filling and island-removing), to surface mesh 
-modeling (extraction, remeshing, validation, repairing, 
-and smoothing), to volumetric mesh creation. Users can 
-either choose the streamlined driver script to create
-3D mesh with a fully automated process, or call invidual
-subroutines to perform specific meshing task, such as 
-closed component extraction or boundary extraction.
+from Mercury Computer Systems). This toolbox was developed 
+as a free alternative to the expensive commertial tools 
+and provides researchers a complete workflow from 3D 
+binary image preprocessing (hole-filling and island-removing), 
+to surface mesh modeling (extraction, remeshing, validation, 
+repairing, and smoothing), to volumetric mesh creation. 
+Users can either choose the streamlined driver script to 
+create 3D mesh with a fully automated process, or to call 
+invidual subroutines to perform specific meshing tasks, 
+such as closed component extraction or boundary extraction.
 
 
 == # List of functions ==
@@ -50,13 +49,23 @@ closed component extraction or boundary extraction.
 
 ==== vol2mesh.m ====
 function [node,elem,bound]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix)
-   convert a binary volume to tetrahedral mesh
+   convert a binary (or multi-valued) volume to tetrahedral mesh
    author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
    inputs: 
           img: a volumetric binary image 
           ix,iy,iz: subvolume selection indices in x,y,z directions
-          opt: target surface element number after simplification
+          opt: additional parameters
+            opt=a float less than 1: compression rate for surf. simplification
+	    opt.keeyratio=a float less than 1: same as above, same for all surf.
+            opt(1,2,..).keeyratio: setting compression rate for each levelset
+            opt(1,2,..).surf.{node,elem}: add additional surfaces
+            opt(1,2,..).{A,B}: linear transformation for each surface
           maxvol: target maximum tetrahedral elem volume
+          dofix: 1: perform mesh validation&repair, 0: skip repairing
+          node: output, node coordinates of the tetrahedral mesh
+          elem: output, element list of the tetrahedral mesh
+          bound: output, mesh surface element list of the tetrahedral mesh
+               the last column denotes the boundary ID
 
 ==== surf2mesh.m ====
 function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol)
@@ -73,6 +82,16 @@ function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol)
         elem: output, element list of the tetrahedral mesh
         bound: output, mesh surface element list of the tetrahedral mesh 
                the last column denotes the boundary ID
+
+==== vol2surf.m ====
+function [node,elem]=vol2mesh(img,ix,iy,iz,opt,dofix)
+   converting a 3D volumetric image to surfaces
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   inputs:
+          img: a volumetric binary image
+          ix,iy,iz: subvolume selection indices in x,y,z directions
+          opt: same as in vol2mesh.m
+
 
 === # Mesh simplification ===
 
@@ -310,6 +329,28 @@ function savesurfpoly(v,f,p0,p1,fname)
         p1: input, coordinates of the other corner of the bounding box, p1=[x1 y1 z1]
         fname: output file name
 
+==== mwpath.m ====
+function fullname=mwpath(fname)
+    get full temp-file name by prepend working-directory and current session name.
+    author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+
+    if global variable ISO2MESH_TEMP is set in 'base', it will use it
+    as the working directory; otherwise, will use matlab function tempdir
+    to return a working directory.
+
+    if global variable ISO2MESH_SESSION is set in 'base', it will be 
+    prepended for each file name, otherwise, use supplied file name.
+
+==== mcpath.m ====
+function fullname=mcpath(cmdname)
+    get full executable path by prepending a command directory path
+    
+    if global variable ISO2MESH_BIN is set in 'base', it will
+    use [ISO2MESH_BIN filesep cmdname] as the command full path,
+    otherwise, let matlab pass the cmdname to the shell, which 
+    will search command in the directories listed in system 
+    $PATH variable.
+
 
 == # Acknowledgement ==
 
@@ -353,8 +394,8 @@ the essential functionalities. These tools are listed below:
 
 
 Note: iso2mesh and the above meshing utilities are considered 
-as an "aggregate" rather than "derived work" based on
-the definition in GPL's FAQ (http://www.gnu.org/licenses/gpl-faq.html#MereAggregation)
+as an "aggregate" rather than "derived work", based on
+the definitions in GPL's FAQ (http://www.gnu.org/licenses/gpl-faq.html#MereAggregation)
 Therefore, the license of iso2mesh and these tools are independent.
 The iso2mesh license only applies to the scripts and documents/data
 in this package except those programs stored in the bin/ directory.
