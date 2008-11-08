@@ -6,6 +6,12 @@
 
 iso2mesh ChangeLog:
 
+2008/11/08 (0.5.1, codename: footlong)
+        1. added meshing tool binaries for Windows (95-vista)
+        2. added meshing tool binaries for Mac OS
+        3. tagged all bin/ files and binaries files in sample/
+           with -kb option in the cvs
+
 2008/10/30 (0.5, alpha release, codename: footlong)
         1. created a sourceforge project, pointing to 
            the project main page at orbit.

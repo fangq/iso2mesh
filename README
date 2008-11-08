@@ -6,7 +6,7 @@
 ::      Martinos Center for Biomedical Imaging
 ::      Massachusetts General Hospital (Harvard Medical School)
 ::      Bldg. 149, 13th St., Charlestown, MA 02148
-'''Version''': 0.5 (footlong)
+'''Version''': 0.5.1 (footlong)
 License: GPL v2 or later (see COPYING) 
 ::      (this license does not cover the binaries in the bin/ 
 ::      directory, see section III for more details)
