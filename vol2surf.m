@@ -32,6 +32,10 @@ for i=0:maxlevel-1
   % first, resample the surface mesh with cgal
   fprintf(1,'resampling surface mesh for level %d...\n',i);
   [v0,f0]=meshresample(v0,f0,keepratio);
+  
+  % iso2mesh is not stable for meshing small islands,remove them (max 3x3x3 voxels)
+  f0=removeisolatedsurf(v0,f0,3);
+
   if(dofix) [v0,f0]=meshcheckrepair(v0,f0); end
   
   % if a transformation matrix/offset vector supplied, apply them
