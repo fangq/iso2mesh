@@ -17,9 +17,6 @@ loopend=edges(1,end);
 edges(1,:)=[];
 
 while(length(edges))
-%    if(loopend==2056)
-%        disp(loopend);
-%    end
     idx=[find(edges(:,1)==loopend)',find(edges(:,2)==loopend)'];
 %    if(length(idx)>1) error('self intersecting curve is unsupported'); end
 %    if(length(idx)==1)

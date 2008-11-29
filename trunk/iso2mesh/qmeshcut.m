@@ -12,7 +12,20 @@ function [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,plane)
 %          multiple columns 
 %   plane: defines a plane by 3 points: plane=[x1 y1 z1;x2 y2 z2;x3 y3 z3]
 %
+% outputs
+%   cutpos: all the intersections of mesh edges by the plane
+%           cutpos is similar to node, containing 3 columns for x/y/z
+%   cutvalue: interpolated values at the intersections, with row number
+%           being the num. of the intersections, column number being the 
+%           same as "value".
+%   facedata: define the intersection polygons in the form of patch "Faces"
+%
+% the outputs of this subroutine can be easily plotted using 
+%     patch('Vertices',cutpos,'Faces',facedata,'FaceVertexCData',cutvalue,...
+%           'FaceColor','interp');
+%
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 % get the x,y,z of the 3 input points
 
@@ -36,8 +49,13 @@ asign(find(asign<0))=-1;
 
 % get all the edges of the mesh
 
-edges=[elem(:,[1,2]);elem(:,[1,3]);elem(:,[1,4]);
-       elem(:,[2,3]);elem(:,[2,4]);elem(:,[3,4])];
+esize=size(elem,2);
+if(esize==4)
+    edges=[elem(:,[1,2]);elem(:,[1,3]);elem(:,[1,4]);
+           elem(:,[2,3]);elem(:,[2,4]);elem(:,[3,4])];
+elseif(esize==3)
+    edges=[elem(:,[1,2]);elem(:,[1,3]);elem(:,[2,3])];
+end
 
 % find all edges with two ends at the both sides of the plane
 edgemask=sum(asign(edges),2);
@@ -62,7 +80,7 @@ cutvalue=value(edges(cutedges,1),:).*repmat(cutweight(:,2),[1 size(value,2)])+..
 
 emap=zeros(size(edges,1),1);
 emap(cutedges)=1:length(cutedges);
-emap=reshape(emap,[size(elem,1),6]);
+emap=reshape(emap,[size(elem,1),esize*(esize-1)/2]); % C^n_2
 faceid=find(any(emap,2)==1);
 facelen=length(faceid);
 
@@ -70,6 +88,14 @@ facelen=length(faceid);
 % (co-plannar mesh needs to be considered)
 
 etag=sum(emap>0,2);
+
+if(esize==3)  % surface mesh cut by a plane
+	linecut=find(etag==2);
+	lineseg=emap(linecut,:)';
+	facedata=reshape(lineseg(find(lineseg)),[2,length(linecut)])';
+	return;
+end
+
 tricut=find(etag==3);
 quadcut=find(etag==4);
 

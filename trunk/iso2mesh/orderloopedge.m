@@ -23,7 +23,7 @@ for i=2:ne
   elseif (length(row)>=2)
      error('bifercation is found,exit\n');
   elseif (length(row)==0)
-     error('open curve\n');
+     error(['open curve at ' num2str(edge(i-1,2))  '\n']);
   end
 end
      
