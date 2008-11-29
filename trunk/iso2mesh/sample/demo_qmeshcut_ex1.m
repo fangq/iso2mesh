@@ -30,3 +30,18 @@ hold on;
 hcut=patch('Vertices',cutpos,'Faces',facedata,'FaceVertexCData',cutvalue,'facecolor','interp');
 %set(hcut, 'linestyle','none')
 axis equal;
+
+% qmeshcut can also cut a surface
+
+[bcutpos,bcutvalue,bcutedges]=qmeshcut(bound(:,1:3),node,node(:,1),plane);
+[bcutpos,bcutedges]=removedupnodes(bcutpos,bcutedges);
+bcutloop=orderloopedge(bcutedges);
+
+bcutloop(isnan(bcutloop))=[]; % there can be multiple loops, remove the separators
+
+% plot the plane-surface cuts
+
+plot3(bcutpos(bcutloop,1),bcutpos(bcutloop,2),bcutpos(bcutloop,3),'r','LineWidth',4);
+
+% essencially, this should be the same as you do a removedupnodes(cutpos,facedata)
+% and then call extractloop(facedata)
