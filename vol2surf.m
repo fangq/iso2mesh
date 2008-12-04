@@ -21,7 +21,12 @@ no=[];
 for i=0:maxlevel-1
   fprintf(1,'processing threshold level %d...\n',i);
 
-  [f0,v0]=isosurface(newimg,i);
+%  if(maxlevel>1) 
+%	[f0,v0]=isosurface(newimg,i);
+%  else
+        [f0,v0]=binsurface(newimg>i); % not sure if binsurface works for multi-value arrays
+%  end
+
   v0(:,[1 2])=v0(:,[2 1]); % isosurface(V,th) assumes x/y transposed
   if(dofix)  [v0,f0]=meshcheckrepair(v0,f0);  end
   
