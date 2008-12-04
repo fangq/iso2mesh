@@ -1,7 +1,7 @@
 function [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,plane)
 % [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,plane)
 %
-% Fast un-structual mesh cross-sectional plot
+% Fast tetrahedral mesh cross-section plot
 %   by Qianqian Fang, <fangq at nmr.mgh.harvard.edu>
 %
 % parameters: 
