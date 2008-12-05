@@ -9,7 +9,6 @@ function savesurfpoly(v,f,p0,p1,fname)
 %      p0: input, coordinates of one corner of the bounding box, p0=[x0 y0 z0]
 %      p1: input, coordinates of the other corner of the bounding box, p1=[x1 y1 z1]
 %      fname: output file name
-
 edges=surfedge(f);
 bbxnum=0;
 node=v;

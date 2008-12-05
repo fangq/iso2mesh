@@ -12,8 +12,7 @@ newdim=dim+[2 2 2];
 newimg=zeros(newdim);
 newimg(2:end-1,2:end-1,2:end-1)=img;
 
-exesuff='.exe';
-if(isunix) exesuff=['.',mexext]; end
+exesuff=getexeext;
 
 maxlevel=max(newimg(:));
 el=[];
