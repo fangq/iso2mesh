@@ -5,5 +5,5 @@ if(isunix)
 	exesuff=['.',mexext];
 end
 if(isoctavemesh)
-	exesuff=".mexglx";
+	exesuff='.mexglx';
 end

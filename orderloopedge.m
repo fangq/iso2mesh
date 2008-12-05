@@ -21,9 +21,9 @@ for i=2:ne
      newedge(i,:)=[newedge(i-1,2),edge(row+i-1,3-col)];
      edge([i,row+i-1],:)=edge([row+i-1,i],:);
   elseif (length(row)>=2)
-     error('bifercation is found,exit\n');
+     error('bifercation is found,exit');
   elseif (length(row)==0)
-     error(['open curve at ' num2str(edge(i-1,2))  '\n']);
+     error(['open curve at ' num2str(edge(i-1,2)) ]);
   end
 end
      
