@@ -15,8 +15,7 @@ function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol)
 %      bound: output, mesh surface element list of the tetrahedral mesh 
 %             the last column denotes the boundary ID
 
-exesuff='.exe';
-if(isunix) exesuff=['.',mexext]; end
+exesuff=getexeext;
 
 % first, resample the surface mesh with cgal
 if(keepratio<1-1e-9)
@@ -25,9 +24,10 @@ if(keepratio<1-1e-9)
 	el=unique(sort(el,2),'rows');
 
 	% then smooth the resampled surface mesh (Laplace smoothing)
-	edges=surfedge(el);
-	mask=zeros(size(no,1),1);
-	mask(unique(edges(:)))=1;  % =1 for edge nodes, =0 otherwise
+
+	%% edges=surfedge(el);  % disable on 12/05/08, very slow on octave
+	%% mask=zeros(size(no,1),1);
+	%% mask(unique(edges(:)))=1;  % =1 for edge nodes, =0 otherwise
 	%[conn,connnum,count]=meshconn(el,length(no));
 	%no=smoothsurf(no,mask,conn,2);
 
@@ -44,7 +44,7 @@ savesurfpoly(no,el,p0,p1,mwpath('post_vmesh.poly'));
 % call tetgen to create volumetric mesh
 deletemeshfile('post_vmesh.1.*');
 fprintf(1,'creating volumetric mesh from a surface mesh ...\n');
-eval(['! "', mcpath('tetgen'), exesuff,'" -q1.414a',num2str(maxvol), ' "' mwpath('post_vmesh.poly') '"']);
+system([' "', mcpath('tetgen'), exesuff,'" -q1.414a',num2str(maxvol), ' "' mwpath('post_vmesh.poly') '"']);
 %eval(['! tetgen',exesuff,' -d' ' post_vmesh.poly']);
 
 % read in the generated mesh

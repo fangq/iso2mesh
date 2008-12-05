@@ -34,14 +34,11 @@ if(nargin<3 || strcmp(opt,'open'))
         error('open surface found, you need to enclose it by padding zeros around the volume');
     end
 end
-exesuff='.exe';
-if(isunix) exesuff=['.',mexext]; end
+exesuff=getexeext;
 
 if(nargin<3 || strcmp(opt,'deep'))
-    exesuff='.exe';
-    if(isunix) exesuff=['.',mexext]; end
     deletemeshfile('post_sclean.off');
     saveoff(node,elem,mwpath('pre_sclean.off'));
-    eval(['! "' mcpath('meshfix') exesuff '" "' mwpath('pre_sclean.off') '" "' mwpath('post_sclean.off') '"']);
+    system([' "' mcpath('meshfix') exesuff '" "' mwpath('pre_sclean.off') '" "' mwpath('post_sclean.off') '"']);
     [node,elem]=readoff(mwpath('post_sclean.off'));
 end

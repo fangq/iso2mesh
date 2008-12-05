@@ -20,5 +20,10 @@ load sampleVol2Mesh.mat
                            1:size(volimage,3),0.2,2,1);
 
 %% visualize the resulting mesh
-trisurf(bound(:,1:3),node(:,1),node(:,2),node(:,3))
+
+if(isoctavemesh)
+        trimesh(bound(:,1:3),node(:,1),node(:,2),node(:,3));
+else
+        trisurf(bound(:,1:3),node(:,1),node(:,2),node(:,3));
+end
 axis equal;

@@ -38,6 +38,10 @@ toc
 h=slice(cleanimgfull,[],[120],[120 180]);
 set(h,'linestyle','none')
 hold on
-hb=trisurf(bound(:,1:3),node(:,1),node(:,2),node(:,3));
-set(hb,'facealpha',0.7)
+if(isoctavemesh)
+        trimesh(bound(:,1:3),node(:,1),node(:,2),node(:,3));
+else
+	hb=trisurf(bound(:,1:3),node(:,1),node(:,2),node(:,3));
+	set(hb,'facealpha',0.7)
+end
 axis equal

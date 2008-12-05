@@ -13,7 +13,13 @@ edges=[f(:,[1,2]);
 % node4=[f(:,3);f(:,2);f(:,1)];   % node idx concatinated
 edges=sort(edges,2);
 [foo,ix,jx]=unique(edges,'rows');
-vec=histc(jx,1:max(jx));
-qx=find(vec==1);
+
+if(isoctavemesh)
+        u=unique(jx);
+	qx=u(hist(jx,u)==1);
+else
+	vec=histc(jx,1:max(jx));
+	qx=find(vec==1);
+end
 tri=edges(ix(qx),:);
 % node4=node4(ix(qx));

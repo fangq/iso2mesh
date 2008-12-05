@@ -17,7 +17,10 @@ opt.keepratio=0.1;
 tic
 [node,elem,bound]=vol2mesh(fullimg,1:size(fullimg,1),1:size(fullimg,2),1:size(fullimg,3),opt,100,1);
 toc
-
-hb=trisurf(bound(:,1:3),node(:,1),node(:,2),node(:,3));
+if(isoctavemesh)
+        hb=trimesh(bound(:,1:3),node(:,1),node(:,2),node(:,3));
+else
+        hb=trisurf(bound(:,1:3),node(:,1),node(:,2),node(:,3));
+end
 axis equal
 view(-90.5,-72);
