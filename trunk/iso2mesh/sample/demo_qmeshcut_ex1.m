@@ -35,7 +35,7 @@ axis equal;
 
 [bcutpos,bcutvalue,bcutedges]=qmeshcut(bound(:,1:3),node,node(:,1),plane);
 [bcutpos,bcutedges]=removedupnodes(bcutpos,bcutedges);
-bcutloop=orderloopedge(bcutedges);
+bcutloop=extractloops(bcutedges);
 
 bcutloop(isnan(bcutloop))=[]; % there can be multiple loops, remove the separators
 
