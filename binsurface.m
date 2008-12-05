@@ -23,7 +23,6 @@ function [node,elem]=binsurface(img,nface)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 % 
 
-img=uint8(img);
 dim=size(img);
 newdim=dim+[1 1 1];
 
