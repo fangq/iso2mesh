@@ -14,9 +14,12 @@ function nodenew=smoothsurf(node,mask,conn,iter)
 nn=size(node);
 nodenew=node;
 idx=find(mask==0)';
+
+%simple Laplacian, maybe Fujiwara operator should be used in the future
+
 for j=1:iter
     for i=idx
-        nodenew(i,:)=mean(node(conn{i},:));
+        nodenew(i,:)=mean(node(conn{i},:)); 
     end
     node=nodenew;
 end
