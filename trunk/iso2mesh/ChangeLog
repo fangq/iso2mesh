@@ -6,6 +6,14 @@
 
 iso2mesh ChangeLog:
 
+[to be determined] (0.6.0, beta release, codename: quesadilla)
+
+2008/12/05 (0.5.9, codename: quesadilla)
+        1. iso2mesh is now compatible with GNU Octave.
+        2. replace matlab's isosurface by home-made binsurface, to produce
+           well-behaved triangular or cubic surfaces from binary images
+        3. added qmeshcut, a fast tetrahedral mesh cross-section plot
+
 2008/11/08 (0.5.1, codename: footlong)
         1. added meshing tool binaries for Windows (95-vista)
         2. added meshing tool binaries for Mac OS
