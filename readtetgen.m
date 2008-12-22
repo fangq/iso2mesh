@@ -24,7 +24,7 @@ if(fp==0)
 end
 [dim,count] = fscanf(fp,'%d',3);
 if(count<3) error('wrong elem file'); end
-elem=fscanf(fp,'%d',[5,dim(1)]);
+elem=fscanf(fp,'%d',[dim(2)+dim(3)+1,dim(1)]);
 elem=elem(2:end,:)'+1;
 fclose(fp);
 

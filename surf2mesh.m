@@ -1,4 +1,4 @@
-function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol)
+function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes)
 % surf2mesh - create quality volumetric mesh from isosurface patches
 % author: fangq (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/24
@@ -37,14 +37,19 @@ else
 	no=v;
 	el=f;
 end
-
+if(nargin==6)
+	regions=[];
+	holes=[];
+elseif(nargin==6)
+	holes=[];
+end
 % dump surface mesh to .poly file format
-savesurfpoly(no,el,p0,p1,mwpath('post_vmesh.poly'));
+savesurfpoly(no,el,holes,regions,p0,p1,mwpath('post_vmesh.poly'));
 
 % call tetgen to create volumetric mesh
 deletemeshfile('post_vmesh.1.*');
 fprintf(1,'creating volumetric mesh from a surface mesh ...\n');
-system([' "', mcpath('tetgen'), exesuff,'" -q1.414a',num2str(maxvol), ' "' mwpath('post_vmesh.poly') '"']);
+system([' "', mcpath('tetgen'), exesuff,'" -A -q1.414a',num2str(maxvol), ' "' mwpath('post_vmesh.poly') '"']);
 %eval(['! tetgen',exesuff,' -d' ' post_vmesh.poly']);
 
 % read in the generated mesh

@@ -1,4 +1,4 @@
-function savesurfpoly(v,f,p0,p1,fname)
+function savesurfpoly(v,f,holelist,regionlist,p0,p1,fname)
 % meshconn: create node neighbor list from a mesh
 % author: fangq (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
@@ -9,10 +9,13 @@ function savesurfpoly(v,f,p0,p1,fname)
 %      p0: input, coordinates of one corner of the bounding box, p0=[x0 y0 z0]
 %      p1: input, coordinates of the other corner of the bounding box, p1=[x1 y1 z1]
 %      fname: output file name
+faceid=f(:,4);
+f=f(:,1:3);
+
 edges=surfedge(f);
 bbxnum=0;
 node=v;
-if(length(edges))
+if(~isempty(edges))
     loops=extractloops(edges);
     if(length(loops)<3)
         error('degenerated loops detected');
@@ -27,15 +30,15 @@ if(length(edges))
     loops=[newloops nan];
 
     seg=[0,find(isnan(loops))];
-    segnum=length(seg)-1;seg
+    segnum=length(seg)-1;
     bbxnum=6;
     loopcount=zeros(bbxnum,1);
     loopid=zeros(segnum,1);
     for i=1:segnum     % walk through the edge loops
         subloop=loops(seg(i)+1:seg(i+1)-1);
-        if(length(subloop)==0) continue; end
+        if(isempty(subloop)) continue; end
         boxfacet=find(sum(abs(diff(v(subloop,:))))<1e-2); % find a flat loop
-        if(length(boxfacet))   % if the loop is flat along x/y/z dir
+        if(~isempty(boxfacet))   % if the loop is flat along x/y/z dir
             bf=boxfacet(1);    % no degeneracy allowed
             if(sum(abs(v(subloop(1),bf)-p0(bf)))<1e-2)
                 loopcount(bf)=loopcount(bf)+1;
@@ -72,11 +75,11 @@ fprintf(fp,'#facet list\n%d 1\n',length(f)+bbxnum);
 elem=[3*ones(length(f),1),f-1,ones(length(f),1)];
 fprintf(fp,'1 0\n%d %d %d %d %d\n',elem');
 
-if(length(edges))
+if(~isempty(edges))
     for i=1:bbxnum
         fprintf(fp,'%d %d 1\n',1+loopcount(i),loopcount(i));
         fprintf(fp,'%d %d %d %d %d\n',boxelem(i,:));
-        if(loopcount(i)&&length(find(loopid==i)))
+        if(loopcount(i) &~isempty(find(loopid==i)))
             endid=find(loopid==i);
             for k=1:length(endid)
                 j=endid(k);
@@ -94,5 +97,19 @@ if(length(edges))
     end
 end
 
-fprintf(fp,'#hole list\n0\n');
+if(size(holelist,1))
+        fprintf(fp,'#hole list\n%d\n',size(holelist,1));
+        for i=1:size(holelist,1)
+                fprintf(fp,'%d %f %f %f\n', i, holelist(i,:));
+        end
+else
+	fprintf(fp,'#hole list\n0\n');
+end
+
+if(size(regionlist,1))
+	fprintf(fp,'#region list\n%d\n',size(regionlist,1));
+	for i=1:size(regionlist,1)
+		fprintf(fp,'%d %f %f %f %d\n', i, regionlist(i,:),i);
+	end
+end
 fclose(fp);
