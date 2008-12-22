@@ -18,10 +18,10 @@ function [node,elem,bound]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix)
 %               the last column denotes the boundary ID
 
 %first, convert the binary volume into isosurfaces
-[no,el]=vol2surf(img,ix,iy,iz,opt,dofix);
+[no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix);
 
 %then, create volumetric mesh from the surface mesh
-[node,elem,bound]=surf2mesh(no,el,[],[],1,maxvol);
+[node,elem,bound]=surf2mesh(no,el,[],[],1,maxvol,regions,holes);
 
 
 %some final fix and scaling
