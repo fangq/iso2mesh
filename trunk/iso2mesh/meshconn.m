@@ -1,4 +1,4 @@
-function [conn,connnum,count]=meshconn(elem,nn);
+function [conn,connnum,count]=meshconn(elem,nn)
 % meshconn: create node neighbor list from a mesh
 % author: fangq (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
