@@ -18,8 +18,8 @@ idx=find(mask==0)';
 %simple Laplacian, maybe Fujiwara operator should be used in the future
 
 for j=1:iter
-    for i=idx
-        nodenew(i,:)=mean(node(conn{i},:)); 
+    for i=1:length(idx)
+        nodenew(idx(i),:)=mean(node(conn{idx(i)},:)); 
     end
     node=nodenew;
 end

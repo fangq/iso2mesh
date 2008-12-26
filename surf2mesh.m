@@ -44,6 +44,7 @@ elseif(nargin==6)
 	holes=[];
 end
 % dump surface mesh to .poly file format
+saveoff(no,el,mwpath('post_vmesh.off'));
 savesurfpoly(no,el,holes,regions,p0,p1,mwpath('post_vmesh.poly'));
 
 % call tetgen to create volumetric mesh

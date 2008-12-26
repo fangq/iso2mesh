@@ -56,6 +56,12 @@ for i=0:maxlevel-1
   f0=removeisolatedsurf(v0,f0,3);
 
   if(dofix) [v0,f0]=meshcheckrepair(v0,f0); end
+
+  % if use defines maxsurf=1, take only the largest closed surface
+  if(isstruct(opt) & ((isfield(opt,'maxsurf') & opt.maxsurf==1) | ...
+      (length(opt)==maxlevel & isfield(opt(i+1),'maxsurf') & opt(i+1).maxsurf==1)))
+      f0=maxsurf(finddisconnsurf(f0));
+  end
   
   % if a transformation matrix/offset vector supplied, apply them
   if(isstruct(opt) & length(opt)==maxlevel & isfield(opt(i+1),'A') & isfield(opt(i+1),'B')) 
@@ -64,6 +70,7 @@ for i=0:maxlevel-1
       v0=(opt.A*v0'+repmat(opt.B(:),1,size(v0,1)))';
   end
   
+  % if user specified holelist and regionlist, append them
   if(isstruct(opt)  & length(opt)==maxlevel)
       if(isfield(opt(i+1),'hole'))
           holes=[holes;opt(i+1).hole]
