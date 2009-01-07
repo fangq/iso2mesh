@@ -1,4 +1,4 @@
-function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix)
+function [no,el,regions,holes]=vol2surf2(img,ix,iy,iz,opt,dofix,method)
 %   converting a 3D volumetric image to surfaces
 %   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
 %   inputs:
@@ -24,70 +24,16 @@ else
 end
 
 maxlevel=max(newimg(:));
-el=[];
-no=[];
 
 bfield=zeros(newdim);
-
-for i=0:maxlevel-1
-  fprintf(1,'processing threshold level %d...\n',i);
-
-%  if(maxlevel>1) 
-%	[f0,v0]=isosurface(newimg,i);
-%  else
-        [v0,f0]=binsurface(newimg>i); % not sure if binsurface works for multi-value arrays
-%  end
-
-  bfield(sub2ind(newdim,v0(:,1),v0(:,2),v0(:,3)))=1;
-
-% with binsurf, I think the following line is not needed anymore
-%  v0(:,[1 2])=v0(:,[2 1]); % isosurface(V,th) assumes x/y transposed
-  if(dofix)  [v0,f0]=meshcheckrepair(v0,f0);  end  
-
-  if(isstruct(opt) & length(opt)==maxlevel) keepratio=opt(i+1).keepratio;
-  elseif (isstruct(opt) & length(opt)==1) keepratio=opt.keepratio;
-  else keepratio=opt;  end;
-
-  % first, resample the surface mesh with cgal
-  fprintf(1,'resampling surface mesh for level %d...\n',i);
-  [v0,f0]=meshresample(v0,f0,keepratio);
-  
-  % iso2mesh is not stable for meshing small islands,remove them (max 3x3x3 voxels)
-  f0=removeisolatedsurf(v0,f0,3);
-
-  if(dofix) [v0,f0]=meshcheckrepair(v0,f0); end
-
-  % if use defines maxsurf=1, take only the largest closed surface
-  if(isstruct(opt) & ((isfield(opt,'maxsurf') & opt.maxsurf==1) | ...
-      (length(opt)==maxlevel & isfield(opt(i+1),'maxsurf') & opt(i+1).maxsurf==1)))
-      f0=maxsurf(finddisconnsurf(f0));
-  end
-  
-  % if a transformation matrix/offset vector supplied, apply them
-  if(isstruct(opt) & length(opt)==maxlevel & isfield(opt(i+1),'A') & isfield(opt(i+1),'B')) 
-      v0=(opt(i+1).A*v0'+repmat(opt(i+1).B(:),1,size(v0,1)))';
-  elseif (isstruct(opt) & length(opt)==1 & isfield(opt,'A') & isfield(opt,'B')) 
-      v0=(opt.A*v0'+repmat(opt.B(:),1,size(v0,1)))';
-  end
-  
-  % if user specified holelist and regionlist, append them
-  if(isstruct(opt)  & length(opt)==maxlevel)
-      if(isfield(opt(i+1),'hole'))
-          holes=[holes;opt(i+1).hole]
-      end
-      if(isfield(opt(i+1),'region'))
-          regions=[regions;opt(i+1).region]
-      end
-  end
-
-  if(i==0)
-      el=[f0 (i+1)*ones(size(f0,1),1)];
-      no=v0;
-  else
-      el=[el;f0+length(no) (i+1)*ones(size(f0,1),1)];
-      no=[no;v0];
-  end
+for i=1:maxlevel
+    fprintf(1,'preprocessing threshold level %d...\n',i);
+    [v0,f0]=binsurface(newimg>i-1); % not sure if binsurface works for multi-value arrays
+    bfield(sub2ind(newdim,v0(:,1),v0(:,2),v0(:,3)))=1;
+    v{i}=v0;
+    f{i}=f0;
 end
+
 
 % create region list. To do this, we need to find an interior point
 % for each region, and make sure this point is not close to the 
@@ -117,6 +63,74 @@ for i=1:maxlevel
           regions(end+1,:)=[ix(1),iy,iz]-1;
       end
   end
+end
+
+el=[];
+no=[];
+
+for i=1:maxlevel
+    fprintf(1,'processing threshold level %d...\n',i);
+    
+    v0=v{i};
+    f0=f{i};
+    if(nargin<7 | strcmp(method,'simplify'))
+    
+	  % with binsurf, I think the following line is not needed anymore
+	  %  v0(:,[1 2])=v0(:,[2 1]); % isosurface(V,th) assumes x/y transposed
+	  if(dofix)  [v0,f0]=meshcheckrepair(v0,f0);  end  
+
+	  if(isstruct(opt) & length(opt)==maxlevel) keepratio=opt(i+1).keepratio;
+	  elseif (isstruct(opt) & length(opt)==1) keepratio=opt.keepratio;
+	  else keepratio=opt;  end;
+
+	  % first, resample the surface mesh with cgal
+	  fprintf(1,'resampling surface mesh for level %d...\n',i);
+	  [v0,f0]=meshresample(v0,f0,keepratio);
+
+	  % iso2mesh is not stable for meshing small islands,remove them (max 3x3x3 voxels)
+	  f0=removeisolatedsurf(v0,f0,3);
+
+	  if(dofix) [v0,f0]=meshcheckrepair(v0,f0); end
+	  
+    elseif(nargin==7 & strcmp(method,'cgalmesh'))
+	  if(isstruct(opt) & length(opt)==maxlevel) radbound=opt(i+1).radbound;
+	  elseif (isstruct(opt) & length(opt)==1) radbound=opt.radbound;
+	  else radbound=opt;  end;
+	  
+	  [v0,f0]=vol2restrictedtri(newimg>(i-1),0.5,regions(i,:),max(newdim)*max(newdim)*2,30,radbound,radbound);
+    end
+    % if use defines maxsurf=1, take only the largest closed surface
+    if(isstruct(opt))
+	if(  ((isfield(opt,'maxsurf') & opt.maxsurf==1) | ...
+            (length(opt)==maxlevel & isfield(opt(i+1),'maxsurf') & opt(i+1).maxsurf==1)))
+            f0=maxsurf(finddisconnsurf(f0));
+	end
+    end
+
+    % if a transformation matrix/offset vector supplied, apply them
+    if(isstruct(opt) & length(opt)==maxlevel & isfield(opt(i+1),'A') & isfield(opt(i+1),'B')) 
+	v0=(opt(i+1).A*v0'+repmat(opt(i+1).B(:),1,size(v0,1)))';
+    elseif (isstruct(opt) & length(opt)==1 & isfield(opt,'A') & isfield(opt,'B')) 
+	v0=(opt.A*v0'+repmat(opt.B(:),1,size(v0,1)))';
+    end
+
+    % if user specified holelist and regionlist, append them
+    if(isstruct(opt)  & length(opt)==maxlevel)
+	if(isfield(opt(i+1),'hole'))
+            holes=[holes;opt(i+1).hole]
+	end
+	if(isfield(opt(i+1),'region'))
+            regions=[regions;opt(i+1).region]
+	end
+    end
+
+    if(i==0)
+	el=[f0 (i+1)*ones(size(f0,1),1)];
+	no=v0;
+    else
+	el=[el;f0+length(no) (i+1)*ones(size(f0,1),1)];
+	no=[no;v0];
+    end
 end
 
 if(isstruct(opt) & isfield(opt,'surf'))
