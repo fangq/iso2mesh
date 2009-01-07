@@ -1,4 +1,4 @@
-function [node,elem,bound]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix)
+function [node,elem,bound]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method)
 %   convert a binary (or multi-valued) volume to tetrahedral mesh
 %   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
 %   inputs:
@@ -18,8 +18,11 @@ function [node,elem,bound]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix)
 %               the last column denotes the boundary ID
 
 %first, convert the binary volume into isosurfaces
-[no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix);
-
+if(nargin==8)
+	[no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method);
+else
+        [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,'cgalmesh');
+end
 %then, create volumetric mesh from the surface mesh
 [node,elem,bound]=surf2mesh(no,el,[],[],1,maxvol,regions,holes);
 
