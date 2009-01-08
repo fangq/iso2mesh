@@ -17,7 +17,11 @@ load sampleVol2Mesh.mat
 %% perform mesh generation
 
 [node,elem,bound]=vol2mesh(volimage>0.05,1:size(volimage,1),1:size(volimage,2),...
-                           1:size(volimage,3),0.2,2,1);
+                           1:size(volimage,3),3,2,1);
+
+%% alternatively, one can use the following cmd as a less robust approach
+% [node,elem,bound]=vol2mesh(volimage>0.05,1:size(volimage,1),1:size(volimage,2),...
+%                           1:size(volimage,3),0.2,2,1,'simplify');
 
 %% visualize the resulting mesh
 

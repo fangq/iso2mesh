@@ -28,8 +28,15 @@ cleanimgfull=cleanimg+(brain>0);
 % create volumetric tetrahedral mesh from the two-layer 3D images
 % this may take another few minutes for a 256x256x256 volume
 clear opt;
-opt(1).keepratio=0.05; % resample levelset 1 to 5%
+
+% set method for vol2mesh to 'simplify' to use these option
+opt(1).keepratio=0.05; % resample levelset 1 to 5%  
 opt(2).keepratio=0.1;  % resample levelset 2 to 10%
+
+% by default, vol2mesh uses 'cgalsurf' method, which requires the following
+opt(1).radbound=4; % head surface element size bound
+opt(2).radbound=2; % brain surface element size bound
+
 tic
 [node,elem,bound]=vol2mesh(cleanimgfull,1:size(cleanimg,1),1:size(cleanimg,2),1:size(cleanimg,3),opt,100,1);
 toc
@@ -39,7 +46,7 @@ h=slice(cleanimgfull,[],[120],[120 180]);
 set(h,'linestyle','none')
 hold on
 if(isoctavemesh)
-        trimesh(bound(:,1:3),node(:,1),node(:,2),node(:,3));
+    trimesh(bound(:,1:3),node(:,1),node(:,2),node(:,3));
 else
 	hb=trisurf(bound(:,1:3),node(:,1),node(:,2),node(:,3));
 	set(hb,'facealpha',0.7)

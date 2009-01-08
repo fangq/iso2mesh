@@ -20,7 +20,7 @@ plane=[min(node(:,1)) min(node(:,2)) z0
 % run qmeshcut to get the cross-section information at z=mean(node(:,1))
 % use the x-coordinates as the nodal values
 
-[cutpos,cutvalue,facedata]=qmeshcut(elem,node,node(:,1),plane);
+[cutpos,cutvalue,facedata]=qmeshcut(elem(:,1:4),node,node(:,1),plane);
 
 % plot your results
 

@@ -1,8 +1,30 @@
 function [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distbound)
+% [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distbound)
+%
+% vol2restrictedtri: surface mesh extraction using CGAL mesher
+% by FangQ, 2009/01/06
+%
+% inputs:
+%       vol: a 3D volumetric image
+%       thres: a scalar as the threshold of of the extraction
+%       cent: a 3d position (x,y,z) which locates inside the resulting
+%             mesh, this is automatically computed from vol2surf
+%       brad: maximum bounding sphere squared of the resulting mesh
+%       ang: minimum angular constrains of the resulting tranglar elements
+%            (in degrees)
+%       radbound: maximum triangle delaunay circle radius
+%       distbound: maximum delaunay sphere distances
+% outputs:
+%       node: the list of 3d nodes in the resulting surface (x,y,z)
+%       elem: the element list of the resulting mesh (3 columns of integers)
+
 
 exesuff=getexeext;
+if(strcmp(exesuff,'.mexa64')) % cgalsurf.mexglx can be used for both
+	exesuff='.mexglx';
+end
+
 saveinr(vol,mwpath('pre_extract.inr'));
-%writeinr(mwpath('pre_extract.inr'),vol>thres,'uint8');
 deletemeshfile('post_extract.off');
 system([' "' mcpath('cgalsurf') exesuff '" "' mwpath('pre_extract.inr') ...
     '" ' sprintf('%f %f %f %f %f %f %f %f ',thres,cent,brad,ang,radbound,distbound) ...

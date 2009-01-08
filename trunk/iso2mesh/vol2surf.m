@@ -79,7 +79,7 @@ for i=1:maxlevel
 	  %  v0(:,[1 2])=v0(:,[2 1]); % isosurface(V,th) assumes x/y transposed
 	  if(dofix)  [v0,f0]=meshcheckrepair(v0,f0);  end  
 
-	  if(isstruct(opt) & length(opt)==maxlevel) keepratio=opt(i+1).keepratio;
+	  if(isstruct(opt) & length(opt)==maxlevel) keepratio=opt(i).keepratio;
 	  elseif (isstruct(opt) & length(opt)==1) keepratio=opt.keepratio;
 	  else keepratio=opt;  end;
 
@@ -92,8 +92,8 @@ for i=1:maxlevel
 
 	  if(dofix) [v0,f0]=meshcheckrepair(v0,f0); end
 	  
-    elseif(nargin==7 & strcmp(method,'cgalmesh'))
-	  if(isstruct(opt) & length(opt)==maxlevel) radbound=opt(i+1).radbound;
+    elseif(nargin==7 & strcmp(method,'cgalsurf'))
+	  if(isstruct(opt) & length(opt)==maxlevel) radbound=opt(i).radbound;
 	  elseif (isstruct(opt) & length(opt)==1) radbound=opt.radbound;
 	  else radbound=opt;  end;
 	  
@@ -102,25 +102,25 @@ for i=1:maxlevel
     % if use defines maxsurf=1, take only the largest closed surface
     if(isstruct(opt))
 	if(  ((isfield(opt,'maxsurf') & opt.maxsurf==1) | ...
-            (length(opt)==maxlevel & isfield(opt(i+1),'maxsurf') & opt(i+1).maxsurf==1)))
+            (length(opt)==maxlevel & isfield(opt(i),'maxsurf') & opt(i).maxsurf==1)))
             f0=maxsurf(finddisconnsurf(f0));
 	end
     end
 
     % if a transformation matrix/offset vector supplied, apply them
-    if(isstruct(opt) & length(opt)==maxlevel & isfield(opt(i+1),'A') & isfield(opt(i+1),'B')) 
-	v0=(opt(i+1).A*v0'+repmat(opt(i+1).B(:),1,size(v0,1)))';
+    if(isstruct(opt) & length(opt)==maxlevel & isfield(opt(i),'A') & isfield(opt(i),'B')) 
+	v0=(opt(i).A*v0'+repmat(opt(i).B(:),1,size(v0,1)))';
     elseif (isstruct(opt) & length(opt)==1 & isfield(opt,'A') & isfield(opt,'B')) 
 	v0=(opt.A*v0'+repmat(opt.B(:),1,size(v0,1)))';
     end
 
     % if user specified holelist and regionlist, append them
     if(isstruct(opt)  & length(opt)==maxlevel)
-	if(isfield(opt(i+1),'hole'))
-            holes=[holes;opt(i+1).hole]
+	if(isfield(opt(i),'hole'))
+            holes=[holes;opt(i).hole]
 	end
-	if(isfield(opt(i+1),'region'))
-            regions=[regions;opt(i+1).region]
+	if(isfield(opt(i),'region'))
+            regions=[regions;opt(i).region]
 	end
     end
 
