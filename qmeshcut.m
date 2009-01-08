@@ -38,9 +38,8 @@ asign(find(asign>=0))=1;
 asign(find(asign<0))=-1;
 
 % get all the edges of the mesh
-
 esize=size(elem,2);
-if(esize==4)
+if(esize>=4)
     edges=[elem(:,[1,2]);elem(:,[1,3]);elem(:,[1,4]);
            elem(:,[2,3]);elem(:,[2,4]);elem(:,[3,4])];
 elseif(esize==3)
