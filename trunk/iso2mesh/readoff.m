@@ -13,4 +13,8 @@ if(length(elem)==4*dim(2))
 elseif(length(elem)==8*dim(2))
     elem=reshape(elem,[8,dim(2)])';
 end
-elem=round(elem(:,2:4))+1;
+if(size(elem,2)<=3)
+    elem=round(elem(:,2:3))+1;
+else
+    elem=round(elem(:,2:4))+1;
+end

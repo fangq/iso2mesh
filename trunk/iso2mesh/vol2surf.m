@@ -101,10 +101,10 @@ for i=1:maxlevel
     end
     % if use defines maxsurf=1, take only the largest closed surface
     if(isstruct(opt))
-	if(  ((isfield(opt,'maxsurf') & opt.maxsurf==1) | ...
-            (length(opt)==maxlevel & isfield(opt(i),'maxsurf') & opt(i).maxsurf==1)))
-            f0=maxsurf(finddisconnsurf(f0));
-	end
+        if(  ((isfield(opt,'maxsurf') & length(opt)==1 & opt.maxsurf==1) | ...
+                (length(opt)==maxlevel & isfield(opt(i),'maxsurf') & opt(i).maxsurf==1)))
+                f0=maxsurf(finddisconnsurf(f0));
+        end
     end
 
     % if a transformation matrix/offset vector supplied, apply them

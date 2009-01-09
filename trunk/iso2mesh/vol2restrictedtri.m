@@ -18,6 +18,11 @@ function [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distboun
 %       node: the list of 3d nodes in the resulting surface (x,y,z)
 %       elem: the element list of the resulting mesh (3 columns of integers)
 
+if(radbound<1)
+    warning(['You are meshing the surface with sub-pixel size. If this ' ...
+             'is not your your intent, please check if you set ' ...
+             '"opt.radbound" correctly for the default meshing method.']);
+end
 
 exesuff=getexeext;
 if(strcmp(exesuff,'.mexa64')) % cgalsurf.mexglx can be used for both
