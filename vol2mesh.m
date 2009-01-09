@@ -21,7 +21,7 @@ function [node,elem,bound]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method)
 if(nargin==8)
 	[no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method);
 else
-        [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,'cgalmesh');
+        [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,'cgalsurf');
 end
 %then, create volumetric mesh from the surface mesh
 [node,elem,bound]=surf2mesh(no,el,[],[],1,maxvol,regions,holes);

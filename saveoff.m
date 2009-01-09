@@ -8,14 +8,8 @@ function saveoff(v,f,fname)
 %      f: input, surface face element list, dimension (be,3)
 %      fname: output file name
 
-try
-	fid=fopen(fname,'wt');
-	fprintf(fid,'OFF\n');
-	fprintf(fid,'%d %d %d\n',length(v),length(f),0);
-	fprintf(fid,'%f %f %f\n',v');
-	fprintf(fid,'3 %d %d %d\n',(f-1)');
-	fclose(fid);
-catch
+fid=fopen(fname,'wt');
+if(fid==-1)
     error(['You do not have permission to save mesh files, if you are working in a multi-user ',...
          'environment, such as Unix/Linux and there are other users using iso2mesh, ',...
          'you may need to define ISO2MESH_SESSION=''yourstring'' to make your output ',...
@@ -23,3 +17,9 @@ catch
          ' as the temporary directory, you have to define ISO2MESH_TEMP=''/folder/you/have/write/permission'' ',...
          'in matlab/octave base workspace.']);
 end
+fprintf(fid,'OFF\n');
+fprintf(fid,'%d %d %d\n',length(v),length(f),0);
+fprintf(fid,'%f %f %f\n',v');
+fprintf(fid,'3 %d %d %d\n',(f-1)');
+fclose(fid);
+
