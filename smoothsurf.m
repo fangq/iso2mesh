@@ -1,4 +1,4 @@
-function nodenew=smoothsurf(node,mask,conn,iter)
+function p=smoothsurf(node,mask,conn,iter,useralpha,usermethod,userbeta)
 % smoothsurf: smooth a surface mesh by Laplace smoothing
 % author: fangq (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
@@ -9,17 +9,63 @@ function nodenew=smoothsurf(node,mask,conn,iter)
 %    conn:  input, a cell structure of length size(node), conn{n}
 %           contains a list of all neighboring node ID for node n
 %    iter:  smoothing iteration number
-%    nodenew: output, the smoothed node coordinates
+%    p: output, the smoothed node coordinates
 
-nn=size(node);
-nodenew=node;
+p=node;
 idx=find(mask==0)';
+nn=length(idx);
 
-%simple Laplacian, maybe Fujiwara operator should be used in the future
-
-for j=1:iter
-    for i=1:length(idx)
-        nodenew(idx(i),:)=mean(node(conn{idx(i)},:)); 
+alpha=0.5;
+method='laplacian';
+beta=0.5;
+if(nargin>4)
+    alpha=useralpha;
+    if(nargin>5)
+        method=usermethod;
+        if(nargin>6)
+            beta=userbeta;
+        end
     end
-    node=nodenew;
+end
+ibeta=1-beta;
+ialpha=1-alpha;
+lambda=-1.02*alpha;
+
+for i=1:nn
+    if(length(conn{idx(i)})==0)
+        idx(i)=0;
+    end
+end
+idx=idx(idx>0);
+nn=length(idx);
+
+if(strcmp(method,'laplacian'))
+    for j=1:iter
+        for i=1:nn
+            p(idx(i),:)=alpha*p(idx(i),:)+ialpha*mean(node(conn{idx(i)},:)); 
+        end
+        node=p;
+    end
+elseif(strcmp(method,'laplacianhc'))
+    for j=1:iter
+        q=p;
+        for i=1:nn
+            p(idx(i),:)=mean(node(conn{idx(i)},:));
+        end
+        b=p-(alpha*node+ialpha*q);
+        for i=1:nn
+            p(idx(i),:)=p(idx(i),:)-(beta*b(i,:)+ibeta*mean(b(conn{idx(i)},:))); 
+        end
+    end
+elseif(strcmp(method,'lowpass'))
+    for j=1:iter
+        for i=1:nn
+            p(idx(i),:)=alpha*p(idx(i),:)+ialpha*mean(node(conn{idx(i)},:)); 
+        end
+        node=p;
+        for i=1:nn
+            p(idx(i),:)=alpha*p(idx(i),:)-1.02*ialpha*(mean(node(conn{idx(i)},:))-p(idx(i),:)); 
+        end
+        node=p;
+    end
 end
