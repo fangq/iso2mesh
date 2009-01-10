@@ -21,6 +21,7 @@ end
 count=0;
 connnum=zeros(1,nn);
 for i=1:nn
+    if(length(conn{i})==0) continue; end
     conn{i}=sort(setdiff(unique(conn{i}),i));
     connnum(i)=length(conn{i});
     count=count+connnum(i);
