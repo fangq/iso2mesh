@@ -1,4 +1,4 @@
-function [no,el,regions,holes]=vol2surf2(img,ix,iy,iz,opt,dofix,method)
+function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method)
 %   converting a 3D volumetric image to surfaces
 %   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
 %   inputs:
@@ -101,8 +101,8 @@ for i=1:maxlevel
     end
     % if use defines maxsurf=1, take only the largest closed surface
     if(isstruct(opt))
-        if(  ((isfield(opt,'maxsurf') & length(opt)==1 & opt.maxsurf==1) | ...
-                (length(opt)==maxlevel & isfield(opt(i),'maxsurf') & opt(i).maxsurf==1)))
+        if( (isfield(opt,'maxsurf') && length(opt)==1 && opt.maxsurf==1) | ...
+                (length(opt)==maxlevel && isfield(opt(i),'maxsurf') && opt(i).maxsurf==1))
                 f0=maxsurf(finddisconnsurf(f0));
         end
     end
