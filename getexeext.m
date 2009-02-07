@@ -5,5 +5,9 @@ if(isunix)
 	exesuff=['.',mexext];
 end
 if(isoctavemesh)
-	exesuff='.mexglx';
+      if(isempty(strfind(computer,'msdos')))
+	    exesuff='.mexglx';
+      else
+          exesuff='.exe';
+      end
 end

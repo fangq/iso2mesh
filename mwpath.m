@@ -18,7 +18,11 @@ session=getvarfrom('base','ISO2MESH_SESSION');
 
 tempname=[];
 if(isempty(p) | ~exist(p))
-	tempname=[tempdir filesep session fname];
+      if(isoctavemesh & tempdir=='\')
+		tempname=['.'  filesep session fname];
+	else
+		tempname=[tempdir filesep session fname];
+	end
 else
 	tempname=[p filesep session fname];
 end
