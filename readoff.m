@@ -1,6 +1,8 @@
 function [node,elem]=readoff(fname)
-% readsmf: read  Geomview Object File Format
+% [node,elem]=readoff(fname)
+% readoff: read  Geomview Object File Format
 % by FangQ, 2008/03/28
+
 node=[];
 elem=[];
 fid=fopen(fname,'rt');

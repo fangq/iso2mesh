@@ -6,11 +6,29 @@
 
 iso2mesh ChangeLog:
 
-[to be determined] (0.6.0, beta release, codename: quesadilla)
+2009/02/07 (0.7.9, codename: hotpot)
+        1. incorporated CGAL Surface mesher as the default vol2surf
+           mesh extraction scheme (thank to Pierre Alliez's suggestion
+           and Laurent Rineau and Mariette Yvinec for developing this utility)
+        2. added sub-region labeling for multi-valued images
+        3. added cgalsurf binaries for Windows
+        4. tested the toolbox with Octave for Windows on a vista machine,
+           applied a few fixes to make it compatible
+        5. recompiled tetgen.exe to get the max-element-volume constraint
+           finally work
 
-2008/12/05 (0.5.9, codename: quesadilla)
+2008/12/27 (0.7.8, codename: hotpot)
+	1. try to handle the self-intersecting element problems, 
+           added getintersecttri.m to extract intesecting element IDs
+        2. implemented Laplacian-HC and Low-pass filter mesh smoothing
+           algorithms; unfortunately, they are not effective to remove the 
+           self-intersecting elements
+        3. sent email to CGAL list to ask advices to handle self-intersecting
+           element.
+
+2008/12/05 (0.6.0, codename: quesadilla)
         1. iso2mesh is now compatible with GNU Octave.
-        2. replaced matlab's isosurface by home-made binsurface, to produce
+        2. replaced matlab's isosurface by a home-made binsurface to produce
            well-behaved triangular or cubic surfaces from binary images
         3. added qmeshcut, a fast tetrahedral mesh cross-section plot
         4. updated tetgen binary for 64bit Linux (mexa64), which caused some crashes
@@ -56,7 +74,7 @@ iso2mesh ChangeLog:
            edges nodes (keep them co-planar)
 
 2007/12/27 (0.1.1)
-        1. used mexext to distinguish binaries for different platform
+        1. used mexext to distinguish binaries for different platforms
 
 2007/11/25 (0.1)
         1. initial upload to cvs, as a module of redbird2

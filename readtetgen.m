@@ -1,6 +1,7 @@
 function [node,elem,bound]=readtetgen(fstub)
+% [node,elem,bound]=readtetgen(fstub)
 % readtetgen: read tetgen output files
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
 %
 % parameters:
