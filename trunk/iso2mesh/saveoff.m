@@ -1,6 +1,7 @@
 function saveoff(v,f,fname)
+% saveoff(v,f,fname)
 % savesmf: save a surface mesh to  Geomview Object File Format
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/03/28
 %
 % parameters:
