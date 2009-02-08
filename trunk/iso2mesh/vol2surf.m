@@ -1,10 +1,38 @@
 function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method)
-%   converting a 3D volumetric image to surfaces
+%   [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method)
+%   vol2surf: converting a 3D volumetric image to surfaces
+%
 %   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
 %   inputs:
 %          img: a volumetric binary image
 %          ix,iy,iz: subvolume selection indices in x,y,z directions
-%          opt: same as in vol2mesh.m
+%          opt: function parameters
+%            if method is 'cgalsurf':
+%              opt=a float number>1: max radius of the Delaunay sphere(element size) 
+%              opt.radbound: same as above, max radius of the Delaunay sphere
+%              opt(1,2,...).radbound: same as above, for each levelset
+%            if method is 'simplify':
+%              opt=a float number<1: compression rate for surf. simplification
+%              opt.keeyratio=a float less than 1: same as above, same for all surf.
+%              opt(1,2,..).keeyratio: setting compression rate for each levelset
+%            opt(1,2,..).maxsurf: 1 - only use the largest disjointed surface
+%                                 0 - use all surfaces for that levelset
+%            opt(1,2,..).holes: user specified holes interior pt list
+%            opt(1,2,..).regions: user specified regions interior pt list
+%            opt(1,2,..).surf.{node,elem}: add additional surfaces
+%            opt(1,2,..).{A,B}: linear transformation for each surface
+%          dofix: 1: perform mesh validation&repair, 0: skip repairing
+%          method: - if method is 'simplify', iso2mesh will first call
+%                    binsurface to generate a voxel-based surface mesh and then
+%                    use meshresample/meshcheckrepair to create a coarser mesh;
+%                  - if method is 'cgalsurf', iso2mesh will call the surface
+%                    extraction program from CGAL to make surface mesh
+%                  - if method is not specified, 'cgalsurf' is assumed by default
+%   outputs: 
+%          no:  list of nodes on the resulting suface mesh, 3 columns for x,y,z
+%          el:  list of trianglular elements on the surface, [n1,n2,n3,region_id]
+%          regions: list of interior points for all sub-region, [x,y,z]
+%          holes:   list of interior points for all holes, [x,y,z]
 
 img=img(ix,iy,iz);
 dim=size(img);
@@ -22,7 +50,6 @@ if(isstruct(opt) & isfield(opt,'regions'))
 else
     regions=[];
 end
-
 maxlevel=max(newimg(:));
 
 bfield=zeros(newdim);
@@ -132,6 +159,14 @@ for i=1:maxlevel
 	no=[no;v0];
     end
 end
+
+%some final fix and scaling
+no(:,1:3)=no(:,1:3)-1; % because we padded the image with a 1 voxel thick null layer in newimg
+
+no(:,1)=no(:,1)*(max(ix)-min(ix)+1)/dim(1)+(min(ix)-1);
+no(:,2)=no(:,2)*(max(iy)-min(iy)+1)/dim(2)+(min(iy)-1);
+no(:,3)=no(:,3)*(max(iz)-min(iz)+1)/dim(3)+(min(iz)-1);
+
 
 if(isstruct(opt) & isfield(opt,'surf'))
    for i=1:length(opt.surf)
