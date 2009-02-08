@@ -81,13 +81,13 @@ for i=1:maxlevel
   idx=find(newimg==i);
   if(~isempty(idx))
       % for each level, find the bfield voxels with the min values
-      [ix,iy]=find(newimg==i & bfield==min(bfield(idx)));
-      if(~isempty(ix))
+      [idx,idy]=find(newimg==i & bfield==min(bfield(idx)));
+      if(~isempty(idx))
           % pick the first 1 for all min points
-          [iy,iz]=ind2sub([size(newimg,2),size(newimg,3)],iy(1));
+          [idy,idz]=ind2sub([size(newimg,2),size(newimg,3)],idy(1));
           % because binsurface makes the bfield shift by 1 in all axes
-          disp([ix(1),iy,iz]-1);
-          regions(end+1,:)=[ix(1),iy,iz]-1;
+          disp([idx(1),idy,idz]-1);
+          regions(end+1,:)=[idx(1),idy,idz]-1;
       end
   end
 end
@@ -166,7 +166,6 @@ no(:,1:3)=no(:,1:3)-1; % because we padded the image with a 1 voxel thick null l
 no(:,1)=no(:,1)*(max(ix)-min(ix)+1)/dim(1)+(min(ix)-1);
 no(:,2)=no(:,2)*(max(iy)-min(iy)+1)/dim(2)+(min(iy)-1);
 no(:,3)=no(:,3)*(max(iz)-min(iz)+1)/dim(3)+(min(iz)-1);
-
 
 if(isstruct(opt) & isfield(opt,'surf'))
    for i=1:length(opt.surf)
