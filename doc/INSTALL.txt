@@ -1,0 +1,58 @@
+
+   #[1]iso2mesh: a Matlab/Octave-based mesh generator
+
+Installation Instructions for iso2mesh toolbox
+
+System Requirements
+
+   iso2mesh is written by Matlab language (we will also provide the Scilab and
+   Octaves versions in the near future), therefore, any system that is able to
+   install Matlab (or Scilab or Octave) should be able to run this toolbox.
+   However,  as we described in the [2]Doc/README, this toolbox relies on
+   multiple external tools/libraries for full functionalities. So far, we have
+   been compiled these external tools for multiple platforms, and we will
+   provide more compiled binaries in the future.
+
+   The recommended system configuration for running this toolbox includes
+     * a computer running GNU/Linux, Windows, Mac OS (either 32bit/64bit)
+     * standard installation of matlab (v5 or above)
+     * 10M disk space for the toolbox and the examples
+
+Installation
+
+   The installation of iso2mesh to your system is very straightforward, you
+   need to follow the simple instructions below:
+     * extract the toolbox to a folder, say /home/myaccount/work/iso2mesh,
+       let's call it the root directory of iso2mesh;
+     * add the bin/ folder under the iso2mesh directory to your system's PATH
+       environment variable, see [3]more details here;
+     * start  your Maltab from a new shell (make sure the PATH setting is
+       effective),  type  addpath('/home/myaccount/work/iso2mesh') to add
+       iso2mesh to your matlab search path for the current session
+     * if you want to add this path permanantly for matlab, you simply type
+       pathtool, browse to the iso2mesh folder and add it to the list, then
+       click "Save"
+     * now, you can do a rehash in matlab, and type which vol2mesh, if you see
+       an output, that means iso2mesh is now seen by matlab
+     * you can navigate to a folder named "sample" inside iso2mesh's root
+       directory, and run the demo scripts, you should be able to see the code
+       complete with no error message. If it complains that some commands can
+       not be found, make sure your PATH variable setting is effective.
+
+For restricted users
+
+   You do not have to have system administrator (or root) right in order to
+   install/use iso2mesh toolbox. Most of the installation instructions can be
+   done in a per user basis. The only problem a restricted user may encounter
+   is to save the "pathtool" path list when they try to add the iso2mesh path
+   permanently. If this happens, you may work in a multi-user or network-based
+   system, you normally need to create file named startup.m under your home
+   directory     (~/matlab/     for     Linux/Unix),    and    put    the
+   addpath('/path/to/iso2mesh/'); into this file. It will be automatically
+   executed when matlab starts.
+
+References
+
+   1. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=rss
+   2. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/README
+   3. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/AddPath
