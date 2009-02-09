@@ -1,4 +1,4 @@
-function [node,elem]=meshresample(v,f,elemnum)
+function [node,elem]=meshresample(v,f,keepratio)
 % [node,elem]=meshresample(v,f,elemnum)
 %
 % meshresample: resample mesh using CGAL mesh simplification code
@@ -11,7 +11,7 @@ end
 
 saveoff(v,f,mwpath('pre_remesh.off'));
 deletemeshfile('post_remesh.off');
-system([' "' mcpath('cgalsimp2') exesuff '" "' mwpath('pre_remesh.off') '" ' num2str(elemnum) ' "' mwpath('post_remesh.off') '"']);
+system([' "' mcpath('cgalsimp2') exesuff '" "' mwpath('pre_remesh.off') '" ' num2str(keepratio) ' "' mwpath('post_remesh.off') '"']);
 [node,elem]=readoff(mwpath('post_remesh.off'));
 [node,I,J]=unique(node,'rows');
 elem=J(elem);
