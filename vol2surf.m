@@ -34,11 +34,8 @@ function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method)
 %          regions: list of interior points for all sub-region, [x,y,z]
 %          holes:   list of interior points for all holes, [x,y,z]
 
-img=img(ix,iy,iz);
-dim=size(img);
-newdim=dim+[2 2 2];
-newimg=zeros(newdim);
-newimg(2:end-1,2:end-1,2:end-1)=img;
+el=[];
+no=[];
 
 if(isstruct(opt) & isfield(opt,'holes')) 
     holes=opt.holes;
@@ -50,6 +47,16 @@ if(isstruct(opt) & isfield(opt,'regions'))
 else
     regions=[];
 end
+maxlevel=0;
+
+if(~isempty(img))
+
+img=img(ix,iy,iz);
+dim=size(img);
+newdim=dim+[2 2 2];
+newimg=zeros(newdim);
+newimg(2:end-1,2:end-1,2:end-1)=img;
+
 maxlevel=max(newimg(:));
 
 bfield=zeros(newdim);
@@ -91,9 +98,6 @@ for i=1:maxlevel
       end
   end
 end
-
-el=[];
-no=[];
 
 for i=1:maxlevel
     fprintf(1,'processing threshold level %d...\n',i);
@@ -166,6 +170,8 @@ no(:,1:3)=no(:,1:3)-1; % because we padded the image with a 1 voxel thick null l
 no(:,1)=no(:,1)*(max(ix)-min(ix)+1)/dim(1)+(min(ix)-1);
 no(:,2)=no(:,2)*(max(iy)-min(iy)+1)/dim(2)+(min(iy)-1);
 no(:,3)=no(:,3)*(max(iz)-min(iz)+1)/dim(3)+(min(iz)-1);
+
+end  % if not isempty(img)
 
 if(isstruct(opt) & isfield(opt,'surf'))
    for i=1:length(opt.surf)
