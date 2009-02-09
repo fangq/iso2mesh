@@ -57,18 +57,48 @@ function [node,elem,bound]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix)
    inputs: 
           img: a volumetric binary image 
           ix,iy,iz: subvolume selection indices in x,y,z directions
-          opt: additional parameters
-            opt=a float less than 1: compression rate for surf. simplification
-	    opt.keeyratio=a float less than 1: same as above, same for all surf.
-            opt(1,2,..).keeyratio: setting compression rate for each levelset
-            opt(1,2,..).surf.{node,elem}: add additional surfaces
-            opt(1,2,..).{A,B}: linear transformation for each surface
+          opt: see vol2surf 
           maxvol: target maximum tetrahedral elem volume
           dofix: 1: perform mesh validation&repair, 0: skip repairing
           node: output, node coordinates of the tetrahedral mesh
           elem: output, element list of the tetrahedral mesh
           bound: output, mesh surface element list of the tetrahedral mesh
                the last column denotes the boundary ID
+
+==== vol2surf.m ====
+function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method)
+   converting a 3D volumetric image to surfaces
+   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+   inputs:
+	  img: a volumetric binary image
+	  ix,iy,iz: subvolume selection indices in x,y,z directions
+	  opt: function parameters
+	    if method is 'cgalsurf':
+	      opt=a float number>1: max radius of the Delaunay sphere(element size)
+	      opt.radbound: same as above, max radius of the Delaunay sphere
+	      opt(1,2,...).radbound: same as above, for each levelset
+	    if method is 'simplify':
+	      opt=a float number<1: compression rate for surf. simplification
+	      opt.keeyratio=a float less than 1: same as above, same for all surf.
+	      opt(1,2,..).keeyratio: setting compression rate for each levelset
+	    opt(1,2,..).maxsurf: 1 - only use the largest disjointed surface
+				 0 - use all surfaces for that levelset
+	    opt(1,2,..).holes: user specified holes interior pt list
+	    opt(1,2,..).regions: user specified regions interior pt list
+	    opt(1,2,..).surf.{node,elem}: add additional surfaces
+	    opt(1,2,..).{A,B}: linear transformation for each surface
+	  dofix: 1: perform mesh validation&repair, 0: skip repairing
+	  method: - if method is 'simplify', iso2mesh will first call
+		    binsurface to generate a voxel-based surface mesh and then
+		    use meshresample/meshcheckrepair to create a coarser mesh;
+		  - if method is 'cgalsurf', iso2mesh will call the surface
+		    extraction program from CGAL to make surface mesh
+		  - if method is not specified, 'cgalsurf' is assumed by default
+   outputs:
+	  no:  list of nodes on the resulting suface mesh, 3 columns for x,y,z
+	  el:  list of trianglular elements on the surface, [n1,n2,n3,region_id]
+	  regions: list of interior points for all sub-region, [x,y,z]
+	  holes:   list of interior points for all holes, [x,y,z]
 
 ==== surf2mesh.m ====
 function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol)
@@ -85,15 +115,6 @@ function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol)
         elem: output, element list of the tetrahedral mesh
         bound: output, mesh surface element list of the tetrahedral mesh 
                the last column denotes the boundary ID
-
-==== vol2surf.m ====
-function [node,elem]=vol2mesh(img,ix,iy,iz,opt,dofix)
-   converting a 3D volumetric image to surfaces
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   inputs:
-          img: a volumetric binary image
-          ix,iy,iz: subvolume selection indices in x,y,z directions
-          opt: same as in vol2mesh.m
 
 
 === # Mesh simplification ===
@@ -156,8 +177,8 @@ function f=surfaceclean(f,v)
         f: output, faces free of those on the bounding box
 
 ==== smoothsurf.m ====
-function nodenew=smoothsurf(node,mask,conn,iter)
-   smoothsurf: smooth a surface mesh by Laplace smoothing
+function nodenew=smoothsurf(node,mask,conn,iter,method)
+   smoothsurf: smooth a surface mesh by 3 smoothing algorithms
    author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
    parameters:
       node:  node coordinates of a surface mesh
@@ -165,6 +186,7 @@ function nodenew=smoothsurf(node,mask,conn,iter)
       conn:  input, a cell structure of length size(node), conn{n}
              contains a list of all neighboring node ID for node n
       iter:  smoothing iteration number
+      method: 'laplacian','laplacianhc' and 'lowpass'
       nodenew: output, the smoothed node coordinates
 
 === # Mesh decomposition and query ===
