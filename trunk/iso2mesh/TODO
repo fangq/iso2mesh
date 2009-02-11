@@ -1,0 +1,20 @@
+====================================================================
+                         iso2mesh TODO list
+====================================================================
+
+== high priority ==
+
+1. detect multi-value interfaces (i.e. voxels where more than 2 values meet)
+and perturb the levelset surface mesh to avoid intersection [proposed on 02/11/09]
+
+2. if one levelset contains multiple disjointed surfaces, separate them, 
+and do sub-region labeling for each component [proposed on 02/11/09]
+
+
+== low priority ==
+
+1. processing gray-scale images directly [proposed on 02/11/09]
+
+2. 2D image-based mesh generation support ? [proposed on 02/11/09]
+
+3. adaptive refining [proposed on 02/11/09]
