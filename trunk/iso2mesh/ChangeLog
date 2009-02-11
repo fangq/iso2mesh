@@ -8,7 +8,7 @@ iso2mesh ChangeLog:
 
 2009/02/11 (0.7.9-1, codename: hotpot)
 	1. compiled all the binaries on Mac OS (PowerPC) and
-           tested on a Intel Mac
+           tested on an Intel Mac
         2. recompiled all linux and windows binaries with optimized speed
            and reduced system dependencies
         3. speeded up bounary field calculation with dedicated imedge3d
