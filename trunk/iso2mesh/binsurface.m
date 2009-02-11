@@ -8,6 +8,7 @@ function [node,elem]=binsurface(img,nface)
 %   img:  a 3D binary image
 %   nface: nface=3 or ignored - for triangular faces, 
 %          nface=4 - square faces
+%          nface=0 - return a boundary mask image via node
 %
 % outputs
 %   elem: integer array with dimensions of NE x nface, each row represents
@@ -51,6 +52,14 @@ ky=sub2ind(newdim(2:3),ky,kz);
 id1=sub2ind(newdim,ix,iy);
 id2=sub2ind(newdim,jx,jy);
 id3=sub2ind(newdim,kx,ky);
+
+if(nargin==2 && nface==0)
+	elem=[id1 id2 id3];
+	node=zeros(newdim);
+	node(elem)=1;
+	node=node(2:end-1,2:end-1,2:end-1);
+	return
+end
 
 % populate all the triangles
 xy=newdim(1)*newdim(2);
