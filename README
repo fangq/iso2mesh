@@ -70,7 +70,8 @@ function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method)
    converting a 3D volumetric image to surfaces
    author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
    inputs:
-	  img: a volumetric binary image
+          img: a volumetric binary image; if img is empty, vol2surf will
+               return user defined surfaces via opt.surf if it exists
 	  ix,iy,iz: subvolume selection indices in x,y,z directions
 	  opt: function parameters
 	    if method is 'cgalsurf':
@@ -121,7 +122,7 @@ function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol)
 
 ==== meshresample.m ====
 function [node,elem]=meshresample(v,f,elemnum)
-   meshresample: resample mesh using CGAL mesh simplification code
+   meshresample: resample mesh using CGAL mesh simplification utility
    author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
 
 ==== bbxflatsegment.m ====

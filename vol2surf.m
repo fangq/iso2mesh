@@ -4,7 +4,8 @@ function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method)
 %
 %   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
 %   inputs:
-%          img: a volumetric binary image
+%          img: a volumetric binary image; if img is empty, vol2surf will
+%               return user defined surfaces via opt.surf if it exists
 %          ix,iy,iz: subvolume selection indices in x,y,z directions
 %          opt: function parameters
 %            if method is 'cgalsurf':
