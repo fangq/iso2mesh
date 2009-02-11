@@ -43,7 +43,7 @@ end
 if(nargin==6)
 	regions=[];
 	holes=[];
-elseif(nargin==6)
+elseif(nargin==7)
 	holes=[];
 end
 % dump surface mesh to .poly file format
