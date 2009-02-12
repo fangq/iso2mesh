@@ -6,10 +6,10 @@
 :      Martinos Center for Biomedical Imaging
 :      Massachusetts General Hospital (Harvard Medical School)
 :      Bldg. 149, 13th St., Charlestown, MA 02148
-'''Version''': 0.7.9 (Hotpot)
+'''Version''': 0.7.9-1 (Hotpot)
 '''License''': GPL v2 or later (see COPYING) 
 :      (this license does not cover the binaries in the bin/ 
-:      directory, see section III for more details)
+:       directory, see section III for more details)
 '''URL''': http://iso2mesh.sf.net
 
 
@@ -21,7 +21,7 @@
 "iso2mesh" is a Matlab/Octave-based mesh generation toolbox. 
 It contains a number of optimized mesh processing scripts 
 and interfaces with a number of free meshing tools, such as 
-surface mesh simplifier and extraction utility (based on 
+surface mesh simplifier and extraction utilities (based on 
 CGAL), tetgen, and mesh validation&repairing utility (based 
 on JMeshLib). Iso2mesh toolbox provides a simple yet powerful 
 way to create quality tetrahedral volumetric mesh directly 
@@ -41,7 +41,7 @@ workflow from 3D binary image preprocessing (hole-filling
 and island-removing), to surface mesh modeling (extraction, 
 remeshing, validation, repairing, and smoothing) and 
 volumetric mesh creation. Users can either choose the 
-streamlined driver scripts to create 3D mesh with a 
+streamlined wrapper scripts to create 3D mesh with a 
 fully automated process, or to call invidual subroutines 
 to perform specific meshing tasks, such as closed surface 
 extraction or boundary extraction.
@@ -380,7 +380,7 @@ function fullname=mcpath(cmdname)
 
 == # Acknowledgement ==
 
-This toolbox is incorporated with a number external meshing tools 
+This toolbox interacts with a number external meshing tools 
 to perform the essential functionalities. These tools are listed 
 below:
 
@@ -400,14 +400,16 @@ and non-commertial uses only.
 gray-scale or binary 3D images
 *Source: it is a slightly modified version from Surface_mesher \
 example from CGAL 3.4
-*License: CGAL v3 library is licensed under LGPL v2.1 (Lesser General Public License)
+*License: CGAL v3 library is licensed under LGPL v2.1 (Lesser \
+General Public License)
 *URL: http://www.cgal.org/Manual/3.3/doc_html/cgal_manual/Surface_mesher/Chapter_main.html
 
 === bin/cgalsimp2 ===
 
 *Summary: cgalsimp2 performs surface mesh simplification in iso2mesh.
 *Source: it is adapted from Surface_mesh_simplification example of CGAL library
-*License: CGAL v3 library is licensed under LGPL v2.1 (Lesser General Public License)
+*License: CGAL v3 library is licensed under LGPL v2.1 (Lesser \
+General Public License)
 *URL: http://www.cgal.org/
 
 === bin/meshfix ===
@@ -431,7 +433,7 @@ example from CGAL 3.4
 
 Note: iso2mesh and the above meshing utilities are considered 
 as an "aggregate" rather than "derived work", based on the 
-definitions in GPL's FAQ (http://www.gnu.org/licenses/gpl-faq.html#MereAggregation)
+definitions in GPL FAQ (http://www.gnu.org/licenses/gpl-faq.html#MereAggregation)
 Therefore, the license of iso2mesh and these utilities are independent.
 The iso2mesh license only applies to the scripts and documents/data
 in this package and exclude those programs stored in the bin/ directory.
