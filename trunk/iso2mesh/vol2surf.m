@@ -96,7 +96,7 @@ if(~isempty(img))
     for i=1:maxlevel
         fprintf(1,'processing threshold level %d...\n',i);
 
-        if(nargin<7 | strcmp(method,'simplify'))
+        if(nargin==7 & strcmp(method,'simplify'))
 
           [v0,f0]=binsurface(newimg>i-1); % not sure if binsurface works for multi-value arrays
           % with binsurf, I think the following line is not needed anymore
@@ -116,7 +116,7 @@ if(~isempty(img))
 
           if(dofix) [v0,f0]=meshcheckrepair(v0,f0); end
 
-        elseif(nargin==7 & strcmp(method,'cgalsurf'))
+        elseif(nargin<7 | strcmp(method,'cgalsurf'))
           if(isstruct(opt) & length(opt)==maxlevel) radbound=opt(i).radbound;
           elseif (isstruct(opt) & length(opt)==1) radbound=opt.radbound;
           else radbound=opt;  end;
