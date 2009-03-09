@@ -121,7 +121,11 @@ if(~isempty(img))
           elseif (isstruct(opt) & length(opt)==1) radbound=opt.radbound;
           else radbound=opt;  end;
 
-          [v0,f0]=vol2restrictedtri(newimg>(i-1),0.5,regions(i,:),max(newdim)*max(newdim)*2,30,radbound,radbound);
+          maxsurfnode=40000;  % maximum node numbers for each level
+          if(isstruct(opt) & length(opt)==maxlevel) maxsurfnode=opt(i).maxnode;
+          elseif (isstruct(opt) & length(opt)==1) maxsurfnode=opt.maxnode;
+
+          [v0,f0]=vol2restrictedtri(newimg>(i-1),0.5,regions(i,:),max(newdim)*max(newdim)*2,30,radbound,radbound,maxsurfnode);
         end
         % if use defines maxsurf=1, take only the largest closed surface
         if(isstruct(opt))
