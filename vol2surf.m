@@ -122,8 +122,11 @@ if(~isempty(img))
           else radbound=opt;  end;
 
           maxsurfnode=40000;  % maximum node numbers for each level
-          if(isstruct(opt) & length(opt)==maxlevel) maxsurfnode=opt(i).maxnode;
-          elseif (isstruct(opt) & length(opt)==1) maxsurfnode=opt.maxnode;
+          if(isstruct(opt) & length(opt)==maxlevel & isfield(opt(i),'maxnode')) 
+              maxsurfnode=opt(i).maxnode;
+          elseif (isstruct(opt) & length(opt)==1 & isfield(opt(i),'maxnode')) 
+              maxsurfnode=opt.maxnode; 
+          end
 
           [v0,f0]=vol2restrictedtri(newimg>(i-1),0.5,regions(i,:),max(newdim)*max(newdim)*2,30,radbound,radbound,maxsurfnode);
         end
@@ -177,3 +180,4 @@ if(isstruct(opt) & isfield(opt,'surf'))
         no=[no;opt.surf(i).node];
    end
 end
+
