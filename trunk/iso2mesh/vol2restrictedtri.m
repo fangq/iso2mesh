@@ -1,5 +1,5 @@
-function [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distbound)
-% [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distbound)
+function [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distbound,maxnode)
+% [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distbound,maxnode)
 %
 % vol2restrictedtri: surface mesh extraction using CGAL mesher
 % by FangQ, 2009/01/06
@@ -14,6 +14,7 @@ function [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distboun
 %            (in degrees)
 %       radbound: maximum triangle delaunay circle radius
 %       distbound: maximum delaunay sphere distances
+%       maxnode: maximum number of surface nodes (even radbound is not reached)
 % outputs:
 %       node: the list of 3d nodes in the resulting surface (x,y,z)
 %       elem: the element list of the resulting mesh (3 columns of integers)
@@ -32,6 +33,6 @@ end
 saveinr(vol,mwpath('pre_extract.inr'));
 deletemeshfile('post_extract.off');
 system([' "' mcpath('cgalsurf') exesuff '" "' mwpath('pre_extract.inr') ...
-    '" ' sprintf('%f %f %f %f %f %f %f %f ',thres,cent,brad,ang,radbound,distbound) ...
+    '" ' sprintf('%f %f %f %f %f %f %f %f %d ',thres,cent,brad,ang,radbound,distbound,maxnode) ...
     ' "' mwpath('post_extract.off') '"']);
 [node,elem]=readoff(mwpath('post_extract.off'));
