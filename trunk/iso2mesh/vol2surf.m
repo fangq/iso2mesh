@@ -18,6 +18,7 @@ function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method)
 %              opt(1,2,..).keeyratio: setting compression rate for each levelset
 %            opt(1,2,..).maxsurf: 1 - only use the largest disjointed surface
 %                                 0 - use all surfaces for that levelset
+%            opt(1,2,..).maxnode: - the maximum number of surface node per levelset
 %            opt(1,2,..).holes: user specified holes interior pt list
 %            opt(1,2,..).regions: user specified regions interior pt list
 %            opt(1,2,..).surf.{node,elem}: add additional surfaces
@@ -130,6 +131,7 @@ if(~isempty(img))
 
           [v0,f0]=vol2restrictedtri(newimg>(i-1),0.5,regions(i,:),max(newdim)*max(newdim)*2,30,radbound,radbound,maxsurfnode);
         end
+
         % if use defines maxsurf=1, take only the largest closed surface
         if(isstruct(opt))
             if( (isfield(opt,'maxsurf') && length(opt)==1 && opt.maxsurf==1) | ...

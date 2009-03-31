@@ -1,9 +1,9 @@
 function binname=mcpath(fname)
-% tempname=mcpath(fname)
+% binname=mcpath(fname)
 % get full executable path by prepending a command directory path
 % parameters:
 %    fname: input, a file name string
-%    tempname: output, full file name located in the bin directory
+%    binname: output, full file name located in the bin directory
 %
 %    if global variable ISO2MESH_BIN is set in 'base', it will
 %    use [ISO2MESH_BIN filesep cmdname] as the command full path,
@@ -12,9 +12,15 @@ function binname=mcpath(fname)
 %    $PATH variable.
 
 p=getvarfrom('base','ISO2MESH_BIN');
-tempname=[];
+binname=[];
 if(isempty(p) | ~exist(p))
-	binname=fname;
+	% the bin folder under iso2mesh is searched first
+	tempname=[fileparts(which(mfilename)) filesep 'bin' filesep fname];
+	if(exist(tempname)==2)
+		binname=tempname;
+	else
+		binname=fname;
+	end
 else
 	binname=[p filesep fname];
 end
