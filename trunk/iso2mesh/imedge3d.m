@@ -1,49 +1,34 @@
-function edgemask=imedge3d(img)
-% edgemask=imedge3d(img)
-%
-% label all voxels that has different values from its neighbors
-%   by Qianqian Fang, <fangq at nmr.mgh.harvard.edu>
-%
-% parameters: 
-%   img:  a 3D binary image
-%
-% outputs
-%   edgemask: a 3D array with same size as img, with value 1 for voxels
-%             which is different from its neighbors and 0 elsewhere
-%
-% note: the thickness of the edge may not necessarily 1, sometimes
-% it is 2 (at the direction exiting the object), but this is fine for
-% vol2surf boundary field calculation
-%
-% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+function imgdiff=imedge3d(binimg,isdiff)
+% imgdiff=imedge3d(binimg,isdiff)
+% Extract the boundary voxels from a binary image
 % 
+% Author: Aslak Grinsted <ag at glaciology.net>
+% modified by Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+%
+% input: 
+%   binimg: a 3D binary image
+%   isdiff: if isdiff=1, output will be all voxels which 
+%         is different from its neighbors; if isdiff=0 or 
+%         ignored, output will be the edge voxels of the 
+%         non-zero regions in binimg
+%
+% output:
+%   imgdiff: a 3D logical array with the same size as binimg
+%            with 1 for voxels on the boundary and 0 otherwise 
+% 
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
-dim=size(img);
-
-% find the jumps for all directions
-d1=diff(img,1,1);
-d2=diff(img,1,2);
-d3=diff(img,1,3);
-[ix,iy]=find(d1);
-[jx,jy]=find(d2);
-[kx,ky]=find(d3);
-
-% compensate the dim. reduction due to diff
-
-ix=ix+1;
-
-[jy,jz]=ind2sub([dim(2)-1,dim(3)],jy);
-jy=jy+1;
-jy=sub2ind(dim(2:3),jy,jz);
-
-[ky,kz]=ind2sub([dim(2),dim(3)-1],ky);
-kz=kz+1;
-ky=sub2ind(dim(2:3),ky,kz);
-
-id1=sub2ind(dim,ix,iy);
-id2=sub2ind(dim,jx,jy);
-id3=sub2ind(dim,kx,ky);
-
-allid=[id1;id2;id3];
-edgemask=zeros(dim);
-edgemask(allid)=1;
+invol=1;
+if(nargin==2)
+	invol=isdiff;
+end
+imgdiff=xor(binimg,binimg(:,:,[1 1:end-1]));
+imgdiff=imgdiff|xor(binimg,binimg(:,:,[2:end end]));
+imgdiff=imgdiff|xor(binimg,binimg(:,[1 1:end-1],:));
+imgdiff=imgdiff|xor(binimg,binimg(:,[2:end end],:));
+imgdiff=imgdiff|xor(binimg,binimg([1 1:end-1],:,:));
+imgdiff=imgdiff|xor(binimg,binimg([2:end end],:,:));
+if(invol)
+	imgdiff=imgdiff&binimg;
+end
