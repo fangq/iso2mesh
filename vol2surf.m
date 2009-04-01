@@ -77,7 +77,7 @@ if(~isempty(img))
     % boundary changes more than 3 voxels, if it moved more, then increase this
     % number
 
-    bfield=smoothbinvol(bfield,3);
+    bfield=smoothbinvol(bfield,4);
 
     for i=1:maxlevel
       idx=find(newimg==i);
