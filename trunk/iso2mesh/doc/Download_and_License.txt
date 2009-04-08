@@ -3,9 +3,9 @@
 
 How to obtain iso2mesh
 
-          1. [2]Download the latest release (v0.5.1, alpha, codenamed Footlong)
+          1. [2]Download the latest release
 
-          2. [3]Download from CVS (not fully tested)
+          2. [3]Download Development Snapshot from CVS (not fully tested)
 
                 2.1. [4]Anonymous CVS Access
 
@@ -13,13 +13,15 @@ How to obtain iso2mesh
 
           3. [6]Important Note on Licenses
 
-1. Download the latest release (v0.5.1, alpha, codenamed Footlong)
+1. Download the latest release
 
-   Please download the latest v0.5.1 release at our [7]registration/download page. We are greatly
+iso2mesh 0.7.9-1, beta codenamed Hotpot
+
+   Please download the latest v0.7.9-1 release at our [7]registration/download page. We are greatly
    appreciated  if  you  can  tell  us  a  little  bit about you and your related research by
    [8][registering your copy of iso2mesh].
 
-2. Download from CVS (not fully tested)
+2. Download Development Snapshot from CVS (not fully tested)
 
    If you want to get the latest development branch of iso2mesh, you can download it from our cvs.
    First, make sure you have installed cvs client on your system. If you are using Debian-based
@@ -80,8 +82,8 @@ urceforge.net, 2008
 References
 
    1. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=rss
-   2. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Download#Download_the_latest_release_v0_5_1_alpha_codenamed_Footlong
-   3. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Download#Download_from_CVS_not_fully_tested
+   2. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Download#Download_the_latest_release
+   3. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Download#Download_Development_Snapshot_from_CVS_not_fully_tested
    4. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Download#Anonymous_CVS_Access
    5. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Download#Developer_CVS_Access_via_SSH
    6. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Download#Important_Note_on_Licenses
