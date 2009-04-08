@@ -57,7 +57,7 @@ if(nargin==2 && nface==0)
 	elem=[id1 id2 id3];
 	node=zeros(newdim);
 	node(elem)=1;
-	node=node(2:end-1,2:end-1,2:end-1);
+	node=node(2:end-1,2:end-1,2:end-1)-1;
 	return
 end
 
@@ -84,4 +84,6 @@ elem=nodemap(elem);
 
 % create the coordiniates
 [xi,yi,zi]=ind2sub(newdim,id);
-node=[xi(:),yi(:),zi(:)];
+
+% assuming the origin [0 0 0] is located at the lower-bottom corner of the image
+node=[xi(:),yi(:),zi(:)]-1;
