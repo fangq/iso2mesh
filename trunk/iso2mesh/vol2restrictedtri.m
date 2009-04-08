@@ -36,3 +36,6 @@ system([' "' mcpath('cgalsurf') exesuff '" "' mwpath('pre_extract.inr') ...
     '" ' sprintf('%f %f %f %f %f %f %f %f %d ',thres,cent,brad,ang,radbound,distbound,maxnode) ...
     ' "' mwpath('post_extract.off') '"']);
 [node,elem]=readoff(mwpath('post_extract.off'));
+
+% assuming the origin [0 0 0] is located at the lower-bottom corner of the image
+node=node+0.5;
