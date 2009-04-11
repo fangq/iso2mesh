@@ -21,14 +21,14 @@ load sampleVol2Mesh.mat
 % this method does not guarantee to be free of self-intersecting
 % element, as 'cgalsurf' promises.
 
-[node,elem,bound]=vol2mesh(volimage>0.05,1:size(volimage,1),1:size(volimage,2),...
+[node,elem,face]=vol2mesh(volimage>0.05,1:size(volimage,1),1:size(volimage,2),...
                           1:size(volimage,3),0.1,2,1,'simplify');
 
 %% visualize the resulting mesh
 
 if(isoctavemesh)
-        trimesh(bound(:,1:3),node(:,1),node(:,2),node(:,3));
+        trimesh(face(:,1:3),node(:,1),node(:,2),node(:,3));
 else
-        trisurf(bound(:,1:3),node(:,1),node(:,2),node(:,3));
+        trisurf(face(:,1:3),node(:,1),node(:,2),node(:,3));
 end
 axis equal;

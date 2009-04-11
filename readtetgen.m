@@ -1,11 +1,14 @@
-function [node,elem,bound]=readtetgen(fstub)
-% [node,elem,bound]=readtetgen(fstub)
+function [node,elem,face]=readtetgen(fstub)
+% [node,elem,face]=readtetgen(fstub)
 % readtetgen: read tetgen output files
 % author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
 %
 % parameters:
 %    fstub: file name stub
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 % read node file
 fp=fopen([fstub,'.node'],'rt');
@@ -36,7 +39,7 @@ if(fp==0)
 end
 [dim,count] = fscanf(fp,'%d',2);
 if(count<2) error('wrong surface file'); end
-bound=fscanf(fp,'%d',[5,dim(1)]);
-bound=[bound(2:end-1,:)+1;bound(end,:)]';
+face=fscanf(fp,'%d',[5,dim(1)]);
+face=[face(2:end-1,:)+1;face(end,:)]';
 fclose(fp);
 

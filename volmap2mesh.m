@@ -1,5 +1,5 @@
-function [node,elem,bound]=volmap2mesh(img,ix,iy,iz,elemnum,maxvol,thickness,Amat,Bvec)
-% [node,elem,bound]=vol2mesh(img,ix,iy,iz,thickness,elemnum,maxvol,A,B)
+function [node,elem,face]=volmap2mesh(img,ix,iy,iz,elemnum,maxvol,thickness,Amat,Bvec)
+% [node,elem,face]=vol2mesh(img,ix,iy,iz,thickness,elemnum,maxvol,A,B)
 % convert a binary volume to tetrahedral mesh
 % author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
 % date:   2008/01/12
@@ -11,8 +11,11 @@ function [node,elem,bound]=volmap2mesh(img,ix,iy,iz,elemnum,maxvol,thickness,Ama
 %        Amat and Bvec maps the image index space to real world coordnate system by
 %         [x,y,z]_new=Amat*[x,y,z]_old+Bvec
 %         thickness: scale z-dimension of the mesh to specified thickness, if thickness==0, scaling is bypassed
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
-[node,elem,bound]=vol2mesh(img,ix,iy,iz,elemnum,maxvol);
+[node,elem,face]=vol2mesh(img,ix,iy,iz,elemnum,maxvol);
 
 node=(Amat*node'+repmat(Bvec(:),1,size(node,1)))';
 
