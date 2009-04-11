@@ -4,7 +4,7 @@ function [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,plane)
 % Fast tetrahedral mesh cross-section plot
 %   by Qianqian Fang, <fangq at nmr.mgh.harvard.edu>
 %
-% parameters: 
+% input: 
 %   elem: integer array with dimensions of NE x 4, each row contains
 %         the indices of all the nodes for each tetrahedron
 %   node: node coordinates, 3 columns for x, y and z respectively
@@ -12,7 +12,7 @@ function [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,plane)
 %          multiple columns 
 %   plane: defines a plane by 3 points: plane=[x1 y1 z1;x2 y2 z2;x3 y3 z3]
 %
-% outputs
+% output:
 %   cutpos: all the intersections of mesh edges by the plane
 %           cutpos is similar to node, containing 3 columns for x/y/z
 %   cutvalue: interpolated values at the intersections, with row number

@@ -1,15 +1,25 @@
 function p=smoothsurf(node,mask,conn,iter,useralpha,usermethod,userbeta)
+% p=smoothsurf(node,mask,conn,iter,useralpha,usermethod,userbeta)
+%
 % smoothsurf: smooth a surface mesh by Laplace smoothing
+%
 % author: fangq (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
 %
-% parameters:
+% input:
 %    node:  node coordinates of a surface mesh
 %    mask: of length of node number, =0 for internal nodes, =1 for edge nodes
 %    conn:  input, a cell structure of length size(node), conn{n}
 %           contains a list of all neighboring node ID for node n
 %    iter:  smoothing iteration number
+%    useralpha: scaler, smoothing parameter, v(k+1)=alpha*v(k)+(1-alpha)*mean(neighbors)
+%    usermethod: smoothing method, including 'laplacian','laplacianhc' and 'lowpass'
+%    userbeta: scaler, smoothing parameter, for 'laplacianhc'
+% output:
 %    p: output, the smoothed node coordinates
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 p=node;
 idx=find(mask==0)';

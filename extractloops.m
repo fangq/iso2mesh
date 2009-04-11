@@ -1,6 +1,9 @@
 function loops=extractloops(edges)
+% loops=extractloops(edges)
+%
 % extractloops: extract individual loops from an edge table of a loop
 %               collection
+%
 % author: fangq (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
 %
@@ -9,6 +12,9 @@ function loops=extractloops(edges)
 %             points of all edge segments
 %    loops:  output, a single vector separated by NaN, each segment
 %             is a close-polygon consisted by node IDs
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 loops=[];
 loops=[loops,edges(1,:)];

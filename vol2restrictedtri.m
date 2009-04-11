@@ -2,7 +2,7 @@ function [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distboun
 % [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distbound,maxnode)
 %
 % vol2restrictedtri: surface mesh extraction using CGAL mesher
-% by FangQ, 2009/01/06
+% author: fangq (fangq<at> nmr.mgh.harvard.edu), 2009/01/06
 %
 % inputs:
 %       vol: a 3D volumetric image

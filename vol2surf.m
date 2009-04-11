@@ -1,5 +1,6 @@
 function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
-%   [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method)
+%   [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
+%
 %   vol2surf: converting a 3D volumetric image to surfaces
 %
 %   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)

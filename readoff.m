@@ -1,7 +1,19 @@
 function [node,elem]=readoff(fname)
 % [node,elem]=readoff(fname)
+%
 % readoff: read  Geomview Object File Format
-% by FangQ, 2008/03/28
+%
+% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% date: 2008/03/28
+%
+% input:
+%    fname: name of the OFF data file
+% output:
+%    node: node coordinates of the mesh
+%    elem: list of elements of the mesh	    
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 node=[];
 elem=[];

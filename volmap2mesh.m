@@ -1,6 +1,8 @@
 function [node,elem,face]=volmap2mesh(img,ix,iy,iz,elemnum,maxvol,thickness,Amat,Bvec)
 % [node,elem,face]=vol2mesh(img,ix,iy,iz,thickness,elemnum,maxvol,A,B)
+%
 % convert a binary volume to tetrahedral mesh
+%
 % author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
 % date:   2008/01/12
 %

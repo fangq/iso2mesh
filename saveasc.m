@@ -1,6 +1,8 @@
 function saveasc(v,f,fname)
 % saveasc(v,f,fname)
+%
 % save a surface mesh to FreeSurfer ASC mesh format
+%
 % author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2009/04/02
 %
@@ -8,6 +10,9 @@ function saveasc(v,f,fname)
 %      v: input, surface node list, dimension (nn,3)
 %      f: input, surface face element list, dimension (be,3)
 %      fname: output file name
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 fid=fopen(fname,'wt');
 if(fid==-1)

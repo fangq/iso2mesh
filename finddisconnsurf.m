@@ -1,15 +1,19 @@
 function facecell=finddisconnsurf(f)
-% facecell=finddisconnsurf(facelist)
+% facecell=finddisconnsurf(f)
 % 
 % subroutine to extract disconnected surfaces from a 
 % cluster of surfaces
-% facelist: input, node indices for all surface triangles
-% facecell: separated disconnected surface node indices
-%
-% Qianqian Fang (fangq@nmr.mgh.harvard.edu)
-% Date: 2008/03/06
 % 
-% this subroutine is part of iso2mesh toolbox
+% author: Qianqian Fang (fangq@nmr.mgh.harvard.edu)
+% Date: 2008/03/06
+%
+% input: 
+%     f: faces defined by node indices for all surface triangles
+% output:
+%     facecell: separated disconnected surface node indices
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 facecell={};
 subset=[];

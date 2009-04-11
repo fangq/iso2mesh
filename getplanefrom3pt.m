@@ -1,4 +1,18 @@
 function [a,b,c,d]=getplanefrom3pt(plane)
+% [a,b,c,d]=getplanefrom3pt(plane)
+% 
+% define a plane equation ax+by+cz+d=0 from three 3D points
+%
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+%
+% input: 
+%    plane: a 3x3 matrix with each row specifying a 3D point (x,y,z)
+% output:
+%    a,b,c,d: the coefficient for plane equation ax+by+cz+d=0
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
+
 x=plane(:,1);
 y=plane(:,2);
 z=plane(:,3);

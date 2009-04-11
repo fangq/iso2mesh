@@ -1,15 +1,22 @@
 function seg=bbxflatsegment(node,loop)
-% bbxflatsegment: decompose edge loops into flat segments
-%                  alone x/y/z planes of the bounding box
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% seg=bbxflatsegment(node,loop)
+%
+% decompose edge loops into flat segments alone x/y/z 
+% planes of the bounding box
+%
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2008/04/08
 %
-% parameters:   
+% input:   
 %    node:  x,y,z coordinates of each node of the mesh
 %    loop:  input, a single vector separated by NaN, each segment
 %             is a close-polygon consisted by node IDs 
+% output:
 %    seg:   output, a single vector separated by NaN, each segment
 %             is a close-polygon on x/y/z plane 
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 pos=node(loop,:);
 

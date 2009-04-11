@@ -11,6 +11,9 @@ function islands=bwislands(img)
 %          islands: a cell array, each cell records the indices 
 %                   of the non-zero elements in img for a connected 
 %                   region (or an island)
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 img=logical(1-img);
 idx=find(1-img(:));
