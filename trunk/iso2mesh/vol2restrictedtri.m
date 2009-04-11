@@ -18,6 +18,9 @@ function [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distboun
 % outputs:
 %       node: the list of 3d nodes in the resulting surface (x,y,z)
 %       elem: the element list of the resulting mesh (3 columns of integers)
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 if(radbound<1)
     warning(['You are meshing the surface with sub-pixel size. If this ' ...

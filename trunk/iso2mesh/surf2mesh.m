@@ -1,5 +1,5 @@
-function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes)
-% [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes)
+function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes)
+% [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes)
 % surf2mesh - create quality volumetric mesh from isosurface patches
 % author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/24
@@ -15,8 +15,11 @@ function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes)
 % outputs:
 %      node: output, node coordinates of the tetrahedral mesh
 %      elem: output, element list of the tetrahedral mesh
-%      bound: output, mesh surface element list of the tetrahedral mesh 
+%      face: output, mesh surface element list of the tetrahedral mesh 
 %             the last column denotes the boundary ID
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 exesuff=getexeext;
 
@@ -57,4 +60,4 @@ system([' "', mcpath('tetgen'), exesuff,'" -A -q1.414a',num2str(maxvol), ' "' mw
 %eval(['! tetgen',exesuff,' -d' ' post_vmesh.poly']);
 
 % read in the generated mesh
-[node,elem,bound]=readtetgen(mwpath('post_vmesh.1'));
+[node,elem,face]=readtetgen(mwpath('post_vmesh.1'));

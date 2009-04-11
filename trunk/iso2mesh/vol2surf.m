@@ -1,4 +1,4 @@
-function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method)
+function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
 %   [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method)
 %   vol2surf: converting a 3D volumetric image to surfaces
 %
@@ -30,11 +30,16 @@ function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method)
 %                  - if method is 'cgalsurf', iso2mesh will call the surface
 %                    extraction program from CGAL to make surface mesh
 %                  - if method is not specified, 'cgalsurf' is assumed by default
+%          isovalues: a list of isovalues where the levelset is defined
+%
 %   outputs: 
 %          no:  list of nodes on the resulting suface mesh, 3 columns for x,y,z
 %          el:  list of trianglular elements on the surface, [n1,n2,n3,region_id]
 %          regions: list of interior points for all sub-region, [x,y,z]
 %          holes:   list of interior points for all holes, [x,y,z]
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 el=[];
 no=[];
@@ -59,7 +64,13 @@ if(~isempty(img))
     newimg=zeros(newdim);
     newimg(2:end-1,2:end-1,2:end-1)=img;
 
-    maxlevel=max(newimg(:));
+    if(nargin<8)
+        maxlevel=max(newimg(:));
+        isovalues=1:maxlevel;
+    else
+        maxlevel=length(isovalues);
+    end
+    isovalues=unique(sort(isovalues));
 
     % to accelerate the boundary field calculation
     bfield=imedge3d(newimg);
@@ -80,10 +91,15 @@ if(~isempty(img))
     bfield=smoothbinvol(bfield,4);
 
     for i=1:maxlevel
-      idx=find(newimg==i);
+      if(i<maxlevel)
+          levelmask=(newimg>=isovalues(i) & newimg<isovalues(i+1));
+      else
+          levelmask=(newimg>=isovalues(i));
+      end
+      idx=find(levelmask);
       if(~isempty(idx))
           % for each level, find the bfield voxels with the min values
-          [idx,idy]=find(newimg==i & bfield==min(bfield(idx)));
+          [idx,idy]=find(levelmask & bfield==min(bfield(idx)));
           if(~isempty(idx))
               % pick the first 1 for all min points
               [idy,idz]=ind2sub([size(newimg,2),size(newimg,3)],idy(1));
@@ -97,10 +113,10 @@ if(~isempty(img))
     for i=1:maxlevel
         fprintf(1,'processing threshold level %d...\n',i);
 
-        if(nargin==7 & strcmp(method,'simplify'))
+        if(nargin>=7 & strcmp(method,'simplify'))
 
-          [v0,f0]=binsurface(newimg>i-1); % not sure if binsurface works for multi-value arrays
-          % with binsurf, I think the following line is not needed anymore
+          [v0,f0]=binsurface(newimg>=isovalues(i)); % not sure if binsurface works for multi-value arrays
+          % with binsurface, I think the following line is not needed anymore
           %  v0(:,[1 2])=v0(:,[2 1]); % isosurface(V,th) assumes x/y transposed
           if(dofix)  [v0,f0]=meshcheckrepair(v0,f0);  end  
 
@@ -129,7 +145,8 @@ if(~isempty(img))
               maxsurfnode=opt.maxnode; 
           end
 
-          [v0,f0]=vol2restrictedtri(newimg>(i-1),0.5,regions(i,:),max(newdim)*max(newdim)*2,30,radbound,radbound,maxsurfnode);
+          [v0,f0]=vol2restrictedtri(newimg>(i-1),isovalues(i),regions(i,:),...
+                     max(newdim)*max(newdim)*2,30,radbound,radbound,maxsurfnode);
         end
 
         % if use defines maxsurf=1, take only the largest closed surface

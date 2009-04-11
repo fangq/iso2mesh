@@ -38,7 +38,7 @@ opt(1).radbound=4; % head surface element size bound
 opt(2).radbound=2; % brain surface element size bound
 
 tic
-[node,elem,bound]=vol2mesh(cleanimgfull,1:size(cleanimg,1),1:size(cleanimg,2),1:size(cleanimg,3),opt,100,1);
+[node,elem,face]=vol2mesh(cleanimgfull,1:size(cleanimg,1),1:size(cleanimg,2),1:size(cleanimg,3),opt,100,1);
 toc
 
 % plot the boundary surface of the generated mesh
@@ -46,9 +46,9 @@ h=slice(cleanimgfull,[],[120],[120 180]);
 set(h,'linestyle','none')
 hold on
 if(isoctavemesh)
-    trimesh(bound(:,1:3),node(:,1),node(:,2),node(:,3));
+    trimesh(face(:,1:3),node(:,1),node(:,2),node(:,3));
 else
-	hb=trisurf(bound(:,1:3),node(:,1),node(:,2),node(:,3));
+	hb=trisurf(face(:,1:3),node(:,1),node(:,2),node(:,3));
 	set(hb,'facealpha',0.7)
 end
 axis equal
