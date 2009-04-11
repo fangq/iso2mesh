@@ -1,11 +1,19 @@
-function tri=surfedge(f)
+function openedge=surfedge(f)
+% openedge=surfedge(f)
+%
 % surfedge: find the edge of an open surface
+%
 % author: fangq (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
 %
 % parameters:
 %      v: input, surface node list, dimension (nn,3)
 %      f: input, surface face element list, dimension (be,3)
+% output:
+%      openedge: list of edges of the specified surface
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 edges=[f(:,[1,2]);
        f(:,[2,3]);
@@ -21,5 +29,5 @@ else
 	vec=histc(jx,1:max(jx));
 	qx=find(vec==1);
 end
-tri=edges(ix(qx),:);
+openedge=edges(ix(qx),:);
 % node4=node4(ix(qx));

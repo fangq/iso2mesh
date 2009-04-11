@@ -1,13 +1,19 @@
 function newedge=orderloopedge(edge)
 % [newedge]=orderloopedge(edge)
+%
 % order the node list of a simple loop based on connection sequence
+%
 % author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
 % date:   2008/05
 %
-% inputs: 
+% input: 
 %        edge: a loop consisted by a sequence of edges, each row 
 %              is an edge with two integers: start/end node index
+% output:
 %        newedge: reordered edge node list
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 % this subroutine can not process bifercation
 

@@ -1,5 +1,8 @@
 function [conn,connnum,count]=meshconn(elem,nn)
+% [conn,connnum,count]=meshconn(elem,nn)
+%
 % meshconn: create node neighbor list from a mesh
+%
 % author: fangq (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
 %
@@ -10,6 +13,9 @@ function [conn,connnum,count]=meshconn(elem,nn)
 %           contains a list of all neighboring node ID for node n
 %    connnum: vector of length nn, denotes the neighbor number of each node
 %    count: total neighbor numbers
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 conn=cell(nn,1);
 dim=size(elem);

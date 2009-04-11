@@ -13,6 +13,9 @@ function [node,elem]=meshcheckrepair(node,elem,opt)
 %            'duplicated': remove duplicated elements
 %            'isolated': remove isolated nodes
 %            'deep': call external jmeshlib to remove non-manifold vertices
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 if(nargin<3 || strcmp(opt,'duplicated'))
     l1=length(elem);

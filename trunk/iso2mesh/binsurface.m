@@ -2,7 +2,8 @@ function [node,elem]=binsurface(img,nface)
 % [node,elem]=binsurface(img,nface)
 %
 % fast isosurface extraction from 3D binary images
-%   by Qianqian Fang, <fangq at nmr.mgh.harvard.edu>
+%
+% author: Qianqian Fang, <fangq at nmr.mgh.harvard.edu>
 %
 % parameters: 
 %   img:  a 3D binary image

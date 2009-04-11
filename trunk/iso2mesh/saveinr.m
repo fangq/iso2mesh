@@ -1,11 +1,17 @@
 function saveinr(vol,fname)
+% saveinr(vol,fname)
+%
 % savesmf: save a surface mesh to INR Format
+%
 % author: fangq (fangq<at> nmr.mgh.harvard.edu)
 % date: 2009/01/04
 %
 % parameters:
 %      vol: input, a binary volume
 %      fname: output file name
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 fid=fopen(fname,'wb');
 if(fid==-1)

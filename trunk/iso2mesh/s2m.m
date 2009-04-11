@@ -1,5 +1,6 @@
 function [node,elem,face]=s2m(v,f,keepratio,maxvol)
 %   [node,elem,face]=s2m(v,f,keepratio,maxvol)
+%
 %   short-hand version of surf2mesh
 %
 %   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)

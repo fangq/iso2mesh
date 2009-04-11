@@ -1,4 +1,18 @@
 function flag=deletemeshfile(fname)
+% flag=deletemeshfile(fname)
+%
+% delete a given work mesh file under the working directory
+%
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+%
+% input: 
+%     fname: specified file name (without path)
+% output:
+%     flag: not used
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
+
 try
     if(exist(mwpath(fname))) 
 	delete(mwpath(fname)); 

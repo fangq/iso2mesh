@@ -1,6 +1,8 @@
 function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes)
 % [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes)
+%
 % surf2mesh - create quality volumetric mesh from isosurface patches
+%
 % author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/24
 %
@@ -11,6 +13,8 @@ function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes)
 %      p1: input, coordinates of the other corner of the bounding box, p1=[x1 y1 z1]
 %      keepratio: input, percentage of elements being kept after the simplification
 %      maxvol: input, maximum tetrahedra element volume
+%      regions: list of regions, specifying by an internal point for each region
+%      holes: list of holes, similar to regions
 %
 % outputs:
 %      node: output, node coordinates of the tetrahedral mesh

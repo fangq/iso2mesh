@@ -1,7 +1,10 @@
 function eid=getintersecttri(tmppath)
 % eid=getintersecttri(tmppath)
+%
 % get the IDs of self-intersecting elements from tetgen
 % call this when tetgen complains about self-intersection
+%
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 %
 % input: 
 %   tmppath: working dir, use mwpath('') in most cases
@@ -9,6 +12,9 @@ function eid=getintersecttri(tmppath)
 %   eid: an array of all intersecting surface elements, 
 %     one can read the corresponding node/elem by
 %     [no,el]=readoff(mwpath('post_vmesh.off'));
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 [status,str] = system(['"' mcpath('tetgen') getexeext '" -d "' ...
                         tmppath filesep 'post_vmesh.poly"']);

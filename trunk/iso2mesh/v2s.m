@@ -1,10 +1,10 @@
 function [no,el,regions,holes]=v2s(img,isovalues,opt,maxvol,method)
-%   [node,elem,face]=v2s(img,isovalues,opt,maxvol,method)
-%   short-hand version of vol2surf
+% [node,elem,face]=v2s(img,isovalues,opt,maxvol,method)
+% short-hand version of vol2surf
 %
-%   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
 %
-%   inputs and outputs are similar to those defined in vol2surf
+% inputs and outputs are similar to those defined in vol2surf
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %

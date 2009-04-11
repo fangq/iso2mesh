@@ -1,4 +1,20 @@
 function fnew=removeisolatedsurf(v,f,maxdiameter)
+% fnew=removeisolatedsurf(v,f,maxdiameter)
+%
+% remove disjointed surface fragment by using mesh diameter
+%
+% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+%
+% input:
+%    v: list of nodes of the input surface
+%    f: list of triangles of the input surface
+%    maxdiameter: maximum bounding box size for surface removal
+% ouput:
+%    fnew: new face list after removing the components smaller than 
+%          maxdiameter
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 fc=finddisconnsurf(f);
 for i=1:length(fc)

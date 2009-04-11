@@ -1,10 +1,11 @@
 function [node,elem,face]=v2m(img,isovalues,opt,maxvol,method)
-%   [node,elem,face]=v2m(img,isovalues,opt,maxvol,method)
-%   short-hand version of vol2mesh
+% [node,elem,face]=v2m(img,isovalues,opt,maxvol,method)
 %
-%   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% short-hand version of vol2mesh
 %
-%   inputs and outputs are similar to those defined in vol2mesh
+% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+%
+% inputs and outputs are similar to those defined in vol2mesh
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %

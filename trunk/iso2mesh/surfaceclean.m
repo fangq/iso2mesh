@@ -1,6 +1,9 @@
 function f=surfaceclean(f,v)
+% f=surfaceclean(f,v)
+%
 % surfaceclean: remove surface patches that are located inside 
 %               the bounding box faces
+%
 % author: fangq (fangq<at> nmr.mgh.harvard.edu)
 % date: 2008/04/08
 %
@@ -8,6 +11,9 @@ function f=surfaceclean(f,v)
 %      v: input, surface node list, dimension (nn,3)
 %      f: input, surface face element list, dimension (be,3)  
 %      f: output, faces free of those on the bounding box
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 pos=v;
 mi=min(pos);
 ma=max(pos);

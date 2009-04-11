@@ -1,5 +1,6 @@
 function imgdiff=imedge3d(binimg,isdiff)
 % imgdiff=imedge3d(binimg,isdiff)
+%
 % Extract the boundary voxels from a binary image
 % 
 % Author: Aslak Grinsted <ag at glaciology.net>

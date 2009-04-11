@@ -1,14 +1,22 @@
 function savesurfpoly(v,f,holelist,regionlist,p0,p1,fname)
-% meshconn: create node neighbor list from a mesh
+% savesurfpoly(v,f,holelist,regionlist,p0,p1,fname)
+%
+% save a set of surfaces into poly format (for tetgen)
+%
 % author: fangq (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
 %
 % parameters:
 %      v: input, surface node list, dimension (nn,3)
 %      f: input, surface face element list, dimension (be,3)
-%      p0: input, coordinates of one corner of the bounding box, p0=[x0 y0 z0]
-%      p1: input, coordinates of the other corner of the bounding box, p1=[x1 y1 z1]
+%      holelist: list of holes, each hole is represented by an internal point
+%      regionlist: list of regions, similar to holelist
+%      p0: coordinate of one of the end of the bounding box
+%      p1: coordinate for the other end of the bounding box
 %      fname: output file name
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 if(size(f,2)==4)
     faceid=f(:,4);
     f=f(:,1:3);

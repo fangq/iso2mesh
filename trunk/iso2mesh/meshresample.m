@@ -1,8 +1,22 @@
 function [node,elem]=meshresample(v,f,keepratio)
 % [node,elem]=meshresample(v,f,elemnum)
 %
-% meshresample: resample mesh using CGAL mesh simplification code
-% by FangQ, 2007/11/21
+% meshresample: resample mesh using CGAL mesh simplification utility
+%
+% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% date: 2007/11/12
+%
+% input:
+%    v: list of nodes
+%    f: list of surface elements (each row for each triangle)
+%    keepratio: decimation rate, a number less than 1, as the percentage
+%               of the elements after the sampling
+% output:
+%    node: the node coordinates of the sampled surface mesh
+%    elem: the element list of the sampled surface mesh
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 exesuff=getexeext;
 if(strcmp(exesuff,'.mexa64')) % cgalsimp2.mexglx can be used for both

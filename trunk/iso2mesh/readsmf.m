@@ -1,6 +1,19 @@
 function [node,elem]=readsmf(fname)
+% [node,elem]=readsmf(fname)
+%
 % readsmf: read simple model format
-% by FangQ, 2007/11/21
+%
+% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% date: 2007/11/21
+%
+% input: 
+%    fname: name of the	SMF data file
+% output:
+%    node: node coordinates of the mesh
+%    elem: list of elements of the mesh
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 node=[];
 elem=[];
 fid=fopen(fname,'rt');

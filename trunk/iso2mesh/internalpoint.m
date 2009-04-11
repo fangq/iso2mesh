@@ -1,14 +1,21 @@
 function p=internalpoint(v,aloop)
+% p=internalpoint(v,aloop)
+%
 % internalpoint: imperical function to find an internal point
-%                of a planar polygon
+% of a planar polygon
+%
 % author: fangq (fangq<at> nmr.mgh.harvard.edu)
 % date: 2008/04/08
 %
-% parameters:   
+% input:   
 %    v:     x,y,z coordinates of each node of the mesh
 %    aloop:  input, a single vector separated by NaN, each segment
 %             is a close-polygon consisted by node IDs 
+% output:
 %    p:   output, [x y z] of an internal point of aloop
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 p=[];
 nd=v(aloop,:);
