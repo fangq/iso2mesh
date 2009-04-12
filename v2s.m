@@ -1,4 +1,4 @@
-function [no,el,regions,holes]=v2s(img,isovalues,opt,maxvol,method)
+function [no,el,regions,holes]=v2s(img,isovalues,opt,method)
 % [node,elem,face]=v2s(img,isovalues,opt,maxvol,method)
 % short-hand version of vol2surf
 %
@@ -9,4 +9,7 @@ function [no,el,regions,holes]=v2s(img,isovalues,opt,maxvol,method)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
+if(nargin==3)
+   method='cgalsurf';
+end
 [no,el,regions,holes]=vol2surf(img,1:size(img,1),1:size(img,2),1:size(img,3),opt,1,method,isovalues);
