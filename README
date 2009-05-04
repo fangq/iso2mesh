@@ -6,7 +6,7 @@
 :      Martinos Center for Biomedical Imaging
 :      Massachusetts General Hospital (Harvard Medical School)
 :      Bldg. 149, 13th St., Charlestown, MA 02148
-'''Version''': 0.7.9-1 (Hotpot)
+'''Version''': 0.8.0 (Hotpot)
 '''License''': GPL v2 or later (see COPYING) 
 :      (this license does not cover the binaries in the bin/ 
 :       directory, see section III for more details)
@@ -51,7 +51,10 @@ extraction or boundary extraction.
 === # Streamlined Mesh Generation (wrapper) ===
 
 ==== vol2mesh.m ====
-function [node,elem,bound]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix)
+function [node,elem,bound]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalues)
+  or
+function [node,elem,face]=v2m(img,isovalues,opt,maxvol,method)
+
    convert a binary (or multi-valued) volume to tetrahedral mesh
    author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
    inputs: 
@@ -60,13 +63,21 @@ function [node,elem,bound]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix)
           opt: see vol2surf 
           maxvol: target maximum tetrahedral elem volume
           dofix: 1: perform mesh validation&repair, 0: skip repairing
+          method: see vol2surf
+          isovalues: extract level-sets at the specified isovalues and
+                fill the volume in-between; if not specified, will use all
+                distinct labels in the image.
+   outputs:
           node: output, node coordinates of the tetrahedral mesh
           elem: output, element list of the tetrahedral mesh
           bound: output, mesh surface element list of the tetrahedral mesh
                the last column denotes the boundary ID
 
 ==== vol2surf.m ====
-function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method)
+function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
+  or
+function [no,el,regions,holes]=v2s(img,isovalues,opt,method)
+
    converting a 3D volumetric image to surfaces
    author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
    inputs:
@@ -95,6 +106,9 @@ function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method)
 		  - if method is 'cgalsurf', iso2mesh will call the surface
 		    extraction program from CGAL to make surface mesh
 		  - if method is not specified, 'cgalsurf' is assumed by default
+          isovalues: extract level-sets at the specified isovalues and
+                fill the volume in-between; if not specified, will use all
+                distinct labels in the image.
    outputs:
 	  no:  list of nodes on the resulting suface mesh, 3 columns for x,y,z
 	  el:  list of trianglular elements on the surface, [n1,n2,n3,region_id]
@@ -103,6 +117,9 @@ function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method)
 
 ==== surf2mesh.m ====
 function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol)
+  or
+function [node,elem,face]=s2m(v,f,keepratio,maxvol)
+
    surf2mesh - create quality volumetric mesh from isosurface patches
    author: fangq (fangq<at> nmr.mgh.harvard.edu)
    parameters:
