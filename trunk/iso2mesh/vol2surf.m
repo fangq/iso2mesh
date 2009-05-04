@@ -69,12 +69,27 @@ if(~isempty(img))
         maxlevel=max(newimg(:));
         isovalues=1:maxlevel;
     else
+        isovalues=unique(sort(isovalues));
         maxlevel=length(isovalues);
     end
-    isovalues=unique(sort(isovalues));
 
     % to accelerate the boundary field calculation
     bfield=imedge3d(newimg);
+    if(any(bfield(:))) 
+      for i=1:maxlevel
+        if(i<maxlevel)
+            levelmask=(newimg>=isovalues(i) & newimg<isovalues(i+1));
+        else
+            levelmask=(newimg>=isovalues(i));
+        end
+        idx=find(levelmask);
+
+        bb=zeros(size(newimg));
+        bb(idx)=1;
+        bfield=(imedge3d(bb) | bfield);
+        clear bb;
+      end
+    end
 
     % create region list. To do this, we need to find an interior point
     % for each region, and make sure this point is not close to the 
@@ -140,13 +155,15 @@ if(~isempty(img))
           else radbound=opt;  end;
 
           maxsurfnode=40000;  % maximum node numbers for each level
-          if(isstruct(opt) & length(opt)==maxlevel & isfield(opt(i),'maxnode')) 
-              maxsurfnode=opt(i).maxnode;
-          elseif (isstruct(opt) & length(opt)==1 & isfield(opt(i),'maxnode')) 
-              maxsurfnode=opt.maxnode; 
+          if(isstruct(opt) & length(opt)==maxlevel) 
+              if(isfield(opt(i),'maxnode')) maxsurfnode=opt(i).maxnode; end
+          elseif (isstruct(opt) & length(opt)==1 )
+              if(isfield(opt(i),'maxnode')) 
+                 maxsurfnode=opt.maxnode; 
+              end
           end
 
-          [v0,f0]=vol2restrictedtri(newimg>(i-1),isovalues(i),regions(i,:),...
+          [v0,f0]=vol2restrictedtri(newimg,isovalues(i),regions(i,:),...
                      max(newdim)*max(newdim)*2,30,radbound,radbound,maxsurfnode);
         end
 
@@ -159,10 +176,18 @@ if(~isempty(img))
         end
 
         % if a transformation matrix/offset vector supplied, apply them
-        if(isstruct(opt) & length(opt)==maxlevel & isfield(opt(i),'A') & isfield(opt(i),'B')) 
-        v0=(opt(i).A*v0'+repmat(opt(i).B(:),1,size(v0,1)))';
-        elseif (isstruct(opt) & length(opt)==1 & isfield(opt,'A') & isfield(opt,'B')) 
-        v0=(opt.A*v0'+repmat(opt.B(:),1,size(v0,1)))';
+        length(opt)
+        maxlevel
+        isstruct(opt)
+
+        if(isstruct(opt) & length(opt)==maxlevel) 
+          if(isfield(opt(i),'A') & isfield(opt(i),'B'))
+            v0=(opt(i).A*v0'+repmat(opt(i).B(:),1,size(v0,1)))';
+          end
+        elseif (isstruct(opt) & length(opt)==1) 
+          if(isfield(opt,'A') & isfield(opt,'B'))
+            v0=(opt.A*v0'+repmat(opt.B(:),1,size(v0,1)))';
+          end
         end
 
         % if user specified holelist and regionlist, append them
