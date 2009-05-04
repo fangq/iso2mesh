@@ -40,7 +40,7 @@ end
 exesuff=getexeext;
 
 if(nargin<3 || strcmp(opt,'deep'))
-    deletemeshfile('post_sclean.off');
+    deletemeshfile(mwpath('post_sclean.off'));
     saveoff(node,elem,mwpath('pre_sclean.off'));
     system([' "' mcpath('meshfix') exesuff '" "' mwpath('pre_sclean.off') '" "' mwpath('post_sclean.off') '"']);
     [node,elem]=readoff(mwpath('post_sclean.off'));
