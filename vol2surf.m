@@ -120,7 +120,7 @@ if(~isempty(img))
               % pick the first 1 for all min points
               [idy,idz]=ind2sub([size(newimg,2),size(newimg,3)],idy(1));
               % because binsurface makes the bfield shift by 1 in all axes
-              disp([idx(1),idy,idz]-1);
+              disp(sprintf('region %d centroid : %d %d %d\n', i, [idx(1),idy,idz]-1));
               regions(end+1,:)=[idx(1),idy,idz]-1;
           end
       end

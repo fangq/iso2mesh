@@ -34,7 +34,7 @@ if(strcmp(exesuff,'.mexa64')) % cgalsurf.mexglx can be used for both
 end
 
 saveinr(vol,mwpath('pre_extract.inr'));
-deletemeshfile('post_extract.off');
+deletemeshfile(mwpath('post_extract.off'));
 system([' "' mcpath('cgalsurf') exesuff '" "' mwpath('pre_extract.inr') ...
     '" ' sprintf('%f %f %f %f %f %f %f %f %d ',thres,cent,brad,ang,radbound,distbound,maxnode) ...
     ' "' mwpath('post_extract.off') '"']);
