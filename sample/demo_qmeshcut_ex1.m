@@ -25,15 +25,19 @@ plane=[min(node(:,1)) min(node(:,2)) z0
 % plot your results
 
 figure;
-hsurf=trimesh(bound(:,1:3),node(:,1),node(:,2),node(:,3),'facecolor','none');
+hsurf=trimesh(face(:,1:3),node(:,1),node(:,2),node(:,3),'facecolor','none');
 hold on;
-hcut=patch('Vertices',cutpos,'Faces',facedata,'FaceVertexCData',cutvalue,'facecolor','interp');
+if(isoctavemesh)
+  hcut=patch('Faces',facedata,'Vertices',cutpos);
+else
+  hcut=patch('Faces',facedata,'Vertices',cutpos,'FaceVertexCData',cutvalue,'facecolor','interp');
+end
 %set(hcut, 'linestyle','none')
 axis equal;
 
 % qmeshcut can also cut a surface
 
-[bcutpos,bcutvalue,bcutedges]=qmeshcut(bound(:,1:3),node,node(:,1),plane);
+[bcutpos,bcutvalue,bcutedges]=qmeshcut(face(:,1:3),node,node(:,1),plane);
 [bcutpos,bcutedges]=removedupnodes(bcutpos,bcutedges);
 bcutloop=extractloops(bcutedges);
 
