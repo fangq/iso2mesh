@@ -176,9 +176,6 @@ if(~isempty(img))
         end
 
         % if a transformation matrix/offset vector supplied, apply them
-        length(opt)
-        maxlevel
-        isstruct(opt)
 
         if(isstruct(opt) & length(opt)==maxlevel) 
           if(isfield(opt(i),'A') & isfield(opt(i),'B'))
