@@ -58,7 +58,7 @@ saveoff(no,el(:,1:3),mwpath('post_vmesh.off'));
 savesurfpoly(no,el,holes,regions,p0,p1,mwpath('post_vmesh.poly'));
 
 % call tetgen to create volumetric mesh
-deletemeshfile('post_vmesh.1.*');
+deletemeshfile(mwpath('post_vmesh.1.*'));
 fprintf(1,'creating volumetric mesh from a surface mesh ...\n');
 system([' "', mcpath('tetgen'), exesuff,'" -A -q1.414a',num2str(maxvol), ' "' mwpath('post_vmesh.poly') '"']);
 %eval(['! tetgen',exesuff,' -d' ' post_vmesh.poly']);

@@ -24,7 +24,7 @@ if(strcmp(exesuff,'.mexa64')) % cgalsimp2.mexglx can be used for both
 end
 
 saveoff(v,f,mwpath('pre_remesh.off'));
-deletemeshfile('post_remesh.off');
+deletemeshfile(mwpath('post_remesh.off'));
 system([' "' mcpath('cgalsimp2') exesuff '" "' mwpath('pre_remesh.off') '" ' num2str(keepratio) ' "' mwpath('post_remesh.off') '"']);
 [node,elem]=readoff(mwpath('post_remesh.off'));
 [node,I,J]=unique(node,'rows');
