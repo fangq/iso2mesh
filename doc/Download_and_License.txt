@@ -1,4 +1,3 @@
-
    #[1]iso2mesh: a Matlab/Octave-based mesh generator
 
 How to obtain iso2mesh
@@ -17,65 +16,67 @@ How to obtain iso2mesh
 
 iso2mesh 0.7.9-1, beta codenamed Hotpot
 
-   Please download the latest v0.7.9-1 release at our [7]registration/download page. We are greatly
-   appreciated  if  you  can  tell  us  a  little  bit about you and your related research by
+   Please download the latest v0.7.9-1 release at our [7]registration/download page. We are
+   greatly appreciated if you can tell us a little bit about you and your related research by
    [8][registering your copy of iso2mesh].
 
 2. Download Development Snapshot from CVS (not fully tested)
 
-   If you want to get the latest development branch of iso2mesh, you can download it from our cvs.
-   First, make sure you have installed cvs client on your system. If you are using Debian-based
-   GNU/Linux systems (such as Ubuntu, Knoppix etc), you can install cvs by
+   If you want to get the latest development branch of iso2mesh, you can download it from our
+   cvs. First, make sure you have installed cvs client on your system. If you are using
+   Debian-based GNU/Linux systems (such as Ubuntu, Knoppix etc), you can install cvs by
  sudo apt-get install cvs
 
-   if you are using Redhat-based GNU/Linux systems (such as Fedora, CentOS etc), you can do this by
+   if you are using Redhat-based GNU/Linux systems (such as Fedora, CentOS etc), you can do
+   this by
  sudo yum install cvs
 
    If your operation system is Windows, we recommend you to install [9][TortoiseCVS].
 
 2.1. Anonymous CVS Access
 
-   This  project's CVS repository can be checked out through anonymous (pserver) CVS with the
-   following instruction set. The module you wish to check out must be specified as the modulename.
-   When prompted for a password for anonymous, simply press the Enter key.
+   This project's CVS repository can be checked out through anonymous (pserver) CVS with the
+   following instruction set. The module you wish to check out must be specified as the
+   modulename. When prompted for a password for anonymous, simply press the Enter key.
 
  cvs -d :pserver:anonymous@orbit.nmr.mgh.harvard.edu:/cvsroot/iso2mesh login
  cvs -d :pserver:anonymous@orbit.nmr.mgh.harvard.edu:/cvsroot/iso2mesh checkout iso2mesh
 
 2.2. Developer CVS Access via SSH
 
-   Only project developers can access the CVS tree via this method. SSH must be installed on your
-   client machine. Substitute modulename and developername with the proper values. Enter your site
-   password when prompted.
+   Only project developers can access the CVS tree via this method. SSH must be installed on
+   your client machine. Substitute modulename and developername with the proper values. Enter
+   your site password when prompted.
 
  export CVS_RSH=ssh
  cvs -d :ext:developername@orbit.nmr.mgh.harvard.edu:/cvsroot/iso2mesh checkout iso2mesh
 
 3. Important Note on Licenses
 
-   The iso2mesh toolbox is licensed under [10][GNU Public License (GPL)]. However, it included a
-   number of external tools (under bin/ directory) to perform certain functionalities by means of
-   [11][pipelines]. These external tools are subjected to their upstream licenses and are not
-   necessarily GPL (or GPL compatible). The complete list of these external commands and their
-   author info and licenses can be found from the [12][README page].
+   The iso2mesh toolbox is licensed under [10][GNU Public License (GPL)]. However, it included
+   a number of external tools (under bin/ directory) to perform certain functionalities by
+   means of [11][pipelines]. These external tools are subjected to their upstream licenses and
+   are not necessarily GPL (or GPL compatible). The complete list of these external commands
+   and their author info and licenses can be found from the [12][README page].
 
    Particularly, the 3D meshing tool, tetgen, is licensed under a non-free license: it can be
-   freely used, modified, redistributed only for research and academic purposes, any commercial
-   utility of tetgen requires a permission from its [13][original author]. iso2mesh calls tetgen in
-   the background to produce 3D mesh, that means if anyone needs to uses the 3D mesh produced by
-   iso2mesh in a commercial product, you MUST contact the author of tetgen to get permission.
-   Processing binary images and produce surfaces are not subject to this limitation.
+   freely used, modified, redistributed only for research and academic purposes, any
+   commercial utility of tetgen requires a permission from its [13][original author]. iso2mesh
+   calls tetgen in the background to produce 3D mesh, that means if anyone needs to uses the
+   3D mesh produced by iso2mesh in a commercial product, you MUST contact the author of tetgen
+   to get permission. Processing binary images and produce surfaces are not subject to this
+   limitation.
 
-   In additional to the licenses, if you use this tool in your research, we are greatly appreciated
-   if you can add iso2mesh to your references:
+   In additional to the licenses, if you use this tool in your research, we are greatly
+   appreciated if you can add iso2mesh to your references:
 
- Qianqian Fang, iso2mesh: a matlab-based 3D tetrahedral mesh generator, URL: [14]http://iso2mesh.so
-urceforge.net, 2008
+ Qianqian Fang, iso2mesh: a matlab-based 3D tetrahedral mesh generator, URL: [14]http://iso2mesh.sou
+rceforge.net, 2008
 
    or
 
  Qianqian Fang and David Boas, "Tetrahedral mesh generation from volumetric binary and
- gray-scale images," IEEE International Symposium on Biomedical Imaging 2009 (submitted)
+ gray-scale images," IEEE International Symposium on Biomedical Imaging 2009 (accepted)
 
    alternatively, you can cite [15][our papers that described this toolbox].
 

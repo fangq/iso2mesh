@@ -1,6 +1,6 @@
-----------------------------------------------------------
-=      Tetrahedral mesh generator from isosurfaces       =
-----------------------------------------------------------
+----------------------------------------------------------------------
+= iso2mesh: an image-based 3D surface and volumetric mesh generator  =
+----------------------------------------------------------------------
 
 '''Author''': Qianqian Fang <fangq at nmr.mgh.harvard.edu>
 :      Martinos Center for Biomedical Imaging
@@ -460,3 +460,8 @@ separatly at iso2mesh's website and retain their upstream licenses.
 Your acknowledgement of iso2mesh in your publications or 
 presentations would be greatly appreciated by the author of 
 this toolbox.
+
+Reference:
+
+*Qianqian Fang and David Boas, "Tetrahedral mesh generation from volumetric binary and \
+ gray-scale images," IEEE International Symposium on Biomedical Imaging 2009, Boston, USA
