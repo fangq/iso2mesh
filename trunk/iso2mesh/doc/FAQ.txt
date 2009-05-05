@@ -1,0 +1,106 @@
+   #[1]iso2mesh: a Matlab/Octave-based mesh generator
+
+Frequently asked questions about iso2mesh
+
+          1. [2]I am getting a "Two subfaces ... are found intersecting
+          each other" error, what should I do?
+
+          2. [3]After mesh generation, the plotted surface looked messed
+          up, what was wrong?
+
+          3. [4]Matlab complains about imread, imclose or imfill missing
+
+          4. [5]iso2mesh failed when writing files to disk
+
+1. I am getting a "Two subfaces ... are found intersecting each other" error,
+what should I do?
+
+   This is the most frequently encountered problem using this toolbox.
+   There are three possible scenarios to cause this error:
+
+1. the volume you are trying to mesh contains regions whose boundaries
+intersect each other
+
+   This is mostly likely happening when you see the above error message.
+   Please investigate your image by plotting the slices, and pay attention
+   to any voxels whose neighbors have more than 2 different values. If you
+   do see these type of voxels, unfortunately, iso2mesh can not handle
+   this situation at this point. Here are two possible solutions:
+    1. if these type of voxels are not many, you can manually edit your
+       image and disconnect the regions that share the same boundary and
+       make sure all the sub-regions are either completely disjointed, or
+       completely enclosed by another.
+    2. merge the regions that have conflict boundaries, and mesh the
+       resulting merged image; after you get the tetrahedra, compute the
+       centroid of each element in the merged domain (by their labels),
+       and map them back to your original segmented image; determine the
+       original region id using the voxel contain your centroid.
+
+   Any suggestions to enable iso2mesh to handle this kind of situation is
+   also appreciated.
+
+2. you are using 'simplify' method to mesh a complex domain
+
+   There are two methods for volume to surface conversion, 'simplify' and
+   'cgalsurf'. The second method always returns a well-posed surface where
+   no self-intersecting elements present. However, the 'simplify' approach
+   does not. The default method for vol2mesh/vol2surf (v2m/v2s) is
+   'cgalsurf'. If you have to use 'simplify', you may have to try
+   different surface density for the surface extraction, and you may by
+   lucky to find a working configuration, but very difficult. Please use
+   'cgalsurf' whenever possible.
+
+3. your surface mesh is too coarse and cause intersection for closed
+interfaces
+
+   The mesh extraction does not exactly preserve the node position on the
+   interface. If you are meshing a very thin layer with two
+   small-separation surfaces, the resulting surface may intersect each
+   other if your surface element is too large. Please use a small
+   opt.radbound number to run the mesh generation again.
+
+2. After mesh generation, the plotted surface looked messed up, what was
+wrong?
+
+   It is very likely you incorrectly used the output variables. The output
+   of vol2mesh or surf2mesh include elem: the tetrahedral element indices,
+   and face: the surface triangle indices. But be careful, both of these
+   two arrays have an additional column. The last column is a label field,
+   indicating the origin (sub-region) of the elements. You should never
+   use the last columns of these two arrays for plotting. To make a
+   correct surface plot, you should use something like
+ trisurf(face(:,1:3),node(:,1),node(:,2),node(:,3));
+
+   and don't use the full face array as the first parameter.
+
+3. Matlab complains about imread, imclose or imfill missing
+
+   Under the sample/ directory, demo_vol2mesh_ex2.m requires imread, which
+   is a build-in function in matlab, but not in octave. You have to
+   install octave-image via apt-get or yum first. In example
+   demo_vol2mesh_ex3.m, functions imclose and imfill are needed. These two
+   functions can only be found in matlab's image processing toolbox. If
+   you don't have this toolbox installed (of course, it is not free), you
+   can simply pass this example. For octave, unfortunately, these
+   functions do not exist yet, and hopefully someone can fill them in
+   soon.
+
+4. iso2mesh failed when writing files to disk
+
+   If you are working on a multi-user workstation, and multiple users were
+   using iso2mesh, some temporary files may have a conflict in read/write
+   permission under /tmp directory. If user A runs iso2mesh first, and
+   user B will get this error, because iso2mesh fails to create the
+   temporary files as it does not have the permissions to overwrite those
+   files created by A. To solve this issue, please define your own
+   temporary folder, or set your session id, you can find more info at
+   [6]Advanced page.
+
+References
+
+   1. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=rss
+   2. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#I_am_getting_a_Two_subfaces_are_found_intersecting_each_other_error_what_should_I_do
+   3. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#After_mesh_generation_the_plotted_surface_looked_messed_up_what_was_wrong
+   4. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#Matlab_complains_about_imread_imclose_or_imfill_missing
+   5. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#iso2mesh_failed_when_writing_files_to_disk
+   6. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Advanced
