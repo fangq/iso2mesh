@@ -30,6 +30,7 @@ nn=size(node,1);
 nontype1=1:nn;
 nontype1(type1)=[];
 ninner=length(nontype1);
+updateflag=zeros(ninner,1);
 
 if(strcmp(opt,'grad'))
     for i=1:iter

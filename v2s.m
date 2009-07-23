@@ -1,5 +1,5 @@
 function [no,el,regions,holes]=v2s(img,isovalues,opt,method)
-% [node,elem,face]=v2s(img,isovalues,opt,maxvol,method)
+% [no,el,regions,holes]=v2s(img,isovalues,opt,method)
 % short-hand version of vol2surf
 %
 % author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
