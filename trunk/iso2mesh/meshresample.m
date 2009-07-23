@@ -27,6 +27,12 @@ saveoff(v,f,mwpath('pre_remesh.off'));
 deletemeshfile(mwpath('post_remesh.off'));
 system([' "' mcpath('cgalsimp2') exesuff '" "' mwpath('pre_remesh.off') '" ' num2str(keepratio) ' "' mwpath('post_remesh.off') '"']);
 [node,elem]=readoff(mwpath('post_remesh.off'));
+if(length(node)==0)
+    error(['Your input mesh contains topological defects, and the ',...
+           'mesh resampling utility aborted during processing. Please ',...
+           'repair your input mesh with meshcheckrepair function first and ',...
+           'pass the repaired mesh to meshresample.'] );
+end
 [node,I,J]=unique(node,'rows');
 elem=J(elem);
 saveoff(node,elem,mwpath('post_remesh.off'));
