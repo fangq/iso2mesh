@@ -18,21 +18,30 @@ function [node,elem]=meshresample(v,f,keepratio)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-exesuff=getexeext;
-if(strcmp(exesuff,'.mexa64')) % cgalsimp2.mexglx can be used for both
-	exesuff='.mexglx';
-end
+[node,elem]=domeshsimplify(v,f,keepratio);
 
-saveoff(v,f,mwpath('pre_remesh.off'));
-deletemeshfile(mwpath('post_remesh.off'));
-system([' "' mcpath('cgalsimp2') exesuff '" "' mwpath('pre_remesh.off') '" ' num2str(keepratio) ' "' mwpath('post_remesh.off') '"']);
-[node,elem]=readoff(mwpath('post_remesh.off'));
 if(length(node)==0)
-    error(['Your input mesh contains topological defects, and the ',...
-           'mesh resampling utility aborted during processing. Please ',...
-           'repair your input mesh with meshcheckrepair function first and ',...
-           'pass the repaired mesh to meshresample.'] );
+    warning(['Your input mesh contains topological defects, and the ',...
+           'mesh resampling utility aborted during processing. Now is2mesh ',...
+           'is trying to repair your mesh with meshcheckrepair. ',...
+           'You can also call this manually before passing your mesh to meshresample.'] );
+    [vnew,fnew]=meshcheckrepair(v,f);
+    [node,elem]=domeshsimplify(vnew,fnew,keepratio);
 end
 [node,I,J]=unique(node,'rows');
 elem=J(elem);
 saveoff(node,elem,mwpath('post_remesh.off'));
+
+end
+
+% function to perform the actual resampling
+function [node,elem]=domeshsimplify(v,f,keepratio)
+  exesuff=getexeext;
+  if(strcmp(exesuff,'.mexa64')) % cgalsimp2.mexglx can be used for both
+        exesuff='.mexglx';
+  end
+  saveoff(v,f,mwpath('pre_remesh.off'));
+  deletemeshfile(mwpath('post_remesh.off'));
+  system([' "' mcpath('cgalsimp2') exesuff '" "' mwpath('pre_remesh.off') '" ' num2str(keepratio) ' "' mwpath('post_remesh.off') '"']);
+  [node,elem]=readoff(mwpath('post_remesh.off'));
+end
