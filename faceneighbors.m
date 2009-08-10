@@ -1,4 +1,26 @@
 function facenb=faceneighbors(t,opt)
+% facenb=faceneighbors(t,opt)
+%
+% to find 4 face-neighboring elements of a tetrahedron
+%
+% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+%
+% input:
+%     t: tetrahedron element list, 4 columns of integers
+%     opt: if opt='surface', return boundary triangle list 
+%          (should be the same as the face output from v2m)
+%
+%          otherwise, return the element list for each element:
+%          each row contains 4 numbers, representing the element
+%          indices sharing triangular faces [1 2 3],[1 2 4],[1 3 4]
+%          and [2 3 4] in order, where 1~4 is the node local index.
+%          if the index is 0, indicating the face has no neighbor
+%          (i.e. a boundary face)
+% output:
+%     facenb: see opt
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 faces=[t(:,[1,2,3]);
        t(:,[1,2,4]);
@@ -13,8 +35,6 @@ else
         vec=histc(jx,1:max(jx));
         qx=find(vec==2);
 end
-%vec=histc(jx,1:max(jx));
-%qx=find(vec==2);  % duplicate only twice
 
 nn=max(t(:));
 ne=size(t,1);
@@ -26,7 +46,7 @@ facenb=zeros(size(t));
 % give me the second. There will be no more than 2
 
 % doing this is 60 times faster than doing find(jx==qx(i))
-% inside the loop
+% inside a loop
 
 [ujx,ii]=unique(jx,'first');
 [ujx,ii2]=unique(jx,'last');
