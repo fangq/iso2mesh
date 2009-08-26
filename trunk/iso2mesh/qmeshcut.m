@@ -27,10 +27,10 @@ function [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,plane)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-% get the x,y,z of the 3 input points
+% get the coefficients of the plane equation: ax+by+cz+d=0
 [a,b,c,d]=getplanefrom3pt(plane);
 
-% compute which side of the plane for each nodes in the mesh
+% compute which side of the plane for all nodes in the mesh
 co=repmat([a b c],size(node,1),1);
 dist=sum( (co.*node)' )+d;
 asign=dist;
@@ -39,11 +39,16 @@ asign(find(asign<0))=-1;
 
 % get all the edges of the mesh
 esize=size(elem,2);
-if(esize>=4)
+if(esize==4)
     edges=[elem(:,[1,2]);elem(:,[1,3]);elem(:,[1,4]);
            elem(:,[2,3]);elem(:,[2,4]);elem(:,[3,4])];
 elseif(esize==3)
     edges=[elem(:,[1,2]);elem(:,[1,3]);elem(:,[2,3])];
+elseif(esize==10)
+    edges=[elem(:,[1,5]);elem(:,[1,8]);elem(:,[1,7]);
+           elem(:,[2,5]);elem(:,[2,6]);elem(:,[2,9]);
+	   elem(:,[3,6]);elem(:,[3,7]);elem(:,[3,10]);
+	   elem(:,[4,8]);elem(:,[4,9]);elem(:,[4,10])];
 end
 
 % find all edges with two ends at the both sides of the plane
@@ -55,6 +60,9 @@ cutedges=find(edgemask==0);
 % calculate the distances of the two nodes, and use them as interpolation weight 
 cutweight=dist(edges(cutedges,:));
 totalweight=diff(cutweight');
+
+%caveat: if an edge is co-planar to the plane, then totalweight will be 0
+%        and dividing zero will cause trouble for cutweight
 
 cutweight=abs(cutweight./repmat(totalweight(:),1,2));
 
@@ -69,7 +77,11 @@ cutvalue=value(edges(cutedges,1),:).*repmat(cutweight(:,2),[1 size(value,2)])+..
 
 emap=zeros(size(edges,1),1);
 emap(cutedges)=1:length(cutedges);
-emap=reshape(emap,[size(elem,1),esize*(esize-1)/2]); % C^n_2
+if(esize==10)
+        emap=reshape(emap,[size(elem,1),12]); % 10-node element
+else
+	emap=reshape(emap,[size(elem,1),esize*(esize-1)/2]); % C^n_2
+end
 faceid=find(any(emap,2)==1);
 facelen=length(faceid);
 

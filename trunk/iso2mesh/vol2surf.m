@@ -164,7 +164,9 @@ if(~isempty(img))
           end
 
           [v0,f0]=vol2restrictedtri(newimg,isovalues(i),regions(i,:),...
-                     max(newdim)*max(newdim)*2,30,radbound,radbound,maxsurfnode);
+                     sum(newdim.*newdim)*2,30,radbound,radbound,maxsurfnode);
+        else
+            error('method can only be one of "cgalsurf" or "simplify".');
         end
 
         % if use defines maxsurf=1, take only the largest closed surface

@@ -47,8 +47,8 @@ if(~isempty(edges))
     for i=1:segnum     % walk through the edge loops
         subloop=loops(seg(i)+1:seg(i+1)-1);
         if(isempty(subloop)) continue; end
-        boxfacet=find(sum(abs(diff(v(subloop,:))))<1e-2); % find a flat loop
-        if(~isempty(boxfacet))   % if the loop is flat along x/y/z dir
+        boxfacet=find(sum(abs(diff(v(subloop,:))))<1e-8); % find a flat loop
+        if(length(boxfacet)==1)   % if the loop is flat along x/y/z dir
             bf=boxfacet(1);    % no degeneracy allowed
             if(sum(abs(v(subloop(1),bf)-p0(bf)))<1e-2)
                 loopcount(bf)=loopcount(bf)+1;
