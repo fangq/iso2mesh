@@ -31,7 +31,7 @@ if(nargin<3 || strcmp(opt,'isolated'))
     if(l2~=l1) fprintf(1,'%d isolated nodes were removed\n',l1-l2); end
 end
 
-if(nargin<3 || strcmp(opt,'open'))
+if(nargin==3 && strcmp(opt,'open'))
     eg=surfedge(elem);
     if(length(eg)>0) 
         error('open surface found, you need to enclose it by padding zeros around the volume');
