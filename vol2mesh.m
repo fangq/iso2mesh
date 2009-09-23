@@ -23,6 +23,13 @@ function [node,elem,face]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalue
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
+if(nargin>=8)
+	if(strcmp(method,'cgalmesh'))
+		[no,el,regions,holes]=cgalmehser(img,opt,maxvol);
+		return;
+	end
+end
+
 %first, convert the binary volume into isosurfaces
 if(nargin==8)
 	[no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method);
