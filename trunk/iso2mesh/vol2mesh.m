@@ -26,7 +26,7 @@ function [node,elem,face]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalue
 
 if(nargin>=8)
 	if(strcmp(method,'cgalmesh'))
-		[no,el,regions,holes]=cgalv2m(img(ix,iy,iz),opt,maxvol);
+		[node elem,face]=cgalv2m(img(ix,iy,iz),opt,maxvol);
 		return;
 	end
 end
