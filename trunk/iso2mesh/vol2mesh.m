@@ -11,6 +11,7 @@ function [node,elem,face]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalue
 %          dofix: 1: perform mesh validation&repair, 0: skip repairing
 %          method: 'cgalsurf' or omit: use CGAL surface mesher
 %                  'simplify': use binsurface and then simplify
+%                  'cgalmesh': use CGAL 3.5 3D mesher for direct mesh generation [new]
 %          isovalues: a list of isovalues where the levelset is defined
 %
 %   outputs:
@@ -25,7 +26,7 @@ function [node,elem,face]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalue
 
 if(nargin>=8)
 	if(strcmp(method,'cgalmesh'))
-		[no,el,regions,holes]=cgalmehser(img,opt,maxvol);
+		[no,el,regions,holes]=cgalv2m(img(ix,iy,iz),opt,maxvol);
 		return;
 	end
 end
