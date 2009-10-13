@@ -42,6 +42,8 @@ function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
+fprintf(1,'extracting surfaces from a volume ...\n');
+
 el=[];
 no=[];
 
@@ -224,4 +226,6 @@ if(isstruct(opt) & isfield(opt,'surf'))
         no=[no;opt.surf(i).node];
    end
 end
+
+fprintf(1,'surface mesh generation is complete\n');
 

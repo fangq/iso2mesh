@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   demo script for mesh generation from binarized volumetric image
+%   demo script for mesh generation from binary volumetric image
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% preparation
@@ -16,13 +16,13 @@ load sampleVol2Mesh.mat
 % A,b are registration matrix and vector, respectively
 %% perform mesh generation
 
-%% use the alternative 'simplify' method: first create voxel-based
-% surface mesh, and then resample it to desired density.
-% this method does not guarantee to be free of self-intersecting
-% element, as 'cgalsurf' promises.
+%% use the alternative 'cgalmesh' method. This will call 
+% cgalmesher to process labled volume to produce surfaces
+% and tetrahedral mesh in a single run.
 
 opt.radbound=2;
 [node,elem,face]=v2m(uint8(volimage),0.5,opt,100,'cgalmesh');
+
 
 %% visualize the resulting mesh
 

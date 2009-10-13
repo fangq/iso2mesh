@@ -8,9 +8,11 @@ function p=smoothsurf(node,mask,conn,iter,useralpha,usermethod,userbeta)
 %
 % input:
 %    node:  node coordinates of a surface mesh
-%    mask: of length of node number, =0 for internal nodes, =1 for edge nodes
+%    mask:  flag whether a node is movable: 0 movable, 1 non-movable
+%           if mask=[], it assumes all nodes are movable
 %    conn:  input, a cell structure of length size(node), conn{n}
-%           contains a list of all neighboring node ID for node n
+%           contains a list of all neighboring node ID for node n,
+%           this can be computed from meshconn function
 %    iter:  smoothing iteration number
 %    useralpha: scaler, smoothing parameter, v(k+1)=alpha*v(k)+(1-alpha)*mean(neighbors)
 %    usermethod: smoothing method, including 'laplacian','laplacianhc' and 'lowpass'
@@ -22,9 +24,13 @@ function p=smoothsurf(node,mask,conn,iter,useralpha,usermethod,userbeta)
 %
 
 p=node;
-idx=find(mask==0)';
-nn=length(idx);
-
+if(isempty(mask))
+    nn=size(node,1);
+    idx=1:nn;
+else
+    idx=find(mask==0)';
+    nn=length(idx);
+end
 alpha=0.5;
 method='laplacian';
 beta=0.5;
