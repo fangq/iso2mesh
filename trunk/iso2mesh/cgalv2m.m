@@ -29,6 +29,11 @@ function [node,elem,face]=cgalv2m(vol,opt,maxvol)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
+dtype=class(vol);
+if(~(islogical(vol) | strcmp(dtype,'uint8')))
+	error('cgalmesher can only handle uint8 volumes, you have to convert your array to unit8 first.');
+end
+
 exesuff=getexeext;
 if(strcmp(exesuff,'.mexa64')) % cgalmesh.mexglx can be used for both
 	exesuff='.mexglx';
