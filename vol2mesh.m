@@ -26,7 +26,16 @@ function [node,elem,face]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalue
 
 if(nargin>=8)
 	if(strcmp(method,'cgalmesh'))
-		[node elem,face]=cgalv2m(img(ix,iy,iz),opt,maxvol);
+		vol=img(ix,iy,iz);
+		if(length(unique(vol(:)))>64 & dofix==1)
+			error([ 'it appears that you are processing a ' ...
+                                'grayscale image. Currently cgalmesher ' ...
+                                'does not support grayscale images. ' ...
+                                'Please use "cgalsurf" method to mesh a grayscale ' ...
+                                'volume. If you are certain to run cgalmesher ' ...
+                                'on your data, please set dofix=0 and run this again.' ]);
+		end
+		[node elem,face]=cgalv2m(vol,opt,maxvol);
 		return;
 	end
 end
