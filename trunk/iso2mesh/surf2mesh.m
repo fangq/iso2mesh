@@ -25,6 +25,8 @@ function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
+fprintf(1,'generating tetrahedral mesh from closed surfaces ...\n');
+
 exesuff=getexeext;
 
 % first, resample the surface mesh with cgal
@@ -65,3 +67,6 @@ system([' "', mcpath('tetgen'), exesuff,'" -A -q1.414a',num2str(maxvol), ' "' mw
 
 % read in the generated mesh
 [node,elem,face]=readtetgen(mwpath('post_vmesh.1'));
+
+fprintf(1,'volume mesh generation is complete\n');
+

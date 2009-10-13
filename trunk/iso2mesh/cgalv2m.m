@@ -29,9 +29,11 @@ function [node,elem,face]=cgalv2m(vol,opt,maxvol)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
+fprintf(1,'creating surface and tetrahedral mesh from a multi-domain volume ...\n');
+
 dtype=class(vol);
 if(~(islogical(vol) | strcmp(dtype,'uint8')))
-	error('cgalmesher can only handle uint8 volumes, you have to convert your array to unit8 first.');
+	error('cgalmesher can only handle uint8 volumes, you have to convert your image to unit8 first.');
 end
 
 exesuff=getexeext;
@@ -65,3 +67,6 @@ if(~exist(mwpath('post_cgalmesh.mesh'),'file'))
     error(['output file was not found, something must have gone wrong when running command: \n',cmd]);
 end
 [node,elem,face]=readmedit(mwpath('post_cgalmesh.mesh'));
+
+fprintf(1,'surface and volume meshes complete\n');
+
