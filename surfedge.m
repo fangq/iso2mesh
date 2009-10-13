@@ -7,7 +7,6 @@ function openedge=surfedge(f)
 % date: 2007/11/21
 %
 % parameters:
-%      v: input, surface node list, dimension (nn,3)
 %      f: input, surface face element list, dimension (be,3)
 % output:
 %      openedge: list of edges of the specified surface
@@ -15,9 +14,18 @@ function openedge=surfedge(f)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-edges=[f(:,[1,2]);
-       f(:,[2,3]);
-       f(:,[1,3])];             % create all the edges
+if(size(f,2)==3)
+    edges=[f(:,[1,2]);
+           f(:,[2,3]);
+           f(:,[1,3])];             % create all the edges
+elseif(size(f,2)==4)
+    edges=[f(:,[1,2,3]);
+           f(:,[1,2,4]);
+           f(:,[1,3,4]);
+           f(:,[2,3,4])];             % create all the edges
+else
+    error('surfedge only support 2D and 3D elements');
+end
 % node4=[f(:,3);f(:,2);f(:,1)];   % node idx concatinated
 edges=sort(edges,2);
 [foo,ix,jx]=unique(edges,'rows');
