@@ -6,7 +6,7 @@
 :      Martinos Center for Biomedical Imaging
 :      Massachusetts General Hospital (Harvard Medical School)
 :      Bldg. 149, 13th St., Charlestown, MA 02148
-'''Version''': 0.8.0 (Hotpot)
+'''Version''': 0.9.0 (Tofu alpha)
 '''License''': GPL v2 or later (see COPYING) 
 :      (this license does not cover the binaries in the bin/ 
 :       directory, see section III for more details)
@@ -20,13 +20,13 @@
 
 "iso2mesh" is a Matlab/Octave-based mesh generation toolbox. 
 It contains a number of optimized mesh processing scripts 
-and interfaces with a number of free meshing tools, such as 
+and interfaces to several free meshing tools, such as 
 surface mesh simplifier and extraction utilities (based on 
 CGAL), tetgen, and mesh validation&repairing utility (based 
 on JMeshLib). Iso2mesh toolbox provides a simple yet powerful 
 way to create quality tetrahedral volumetric mesh directly 
-from 3D binary, segmented or gray-scale images such as those 
-from MRI or CT scans.
+from 3D binary, segmented or gray-scale images such as 
+MRI or CT scans.
 
 To be able to create volumetric finite-element mesh from 
 3D volumetric images is of great interest for researchers 
@@ -45,6 +45,13 @@ streamlined wrapper scripts to create 3D mesh with a
 fully automated process, or to call invidual subroutines 
 to perform specific meshing tasks, such as closed surface 
 extraction or boundary extraction.
+
+The details of this toolbox can be found in the following
+reference:
+
+*Qianqian Fang and David Boas, "Tetrahedral mesh generation from volumetric binary and \
+ gray-scale images," Proceedings of IEEE International Symposium on Biomedical Imaging \
+ (ISBI 2009), pp. 1142-1145, 2009
 
 
 == # List of functions ==
@@ -116,9 +123,9 @@ function [no,el,regions,holes]=v2s(img,isovalues,opt,method)
 	  holes:   list of interior points for all holes, [x,y,z]
 
 ==== surf2mesh.m ====
-function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol)
+function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol,method)
   or
-function [node,elem,face]=s2m(v,f,keepratio,maxvol)
+function [node,elem,face]=s2m(v,f,keepratio,maxvol,method)
 
    surf2mesh - create quality volumetric mesh from isosurface patches
    author: fangq (fangq<at> nmr.mgh.harvard.edu)
@@ -195,16 +202,22 @@ function f=surfaceclean(f,v)
         f: output, faces free of those on the bounding box
 
 ==== smoothsurf.m ====
-function nodenew=smoothsurf(node,mask,conn,iter,method)
+function nodenew=smoothsurf(node,mask,conn,iter,useralpha,usermethod,userbeta)
+or
+function nodenew=sms(node,face,iter,alpha)
+
    smoothsurf: smooth a surface mesh by 3 smoothing algorithms
    author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters:
+   input:
       node:  node coordinates of a surface mesh
       mask: of length of node number, =0 for internal nodes, =1 for edge nodes
       conn:  input, a cell structure of length size(node), conn{n}
              contains a list of all neighboring node ID for node n
       iter:  smoothing iteration number
-      method: 'laplacian','laplacianhc' and 'lowpass'
+      useralpha: scaler, smoothing parameter, v(k+1)=alpha*v(k)+(1-alpha)*mean(neighbors)
+      usermethod: smoothing method, including 'laplacian','laplacianhc' and 'lowpass'
+      userbeta: scaler, smoothing parameter, for 'laplacianhc'
+   output:
       nodenew: output, the smoothed node coordinates
 
 === # Mesh decomposition and query ===
@@ -417,17 +430,26 @@ and non-commertial uses only.
 gray-scale or binary 3D images
 *Source: it is a slightly modified version from Surface_mesher \
 example from CGAL 3.4
-*License: CGAL v3 library is licensed under LGPL v2.1 (Lesser \
-General Public License)
+*License: CGAL v3 core library is licensed under QPL (Q Public License) \
+other modules are under the Lesser General Public License (LGPL)
 *URL: http://www.cgal.org/Manual/3.3/doc_html/cgal_manual/Surface_mesher/Chapter_main.html
+
+=== bin/cgalmesh and bin/cgalpoly ===
+*Summary: cgalmesh and cgalpoly are utilities to produce surface \
+and volumetric meshes from a multi-valued volumetric image
+*Source: it is a slightly modified version from Mesh_3 \
+example from CGAL 3.5
+*License: CGAL v3 core library is licensed under QPL (Q Public License) \
+other modules are under the Lesser General Public License (LGPL)
+*URL: http://www.cgal.org/Manual/3.5/doc_html/cgal_manual/Mesh_3/Chapter_main.html
 
 === bin/cgalsimp2 ===
 
 *Summary: cgalsimp2 performs surface mesh simplification in iso2mesh.
 *Source: it is adapted from Surface_mesh_simplification example of CGAL library
-*License: CGAL v3 library is licensed under LGPL v2.1 (Lesser \
-General Public License)
-*URL: http://www.cgal.org/
+*License: CGAL v3 core library is licensed under QPL (Q Public License) \
+other modules are under the Lesser General Public License (LGPL)
+*URL: http://www.cgal.org/Manual/3.4/doc_html/cgal_manual/Surface_mesh_simplification/Chapter_main.html
 
 === bin/meshfix ===
 
@@ -459,9 +481,5 @@ separatly at iso2mesh's website and retain their upstream licenses.
 
 Your acknowledgement of iso2mesh in your publications or 
 presentations would be greatly appreciated by the author of 
-this toolbox.
-
-Reference:
-
-*Qianqian Fang and David Boas, "Tetrahedral mesh generation from volumetric binary and \
- gray-scale images," IEEE International Symposium on Biomedical Imaging 2009, Boston, USA
+this toolbox. The citation information can be found in the
+Introduction section.
