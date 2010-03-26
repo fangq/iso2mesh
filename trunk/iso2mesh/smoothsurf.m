@@ -66,7 +66,7 @@ elseif(strcmp(method,'laplacianhc'))
     for j=1:iter
         q=p;
         for i=1:nn
-            p(idx(i),:)=mean(node(conn{idx(i)},:));
+            p(idx(i),:)=mean(q(conn{idx(i)},:));
         end
         b=p-(alpha*node+ialpha*q);
         for i=1:nn
