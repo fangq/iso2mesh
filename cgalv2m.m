@@ -36,6 +36,10 @@ if(~(islogical(vol) | strcmp(dtype,'uint8')))
 	error('cgalmesher can only handle uint8 volumes, you have to convert your image to unit8 first.');
 end
 
+if(~any(vol))
+        error('no labeled regions found in the input volume.');
+end
+
 exesuff=getexeext;
 if(strcmp(exesuff,'.mexa64')) % cgalmesh.mexglx can be used for both
 	exesuff='.mexglx';
