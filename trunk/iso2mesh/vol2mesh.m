@@ -12,14 +12,22 @@ function [node,elem,face]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalue
 %          method: 'cgalsurf' or omit: use CGAL surface mesher
 %                  'simplify': use binsurface and then simplify
 %                  'cgalmesh': use CGAL 3.5 3D mesher for direct mesh generation [new]
+%
+%                  generally speaking, 'cgalmesh' is the most robust path
+%                  if you want to product meshes from binary or multi-region
+%                  volumes, however, its limitations include 1) only accept 
+%                  uint8 volume, and 2) can not extract meshes from gray-scale
+%                  volumes. If ones goal is to process a gray-scale volume,
+%                  he/she should use the 'cgalsurf' option. 'simplify' approach
+%                  is not recommended unless other options failed.
 %          isovalues: a list of isovalues where the levelset is defined
 %
 %   outputs:
 %          node: output, node coordinates of the tetrahedral mesh
 %          elem: output, element list of the tetrahedral mesh, the last 
-%               column is the region id
+%                column is the region ID
 %          face: output, mesh surface element list of the tetrahedral mesh
-%               the last column denotes the boundary ID
+%                the last column denotes the boundary ID
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
