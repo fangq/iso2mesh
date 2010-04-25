@@ -17,8 +17,17 @@ function p=smoothsurf(node,mask,conn,iter,useralpha,usermethod,userbeta)
 %    useralpha: scaler, smoothing parameter, v(k+1)=alpha*v(k)+(1-alpha)*mean(neighbors)
 %    usermethod: smoothing method, including 'laplacian','laplacianhc' and 'lowpass'
 %    userbeta: scaler, smoothing parameter, for 'laplacianhc'
+%
 % output:
 %    p: output, the smoothed node coordinates
+%
+% recommendations
+%    Based on [Bade2006], 'Lowpass' method outperforms 'Laplacian-HC' in volume
+%    preserving and both are significantly better than the standard Laplacian method
+%
+%    [Bade2006]  R. Bade, H. Haase, B. Preim, "Comparison of Fundamental Mesh 
+%                Smoothing Algorithms for Medical Surface Models," 
+%                Simulation and Visualization, pp. 289-304, 2006. 
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
@@ -58,7 +67,7 @@ nn=length(idx);
 if(strcmp(method,'laplacian'))
     for j=1:iter
         for i=1:nn
-            p(idx(i),:)=alpha*p(idx(i),:)+ialpha*mean(node(conn{idx(i)},:)); 
+            p(idx(i),:)=ialpha*p(idx(i),:)+alpha*mean(node(conn{idx(i)},:)); 
         end
         node=p;
     end
@@ -74,13 +83,15 @@ elseif(strcmp(method,'laplacianhc'))
         end
     end
 elseif(strcmp(method,'lowpass'))
+    beta=-1.02*alpha;
+    ibeta=1+1.02*alpha;
     for j=1:iter
         for i=1:nn
-            p(idx(i),:)=alpha*p(idx(i),:)+ialpha*mean(node(conn{idx(i)},:)); 
+            p(idx(i),:)=ialpha*node(idx(i),:)+alpha*mean(node(conn{idx(i)},:)); 
         end
         node=p;
         for i=1:nn
-            p(idx(i),:)=alpha*p(idx(i),:)-1.02*ialpha*(mean(node(conn{idx(i)},:))-p(idx(i),:)); 
+            p(idx(i),:)=ibeta *node(idx(i),:)+beta *mean(node(conn{idx(i)},:)); 
         end
         node=p;
     end
