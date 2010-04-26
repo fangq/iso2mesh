@@ -5,7 +5,7 @@
 ----------------------------------------------------------
 
 iso2mesh ChangeLog:
-2010/04/26 (1.0.0pre, codename: Toufu)
+2010/04/26 (0.9.0pre, codename: Toufu-beta)
         1. add surf2img, converting a closed surface to a binary volume
         2. fix deletemeshfile bug for Windows
         3. automatic repairing when meshresample fails
@@ -14,7 +14,7 @@ iso2mesh ChangeLog:
         6. added CGAL 3D polyhedral mesher as an alternative to tetgen
         7. corrected bugs in Laplacian-HC and Lowpass smoothing algorithms
         8. added sms.m as the shortcut for surfsmooth
-        9. added exporter for DXF and VRML mesh formats
+        9. added exporters for DXF and VRML mesh formats
 
 2009/05/04 (0.8.0, codename: Hotpot)
         1. added stopping criteria for cgalsurf surface extractor to 
@@ -31,8 +31,8 @@ iso2mesh ChangeLog:
            (thanks to Aslak Grinsted)
         9. many other minor fixes and cleaning
 
-2009/02/11 (0.7.9-1, codename: hotpot-beta)
-	      1. compiled all the binaries on Mac OS (PowerPC) and
+2009/02/11 (0.7.9-1, codename: Hotpot-beta)
+        1. compiled all the binaries on Mac OS (PowerPC) and
            tested on an Intel Mac
         2. recompiled all linux and windows binaries with optimized speed
            and reduced system dependencies
@@ -51,7 +51,7 @@ iso2mesh ChangeLog:
            finally work
 
 2008/12/27 (0.7.8, codename: Hotpot-alpha)
-	      1. try to handle the self-intersecting element problems, 
+        1. try to handle the self-intersecting element problems, 
            added getintersecttri.m to extract intesecting element IDs
         2. implemented Laplacian-HC and Low-pass filter mesh smoothing
            algorithms; unfortunately, they are not effective to remove the 
@@ -59,7 +59,7 @@ iso2mesh ChangeLog:
         3. sent email to CGAL list to ask advices to handle self-intersecting
            element.
 
-2008/12/05 (0.6.0, codename: quesadilla)
+2008/12/05 (0.6.0, codename: Quesadilla)
         1. iso2mesh is now compatible with GNU Octave.
         2. replaced matlab's isosurface by a home-made binsurface to produce
            well-behaved triangular or cubic surfaces from binary images
@@ -67,13 +67,13 @@ iso2mesh ChangeLog:
         4. updated tetgen binary for 64bit Linux (mexa64), which caused some crashes
         5. provided instructions when user encounters a "permission denied" error
 
-2008/11/08 (0.5.1, codename: footlong)
+2008/11/08 (0.5.1, codename: Footlong)
         1. added meshing tool binaries for Windows (95-vista)
         2. added meshing tool binaries for Mac OS
         3. tagged all bin/ files and binaries files in sample/
            with -kb option in the cvs
 
-2008/10/30 (0.5, alpha release, codename: footlong)
+2008/10/30 (0.5, alpha release, codename: Footlong)
         1. created a sourceforge project, pointing to 
            the project main page at orbit.
         2. wrote documents and polish file structures
