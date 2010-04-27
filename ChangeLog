@@ -15,6 +15,7 @@ iso2mesh ChangeLog:
         7. corrected bugs in Laplacian-HC and Lowpass smoothing algorithms
         8. added sms.m as the shortcut for surfsmooth
         9. added exporters for DXF and VRML mesh formats
+       10. added user name to the temporary files avoid permission conflict
 
 2009/05/04 (0.8.0, codename: Hotpot)
         1. added stopping criteria for cgalsurf surface extractor to 
