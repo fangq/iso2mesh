@@ -23,12 +23,27 @@ function tempname=mwpath(fname)
 p=getvarfrom('base','ISO2MESH_TEMP');
 session=getvarfrom('base','ISO2MESH_SESSION');
 
+username=getenv('USER'); % for Linux/Unix/Mac OS
+
+if(isempty(username))
+   username=getenv('UserName'); % for windows
+end
+
+if(~isempty(username))
+   username=['iso2mesh-' username];
+end
+
 tempname=[];
 if(isempty(p) | ~exist(p))
       if(isoctavemesh & tempdir=='\')
 		tempname=['.'  filesep session fname];
 	else
-		tempname=[tempdir filesep session fname];
+		tdir=tempdir;
+		if(~isempty(username))
+                    tdir=[tdir username filesep];
+                    if(exist(tdir)==0) mkdir(tdir); end
+                end
+		tempname=[tdir session fname];
 	end
 else
 	tempname=[p filesep session fname];
