@@ -1,4 +1,4 @@
-function savesurfpoly(v,f,holelist,regionlist,p0,p1,fname)
+function savesurfpoly(v,f,holelist,regionlist,p0,p1,fname,forcebox)
 % savesurfpoly(v,f,holelist,regionlist,p0,p1,fname)
 %
 % save a set of surfaces into poly format (for tetgen)
@@ -14,9 +14,18 @@ function savesurfpoly(v,f,holelist,regionlist,p0,p1,fname)
 %      p0: coordinate of one of the end of the bounding box
 %      p1: coordinate for the other end of the bounding box
 %      fname: output file name
+%      forcebox: 1: add bounding box, 0: automatic
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
+
+dobbx=0;
+if(nargin>=8)
+	dobbx=forcebox;
+end
+
+dobbx
+
 if(size(f,2)==4)
     faceid=f(:,4);
     f=f(:,1:3);
@@ -61,8 +70,15 @@ if(~isempty(edges))
             end
         end
     end
-    nn=size(v,1);
+end
 
+if(dobbx & isempty(edges))
+    bbxnum=6;
+    loopcount=zeros(bbxnum,1);	
+end
+
+if(dobbx|~isempty(edges))
+    nn=size(v,1);
     boxnode=[p0;p1(1),p0(2:3);p1(1:2),p0(3);p0(1),p1(2),p0(3);
               p0(1:2),p1(3);p1(1),p0(2),p1(3);p1;p0(1),p1(2:3)];
     boxelem=[
@@ -75,6 +91,7 @@ if(~isempty(edges))
 
     node=[v;boxnode];
 end
+
 node=[(0:size(node,1)-1)',node];
 
 fp=fopen(fname,'wt');
@@ -85,11 +102,11 @@ fprintf(fp,'#facet list\n%d 1\n',length(f)+bbxnum);
 elem=[3*ones(length(f),1),f-1,ones(length(f),1)];
 fprintf(fp,'1 0\n%d %d %d %d %d\n',elem');
 
-if(~isempty(edges))
+if(dobbx|~isempty(edges))
     for i=1:bbxnum
         fprintf(fp,'%d %d 1\n',1+loopcount(i),loopcount(i));
         fprintf(fp,'%d %d %d %d %d\n',boxelem(i,:));
-        if(loopcount(i) &~isempty(find(loopid==i)))
+        if(~isempty(edges) & loopcount(i) &~isempty(find(loopid==i)))
             endid=find(loopid==i);
             for k=1:length(endid)
                 j=endid(k);
