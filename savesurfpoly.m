@@ -24,8 +24,6 @@ if(nargin>=8)
 	dobbx=forcebox;
 end
 
-dobbx
-
 if(size(f,2)==4)
     faceid=f(:,4);
     f=f(:,1:3);
