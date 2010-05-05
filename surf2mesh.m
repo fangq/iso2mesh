@@ -1,5 +1,5 @@
-function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes)
-% [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes)
+function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox)
+% [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox)
 %
 % surf2mesh - create quality volumetric mesh from isosurface patches
 %
@@ -15,6 +15,7 @@ function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes)
 %      maxvol: input, maximum tetrahedra element volume
 %      regions: list of regions, specifying by an internal point for each region
 %      holes: list of holes, similar to regions
+%      forcebox: 1: add bounding box, 0: automatic
 %
 % outputs:
 %      node: output, node coordinates of the tetrahedral mesh
@@ -55,9 +56,15 @@ if(nargin==6)
 elseif(nargin==7)
 	holes=[];
 end
+
+dobbx=0;
+if(nargin>=9)
+	dobbx=forcebox;
+end
+
 % dump surface mesh to .poly file format
 saveoff(no,el(:,1:3),mwpath('post_vmesh.off'));
-savesurfpoly(no,el,holes,regions,p0,p1,mwpath('post_vmesh.poly'));
+savesurfpoly(no,el,holes,regions,p0,p1,mwpath('post_vmesh.poly'),dobbx);
 
 % call tetgen to create volumetric mesh
 deletemeshfile(mwpath('post_vmesh.1.*'));
