@@ -12,6 +12,7 @@ function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
 %            if method is 'cgalsurf':
 %              opt=a float number>1: max radius of the Delaunay sphere(element size) 
 %              opt.radbound: same as above, max radius of the Delaunay sphere
+%              opt.distbound: maximum deviation from the specified isosurfaces
 %              opt(1,2,...).radbound: same as above, for each levelset
 %            if method is 'simplify':
 %              opt=a float number<1: compression rate for surf. simplification
@@ -165,8 +166,15 @@ if(~isempty(img))
               end
           end
 
+	  distbound=radbound;
+          if(isstruct(opt) & length(opt)==maxlevel)
+              if(isfield(opt(i),'distbound')) distbound=opt(i).distbound; end
+          elseif (isstruct(opt) & length(opt)==1 )
+              if(isfield(opt(i),'distbound')) distbound=opt.distbound; end
+          end
+
           [v0,f0]=vol2restrictedtri(newimg,isovalues(i),regions(i,:),...
-                     sum(newdim.*newdim)*2,30,radbound,radbound,maxsurfnode);
+                     sum(newdim.*newdim)*2,30,radbound,distbound,maxsurfnode);
         else
             error('method can only be one of "cgalsurf" or "simplify".');
         end
