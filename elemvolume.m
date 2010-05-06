@@ -1,13 +1,13 @@
-function vol=elemvolume(elem,node,option)
-% vol=elemvolume(elem,node,option)
+function vol=elemvolume(node,elem,option)
+% vol=elemvolume(node,elem,option)
 %
 % calculate the volume for a list of simplexes
 % author: fangq (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
 %
 % input:
-%    elem:  element table of a mesh
 %    node:  node coordinates
+%    elem:  element table of a mesh
 %    option: if option='signed', the volume is the raw determinant,
 %            else, the results will be the absolute values
 %
