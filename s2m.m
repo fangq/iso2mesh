@@ -10,7 +10,7 @@ function [node,elem,face]=s2m(v,f,keepratio,maxvol)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-p0=min(v);
-p1=max(v);
+p0=min(v(:,1:3));
+p1=max(v(:,1:3));
 [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,[],[]);
 
