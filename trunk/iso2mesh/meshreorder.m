@@ -18,7 +18,7 @@ function newelem=meshreorder(node,elem)
 %
 
 % calculate the canonical volume of the element (can be a 2D or 3D)
-vol=elemvolume(elem,node,'signed');
+vol=elemvolume(node,elem,'signed');
 
 % make sure all elements are positive in volume
 idx=find(vol<0);
