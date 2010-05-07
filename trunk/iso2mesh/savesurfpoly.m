@@ -8,20 +8,23 @@ function savesurfpoly(v,f,holelist,regionlist,p0,p1,fname,forcebox)
 %
 % parameters:
 %      v: input, surface node list, dimension (nn,3)
+%         if v has 4 columns, the last column specifies mesh density near each node
 %      f: input, surface face element list, dimension (be,3)
 %      holelist: list of holes, each hole is represented by an internal point
 %      regionlist: list of regions, similar to holelist
 %      p0: coordinate of one of the end of the bounding box
 %      p1: coordinate for the other end of the bounding box
 %      fname: output file name
-%      forcebox: 1: add bounding box, 0: automatic
+%      forcebox: non-empty: add bounding box, []: automatic
+%                if forcebox is a 8x1 vector, it will be used to 
+%                specify max-edge size near the bounding box corners
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
 dobbx=0;
 if(nargin>=8)
-	dobbx=forcebox;
+	dobbx=~isempty(forcebox);
 end
 
 if(size(f,2)==4)
@@ -31,6 +34,12 @@ end
 
 edges=surfedge(f);
 bbxnum=0;
+
+nodesize=[];
+if(size(v,2)==4)
+   nodesize=v(:,4);
+   v=v(:,1:3);
+end
 node=v;
 if(~isempty(edges))
     loops=extractloops(edges);
@@ -138,3 +147,13 @@ if(size(regionlist,1))
 	end
 end
 fclose(fp);
+
+if(~isempty(nodesize))
+	if(size(nodesize,1)+size(forcebox)==size(node,1))
+		nodesize=[nodesize;forcebox(:)];
+	end
+	fid=fopen(regexprep(fname,'\.poly$','.mtr'),'wt');
+	fprintf(fid,'%d 1\n',size(nodesize,1));
+	fprintf(fid,'%f\n',nodesize);
+	fclose(fid);
+end

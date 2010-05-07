@@ -8,6 +8,7 @@ function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,for
 %
 % input parameters:
 %      v: input, isosurface node list, dimension (nn,3)
+%         if v has 4 columns, the last column specifies mesh density near each node
 %      f: input, isosurface face element list, dimension (be,3)
 %      p0: input, coordinates of one corner of the bounding box, p0=[x0 y0 z0]
 %      p1: input, coordinates of the other corner of the bounding box, p1=[x1 y1 z1]
@@ -33,7 +34,7 @@ exesuff=getexeext;
 % first, resample the surface mesh with cgal
 if(keepratio<1-1e-9)
 	fprintf(1,'resampling surface mesh ...\n');
-	[no,el]=meshresample(v,f,keepratio);
+	[no,el]=meshresample(v(:,1:3),f,keepratio);
 	el=unique(sort(el,2),'rows');
 
 	% then smooth the resampled surface mesh (Laplace smoothing)
@@ -63,13 +64,17 @@ if(nargin>=9)
 end
 
 % dump surface mesh to .poly file format
-saveoff(no,el(:,1:3),mwpath('post_vmesh.off'));
+saveoff(no(:,1:3),el(:,1:3),mwpath('post_vmesh.off'));
 savesurfpoly(no,el,holes,regions,p0,p1,mwpath('post_vmesh.poly'),dobbx);
 
+moreopt='';
+if(size(no,2)==4)
+   moreopt=[moreopt ' -m '];
+end
 % call tetgen to create volumetric mesh
 deletemeshfile(mwpath('post_vmesh.1.*'));
 fprintf(1,'creating volumetric mesh from a surface mesh ...\n');
-system([' "', mcpath('tetgen'), exesuff,'" -A -q1.414a',num2str(maxvol), ' "' mwpath('post_vmesh.poly') '"']);
+system([' "' mcpath('tetgen') exesuff '" -A -q1.414a' num2str(maxvol) ' ' moreopt ' "' mwpath('post_vmesh.poly') '"']);
 %eval(['! tetgen',exesuff,' -d' ' post_vmesh.poly']);
 
 % read in the generated mesh
