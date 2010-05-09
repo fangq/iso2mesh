@@ -149,7 +149,7 @@ end
 fclose(fp);
 
 if(~isempty(nodesize))
-	if(size(nodesize,1)+size(forcebox)==size(node,1))
+	if(size(nodesize,1)+size(forcebox(:),1)==size(node,1))
 		nodesize=[nodesize;forcebox(:)];
 	end
 	fid=fopen(regexprep(fname,'\.poly$','.mtr'),'wt');
