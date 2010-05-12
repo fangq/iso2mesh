@@ -18,13 +18,15 @@ function facecell=finddisconnsurf(f)
 facecell={};
 subset=[];
 while(length(f))
-    [ii,jj]=find(sum(ismember(f,f(1,:))')');
+	idx=reshape(ismember(f,f(1,:)), size(f));
+	[ii,jj]=find(sum(idx')');
 	while(length(ii)>0)
 		if(isempty(ii)) break; end
 		%ii=unique(ii);
 		subset(end+1:end+length(ii),:)=f(ii,:);
 		f(ii,:)=[];
-	        [ii,jj]=find(sum(ismember(f,subset)')');
+		idx=reshape(ismember(f,subset), size(f));
+	        [ii,jj]=find(sum(idx')');
 	end
 	if(length(subset))
 		facecell{end+1}=subset;

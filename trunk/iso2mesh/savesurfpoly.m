@@ -41,6 +41,7 @@ if(size(v,2)==4)
    v=v(:,1:3);
 end
 node=v;
+loopid=[];
 if(~isempty(edges))
     loops=extractloops(edges);
     if(length(loops)<3)
