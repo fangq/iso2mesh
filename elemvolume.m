@@ -36,7 +36,7 @@ for i=1:enum
     detmat=[node(elem(i,:),:)';ones(1,dim)];
     vol(i)=det(detmat);
 end
-if(nargin==3 & strcmp(option,'signed'))
+if(nargin==3 && strcmp(option,'signed'))
   vol=vol/prod(1:size(node,2));
 else
   vol=abs(vol)/prod(1:size(node,2));
