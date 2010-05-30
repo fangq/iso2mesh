@@ -21,10 +21,9 @@ function savesurfpoly(v,f,holelist,regionlist,p0,p1,fname,forcebox)
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
-
 dobbx=0;
 if(nargin>=8)
-	dobbx=~isempty(forcebox);
+	dobbx=~isempty(forcebox) & all(forcebox);
 end
 
 if(size(f,2)==4)
