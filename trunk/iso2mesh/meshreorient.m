@@ -1,5 +1,5 @@
-function newelem=meshreorder(node,elem)
-% newelem=meshreorder(node,elem)
+function newelem=meshreorient(node,elem)
+% newelem=meshreorient(node,elem)
 %
 % reorder nodes in a surface or tetrahedral mesh to ensure all
 % elements are oriented consistently
