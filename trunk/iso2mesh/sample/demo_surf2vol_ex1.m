@@ -22,7 +22,7 @@ zslice=15;
 xrange=0:dstep:mdim(1);
 yrange=0:dstep:mdim(2);
 zrange=0:dstep:mdim(3);
-img=surf2img(node,face(:,1:3),xrange,yrange,zrange);
+img=surf2vol(node,face(:,1:3),xrange,yrange,zrange);
 
 imagesc(squeeze(img(:,:,zslice))); % z=10
 

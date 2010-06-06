@@ -1,5 +1,5 @@
-function img=surf2imgz(node,face,xi,yi,zi)
-%   img=surf2imgz(node,face,xi,yi,zi)
+function img=surf2volz(node,face,xi,yi,zi)
+%   img=surf2volz(node,face,xi,yi,zi)
 %
 %   convert a triangular surface to a shell of voxels in a 3D image
 %   along the z-axis
