@@ -25,6 +25,9 @@ function [node,elem,face]=cgalv2m(vol,opt,maxvol)
 %               column is the region id
 %          face: output, mesh surface element list of the tetrahedral mesh
 %               the last column denotes the boundary ID
+%               note: each triangle will appear twice in the face list with each
+%                     one attaches to each side of the interface. one can remove
+%                     the redundant triangles by unique(face(:,1:3),'rows')
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %

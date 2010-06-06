@@ -20,10 +20,11 @@ end
 % this may take a few minutes for a 256x256x256 volume
 tic
 cleanimg=deislands3d(logical(head>0));
+cleanbrain=deislands3d(logical(brain>0));
 toc
 
 % add brain image as additional segment
-cleanimgfull=cleanimg+(brain>0);
+cleanimgfull=cleanimg+(cleanbrain>0);
 
 % create volumetric tetrahedral mesh from the two-layer 3D images
 % this may take another few minutes for a 256x256x256 volume
