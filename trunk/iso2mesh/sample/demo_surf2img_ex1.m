@@ -12,17 +12,23 @@ load sampleVol2Mesh.mat
 % first, generate a surface from the original image
 % similar to demo_shortcuts_ex1.m
 
-[node,face,regions,holes]=v2s(volimage,0.05,3);
+[node,face,regions,holes]=v2s(volimage,0.5,3);
+
+node=sms(node,face(:,1:3),3,0.5); % apply 3 mesh smoothing
 
 mdim=ceil(max(node)+1);
+dstep=0.25;
+zslice=15;
+xrange=0:dstep:mdim(1);
+yrange=0:dstep:mdim(2);
+zrange=0:dstep:mdim(3);
+img=surf2img(node,face(:,1:3),xrange,yrange,zrange);
 
-img=surf2img(node,face(:,1:3),0:0.5:mdim(1),0:0.5:mdim(2),0:0.5:mdim(3));
-
-imagesc(squeeze(img(:,:,20))); % z=10
+imagesc(squeeze(img(:,:,zslice))); % z=10
 
 hold on
 
-z0=10;
+z0=zslice*dstep;
 plane=[min(node(:,1)) min(node(:,2)) z0
        min(node(:,1)) max(node(:,2)) z0
        max(node(:,1)) min(node(:,2)) z0];
@@ -34,12 +40,12 @@ plane=[min(node(:,1)) min(node(:,2)) z0
 [bcutpos,bcutedges]=removedupnodes(bcutpos,bcutedges);
 bcutloop=extractloops(bcutedges);
 bcutloop(isnan(bcutloop))=[]; % there can be multiple loops, remove the separators
-plot(bcutpos(bcutloop,2)*2,bcutpos(bcutloop,1)*2,'w');
+plot(bcutpos(bcutloop,2)*(1/dstep),bcutpos(bcutloop,1)*(1/dstep),'w');
 
-if(0 & exist('imfill'))
+if(exist('imfill'))
    img2=imfill(img,'holes')+img;
    figure;
-   imagesc(squeeze(img2(:,:,20))); % z=10
+   imagesc(squeeze(img2(:,:,zslice))); % z=10
    hold on;
-   plot(bcutpos(bcutloop,2)*2,bcutpos(bcutloop,1)*2,'y.');
+   plot(bcutpos(bcutloop,2)*(1/dstep),bcutpos(bcutloop,1)*(1/dstep),'y--');
 end
