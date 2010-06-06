@@ -1,5 +1,5 @@
 function [node,elem]=meshresample(v,f,keepratio)
-% [node,elem]=meshresample(v,f,elemnum)
+% [node,elem]=meshresample(v,f,keepratio)
 %
 % meshresample: resample mesh using CGAL mesh simplification utility
 %

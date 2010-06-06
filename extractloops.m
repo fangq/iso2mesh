@@ -25,7 +25,7 @@ edges(1,:)=[];
 while(length(edges))
     idx=[find(edges(:,1)==loopend)',find(edges(:,2)==loopend)'];
 %    if(length(idx)>1) error('self intersecting curve is unsupported'); end
-%    if(length(idx)==1)
+    if(length(idx)==1)
         idx=idx(1);
         newend=setdiff(edges(idx,:),loopend);
         if(newend==loophead)
@@ -42,6 +42,6 @@ while(length(edges))
         end
         loopend=newend;
         edges(idx,:)=[];
-%    end
+    end
 end
     
