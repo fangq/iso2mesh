@@ -34,7 +34,10 @@ for i=1:layer
 	goodidx=find(nextidx>0 & nextidx<fulllen);
     % for all neighboring voxels, add a fraction from the non-0 voxels
     % problematic when running in parallel (racing)
-	vol(nextidx(goodidx))=vol(nextidx(goodidx))+weight*val(goodidx);
+    len=length(goodidx);
+    for j=1:len
+        vol(nextidx(goodidx(j)))=vol(nextidx(goodidx(j)))+weight*val(goodidx(j));
+    end
     % the above line may change the values of the non-zero voxels, recover
     % them
     vol(idx)=val(:,1);

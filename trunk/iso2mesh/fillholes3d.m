@@ -16,5 +16,5 @@ function resimg=fillholes3d(img,ballsize)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-resimg = imclose(img,strel('ball',ballsize));
+resimg = imclose(img,strel('ball',ballsize,2*ballsize));
 resimg = imfill(resimg,'holes');

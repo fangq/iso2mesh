@@ -73,6 +73,7 @@ if(size(no,2)==4)
 end
 % call tetgen to create volumetric mesh
 deletemeshfile(mwpath('post_vmesh.1.*'));
+deletemeshfile(mwpath('post_vmesh.mtr'));
 fprintf(1,'creating volumetric mesh from a surface mesh ...\n');
 system([' "' mcpath('tetgen') exesuff '" -A -q1.414a' num2str(maxvol) ' ' moreopt ' "' mwpath('post_vmesh.poly') '"']);
 %eval(['! tetgen',exesuff,' -d' ' post_vmesh.poly']);
