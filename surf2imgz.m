@@ -22,6 +22,7 @@ dx0=min(abs(diff(xi)));
 dx=dx0/2;
 dy0=min(abs(diff(yi)));
 dy=dy0/2;
+dz0=min(abs(diff(zi)));
 
 dl=sqrt(dx*dx+dy*dy);
 
@@ -50,8 +51,9 @@ for i=1:length(iz);
         pos(find(posx>length(xi) | posy>length(yi) | posx<=0|posy<=0), :)=[];
 
         if(length(pos)>0)
+            zz=floor(((zi(iz(i))-zi(1)))/dy0);
             for k=1:size(pos,1)
-                img(pos(k,1),pos(k,2),i)=1;
+                img(pos(k,1),pos(k,2),zz)=1;
             end
           %img(sub2ind(size(img),pos(:,1),pos(:,2),i*ones(size(pos,1),1)))=1;
         end

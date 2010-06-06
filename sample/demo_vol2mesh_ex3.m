@@ -18,9 +18,10 @@ end
 
 % fill holes in the head image and create the canonical binary volume
 % this may take a few minutes for a 256x256x256 volume
+fprintf(1,'fill the holes in the volumetric images...\n');
 tic
-cleanimg=deislands3d(logical(head>0));
-cleanbrain=deislands3d(logical(brain>0));
+cleanimg=fillholes3d(logical(head>0),10);
+cleanbrain=fillholes3d(logical(brain>0),10);
 toc
 
 % add brain image as additional segment
