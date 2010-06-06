@@ -1,5 +1,5 @@
-function img=surf2img(node,face,xi,yi,zi)
-%   img=surf2img(node,face,xi,yi,zi)
+function img=surf2vol(node,face,xi,yi,zi)
+%   img=surf2vol(node,face,xi,yi,zi)
 %
 %   convert a triangular surface to a shell of voxels in a 3D image
 %
@@ -14,7 +14,7 @@ function img=surf2img(node,face,xi,yi,zi)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-img=surf2imgz(node,face,xi,yi,zi);
-img=img | shiftdim(surf2imgz(node(:,[3 1 2]),face,zi,xi,yi),1);
-img=img | shiftdim(surf2imgz(node(:,[2 3 1]),face,yi,zi,xi),2);
+img=surf2volz(node,face,xi,yi,zi);
+img=img | shiftdim(surf2volz(node(:,[3 1 2]),face,zi,xi,yi),1);
+img=img | shiftdim(surf2volz(node(:,[2 3 1]),face,yi,zi,xi),2);
 
