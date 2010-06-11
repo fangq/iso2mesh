@@ -28,7 +28,7 @@ dl=sqrt(dx*dx+dy*dy);
 
 minz=min(node(:,3));
 maxz=max(node(:,3));
-iz=(histc([minz,maxz],zi));
+iz=hist([minz,maxz],zi);
 hz=find(iz);
 iz=hz(1):min(length(zi),hz(end)+1);
 

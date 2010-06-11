@@ -16,5 +16,19 @@ function resimg=fillholes3d(img,ballsize)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-resimg = imclose(img,strel(ones(ballsize,ballsize,ballsize)));
-resimg = imfill(resimg,'holes');
+if(ballsize)
+  resimg = imclose(img,strel(ones(ballsize,ballsize,ballsize)));
+else
+  resimg=img;
+end
+
+if(isoctavemesh)
+  if(~exist('bwfill'))
+    error('you need to install octave-image toolbox first');
+  end
+  for i=1:size(resimg,3)
+    resimg(:,:,i)=bwfill(resimg(:,:,i),'holes');
+  end
+else
+  resimg=imfill(resimg,'holes');
+end
