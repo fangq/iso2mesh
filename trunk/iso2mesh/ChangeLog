@@ -5,9 +5,9 @@
 ----------------------------------------------------------
 
 iso2mesh ChangeLog:
-2010/04/26 (0.9.0pre, codename: Toufu-beta)
-        1. add surf2img, converting a closed surface to a binary volume
-        2. fix deletemeshfile bug for Windows
+2010/06/10 (0.9.0pre, codename: Toufu-beta)
+        1. added surf2vol, converting a closed surface to a binary volume
+        2. fixed deletemeshfile bug for Windows
         3. automatic repairing when meshresample fails
         4. fast faceneighbors unit
         5. added CGAL 3D mesher for robust meshing of segmented volumes
@@ -16,6 +16,11 @@ iso2mesh ChangeLog:
         8. added sms.m as the shortcut for surfsmooth
         9. added exporters for DXF and VRML mesh formats
        10. added user name to the temporary files avoid permission conflict
+       11. added force-bounding-box option for surf2mesh
+       12. added nodevolume, elemvolume from FEMcore and meshreorient
+       13. added sortmesh to optimize node and element ordering
+       14. mesh refinement using the 4-th column of surface node
+       15. thining a volumetric binary image
 
 2009/05/04 (0.8.0, codename: Hotpot)
         1. added stopping criteria for cgalsurf surface extractor to 
