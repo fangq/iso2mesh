@@ -24,6 +24,7 @@ invol=1;
 if(nargin==2)
 	invol=isdiff;
 end
+binimg=logical(binimg);
 imgdiff=xor(binimg,binimg(:,:,[1 1:end-1]));
 imgdiff=imgdiff|xor(binimg,binimg(:,:,[2:end end]));
 imgdiff=imgdiff|xor(binimg,binimg(:,[1 1:end-1],:));
