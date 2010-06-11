@@ -96,15 +96,15 @@ if(~isempty(img))
 
     % create region list. To do this, we need to find an interior point
     % for each region, and make sure this point is not close to the 
-    % boundary (otherwise, after mesh simplification, it may move outside)
+    % boundary (otherwise, after mesh simplification, it may move to outside)
 
     % The trick is to use a bfield matrix, by smoothing it for a few iterations,
     % we will get a field with values related to the distances to the boundary; 
     % for each region we find the lowest field point as the interior point
 
-    % smooth bfield 3 times, this makes the min distance to the boundaries 3
+    % smooth bfield 4 times, this makes the min distance to the boundaries 4
     % voxels: I am assuming that the subsequent mesh-resample will not cause
-    % boundary changes more than 3 voxels, if it moved more, then increase this
+    % boundary changes more than 4 voxels, if it moved more, then increase this
     % number
 
     bfield=smoothbinvol(bfield,4);
@@ -173,7 +173,7 @@ if(~isempty(img))
               if(isfield(opt(i),'distbound')) distbound=opt.distbound; end
           end
 
-          [v0,f0]=vol2restrictedtri(newimg,isovalues(i),regions(i,:),...
+          [v0,f0]=vol2restrictedtri(newimg>=isovalues(i),0.5,regions(i,:),...
                      sum(newdim.*newdim)*2,30,radbound,distbound,maxsurfnode);
         else
             error('method can only be one of "cgalsurf" or "simplify".');
