@@ -161,7 +161,7 @@ if(~isempty(img))
           if(isstruct(opt) & length(opt)==maxlevel) 
               if(isfield(opt(i),'maxnode')) maxsurfnode=opt(i).maxnode; end
           elseif (isstruct(opt) & length(opt)==1 )
-              if(isfield(opt(i),'maxnode')) 
+              if(isfield(opt(1),'maxnode')) 
                  maxsurfnode=opt.maxnode; 
               end
           end
@@ -170,10 +170,10 @@ if(~isempty(img))
           if(isstruct(opt) & length(opt)==maxlevel)
               if(isfield(opt(i),'distbound')) distbound=opt(i).distbound; end
           elseif (isstruct(opt) & length(opt)==1 )
-              if(isfield(opt(i),'distbound')) distbound=opt.distbound; end
+              if(isfield(opt(1),'distbound')) distbound=opt.distbound; end
           end
 
-          [v0,f0]=vol2restrictedtri(newimg>=isovalues(i),0.5,regions(i,:),...
+          [v0,f0]=vol2restrictedtri(newimg,isovalues(i),regions(i,:),...
                      sum(newdim.*newdim)*2,30,radbound,distbound,maxsurfnode);
         else
             error('method can only be one of "cgalsurf" or "simplify".');

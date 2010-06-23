@@ -32,9 +32,9 @@ fprintf(1,'generating tetrahedral mesh from closed surfaces ...\n');
 exesuff=getexeext;
 
 % first, resample the surface mesh with cgal
-if(keepratio<1-1e-9)
+if(keepratio<1-1e-9 | ~iscell(f))
 	fprintf(1,'resampling surface mesh ...\n');
-	[no,el]=meshresample(v(:,1:3),f,keepratio);
+	[no,el]=meshresample(v(:,1:3),f(:,1:3),keepratio);
 	el=unique(sort(el,2),'rows');
 
 	% then smooth the resampled surface mesh (Laplace smoothing)
@@ -64,7 +64,9 @@ if(nargin>=9)
 end
 
 % dump surface mesh to .poly file format
-saveoff(no(:,1:3),el(:,1:3),mwpath('post_vmesh.off'));
+if(~iscell(el))
+	saveoff(no(:,1:3),el(:,1:3),mwpath('post_vmesh.off'));
+end
 deletemeshfile(mwpath('post_vmesh.mtr'));
 savesurfpoly(no,el,holes,regions,p0,p1,mwpath('post_vmesh.poly'),dobbx);
 
@@ -75,8 +77,13 @@ end
 % call tetgen to create volumetric mesh
 deletemeshfile(mwpath('post_vmesh.1.*'));
 fprintf(1,'creating volumetric mesh from a surface mesh ...\n');
-system([' "' mcpath('tetgen') exesuff '" -A -q1.414a' num2str(maxvol) ' ' moreopt ' "' mwpath('post_vmesh.poly') '"']);
-%eval(['! tetgen',exesuff,' -d' ' post_vmesh.poly']);
+
+cmdopt=getvarfrom('base','ISO2MESH_TETGENOPT');
+if(isempty(cmdopt))
+  system([' "' mcpath('tetgen') exesuff '" -A -q1.414a' num2str(maxvol) ' ' moreopt ' "' mwpath('post_vmesh.poly') '"']);
+else
+  system([' "' mcpath('tetgen') exesuff '" ' cmdopt ' "' mwpath('post_vmesh.poly') '"']);
+end
 
 % read in the generated mesh
 [node,elem,face]=readtetgen(mwpath('post_vmesh.1'));
