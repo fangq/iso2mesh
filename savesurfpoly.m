@@ -26,12 +26,16 @@ if(nargin>=8)
 	dobbx=~isempty(forcebox) & all(forcebox);
 end
 
-if(size(f,2)==4)
+if(~iscell(f) & size(f,2)==4)
     faceid=f(:,4);
     f=f(:,1:3);
 end
 
-edges=surfedge(f);
+if(~iscell(f))
+    edges=surfedge(f);
+else
+    edges=[];
+end
 bbxnum=0;
 
 nodesize=[];
@@ -105,9 +109,69 @@ fp=fopen(fname,'wt');
 fprintf(fp,'#node list\n%d 3 0 0\n',length(node));
 fprintf(fp,'%d %f %f %f\n',node');
 
-fprintf(fp,'#facet list\n%d 1\n',length(f)+bbxnum);
-elem=[3*ones(length(f),1),f-1,ones(length(f),1)];
-fprintf(fp,'1 0\n%d %d %d %d %d\n',elem');
+if(~iscell(f))
+    fprintf(fp,'#facet list\n%d 1\n',length(f)+bbxnum);
+    elem=[3*ones(length(f),1),f-1,ones(length(f),1)];
+    fprintf(fp,'1 0\n%d %d %d %d %d\n',elem');
+else % if the surface is recorded as a cell array
+    totalplc=0;
+    for i=1:length(f)
+        if(~iscell(f{i}))
+            totalplc=totalplc+size(f{i},1);
+        else
+            totalplc=totalplc+size(f{i}{1},1);
+        end
+    end
+    fprintf(fp,'#facet list\n%d 1\n',totalplc+bbxnum);
+    for i=1:length(f)
+        plcs=f{i};
+        faceid=-1;
+        if(iscell(plcs)) % if each face is a cell, use plc{2} for face id
+            if(length(plcs)>1)
+                faceid=plcs{2};
+            end
+            plcs=plcs{1};
+        end
+        for row=1:size(plcs,1);
+         plc=plcs(row,:);
+         if(any(isnan(plc))) % we use nan to separate outter contours and holes
+            holeid=find(isnan(plc));
+            if(faceid>0) 
+                fprintf(fp,'%d %d %d\n%d',length(holeid)+1,length(holeid),faceid,holeid(1)-1);
+            else
+                fprintf(fp,'%d %d\n%d',length(holeid)+1,length(holeid),holeid(1)-1);
+            end
+            fprintf(fp,'\t%d',plc(1:holeid(1)-1)-1);
+            fprintf(fp,'\t1\n');
+            for j=1:length(holeid)
+                if(j==length(holeid))
+                    fprintf(fp,'%d',length(plc(holeid(j)+1:end)));
+                fprintf(fp,'\t%d',plc(holeid(j)+1:end)-1);
+                else
+                    fprintf(fp,'%d',length(plc(holeid(j)+1:holeid(j+1)-1)));
+                    fprintf(fp,'\t%d',plc(holeid(j)+1:holeid(j+1)-1)-1);
+                end
+                fprintf(fp,'\t1\n');
+            end
+            for j=1:length(holeid)
+                if(j==length(holeid))
+                    fprintf(fp,'%d %f %f %f\n',j,mean(node(plc(holeid(j)+1:end),2:4)));
+                else
+                    fprintf(fp,'%d %f %f %f\n',j,mean(node(plc(holeid(j)+1:holeid(j+1)-1),2:4)));
+                end
+            end
+         else
+	    	if(faceid>0)
+                fprintf(fp,'1 0 %d\n%d',faceid,length(plc));
+            else
+                fprintf(fp,'1 0\n%d',length(plc));
+            end
+    		fprintf(fp,'\t%d',plc-1);
+            fprintf(fp,'\t1\n');
+         end
+        end
+    end
+end
 
 if(dobbx|~isempty(edges))
     for i=1:bbxnum
