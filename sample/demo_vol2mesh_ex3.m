@@ -18,7 +18,7 @@ end
 
 % fill holes in the head image and create the canonical binary volume
 % this may take a few minutes for a 256x256x256 volume
-fprintf(1,'fill the holes in the volumetric images...\n');
+fprintf(1,'filling holes in the volumetric images...\n');
 tic
 cleanimg=fillholes3d(logical(head>0),10);
 cleanbrain=fillholes3d(logical(brain>0),10);
@@ -48,9 +48,9 @@ h=slice(cleanimgfull,[],[120],[120 180]);
 set(h,'linestyle','none')
 hold on
 if(isoctavemesh)
-    trimesh(face(:,1:3),node(:,1),node(:,2),node(:,3));
+    trimesh(face(:,1:3),node(:,2),node(:,1),node(:,3));
 else
-	hb=trisurf(face(:,1:3),node(:,1),node(:,2),node(:,3));
+	hb=trisurf(face(:,1:3),node(:,2),node(:,1),node(:,3));
 	set(hb,'facealpha',0.7)
 end
 axis equal
