@@ -18,10 +18,7 @@ opt.radbound=3;    % set the target surface mesh element bounding sphere be <3 p
 tic
 [node,elem,face]=vol2mesh(fullimg,1:size(fullimg,1),1:size(fullimg,2),1:size(fullimg,3),opt,100,1);
 toc
-if(isoctavemesh)
-        hb=trimesh(face(:,1:3),node(:,1),node(:,2),node(:,3));
-else
-        hb=trisurf(face(:,1:3),node(:,1),node(:,2),node(:,3));
-end
+
+hb=plotmesh(node,face);
 axis equal
 view(-90.5,-72);

@@ -19,12 +19,8 @@ fprintf(1,'meshing the segmented brain (this may take a few minutes) ...\n');
 
 centroid=meshcentroid(node(:,1:4),face(:,1:3));
 
-if(isoctavemesh)
-    trimesh(face(find(centroid(:,2)>100),1:3),node(:,1),node(:,2),node(:,3));
-else
-    hs=trisurf(face(find(centroid(:,2)>100),1:3),node(:,1),node(:,2),node(:,3));
-    %set(hs,'facealpha',0.6);
-end
+hs=plotmesh(node,face,'y>100');
+
 axis equal;
 title('cross-cut view of the generated surface mesh');
 
@@ -37,11 +33,7 @@ LHwhitemat=elem(find(elem(:,5)==3),:);
 wmsurf=volface(LHwhitemat(:,1:4));
 
 figure;
-if(isoctavemesh)
-    trimesh(wmsurf(:,1:3),node(:,1),node(:,2),node(:,3));
-else
-    trisurf(wmsurf(:,1:3),node(:,1),node(:,2),node(:,3));
-end
+hs=plotmesh(node,wmsurf);
 axis equal;
 title('pre-smoothed pial surface');
 
@@ -53,11 +45,7 @@ conn=meshconn(el,length(no));
 wmno=smoothsurf(no(:,1:3),[],conn,3,0.5,'laplacianhc',0.5);
 
 figure;
-if(isoctavemesh)
-    trimesh(el,wmno(:,1),wmno(:,2),wmno(:,3));
-else
-    trisurf(el,wmno(:,1),wmno(:,2),wmno(:,3));
-end
+hs=plotmesh(wmno,el);
 axis equal;
 title('smoothed pial surface for left-hemisphere');
 

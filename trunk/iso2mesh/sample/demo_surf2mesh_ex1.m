@@ -17,9 +17,5 @@ load surfmesh_demo.mat
 [node,elem,face]=surf2mesh(v,f,[1 1 1],[100 100 100],0.1,25);
 
 %% visualize the resulting mesh
-if(isoctavemesh)
-	trimesh(face(:,1:3),node(:,1),node(:,2),node(:,3));
-else
-	trisurf(face(:,1:3),node(:,1),node(:,2),node(:,3));
-end
+plotmesh(node,face(:,1:3));
 axis equal;

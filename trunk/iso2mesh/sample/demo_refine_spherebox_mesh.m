@@ -31,11 +31,7 @@ sphsurf=facecell{1};
 if( sum((v0(sphsurf(1,1),:)-[30 30 30]).^2) > 25*25 )
    sphsurf=facecell{2};
 end
-if(isoctavemesh)
-   trimesh(sphsurf,v0(:,1),v0(:,2),v0(:,3)); % plot the sphere surface
-else
-   trisurf(sphsurf,v0(:,1),v0(:,2),v0(:,3)); % plot the sphere surface
-end
+plotmesh(v0,sphsurf);
 axis equal;
 idx=unique(sphsurf);  % this is the index of all the nodes on the sphere
 

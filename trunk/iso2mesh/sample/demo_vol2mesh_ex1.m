@@ -25,9 +25,5 @@ load sampleVol2Mesh.mat
 
 %% visualize the resulting mesh
 
-if(isoctavemesh)
-        trimesh(face(:,1:3),node(:,1),node(:,2),node(:,3));
-else
-        trisurf(face(:,1:3),node(:,1),node(:,2),node(:,3));
-end
+plotmesh(node,face);
 axis equal;
