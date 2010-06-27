@@ -22,11 +22,7 @@ load sampleVol2Mesh.mat
 
 %% visualize the resulting mesh
 subplot(211);
-if(isoctavemesh)
-        trimesh(face(:,1:3),node(:,1),node(:,2),node(:,3));
-else
-        trisurf(face(:,1:3),node(:,1),node(:,2),node(:,3));
-end
+plotmesh(node,face);
 axis equal;
 
 %% alternatively, one can call vol2surf and surf2mesh separately
@@ -38,10 +34,6 @@ axis equal;
 
 %% visualize the resulting mesh
 subplot(212)
-if(isoctavemesh)
-        trimesh(face(:,1:3),node(:,1),node(:,2),node(:,3));
-else
-        trisurf(face(:,1:3),node(:,1),node(:,2),node(:,3));
-end
+plotmesh(node,face);
 axis equal;
 
