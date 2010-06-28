@@ -1,5 +1,5 @@
-function h=plottetra(node,elem,varargin)
-% h=plottetra(node,elem,opt)
+function hm=plottetra(node,elem,varargin)
+% hm=plottetra(node,elem,opt)
 %
 % plot 3D surface meshes
 % 
@@ -11,7 +11,7 @@ function h=plottetra(node,elem,varargin)
 %      opt:  additional options for a patch object
 % 
 % output:
-%   h: handle or handles (vector) to the plotted surfaces
+%   hm: handle or handles (vector) to the plotted surfaces
 % example:
 %
 %   h=plottetra(node,elem);
@@ -32,11 +32,15 @@ if(~iscell(elem))
 			h=[h plotsurf(node,face,'facecolor',rand(3,1))];
 		end
 	else
-		face=volface(elem);
+		face=volface(elem(:,1:4));
 		if(nargin<3) 
 			h=plotsurf(node,face);
 		else
                         h=plotsurf(node,face,varargin{:});
 		end
 	end
+end
+
+if(~isempty(h) & nargout>=1)
+  hm=h;
 end
