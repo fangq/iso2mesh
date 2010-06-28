@@ -1,26 +1,27 @@
-function h=plotmesh(node,varargin)
-% h=plotmesh(node,face,elem,opt)
+function hm=plotmesh(node,varargin)
+% hm=plotmesh(node,face,elem,opt)
 %
 % plot surface and volumetric meshes
 % 
 % Author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
 %
 % input: 
-%      node: node coordinates, dimension (nn,3)
-%      face: triangular surface face list
-%      elem: tetrahedral element list
+%      node: a node coordinate list, 3 columns for x/y/z
+%      face: a triangular surface face list
+%      elem: a tetrahedral element list
 %      opt:  additional options for the plotting
 %
 %            for simple point plotting, opt can be markers
-%            or color options, such as 'r.'; opt can also be 
-%            a logic statement to select a subset of the meshes,
+%            or color options, such as 'r.', or opt can be 
+%            a logic statement to select a subset of the mesh,
 %            such as 'x>0 & y+z<1'; opt can have more than one
 %            items to combine these options, for example: 
 %            plotmesh(...,'x>0','r.'); the range selector must
-%            appears before the color/marker specifier
+%            appear before the color/marker specifier
 % 
 % output:
-%   h: handle or handles (vector) to the plotted surfaces
+%   hm: handle or handles (vector) to the plotted surfaces
+%
 % example:
 %
 %   h=plotmesh(node,'r.');
@@ -54,7 +55,7 @@ if(nargin>1)
 		if(i==1)
 			face=[];elem=[];
 		elseif(i==2)
-			if(iscell(varargin{1}) | size(varargin{1},2)<4)
+			if(iscell(varargin{1}) | size(varargin{1},2)<4 || (size(varargin{1},2)==4 & max(varargin{1}(:,4))<10) )
 				face=varargin{1}; elem=[];
 			else
 				elem=varargin{1}; face=[];
@@ -83,7 +84,7 @@ end
 if(isempty(face) & isempty(elem))
    if(isempty(selector))
         if(isempty(opt))
-   		h=plot3(node(:,1),node(:,2),node(:,3),'.');
+   		h=plot3(node(:,1),node(:,2),node(:,3),'o');
 	else
    		h=plot3(node(:,1),node(:,2),node(:,3),opt{:});
 	end
@@ -94,7 +95,7 @@ if(isempty(face) & isempty(elem))
 	idx=eval(['find(' selector ')']);
         if(~isempty(idx))
 	    if(isempty(opt))
-		h=plot3(node(idx,1),node(idx,2),node(idx,3),'.');
+		h=plot3(node(idx,1),node(idx,2),node(idx,3),'o');
 	    else
 		h=plot3(node(idx,1),node(idx,2),node(idx,3),opt{:});
 	    end
@@ -148,4 +149,8 @@ if(~isempty(elem))
 	    end
 	end
    end
+end
+
+if(~isempty(h) & nargout>=1)
+  hm=h;
 end

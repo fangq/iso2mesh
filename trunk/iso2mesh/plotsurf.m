@@ -1,5 +1,5 @@
-function h=plotsurf(node,face,varargin)
-% h=plotsurf(node,face,opt)
+function hm=plotsurf(node,face,varargin)
+% hm=plotsurf(node,face,opt)
 %
 % plot 3D surface meshes
 % 
@@ -11,7 +11,7 @@ function h=plotsurf(node,face,varargin)
 %      opt:  additional options for the plotting, see trisurf
 % 
 % output:
-%   h: handle or handles (vector) to the plotted surfaces
+%   hm: handle or handles (vector) to the plotted surfaces
 % example:
 %
 %   h=plotsurf(node,face);
@@ -35,3 +35,8 @@ else
         end
 	view(3);
 end
+
+if(~isempty(h) & nargout>=1)
+  hm=h;
+end
+
