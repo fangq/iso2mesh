@@ -1,16 +1,18 @@
 function islands=bwislands(img)
-%   islands=bwislands(img)
 %
-%   return the indices of non-zero elements in a 2D or 3D image
-%   grouped by connected regions in a cell array
+% islands=bwislands(img)
 %
-%   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-%   input:
-%          img: a 2D or 3D array
-%   output:
-%          islands: a cell array, each cell records the indices 
-%                   of the non-zero elements in img for a connected 
-%                   region (or an island)
+% return the indices of non-zero elements in a 2D or 3D image
+% grouped by connected regions in a cell array
+%
+% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+%
+% input:
+%	 img: a 2D or 3D array
+% output:
+%	 islands: a cell array, each cell records the indices 
+%		  of the non-zero elements in img for a connected 
+%		  region (or an island)
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %

@@ -1,17 +1,19 @@
 function hm=plottetra(node,elem,varargin)
+%
 % hm=plottetra(node,elem,opt)
 %
 % plot 3D surface meshes
 % 
-% Author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
 %
 % input: 
 %      node: node coordinates, dimension (nn,3)
 %      elem: tetrahedral element list
 %      opt:  additional options for a patch object
-% 
+%
 % output:
 %   hm: handle or handles (vector) to the plotted surfaces
+%
 % example:
 %
 %   h=plottetra(node,elem);

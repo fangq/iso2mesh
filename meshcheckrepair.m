@@ -1,12 +1,13 @@
 function [node,elem]=meshcheckrepair(node,elem,opt)
+%
 % [node,elem]=meshcheckrepair(node,elem,opt)
 % 
 % check and repair a surface mesh
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2008/10/10
 %
-% parameters:
+% input/output:
 %      node: input/output, surface node list, dimension (nn,3)
 %      elem: input/output, surface face element list, dimension (be,3)
 %      opt: options, including

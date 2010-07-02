@@ -1,13 +1,15 @@
 function [node,elem,face]=readtetgen(fstub)
+%
 % [node,elem,face]=readtetgen(fstub)
 %
-% readtetgen: read tetgen output files
+% read tetgen output files
 %
 % author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
 %
 % input:
 %    fstub: file name stub
+%
 % output:
 %    node: node coordinates of the tetgen mesh
 %    elem: tetrahedra element list of the tetgen mesh

@@ -1,4 +1,5 @@
 function eid=getintersecttri(tmppath)
+%
 % eid=getintersecttri(tmppath)
 %
 % get the IDs of self-intersecting elements from tetgen
@@ -8,6 +9,7 @@ function eid=getintersecttri(tmppath)
 %
 % input: 
 %   tmppath: working dir, use mwpath('') in most cases
+%
 % output:
 %   eid: an array of all intersecting surface elements, 
 %     one can read the corresponding node/elem by

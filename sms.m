@@ -1,9 +1,10 @@
 function newnode=sms(node,face,iter,alpha)
+%
 % newnode=sms(node,face,iter,useralpha)
 %
 % simplified version of surface mesh smoothing
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2009/10/21
 %
 % input:
@@ -11,6 +12,7 @@ function newnode=sms(node,face,iter,alpha)
 %    face:  face element list of the surface mesh
 %    iter:  smoothing iteration number
 %    alpha: scaler, smoothing parameter, v(k+1)=alpha*v(k)+(1-alpha)*mean(neighbors)
+%
 % output:
 %    newnode: output, the smoothed node coordinates
 %

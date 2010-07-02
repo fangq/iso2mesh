@@ -1,9 +1,10 @@
 function [node,elem]=meshresample(v,f,keepratio)
+%
 % [node,elem]=meshresample(v,f,keepratio)
 %
-% meshresample: resample mesh using CGAL mesh simplification utility
+% resample mesh using CGAL mesh simplification utility
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/12
 %
 % input:
@@ -11,6 +12,7 @@ function [node,elem]=meshresample(v,f,keepratio)
 %    f: list of surface elements (each row for each triangle)
 %    keepratio: decimation rate, a number less than 1, as the percentage
 %               of the elements after the sampling
+%
 % output:
 %    node: the node coordinates of the sampled surface mesh
 %    elem: the element list of the sampled surface mesh

@@ -1,10 +1,11 @@
 function newelem=meshreorient(node,elem)
+%
 % newelem=meshreorient(node,elem)
 %
 % reorder nodes in a surface or tetrahedral mesh to ensure all
 % elements are oriented consistently
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2010/05/05
 %
 % input:

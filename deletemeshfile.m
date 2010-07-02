@@ -1,4 +1,5 @@
 function flag=deletemeshfile(fname)
+%
 % flag=deletemeshfile(fname)
 %
 % delete a given work mesh file under the working directory
@@ -7,6 +8,7 @@ function flag=deletemeshfile(fname)
 %
 % input: 
 %     fname: specified file name (without path)
+%
 % output:
 %     flag: not used
 %

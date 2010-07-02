@@ -1,4 +1,5 @@
 function isoctave=isoctavemesh
+%
 % isoctave=isoctavemesh
 %
 % determine whether the code is running in octave

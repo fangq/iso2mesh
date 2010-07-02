@@ -1,44 +1,46 @@
 function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
-%   [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
 %
-%   vol2surf: converting a 3D volumetric image to surfaces
+% [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
 %
-%   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-%   inputs:
-%          img: a volumetric binary image; if img is empty, vol2surf will
-%               return user defined surfaces via opt.surf if it exists
-%          ix,iy,iz: subvolume selection indices in x,y,z directions
-%          opt: function parameters
-%            if method is 'cgalsurf':
-%              opt=a float number>1: max radius of the Delaunay sphere(element size) 
-%              opt.radbound: same as above, max radius of the Delaunay sphere
-%              opt.distbound: maximum deviation from the specified isosurfaces
-%              opt(1,2,...).radbound: same as above, for each levelset
-%            if method is 'simplify':
-%              opt=a float number<1: compression rate for surf. simplification
-%              opt.keeyratio=a float less than 1: same as above, same for all surf.
-%              opt(1,2,..).keeyratio: setting compression rate for each levelset
-%            opt(1,2,..).maxsurf: 1 - only use the largest disjointed surface
-%                                 0 - use all surfaces for that levelset
-%            opt(1,2,..).maxnode: - the maximum number of surface node per levelset
-%            opt(1,2,..).holes: user specified holes interior pt list
-%            opt(1,2,..).regions: user specified regions interior pt list
-%            opt(1,2,..).surf.{node,elem}: add additional surfaces
-%            opt(1,2,..).{A,B}: linear transformation for each surface
-%          dofix: 1: perform mesh validation&repair, 0: skip repairing
-%          method: - if method is 'simplify', iso2mesh will first call
-%                    binsurface to generate a voxel-based surface mesh and then
-%                    use meshresample/meshcheckrepair to create a coarser mesh;
-%                  - if method is 'cgalsurf', iso2mesh will call the surface
-%                    extraction program from CGAL to make surface mesh
-%                  - if method is not specified, 'cgalsurf' is assumed by default
-%          isovalues: a list of isovalues where the levelset is defined
+% converting a 3D volumetric image to surfaces
 %
-%   outputs: 
-%          no:  list of nodes on the resulting suface mesh, 3 columns for x,y,z
-%          el:  list of trianglular elements on the surface, [n1,n2,n3,region_id]
-%          regions: list of interior points for all sub-region, [x,y,z]
-%          holes:   list of interior points for all holes, [x,y,z]
+% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+%
+% input:
+%	 img: a volumetric binary image; if img is empty, vol2surf will
+%	      return user defined surfaces via opt.surf if it exists
+%	 ix,iy,iz: subvolume selection indices in x,y,z directions
+%	 opt: function parameters
+%	   if method is 'cgalsurf':
+%	     opt=a float number>1: max radius of the Delaunay sphere(element size) 
+%	     opt.radbound: same as above, max radius of the Delaunay sphere
+%	     opt.distbound: maximum deviation from the specified isosurfaces
+%	     opt(1,2,...).radbound: same as above, for each levelset
+%	   if method is 'simplify':
+%	     opt=a float number<1: compression rate for surf. simplification
+%	     opt.keeyratio=a float less than 1: same as above, same for all surf.
+%	     opt(1,2,..).keeyratio: setting compression rate for each levelset
+%	   opt(1,2,..).maxsurf: 1 - only use the largest disjointed surface
+%				0 - use all surfaces for that levelset
+%	   opt(1,2,..).maxnode: - the maximum number of surface node per levelset
+%	   opt(1,2,..).holes: user specified holes interior pt list
+%	   opt(1,2,..).regions: user specified regions interior pt list
+%	   opt(1,2,..).surf.{node,elem}: add additional surfaces
+%	   opt(1,2,..).{A,B}: linear transformation for each surface
+%	 dofix: 1: perform mesh validation&repair, 0: skip repairing
+%	 method: - if method is 'simplify', iso2mesh will first call
+%		   binsurface to generate a voxel-based surface mesh and then
+%		   use meshresample/meshcheckrepair to create a coarser mesh;
+%		 - if method is 'cgalsurf', iso2mesh will call the surface
+%		   extraction program from CGAL to make surface mesh
+%		 - if method is not specified, 'cgalsurf' is assumed by default
+%	 isovalues: a list of isovalues where the levelset is defined
+%
+% output: 
+%	 no:  list of nodes on the resulting suface mesh, 3 columns for x,y,z
+%	 el:  list of trianglular elements on the surface, [n1,n2,n3,region_id]
+%	 regions: list of interior points for all sub-region, [x,y,z]
+%	 holes:   list of interior points for all holes, [x,y,z]
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %

@@ -1,4 +1,5 @@
 function newedge=orderloopedge(edge)
+%
 % [newedge]=orderloopedge(edge)
 %
 % order the node list of a simple loop based on connection sequence
@@ -9,6 +10,7 @@ function newedge=orderloopedge(edge)
 % input: 
 %        edge: a loop consisted by a sequence of edges, each row 
 %              is an edge with two integers: start/end node index
+%
 % output:
 %        newedge: reordered edge node list
 %

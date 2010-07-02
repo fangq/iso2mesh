@@ -1,4 +1,5 @@
 function tempname=mwpath(fname)
+%
 % tempname=meshtemppath(fname)
 %
 % get full temp-file name by prepend working-directory and current session name
@@ -7,6 +8,7 @@ function tempname=mwpath(fname)
 %
 % input:
 %    fname: input, a file name string
+%
 % output:
 %    tempname: output, full file name located in the working directory
 %

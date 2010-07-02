@@ -1,12 +1,15 @@
 function [node,elem]=readasc(fname)
+%
 % [node,elem]=readasc(fname)
 %
-% readasc: read FreeSurfer ASC mesh format
+% read FreeSurfer ASC mesh format
 %
-% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>, 2009/04/02
+% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% date: 2009/04/02
 % 
 % input:
 %      fname: name of the asc file
+%
 % output:
 %      node: node positions of the mesh
 %      elem: element list of the mesh

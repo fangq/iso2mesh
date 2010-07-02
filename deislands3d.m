@@ -1,4 +1,5 @@
 function cleanimg=deislands3d(img,sizelim)
+%
 % cleanimg=deislands3d(img,sizelim)
 %
 % remove isolated islands for 3D image (for each slice)
@@ -8,6 +9,7 @@ function cleanimg=deislands3d(img,sizelim)
 % input:
 %      img: a 3D volumetric image
 %      sizelim: maximum island size (in pixels) for each x/y/z slice
+%
 % output:
 %      cleanimg: 3D image after removing the islands
 %

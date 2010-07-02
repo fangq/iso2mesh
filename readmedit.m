@@ -1,4 +1,21 @@
 function [node,elem,face]=readmedit(filename)
+%
+% [node,elem,face]=readmedit(filename)
+%
+% read Medit mesh format
+%
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+%
+% input:
+%    fname: name of the medit data file
+%
+% output:
+%    node: node coordinates of the mesh
+%    elem: list of elements of the mesh	    
+%    face: list of surface triangles of the mesh	    
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 node=[];
 elem=[];

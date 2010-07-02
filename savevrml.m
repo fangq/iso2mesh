@@ -1,12 +1,13 @@
 function savevrml(node,elem,face,fname)
+%
 % savevrml(node,elem,face,fname)
 %
-% savevrml: save a surface mesh to VRML 1.0 format
+% save a surface mesh to VRML 1.0 format
 %
 % author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2010/04/25
 %
-% parameters:
+% input:
 %      node: input, surface node list, dimension (nn,3)
 %      elem: input, tetrahedral element list, dimension (ne,4)
 %      face: input, surface face element list, dimension (be,3)

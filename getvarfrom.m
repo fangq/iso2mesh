@@ -1,4 +1,5 @@
 function p=getvarfrom(ws,name)
+%
 % p=getvarfrom(ws,name)
 %
 % get variable value by name from specified work-space
@@ -8,6 +9,7 @@ function p=getvarfrom(ws,name)
 % input:
 %    ws: name of the work-space, for example, 'base'
 %    name: name string of the variable
+%
 % output:
 %    p: the value of the specified variable, if the variable does not
 %       exist, return empty array

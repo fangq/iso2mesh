@@ -1,11 +1,12 @@
 function [no,el,fc,nodemap]=sortmesh(origin,node,elem,ecol,face,fcol)
+%
 % [no,el,fc]=sortmesh(origin,node,elem,face)
 %
 % sort nodes and elements in a mesh so that the indexed
 % nodes and elements are closer to each order
 % (this may reduce cache-miss in a calculation)
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2010/05/06
 %
 % input:

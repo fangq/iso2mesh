@@ -1,15 +1,18 @@
 function loops=extractloops(edges)
+%
 % loops=extractloops(edges)
 %
-% extractloops: extract individual loops from an edge table of a loop
-%               collection
+% extract individual loops from an edge table of a loop
+% collection
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
 %
-% parameters:   
+% input:   
 %    edges:  two column matrix recording the starting/ending 
 %             points of all edge segments
+%
+% output:
 %    loops:  output, a single vector separated by NaN, each segment
 %             is a close-polygon consisted by node IDs
 %

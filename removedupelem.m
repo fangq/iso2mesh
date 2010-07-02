@@ -1,12 +1,14 @@
 function elem=removedupelem(elem)
+%
 % elem=removedupelem(elem)
 %
 % remove doubly duplicated elements
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 %
 % input:
 %    elem: list of elements (node indices)
+%
 % output:
 %    elem: element list after removing the duplicated elements
 %

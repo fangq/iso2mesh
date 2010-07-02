@@ -1,14 +1,17 @@
 function dat=readinr(fname)
+%
 % vol=readinr(fname)
 %
-% readinf: load a volume from an INR file
+% load a volume from an INR file
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2009/05/03
 %
-% parameters:
-%      dat: output, data read from the inr file
+% input:
 %      fname: input file name
+%
+% output:
+%      dat: output, data read from the inr file
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %

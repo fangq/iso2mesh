@@ -1,9 +1,10 @@
 function p=smoothsurf(node,mask,conn,iter,useralpha,usermethod,userbeta)
+%
 % p=smoothsurf(node,mask,conn,iter,useralpha,usermethod,userbeta)
 %
-% smoothsurf: smooth a surface mesh by Laplace smoothing
+% smoothing a surface mesh
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
 %
 % input:

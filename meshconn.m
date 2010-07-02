@@ -1,14 +1,17 @@
 function [conn,connnum,count]=meshconn(elem,nn)
+%
 % [conn,connnum,count]=meshconn(elem,nn)
 %
-% meshconn: create node neighbor list from a mesh
+% create node neighbor list from a mesh
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
 %
-% parameters:
+% input:
 %    elem:  element table of a mesh
 %    nn  :  total node number of the mesh
+%
+% output:
 %    conn:  output, a cell structure of length nn, conn{n}
 %           contains a list of all neighboring node ID for node n
 %    connnum: vector of length nn, denotes the neighbor number of each node

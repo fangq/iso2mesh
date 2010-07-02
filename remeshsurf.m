@@ -1,24 +1,25 @@
 function [newno,newfc]=remeshsurf(node,face,opt)
-%   [newno,newfc]=resurf(node,face,opt)
 %
-%   remesh a triangular surface and the output is guaranteed to be
-%   free of self-intersecting element. This function is similar to 
-%   meshresample, but it can both downsample or upsample a mesh
+% [newno,newfc]=resurf(node,face,opt)
 %
-%   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% remesh a triangular surface and the output is guaranteed to be
+% free of self-intersecting element. This function is similar to 
+% meshresample, but it can both downsample or upsample a mesh
 %
-%   inputs:
-%          node: list of nodes on the input suface mesh, 3 columns for x,y,z
-%          face: list of trianglular elements on the surface, [n1,n2,n3,region_id]
-%          opt: function parameters
-%            opt.gridsize:  resolution for the voxelization of the mesh
-%            opt.closesize: if there are openings, set the closing diameter
-%            opt.elemsize:  the size of the element of the output surface
-%            if opt is a scalar, it defines the elemsize and gridsize=opt/4
+% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
 %
-%   outputs:
-%          newno:  list of nodes on the resulting suface mesh, 3 columns for x,y,z
-%          newfc:  list of trianglular elements on the surface, [n1,n2,n3,region_id]
+% input:
+%	 node: list of nodes on the input suface mesh, 3 columns for x,y,z
+%	 face: list of trianglular elements on the surface, [n1,n2,n3,region_id]
+%	 opt: function parameters
+%	   opt.gridsize:  resolution for the voxelization of the mesh
+%	   opt.closesize: if there are openings, set the closing diameter
+%	   opt.elemsize:  the size of the element of the output surface
+%	   if opt is a scalar, it defines the elemsize and gridsize=opt/4
+%
+% output:
+%	 newno:  list of nodes on the resulting suface mesh, 3 columns for x,y,z
+%	 newfc:  list of trianglular elements on the surface, [n1,n2,n3,region_id]
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %

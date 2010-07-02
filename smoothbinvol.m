@@ -1,13 +1,15 @@
 function vol=smoothbinvol(vol,layer)
+%
 % vol=smoothbinvol(vol,layer)
 %
 % convolve a 3x3 gaussian kernel to a binary image multiple times
 % 
-% Author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
 %
 % input:
 %     vol: a 3D volumetric image to be smoothed
 %     layer: number of iterations for the smoothing
+%
 % output:
 %     vol: the volumetric image after smoothing
 %

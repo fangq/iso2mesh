@@ -1,8 +1,10 @@
 function [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,plane)
+%
 % [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,plane)
 %
-% Fast tetrahedral mesh cross-section plot
-%   by Qianqian Fang, <fangq at nmr.mgh.harvard.edu>
+% fast tetrahedral mesh cross-section plot
+%
+% author:Qianqian Fang, <fangq at nmr.mgh.harvard.edu>
 %
 % input: 
 %   elem: integer array with dimensions of NE x 4, each row contains

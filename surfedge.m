@@ -1,13 +1,15 @@
 function openedge=surfedge(f)
+%
 % openedge=surfedge(f)
 %
-% surfedge: find the edge of an open surface
+% find the edge of an open surface or surface of a volume
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
 %
-% parameters:
+% input:
 %      f: input, surface face element list, dimension (be,3)
+%
 % output:
 %      openedge: list of edges of the specified surface
 %

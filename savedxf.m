@@ -1,12 +1,13 @@
 function savedxf(node,elem,face,fname)
+%
 % savedxf(node,elem,face,fname)
 %
-% savedxf: save a surface mesh to DXF format
+% save a surface mesh to DXF format
 %
 % author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2010/04/25
 %
-% parameters:
+% input:
 %      node: input, surface node list, dimension (nn,3)
 %      elem: input, tetrahedral element list, dimension (ne,4)
 %      face: input, surface face element list, dimension (be,3)
