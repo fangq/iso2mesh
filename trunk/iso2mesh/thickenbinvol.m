@@ -1,14 +1,18 @@
 function vol=thickenbinvol(vol,layer)
+%
 % vol=thickenbinvol(vol,layer)
 %
-% this is similar to bwmorph(vol,'thicken',3) except this does it
-% in 3d and only does thickening for non-zero elements (and hopefully faster)
+% thickening a binary volume by a given pixel width
+% this is similar to bwmorph(vol,'thicken',3) except 
+% this does it in 3d and only does thickening for 
+% non-zero elements (and hopefully faster)
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 %
 % input:
 %     vol: a volumetric binary image
 %     layer: number of iterations for the thickenining
+%
 % output:
 %     vol: the volume image after the thickening
 %

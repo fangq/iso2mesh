@@ -1,17 +1,19 @@
 function hm=plotsurf(node,face,varargin)
+%
 % hm=plotsurf(node,face,opt)
 %
 % plot 3D surface meshes
 % 
-% Author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
 %
 % input: 
 %      node: node coordinates, dimension (nn,3)
 %      face: triangular surface face list
 %      opt:  additional options for the plotting, see trisurf
-% 
+%
 % output:
 %   hm: handle or handles (vector) to the plotted surfaces
+%
 % example:
 %
 %   h=plotsurf(node,face);

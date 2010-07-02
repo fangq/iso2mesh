@@ -1,17 +1,18 @@
 function [node,elem]=binsurface(img,nface)
+%
 % [node,elem]=binsurface(img,nface)
 %
 % fast isosurface extraction from 3D binary images
 %
 % author: Qianqian Fang, <fangq at nmr.mgh.harvard.edu>
 %
-% parameters: 
+% input: 
 %   img:  a 3D binary image
 %   nface: nface=3 or ignored - for triangular faces, 
 %          nface=4 - square faces
 %          nface=0 - return a boundary mask image via node
 %
-% outputs
+% output
 %   elem: integer array with dimensions of NE x nface, each row represents
 %         a surface mesh face element 
 %   node: node coordinates, 3 columns for x, y and z respectively

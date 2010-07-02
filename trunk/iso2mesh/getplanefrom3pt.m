@@ -1,4 +1,5 @@
 function [a,b,c,d]=getplanefrom3pt(plane)
+%
 % [a,b,c,d]=getplanefrom3pt(plane)
 % 
 % define a plane equation ax+by+cz+d=0 from three 3D points
@@ -7,6 +8,7 @@ function [a,b,c,d]=getplanefrom3pt(plane)
 %
 % input: 
 %    plane: a 3x3 matrix with each row specifying a 3D point (x,y,z)
+%
 % output:
 %    a,b,c,d: the coefficient for plane equation ax+by+cz+d=0
 %

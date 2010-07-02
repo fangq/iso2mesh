@@ -1,33 +1,36 @@
 function [node,elem,face]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalues)
-%   [node,elem,face]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalues)
-%   convert a binary (or multi-valued) volume to tetrahedral mesh
 %
-%   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-%   inputs:
-%          img: a volumetric binary image
-%          ix,iy,iz: subvolume selection indices in x,y,z directions
-%          opt: as defined in vol2surf.m
-%          maxvol: target maximum tetrahedral elem volume
-%          dofix: 1: perform mesh validation&repair, 0: skip repairing
-%          method: 'cgalsurf' or omit: use CGAL surface mesher
-%                  'simplify': use binsurface and then simplify
-%                  'cgalmesh': use CGAL 3.5 3D mesher for direct mesh generation [new]
+% [node,elem,face]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalues)
 %
-%                  generally speaking, 'cgalmesh' is the most robust path
-%                  if you want to product meshes from binary or multi-region
-%                  volumes, however, its limitations include 1) only accept 
-%                  uint8 volume, and 2) can not extract meshes from gray-scale
-%                  volumes. If ones goal is to process a gray-scale volume,
-%                  he/she should use the 'cgalsurf' option. 'simplify' approach
-%                  is not recommended unless other options failed.
-%          isovalues: a list of isovalues where the levelset is defined
+% convert a binary (or multi-valued) volume to tetrahedral mesh
 %
-%   outputs:
-%          node: output, node coordinates of the tetrahedral mesh
-%          elem: output, element list of the tetrahedral mesh, the last 
-%                column is the region ID
-%          face: output, mesh surface element list of the tetrahedral mesh
-%                the last column denotes the boundary ID
+% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+%
+% input:
+%	 img: a volumetric binary image
+%	 ix,iy,iz: subvolume selection indices in x,y,z directions
+%	 opt: as defined in vol2surf.m
+%	 maxvol: target maximum tetrahedral elem volume
+%	 dofix: 1: perform mesh validation&repair, 0: skip repairing
+%	 method: 'cgalsurf' or omit: use CGAL surface mesher
+%		 'simplify': use binsurface and then simplify
+%		 'cgalmesh': use CGAL 3.5 3D mesher for direct mesh generation [new]
+%
+%		 generally speaking, 'cgalmesh' is the most robust path
+%		 if you want to product meshes from binary or multi-region
+%		 volumes, however, its limitations include 1) only accept 
+%		 uint8 volume, and 2) can not extract meshes from gray-scale
+%		 volumes. If ones goal is to process a gray-scale volume,
+%		 he/she should use the 'cgalsurf' option. 'simplify' approach
+%		 is not recommended unless other options failed.
+%	 isovalues: a list of isovalues where the levelset is defined
+%
+% output:
+%	 node: output, node coordinates of the tetrahedral mesh
+%	 elem: output, element list of the tetrahedral mesh, the last 
+%	       column is the region ID
+%	 face: output, mesh surface element list of the tetrahedral mesh
+%	       the last column denotes the boundary ID
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %

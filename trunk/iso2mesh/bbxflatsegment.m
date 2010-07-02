@@ -1,4 +1,5 @@
 function seg=bbxflatsegment(node,loop)
+%
 % seg=bbxflatsegment(node,loop)
 %
 % decompose edge loops into flat segments alone x/y/z 

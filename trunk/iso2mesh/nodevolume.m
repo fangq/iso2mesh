@@ -1,16 +1,17 @@
 function nodevol=nodevolume(node,elem)
+%
 % nodevol=nodevolume(node,elem)
 %
 % calculate the Voronoi volume of each node in a simplex mesh
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2009/12/31
 %
 % input:
 %    node:  node coordinates
 %    elem:  element table of a mesh
 %
-% ooutput:
+% output:
 %    nodevol:   volume values for all nodes
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)

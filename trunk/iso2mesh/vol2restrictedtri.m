@@ -1,10 +1,13 @@
 function [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distbound,maxnode)
+%
 % [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distbound,maxnode)
 %
-% vol2restrictedtri: surface mesh extraction using CGAL mesher
-% author: fangq (fangq<at> nmr.mgh.harvard.edu), 2009/01/06
+% surface mesh extraction using CGAL mesher
 %
-% inputs:
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+% date: 2009/01/06
+%
+% input:
 %       vol: a 3D volumetric image
 %       thres: a scalar as the threshold of of the extraction
 %       cent: a 3d position (x,y,z) which locates inside the resulting
@@ -15,7 +18,7 @@ function [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distboun
 %       radbound: maximum triangle delaunay circle radius
 %       distbound: maximum delaunay sphere distances
 %       maxnode: maximum number of surface nodes (even radbound is not reached)
-% outputs:
+% output:
 %       node: the list of 3d nodes in the resulting surface (x,y,z)
 %       elem: the element list of the resulting mesh (3 columns of integers)
 %

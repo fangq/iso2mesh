@@ -1,14 +1,15 @@
 function [X,V,E,F]=mesheuler(face)
+%
 % [X,V,E,F]=mesheuler(face)
 %
 % Euler's charastistics of a mesh
 %
 % author: Qianqian Fang, <fangq at nmr.mgh.harvard.edu>
 %
-% parameters: 
+% input: 
 %   face: a closed surface mesh
 %
-% outputs
+% output:
 %   X: Euler's charastistics
 %   V: number of vertices 
 %   E: number of edges

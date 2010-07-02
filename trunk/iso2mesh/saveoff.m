@@ -1,12 +1,13 @@
 function saveoff(v,f,fname)
+%
 % saveoff(v,f,fname)
 %
-% savesmf: save a surface mesh to  Geomview Object File Format
+% save a surface mesh to Geomview Object File Format (OFF)
 %
 % author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/03/28
 %
-% parameters:
+% input:
 %      v: input, surface node list, dimension (nn,3)
 %      f: input, surface face element list, dimension (be,3)
 %      fname: output file name

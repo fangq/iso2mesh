@@ -1,9 +1,10 @@
 function hm=plotmesh(node,varargin)
+%
 % hm=plotmesh(node,face,elem,opt)
 %
 % plot surface and volumetric meshes
 % 
-% Author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
 %
 % input: 
 %      node: a node coordinate list, 3 columns for x/y/z
@@ -18,7 +19,7 @@ function hm=plotmesh(node,varargin)
 %            items to combine these options, for example: 
 %            plotmesh(...,'x>0','r.'); the range selector must
 %            appear before the color/marker specifier
-% 
+%
 % output:
 %   hm: handle or handles (vector) to the plotted surfaces
 %

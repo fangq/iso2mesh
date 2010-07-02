@@ -1,7 +1,8 @@
 function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox)
+%
 % [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox)
 %
-% surf2mesh - create quality volumetric mesh from isosurface patches
+% create quality volumetric mesh from isosurface patches
 %
 % author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/24

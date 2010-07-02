@@ -1,4 +1,5 @@
 function facecell=finddisconnsurf(f)
+%
 % facecell=finddisconnsurf(f)
 % 
 % subroutine to extract disconnected surfaces from a 
@@ -9,6 +10,7 @@ function facecell=finddisconnsurf(f)
 %
 % input: 
 %     f: faces defined by node indices for all surface triangles
+%
 % output:
 %     facecell: separated disconnected surface node indices
 %

@@ -1,19 +1,20 @@
 function mask=flatsegment(node,edge)
+%
 % mask=flatsegment(node,edge)
 %
-% flatsegment: decompose edge loops into flat segments
-%              alone arbitrary planes of the bounding box
+% decompose edge loops into flat segments alone arbitrary planes of the bounding box
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2008/04/08
 %
-%  this code is fragile: it can not handle curves with many co-linear
-%  nodes near the corner point
+% this code is fragile: it can not handle curves with many co-linear
+% nodes near the corner point
 %
 % input:   
 %    node:  x,y,z coordinates of each node of the mesh
 %    edge:  input, a single vector separated by NaN, each segment
 %           is a close-polygon consisted by node IDs 
+%
 % output:
 %    mask:  output, a cell, each element is a close-polygon 
 %           on x/y/z plane 

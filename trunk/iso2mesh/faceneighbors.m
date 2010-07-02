@@ -1,9 +1,10 @@
 function facenb=faceneighbors(t,opt)
+%
 % facenb=faceneighbors(t,opt)
 %
 % to find 4 face-neighboring elements of a tetrahedron
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 %
 % input:
 %     t: tetrahedron element list, 4 columns of integers
@@ -16,6 +17,7 @@ function facenb=faceneighbors(t,opt)
 %          and [2 3 4] in order, where 1~4 is the node local index.
 %          if the index is 0, indicating the face has no neighbor
 %          (i.e. a boundary face)
+%
 % output:
 %     facenb: see opt
 %

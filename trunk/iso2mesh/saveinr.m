@@ -1,12 +1,13 @@
 function saveinr(vol,fname)
+%
 % saveinr(vol,fname)
 %
-% savesmf: save a surface mesh to INR Format
+% save a surface mesh to INR Format
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2009/01/04
 %
-% parameters:
+% input:
 %      vol: input, a binary volume
 %      fname: output file name
 %

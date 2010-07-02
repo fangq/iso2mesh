@@ -1,4 +1,5 @@
 function binname=mcpath(fname)
+%
 % binname=mcpath(fname)
 %
 % get full executable path by prepending a command directory path
@@ -8,6 +9,7 @@ function binname=mcpath(fname)
 %
 % input:
 %    fname: input, a file name string
+%
 % output:
 %    binname: output, full file name located in the bin directory
 %

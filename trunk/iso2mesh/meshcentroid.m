@@ -1,14 +1,16 @@
 function centroid=meshcentroid(v,f)
+%
 % centroid=meshcentroid(v,f)
 % 
 % compute the centroids of a mesh defined by nodes and elements
 % (surface or tetrahedra) in R^n space
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 %
-% parameters:
+% input:
 %      v: surface node list, dimension (nn,3)
 %      f: surface face element list, dimension (be,3)
+%
 % output:
 %      centroid: centroid positions, one row for each element
 %

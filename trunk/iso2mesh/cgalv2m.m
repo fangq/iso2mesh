@@ -1,33 +1,36 @@
 function [node,elem,face]=cgalv2m(vol,opt,maxvol)
-%   [node,elem,face]=cgalv2m(vol,opt,maxvol)
-%   wrapper for CGAL 3D mesher (CGAL 3.5)
-%   convert a binary (or multi-valued) volume to tetrahedral mesh
 %
-%   http://www.cgal.org/Manual/3.5/doc_html/cgal_manual/Mesh_3/Chapter_main.html
+% [node,elem,face]=cgalv2m(vol,opt,maxvol)
 %
-%   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-%   inputs:
-%          vol: a volumetric binary image
-%          ix,iy,iz: subvolume selection indices in x,y,z directions
-%          opt: parameters for CGAL mesher, if opt is a structure, then
-%              opt.radbound: defines the maximum surface element size
-%              opt.angbound: defines the miminum angle of a surface triangle
-%              opt.surfaceapprox: defines the maximum distance between the 
-%                  center of the surface bounding circle and center of the 
-%                  element bounding sphere
-%              opt.reratio:  maximum radius-edge ratio
-%              if opt is a scalar, it only specifies radbound.
-%          maxvol: target maximum tetrahedral elem volume
+% wrapper for CGAL 3D mesher (CGAL 3.5)
+% convert a binary (or multi-valued) volume to tetrahedral mesh
 %
-%   outputs:
-%          node: output, node coordinates of the tetrahedral mesh
-%          elem: output, element list of the tetrahedral mesh, the last 
-%               column is the region id
-%          face: output, mesh surface element list of the tetrahedral mesh
-%               the last column denotes the boundary ID
-%               note: each triangle will appear twice in the face list with each
-%                     one attaches to each side of the interface. one can remove
-%                     the redundant triangles by unique(face(:,1:3),'rows')
+% http://www.cgal.org/Manual/3.5/doc_html/cgal_manual/Mesh_3/Chapter_main.html
+%
+% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+%
+% input:
+%	 vol: a volumetric binary image
+%	 ix,iy,iz: subvolume selection indices in x,y,z directions
+%	 opt: parameters for CGAL mesher, if opt is a structure, then
+%	     opt.radbound: defines the maximum surface element size
+%	     opt.angbound: defines the miminum angle of a surface triangle
+%	     opt.surfaceapprox: defines the maximum distance between the 
+%		 center of the surface bounding circle and center of the 
+%		 element bounding sphere
+%	     opt.reratio:  maximum radius-edge ratio
+%	     if opt is a scalar, it only specifies radbound.
+%	 maxvol: target maximum tetrahedral elem volume
+%
+% output:
+%	 node: output, node coordinates of the tetrahedral mesh
+%	 elem: output, element list of the tetrahedral mesh, the last 
+%	      column is the region id
+%	 face: output, mesh surface element list of the tetrahedral mesh
+%	      the last column denotes the boundary ID
+%	      note: each triangle will appear twice in the face list with each
+%		    one attaches to each side of the interface. one can remove
+%		    the redundant triangles by unique(face(:,1:3),'rows')
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %

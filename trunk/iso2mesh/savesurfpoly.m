@@ -1,12 +1,13 @@
 function savesurfpoly(v,f,holelist,regionlist,p0,p1,fname,forcebox)
+%
 % savesurfpoly(v,f,holelist,regionlist,p0,p1,fname)
 %
 % save a set of surfaces into poly format (for tetgen)
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2007/11/21
 %
-% parameters:
+% input:
 %      v: input, surface node list, dimension (nn,3)
 %         if v has 4 columns, the last column specifies mesh density near each node
 %      f: input, surface face element list, dimension (be,3)

@@ -1,13 +1,15 @@
 function [node,elem]=readoff(fname)
+%
 % [node,elem]=readoff(fname)
 %
-% readoff: read  Geomview Object File Format
+% read Geomview Object File Format (OFF)
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2008/03/28
 %
 % input:
 %    fname: name of the OFF data file
+%
 % output:
 %    node: node coordinates of the mesh
 %    elem: list of elements of the mesh	    

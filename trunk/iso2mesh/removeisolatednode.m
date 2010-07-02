@@ -1,13 +1,15 @@
 function [no,el]=removeisolatednode(node,elem)
+%
 % [no,el]=removeisolatednode(node,elem)
 %
 % remove isolated nodes: nodes that are not included in any element
 %
-% author: fangq (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 %
 % input:
 %     node: list of node coordinates
 %     elem: list of elements of the mesh
+%
 % output:
 %     no: node coordinates after removing the isolated nodes
 %     el: element list of the resulting mesh
