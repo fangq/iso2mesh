@@ -5,7 +5,7 @@
 ----------------------------------------------------------
 
 iso2mesh ChangeLog:
-2010/06/10 (0.9.0pre, codename: Toufu-beta)
+2010/07/13 (0.9.0pre, codename: Toufu-beta)
         1. added surf2vol, converting a closed surface to a binary volume
         2. fixed deletemeshfile bug for Windows
         3. automatic repairing when meshresample fails
@@ -21,6 +21,9 @@ iso2mesh ChangeLog:
        13. added sortmesh to optimize node and element ordering
        14. mesh refinement using the 4-th column of surface node
        15. thining a volumetric binary image
+       16. added remeshsurf to repair self-intersecting surfaces
+       17. unify help text format, add bash script to generate function list
+       18. use opt.side to specify upper/lower interface of a labeled region
 
 2009/05/04 (0.8.0, codename: Hotpot)
         1. added stopping criteria for cgalsurf surface extractor to 
