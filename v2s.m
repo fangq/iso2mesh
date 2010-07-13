@@ -15,4 +15,11 @@ function [no,el,regions,holes]=v2s(img,isovalues,opt,method)
 if(nargin==3)
    method='cgalsurf';
 end
+
+if(strcmp(method,'cgalmesh'))
+   [no,tet,el]=v2m(uint8(img),isovalues,opt,1000,method);
+   regions=[]; holes=[];
+   return;
+end
+
 [no,el,regions,holes]=vol2surf(img,1:size(img,1),1:size(img,2),1:size(img,3),opt,1,method,isovalues);

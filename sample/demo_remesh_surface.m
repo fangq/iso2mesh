@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   demo script for mesh generation from binarized volumetric image
+%   demo script for surface repairing using surf2vol and remeshsurf
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% preparation
@@ -16,14 +16,16 @@ load sampleVol2Mesh.mat
 % A,b are registration matrix and vector, respectively
 %% perform mesh generation
 
-[node,elem,face]=vol2mesh(volimage>0.05,1:size(volimage,1),1:size(volimage,2),...
-                           1:size(volimage,3),2,2,1);
+[node,face]=v2s(volimage,0.5,2,'cgalmesh');
 
-%% alternatively, one can use the following cmd as a less robust approach
-% [node,elem,face]=vol2mesh(volimage>0.05,1:size(volimage,1),1:size(volimage,2),...
-%                           1:size(volimage,3),0.2,2,1,'simplify');
-
-%% visualize the resulting mesh
+node=node(:,1:3);
+face=face(:,1:3);
 
 plotmesh(node,face);
-axis equal;
+
+[newno,newfc]=remeshsurf(node,face,1);
+
+newno=sms(newno,newfc(:,1:3),3,0.5);
+
+figure;
+plotmesh(newno,newfc);

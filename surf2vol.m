@@ -17,6 +17,8 @@ function img=surf2vol(node,face,xi,yi,zi)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
+fprintf(1,'converting a closed surface to a volumetric binary image ...\n');
+
 img=surf2volz(node,face,xi,yi,zi);
 img=img | shiftdim(surf2volz(node(:,[3 1 2]),face,zi,xi,yi),1);
 img=img | shiftdim(surf2volz(node(:,[2 3 1]),face,yi,zi,xi),2);

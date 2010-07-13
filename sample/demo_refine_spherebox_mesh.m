@@ -77,6 +77,9 @@ ISO2MESH_SESSION='demo_sph2_';
 nodesize=[0.7*ones(size(no,1),1) ; 0.2; 2];  % set target edge size to 0.7 near the sphere
                                              % 0.2 near (30,30,0.5) and 2 near (30,30,30)
 [node2,elem2,face2]=surf2mesh([nfull,nodesize],el,[0 0 0],[61 61 61],1,2,[30 30 30],[],[1 1 1 1 5 5 5 5]);
+
+figure; plotmesh(node2,face2(:,1:3),'y>30');axis equal;
+
 [node2,elem2]=sortmesh(srcpos,node2,elem2,1:4);
 elem2(:,1:4)=meshreorient(node2,elem2(:,1:4));
 

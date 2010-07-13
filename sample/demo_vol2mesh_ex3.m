@@ -52,7 +52,7 @@ hold on
 if(isoctavemesh)
     trimesh(face(:,1:3),node(:,2),node(:,1),node(:,3));
 else
-	%hb=trisurf(face(:,1:3),node(:,2),node(:,1),node(:,3));
-	%set(hb,'facealpha',0.7)
+    hb=trisurf(face(:,1:3),node(:,2),node(:,1),node(:,3));
+    set(hb,'facealpha',0.7)
 end
 axis equal

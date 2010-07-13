@@ -61,9 +61,10 @@ img=fillholes3d(img,ballsize);
 
 if(isstruct(opt))
    if(isfield(opt,'elemsize'))
-      [newno,newfc]=v2s(img,0.5,opt.elemsize,'cgalsurf');
+      [newno,newfc]=v2s(img,0.5,opt.elemsize/dx,'cgalsurf');
    end
 else
-  [newno,newfc]=v2s(img,0.5,opt,'cgalsurf');
+  [newno,newfc]=v2s(img,0.5,opt/dx,'cgalsurf');
 end
 
+newno(:,1:3)=newno(:,1:3)*dx;
