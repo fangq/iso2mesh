@@ -35,7 +35,7 @@ exesuff=getexeext;
 if(strcmp(exesuff,'.mexa64')) % cgalsurf.mexglx can be used for both
 	exesuff='.mexglx';
 end
-keyboard
+
 saveinr(vol,mwpath('pre_extract.inr'));
 deletemeshfile(mwpath('post_extract.off'));
 system([' "' mcpath('cgalsurf') exesuff '" "' mwpath('pre_extract.inr') ...
