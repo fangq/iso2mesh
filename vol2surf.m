@@ -174,9 +174,28 @@ if(~isempty(img))
           elseif (isstruct(opt) & length(opt)==1 )
               if(isfield(opt(1),'distbound')) distbound=opt.distbound; end
           end
+	  surfside='';
+          if(isstruct(opt) & length(opt)==maxlevel)
+              if(isfield(opt(i),'side')) surfside=opt(i).side; end
+          elseif (isstruct(opt) & length(opt)==1)
+              if(isfield(opt(1),'side')) surfside=opt(1).side; end
+          end
+	  if(~isempty(surfside))
+	     newimg0=newimg;
+	  end
+          if(strcmp(surfside,'upper'))
+	      newimg(find(newimg<=isovalues(i)-1e-9))=isovalues(i)-1e-9;
+	  elseif(strcmp(surfside,'lower'))
+	      newimg(find(newimg>=isovalues(i)+1e-9))=isovalues(i)+1e-9;
+	  end
 
           [v0,f0]=vol2restrictedtri(newimg,isovalues(i),regions(i,:),...
                      sum(newdim.*newdim)*2,30,radbound,distbound,maxsurfnode);
+keyboard;
+	  if(~isempty(surfside))
+            newimg=newimg0;
+	    clear newimg0;
+	  end
         else
             error('method can only be one of "cgalsurf" or "simplify".');
         end
