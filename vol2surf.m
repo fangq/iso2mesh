@@ -191,7 +191,7 @@ if(~isempty(img))
 
           [v0,f0]=vol2restrictedtri(newimg,isovalues(i),regions(i,:),...
                      sum(newdim.*newdim)*2,30,radbound,distbound,maxsurfnode);
-keyboard;
+
 	  if(~isempty(surfside))
             newimg=newimg0;
 	    clear newimg0;
