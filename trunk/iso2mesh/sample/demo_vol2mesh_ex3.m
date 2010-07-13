@@ -38,6 +38,8 @@ opt(2).keepratio=0.1;  % resample levelset 2 to 10%
 % by default, vol2mesh uses 'cgalsurf' method, which requires the following
 opt(1).radbound=4; % head surface element size bound
 opt(2).radbound=2; % brain surface element size bound
+opt(1).side='lower'; %
+opt(2).side='lower'; %
 
 tic
 [node,elem,face]=vol2mesh(cleanimgfull,1:size(cleanimg,1),1:size(cleanimg,2),1:size(cleanimg,3),opt,100,1);
@@ -50,7 +52,7 @@ hold on
 if(isoctavemesh)
     trimesh(face(:,1:3),node(:,2),node(:,1),node(:,3));
 else
-	hb=trisurf(face(:,1:3),node(:,2),node(:,1),node(:,3));
-	set(hb,'facealpha',0.7)
+	%hb=trisurf(face(:,1:3),node(:,2),node(:,1),node(:,3));
+	%set(hb,'facealpha',0.7)
 end
 axis equal

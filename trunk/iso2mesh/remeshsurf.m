@@ -1,6 +1,6 @@
 function [newno,newfc]=remeshsurf(node,face,opt)
 %
-% [newno,newfc]=resurf(node,face,opt)
+% [newno,newfc]=remeshsurf(node,face,opt)
 %
 % remesh a triangular surface and the output is guaranteed to be
 % free of self-intersecting element. This function is similar to 
