@@ -10,6 +10,8 @@ and perturb the levelset surface mesh to avoid intersection [proposed on 02/11/0
 2. if one levelset contains multiple disjointed surfaces, separate them, 
 and do sub-region labeling for each component [proposed on 02/11/09]
 
+3. setting RNG seeds when calling CGAL tools to ensure repeatibility
+of the meshing [proposed 07/17/2010]
 
 == low priority ==
 

@@ -22,6 +22,8 @@ function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
 %	     opt(1,2,..).keeyratio: setting compression rate for each levelset
 %	   opt(1,2,..).maxsurf: 1 - only use the largest disjointed surface
 %				0 - use all surfaces for that levelset
+%          opt(1,2,..).side: - 'upper': threshold at upper interface
+%                              'lower': threshold at lower interface
 %	   opt(1,2,..).maxnode: - the maximum number of surface node per levelset
 %	   opt(1,2,..).holes: user specified holes interior pt list
 %	   opt(1,2,..).regions: user specified regions interior pt list
