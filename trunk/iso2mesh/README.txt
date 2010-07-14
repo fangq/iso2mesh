@@ -6,10 +6,10 @@
 :      Martinos Center for Biomedical Imaging
 :      Massachusetts General Hospital (Harvard Medical School)
 :      Bldg. 149, 13th St., Charlestown, MA 02148
-'''Version''': 0.9.0 (Tofu alpha)
+'''Version''': 0.9.8 (Tofu alpha)
 '''License''': GPL v2 or later (see COPYING) 
-:      (this license does not cover the binaries in the bin/ 
-:       directory, see section III for more details)
+:      (this license does not cover the binaries under the bin/ 
+:       directory, see Section III for more details)
 '''URL''': http://iso2mesh.sf.net
 
 
@@ -18,33 +18,33 @@
 
 == # Introduction ==
 
-"iso2mesh" is a Matlab/Octave-based mesh generation toolbox. 
-It contains a number of optimized mesh processing scripts 
-and interfaces to several free meshing tools, such as 
-surface mesh simplifier and extraction utilities (based on 
-CGAL), tetgen, and mesh validation&repairing utility (based 
-on JMeshLib). Iso2mesh toolbox provides a simple yet powerful 
-way to create quality tetrahedral volumetric mesh directly 
-from 3D binary, segmented or gray-scale images such as 
-MRI or CT scans.
+"Iso2mesh" is a Matlab/Octave-based mesh generation toolbox
+designed for easy creation of high quality surface and 
+tetrahedral meshes from 3D volumetric images. It contains 
+a rich set of mesh processing scripts/programs, functioning 
+independently or interfacing with external free meshing
+utilities. Iso2mesh toolbox can operate directly on 3D
+binary, segmented or gray-scale images, such as those
+from MRI or CT scans, making it particularly suitable 
+for multi-modality medical imaging data analysis or 
+multi-physics modeling.
 
-To be able to create volumetric finite-element mesh from 
-3D volumetric images is of great interest for researchers 
-in the field of image-based modeling and analysis. 
-Unfortunately, very limited software packages for this 
-purpose can be found in publications and market; they
-are either limited in functionalities or very expensive 
-(such as Amira from Mercury Computer Systems). This toolbox 
-was developed as a free alternative to the expensive 
-commertial tools and provides researchers a complete 
-workflow from 3D binary image preprocessing (hole-filling 
-and island-removing), to surface mesh modeling (extraction, 
-remeshing, validation, repairing, and smoothing) and 
-volumetric mesh creation. Users can either choose the 
-streamlined wrapper scripts to create 3D mesh with a 
-fully automated process, or to call invidual subroutines 
-to perform specific meshing tasks, such as closed surface 
-extraction or boundary extraction.
+Creating quality surface or tetrahedral meshes from 
+volumetric images has been a challenging task where 
+very limited software and resources could be found. 
+Commercial tools, such as Mimics and Amira, are both 
+expensive and limited in functionalities. Iso2mesh
+was developed as a free alternative to these expensive 
+commercial tools and provides researchers a highly
+flexible, modularized and streamlined image-based mesh 
+generation pipeline. It defines simple interfaces to
+perform a wide varieties of meshing tasks, ranging
+from 3D volumetric image pre-processing (hole-filling, 
+thinning and thickening), surface mesh modeling 
+(extraction, remeshing, repairing, and smoothing) to 
+volumetric mesh creation. Iso2mesh is cross-platform
+and is compatible with both Matlab and GNU Octave 
+(a free Matlab clone).
 
 The details of this toolbox can be found in the following
 reference:
@@ -55,357 +55,943 @@ reference:
 
 
 == # List of functions ==
-=== # Streamlined Mesh Generation (wrapper) ===
+=== # Streamlined mesh generation - shortcuts ===
 
-==== vol2mesh.m ====
-function [node,elem,bound]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalues)
-  or
-function [node,elem,face]=v2m(img,isovalues,opt,maxvol,method)
+==== function [node,elem,face]=v2m(img,isovalues,opt,maxvol,method) ====
+ [node,elem,face]=v2m(img,isovalues,opt,maxvol,method)
+ volumetric mesh generation from binary or gray-scale volumetric images
+ shortcut for vol2mesh
+ inputs and outputs are similar to those defined in vol2mesh
 
-   convert a binary (or multi-valued) volume to tetrahedral mesh
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   inputs: 
-          img: a volumetric binary image 
-          ix,iy,iz: subvolume selection indices in x,y,z directions
-          opt: see vol2surf 
-          maxvol: target maximum tetrahedral elem volume
-          dofix: 1: perform mesh validation&repair, 0: skip repairing
-          method: see vol2surf
-          isovalues: extract level-sets at the specified isovalues and
-                fill the volume in-between; if not specified, will use all
-                distinct labels in the image.
-   outputs:
-          node: output, node coordinates of the tetrahedral mesh
-          elem: output, element list of the tetrahedral mesh
-          bound: output, mesh surface element list of the tetrahedral mesh
-               the last column denotes the boundary ID
+==== function [no,el,regions,holes]=v2s(img,isovalues,opt,method) ====
+ [no,el,regions,holes]=v2s(img,isovalues,opt,method)
+ surface mesh generation from binary or gray-scale volumetric images
+ shortcut for vol2surf
+ inputs and outputs are similar to those defined in vol2surf
 
-==== vol2surf.m ====
-function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
-  or
-function [no,el,regions,holes]=v2s(img,isovalues,opt,method)
+==== function [node,elem,face]=s2m(v,f,keepratio,maxvol) ====
+ [node,elem,face]=s2m(v,f,keepratio,maxvol)
+ volumetric mesh generation from a closed surface, shortcut for surf2mesh
+ inputs and outputs are similar to those defined in surf2mesh
 
-   converting a 3D volumetric image to surfaces
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   inputs:
-          img: a volumetric binary image; if img is empty, vol2surf will
-               return user defined surfaces via opt.surf if it exists
-	  ix,iy,iz: subvolume selection indices in x,y,z directions
-	  opt: function parameters
-	    if method is 'cgalsurf':
-	      opt=a float number>1: max radius of the Delaunay sphere(element size)
-	      opt.radbound: same as above, max radius of the Delaunay sphere
-	      opt(1,2,...).radbound: same as above, for each levelset
-	    if method is 'simplify':
-	      opt=a float number<1: compression rate for surf. simplification
-	      opt.keeyratio=a float less than 1: same as above, same for all surf.
-	      opt(1,2,..).keeyratio: setting compression rate for each levelset
-	    opt(1,2,..).maxsurf: 1 - only use the largest disjointed surface
-				 0 - use all surfaces for that levelset
-	    opt(1,2,..).holes: user specified holes interior pt list
-	    opt(1,2,..).regions: user specified regions interior pt list
-	    opt(1,2,..).surf.{node,elem}: add additional surfaces
-	    opt(1,2,..).{A,B}: linear transformation for each surface
-	  dofix: 1: perform mesh validation&repair, 0: skip repairing
-	  method: - if method is 'simplify', iso2mesh will first call
-		    binsurface to generate a voxel-based surface mesh and then
-		    use meshresample/meshcheckrepair to create a coarser mesh;
-		  - if method is 'cgalsurf', iso2mesh will call the surface
-		    extraction program from CGAL to make surface mesh
-		  - if method is not specified, 'cgalsurf' is assumed by default
-          isovalues: extract level-sets at the specified isovalues and
-                fill the volume in-between; if not specified, will use all
-                distinct labels in the image.
-   outputs:
-	  no:  list of nodes on the resulting suface mesh, 3 columns for x,y,z
-	  el:  list of trianglular elements on the surface, [n1,n2,n3,region_id]
-	  regions: list of interior points for all sub-region, [x,y,z]
-	  holes:   list of interior points for all holes, [x,y,z]
+==== function newnode=sms(node,face,iter,alpha) ====
+ newnode=sms(node,face,iter,useralpha)
+ simplified version of surface mesh smoothing
+ input:
+    node:  node coordinates of a surface mesh
+    face:  face element list of the surface mesh
+    iter:  smoothing iteration number
+    alpha: scaler, smoothing parameter, v(k+1)=alpha*v(k)+(1-alpha)*mean(neighbors)
+ output:
+    newnode: output, the smoothed node coordinates
+=== # Streamlined mesh generation ===
 
-==== surf2mesh.m ====
-function [node,elem,bound]=surf2mesh(v,f,p0,p1,keepratio,maxvol,method)
-  or
-function [node,elem,face]=s2m(v,f,keepratio,maxvol,method)
+==== function [node,elem,face]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalues) ====
+ [node,elem,face]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalues)
+ convert a binary (or multi-valued) volume to tetrahedral mesh
+ input:
+	 img: a volumetric binary image
+	 ix,iy,iz: subvolume selection indices in x,y,z directions
+	 opt: as defined in vol2surf.m
+	 maxvol: target maximum tetrahedral elem volume
+	 dofix: 1: perform mesh validation&repair, 0: skip repairing
+	 method: 'cgalsurf' or omit: use CGAL surface mesher
+		 'simplify': use binsurface and then simplify
+		 'cgalmesh': use CGAL 3.5 3D mesher for direct mesh generation [new]
+		 generally speaking, 'cgalmesh' is the most robust path
+		 if you want to product meshes from binary or multi-region
+		 volumes, however, its limitations include 1) only accept 
+		 uint8 volume, and 2) can not extract meshes from gray-scale
+		 volumes. If ones goal is to process a gray-scale volume,
+		 he/she should use the 'cgalsurf' option. 'simplify' approach
+		 is not recommended unless other options failed.
+	 isovalues: a list of isovalues where the levelset is defined
+ output:
+	 node: output, node coordinates of the tetrahedral mesh
+	 elem: output, element list of the tetrahedral mesh, the last 
+	       column is the region ID
+	 face: output, mesh surface element list of the tetrahedral mesh
+	       the last column denotes the boundary ID
 
-   surf2mesh - create quality volumetric mesh from isosurface patches
-   author: fangq (fangq<at> nmr.mgh.harvard.edu)
-   parameters:
-        v: input, isosurface node list, dimension (nn,3)
-        f: input, isosurface face element list, dimension (be,3)
-        p0: input, coordinates of one corner of the bounding box, p0=[x0 y0 z0]
-        p1: input, coordinates of the other corner of the bounding box, p1=[x1 y1 z1]
-        keepratio: input, percentage of elements being kept after the simplification
-        maxvol: input, maximum tetrahedra element volume
-        node: output, node coordinates of the tetrahedral mesh
-        elem: output, element list of the tetrahedral mesh
-        bound: output, mesh surface element list of the tetrahedral mesh 
-               the last column denotes the boundary ID
+==== function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues) ====
+ [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
+ converting a 3D volumetric image to surfaces
+ input:
+	 img: a volumetric binary image; if img is empty, vol2surf will
+	      return user defined surfaces via opt.surf if it exists
+	 ix,iy,iz: subvolume selection indices in x,y,z directions
+	 opt: function parameters
+	   if method is 'cgalsurf':
+	     opt=a float number>1: max radius of the Delaunay sphere(element size) 
+	     opt.radbound: same as above, max radius of the Delaunay sphere
+	     opt.distbound: maximum deviation from the specified isosurfaces
+	     opt(1,2,...).radbound: same as above, for each levelset
+	   if method is 'simplify':
+	     opt=a float number<1: compression rate for surf. simplification
+	     opt.keeyratio=a float less than 1: same as above, same for all surf.
+	     opt(1,2,..).keeyratio: setting compression rate for each levelset
+	   opt(1,2,..).maxsurf: 1 - only use the largest disjointed surface
+				0 - use all surfaces for that levelset
+          opt(1,2,..).side: - 'upper': threshold at upper interface
+                              'lower': threshold at lower interface
+	   opt(1,2,..).maxnode: - the maximum number of surface node per levelset
+	   opt(1,2,..).holes: user specified holes interior pt list
+	   opt(1,2,..).regions: user specified regions interior pt list
+	   opt(1,2,..).surf.{node,elem}: add additional surfaces
+	   opt(1,2,..).{A,B}: linear transformation for each surface
+	 dofix: 1: perform mesh validation&repair, 0: skip repairing
+	 method: - if method is 'simplify', iso2mesh will first call
+		   binsurface to generate a voxel-based surface mesh and then
+		   use meshresample/meshcheckrepair to create a coarser mesh;
+		 - if method is 'cgalsurf', iso2mesh will call the surface
+		   extraction program from CGAL to make surface mesh
+		 - if method is not specified, 'cgalsurf' is assumed by default
+	 isovalues: a list of isovalues where the levelset is defined
+ output: 
+	 no:  list of nodes on the resulting suface mesh, 3 columns for x,y,z
+	 el:  list of trianglular elements on the surface, [n1,n2,n3,region_id]
+	 regions: list of interior points for all sub-region, [x,y,z]
+	 holes:   list of interior points for all holes, [x,y,z]
 
+==== function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox) ====
+ [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox)
+ create quality volumetric mesh from isosurface patches
+ input parameters:
+      v: input, isosurface node list, dimension (nn,3)
+         if v has 4 columns, the last column specifies mesh density near each node
+      f: input, isosurface face element list, dimension (be,3)
+      p0: input, coordinates of one corner of the bounding box, p0=[x0 y0 z0]
+      p1: input, coordinates of the other corner of the bounding box, p1=[x1 y1 z1]
+      keepratio: input, percentage of elements being kept after the simplification
+      maxvol: input, maximum tetrahedra element volume
+      regions: list of regions, specifying by an internal point for each region
+      holes: list of holes, similar to regions
+      forcebox: 1: add bounding box, 0: automatic
+ outputs:
+      node: output, node coordinates of the tetrahedral mesh
+      elem: output, element list of the tetrahedral mesh
+      face: output, mesh surface element list of the tetrahedral mesh 
+             the last column denotes the boundary ID
 
-=== # Mesh simplification ===
+==== function img=surf2vol(node,face,xi,yi,zi) ====
+ img=surf2vol(node,face,xi,yi,zi)
+ convert a triangular surface to a shell of voxels in a 3D image
+ input:
+	 node: node list of the triangular surface, 3 columns for x/y/z
+	 face: triangle node indices, each row is a triangle
+	 xi,yi,zi: x/y/z grid for the resulting volume
+ output:
+	 img: a volumetric binary image at position of ndgrid(xi,yi,zi)
+=== # iso2mesh main function backend ===
 
-==== meshresample.m ====
-function [node,elem]=meshresample(v,f,elemnum)
-   meshresample: resample mesh using CGAL mesh simplification utility
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+==== function [node,elem]=binsurface(img,nface) ====
+ [node,elem]=binsurface(img,nface)
+ fast isosurface extraction from 3D binary images
+ input: 
+   img:  a 3D binary image
+   nface: nface=3 or ignored - for triangular faces, 
+          nface=4 - square faces
+          nface=0 - return a boundary mask image via node
+ output
+   elem: integer array with dimensions of NE x nface, each row represents
+         a surface mesh face element 
+   node: node coordinates, 3 columns for x, y and z respectively
+ the outputs of this subroutine can be easily plotted using 
+     patch('Vertices',node,'faces',elem,'FaceVertexCData',node(:,3),
+           'FaceColor','interp');
+ if the surface mesh has triangular faces, one can plot it with
+     trisurf(elem,node(:,1),node(:,2),node(:,3))
 
-==== bbxflatsegment.m ====
-function seg=bbxflatsegment(node,loop)
-   bbxflatsegment: decompose edge loops into flat segments
-                    alone x/y/z planes of the bounding box
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters:   
-      node:  x,y,z coordinates of each node of the mesh
-      loop:  input, a single vector separated by NaN, each segment
-               is a close-polygon consisted by node IDs 
-      seg:   output, a single vector separated by NaN, each segment
-               is a close-polygon on x/y/z plane 
+==== function [node,elem,face]=cgalv2m(vol,opt,maxvol) ====
+ [node,elem,face]=cgalv2m(vol,opt,maxvol)
+ wrapper for CGAL 3D mesher (CGAL 3.5)
+ convert a binary (or multi-valued) volume to tetrahedral mesh
+ http://www.cgal.org/Manual/3.5/doc_html/cgal_manual/Mesh_3/Chapter_main.html
+ input:
+	 vol: a volumetric binary image
+	 ix,iy,iz: subvolume selection indices in x,y,z directions
+	 opt: parameters for CGAL mesher, if opt is a structure, then
+	     opt.radbound: defines the maximum surface element size
+	     opt.angbound: defines the miminum angle of a surface triangle
+	     opt.surfaceapprox: defines the maximum distance between the 
+		 center of the surface bounding circle and center of the 
+		 element bounding sphere
+	     opt.reratio:  maximum radius-edge ratio
+	     if opt is a scalar, it only specifies radbound.
+	 maxvol: target maximum tetrahedral elem volume
+ output:
+	 node: output, node coordinates of the tetrahedral mesh
+	 elem: output, element list of the tetrahedral mesh, the last 
+	      column is the region id
+	 face: output, mesh surface element list of the tetrahedral mesh
+	      the last column denotes the boundary ID
+	      note: each triangle will appear twice in the face list with each
+		    one attaches to each side of the interface. one can remove
+		    the redundant triangles by unique(face(:,1:3),'rows')
 
-=== # Mesh repair ===
+==== function [node,elem,face]=cgals2m(v,f,opt,maxvol) ====
+ [node,elem,face]=cgals2m(v,f,opt,maxvol)
+ wrapper for CGAL 3D mesher (CGAL 3.5)
+ convert a binary (or multi-valued) volume to tetrahedral mesh
+ http://www.cgal.org/Manual/3.5/doc_html/cgal_manual/Mesh_3/Chapter_main.html
+ input:
+	 v: the node coordinate list of a surface mesh (nn x 3)
+	 f: the face element list of a surface mesh (be x 3)
+	 opt: parameters for CGAL mesher, if opt is a structure, then
+	     opt.radbound: defines the maximum surface element size
+	     opt.angbound: defines the miminum angle of a surface triangle
+	     opt.surfaceapprox: defines the maximum distance between the 
+		 center of the surface bounding circle and center of the 
+		 element bounding sphere
+	     opt.reratio:  maximum radius-edge ratio
+	     if opt is a scalar, it only specifies radbound.
+	 maxvol: target maximum tetrahedral elem volume
+ output:
+	 node: output, node coordinates of the tetrahedral mesh
+	 elem: output, element list of the tetrahedral mesh, the last 
+	      column is the region id
+	 face: output, mesh surface element list of the tetrahedral mesh
+	      the last column denotes the boundary ID
 
-==== meshcheckrepair.m ====
-function [node,elem]=meshcheckrepair(node,elem,opt)
-   check and repair a surface mesh
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters:
-        node: input/output, surface node list, dimension (nn,3)
-        elem: input/output, surface face element list, dimension (be,3)
-        opt: options, including
-              'duplicated': remove duplicated elements
-              'isolated': remove isolated nodes
-              'deep': call external jmeshlib to remove non-manifold vertices
+==== function [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distbound,maxnode) ====
+ [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distbound,maxnode)
+ surface mesh extraction using CGAL mesher
+ input:
+       vol: a 3D volumetric image
+       thres: a scalar as the threshold of of the extraction
+       cent: a 3d position (x,y,z) which locates inside the resulting
+             mesh, this is automatically computed from vol2surf
+       brad: maximum bounding sphere squared of the resulting mesh
+       ang: minimum angular constrains of the resulting tranglar elements
+            (in degrees)
+       radbound: maximum triangle delaunay circle radius
+       distbound: maximum delaunay sphere distances
+       maxnode: maximum number of surface nodes (even radbound is not reached)
+ output:
+       node: the list of 3d nodes in the resulting surface (x,y,z)
+       elem: the element list of the resulting mesh (3 columns of integers)
 
-==== removedupelem.m ====
-function elem=removedupelem(elem)
-   remove doubly duplicated elements
-
-==== removeisolatednode.m ====
-function [no,el]=removeisolatednode(node,elem)
-   remove isolated nodes: nodes that are not included in any element
-
-==== delendelem.m ====
-function elem=delendelem(elem,mask)
-   delendelem - delete elements whose nodes are all edge nodes
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters: 
-        elem: input/output, surface/volumetric element list
-        mask: node label, =0 for internal nodes, =1 for edge nodes
-
-==== surfaceclean.m ====
-function f=surfaceclean(f,v)
-   surfaceclean: remove surface patches that are located inside 
-                 the bounding box faces
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters: 
-        v: input, surface node list, dimension (nn,3)
-        f: input, surface face element list, dimension (be,3)  
-        f: output, faces free of those on the bounding box
-
-==== smoothsurf.m ====
-function nodenew=smoothsurf(node,mask,conn,iter,useralpha,usermethod,userbeta)
-or
-function nodenew=sms(node,face,iter,alpha)
-
-   smoothsurf: smooth a surface mesh by 3 smoothing algorithms
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   input:
-      node:  node coordinates of a surface mesh
-      mask: of length of node number, =0 for internal nodes, =1 for edge nodes
-      conn:  input, a cell structure of length size(node), conn{n}
-             contains a list of all neighboring node ID for node n
-      iter:  smoothing iteration number
-      useralpha: scaler, smoothing parameter, v(k+1)=alpha*v(k)+(1-alpha)*mean(neighbors)
-      usermethod: smoothing method, including 'laplacian','laplacianhc' and 'lowpass'
-      userbeta: scaler, smoothing parameter, for 'laplacianhc'
-   output:
-      nodenew: output, the smoothed node coordinates
-
+==== function img=surf2volz(node,face,xi,yi,zi) ====
+ img=surf2volz(node,face,xi,yi,zi)
+ convert a triangular surface to a shell of voxels in a 3D image
+ along the z-axis
+ input:
+	 node: node list of the triangular surface, 3 columns for x/y/z
+	 face: triangle node indices, each row is a triangle
+	 xi,yi,zi: x/y/z grid for the resulting volume
+ output:
+	 img: a volumetric binary image at position of ndgrid(xi,yi,zi)
 === # Mesh decomposition and query ===
 
-==== finddisconnsurf.m ====
-function facecell=finddisconnsurf(f)   
-   subroutine to extract disconnected surfaces from a 
-   cluster of surfaces
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters:
-       facelist: input, node indices for all surface triangles
-       facecell: separated disconnected surface node indices
+==== function facecell=finddisconnsurf(f) ====
+ facecell=finddisconnsurf(f)
+ subroutine to extract disconnected surfaces from a 
+ cluster of surfaces
+ Date: 2008/03/06
+ input: 
+     f: faces defined by node indices for all surface triangles
+ output:
+     facecell: separated disconnected surface node indices
 
-==== maxsurf.m ====
-function f=maxsurf(facecell)
-   return a surface with contains the most elements in a 
-   collection of surfaces (stored in a cell array)
+==== function openedge=surfedge(f) ====
+ openedge=surfedge(f)
+ find the edge of an open surface or surface of a volume
+ input:
+      f: input, surface face element list, dimension (be,3)
+ output:
+      openedge: list of edges of the specified surface
 
-==== extractloops.m ====
-function loops=extractloops(edges)
-   extractloops: extract individual loops from an edge table of a loop
-                 collection
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters:   
-      edges:  two column matrix recording the starting/ending 
-               points of all edge segments
-      loops:  output, a single vector separated by NaN, each segment
-               is a close-polygon consisted by node IDs
+==== function openface=volface(t) ====
+ openface=volface(t)
+ find the surface patches of a volume
+ input:
+      t: input, volumetric element list, dimension (ne,4)
+ output:
+      openface: list of faces of the specified volume
 
-==== flatsegment.m ====
-function mask=flatsegment(node,edge)
-   flatsegment: decompose edge loops into flat segments
-                alone arbitrary planes of the bounding box
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-    this code is fragile: it can not handle curves with many co-linear
-    nodes near the corner point
-  
-   parameters:   
-      node:  x,y,z coordinates of each node of the mesh
-      edge:  input, a single vector separated by NaN, each segment
+==== function loops=extractloops(edges) ====
+ loops=extractloops(edges)
+ extract individual loops from an edge table of a loop
+ collection
+ input:   
+    edges:  two column matrix recording the starting/ending 
+             points of all edge segments
+ output:
+    loops:  output, a single vector separated by NaN, each segment
+             is a close-polygon consisted by node IDs
+
+==== function [conn,connnum,count]=meshconn(elem,nn) ====
+ [conn,connnum,count]=meshconn(elem,nn)
+ create node neighbor list from a mesh
+ input:
+    elem:  element table of a mesh
+    nn  :  total node number of the mesh
+ output:
+    conn:  output, a cell structure of length nn, conn{n}
+           contains a list of all neighboring node ID for node n
+    connnum: vector of length nn, denotes the neighbor number of each node
+    count: total neighbor numbers
+
+==== function centroid=meshcentroid(v,f) ====
+ centroid=meshcentroid(v,f)
+ compute the centroids of a mesh defined by nodes and elements
+ (surface or tetrahedra) in R^n space
+ input:
+      v: surface node list, dimension (nn,3)
+      f: surface face element list, dimension (be,3)
+ output:
+      centroid: centroid positions, one row for each element
+
+==== function nodevol=nodevolume(node,elem) ====
+ nodevol=nodevolume(node,elem)
+ calculate the Voronoi volume of each node in a simplex mesh
+ input:
+    node:  node coordinates
+    elem:  element table of a mesh
+ output:
+    nodevol:   volume values for all nodes
+
+==== function vol=elemvolume(node,elem,option) ====
+ vol=elemvolume(node,elem,option)
+ calculate the volume for a list of simplexes
+ input:
+    node:  node coordinates
+    elem:  element table of a mesh
+    option: if option='signed', the volume is the raw determinant,
+            else, the results will be the absolute values
+ output
+    vol:   volume values for all elements
+
+==== function [conn,connnum,count]=neighborelem(elem,nn); ====
+ [conn,connnum,count]=neighborelem(elem,nn)
+ create node neighbor list from a mesh
+ input:
+    elem:  element table of a mesh
+    nn  :  total node number of the mesh
+ output:
+    conn:  output, a cell structure of length nn, conn{n}
+           contains a list of all neighboring elem ID for node n
+    connnum: vector of length nn, denotes the neighbor number of each node
+    count: total neighbor numbers
+
+==== function facenb=faceneighbors(t,opt) ====
+ facenb=faceneighbors(t,opt)
+ to find 4 face-neighboring elements of a tetrahedron
+ input:
+     t: tetrahedron element list, 4 columns of integers
+     opt: if opt='surface', return boundary triangle list 
+          (should be the same as the face output from v2m)
+          otherwise, return the element list for each element:
+          each row contains 4 numbers, representing the element
+          indices sharing triangular faces [1 2 3],[1 2 4],[1 3 4]
+          and [2 3 4] in order, where 1~4 is the node local index.
+          if the index is 0, indicating the face has no neighbor
+          (i.e. a boundary face)
+ output:
+     facenb: see opt
+
+==== function f=maxsurf(facecell) ====
+ f=maxsurf(facecell)
+ return the surface with the maximum element number (not 
+ necessarily in area) from a cell arry of surfaces
+ input:
+    facecell: a cell array, each element is a face array
+ output:
+    f: the surface data (node indices) for the surface with most elements
+
+==== function mask=flatsegment(node,edge) ====
+ mask=flatsegment(node,edge)
+ decompose edge loops into flat segments alone arbitrary planes of the bounding box
+ this code is fragile: it can not handle curves with many co-linear
+ nodes near the corner point
+ input:   
+    node:  x,y,z coordinates of each node of the mesh
+    edge:  input, a single vector separated by NaN, each segment
+           is a close-polygon consisted by node IDs 
+ output:
+    mask:  output, a cell, each element is a close-polygon 
+           on x/y/z plane 
+
+==== function newedge=orderloopedge(edge) ====
+ [newedge]=orderloopedge(edge)
+ order the node list of a simple loop based on connection sequence
+ input: 
+        edge: a loop consisted by a sequence of edges, each row 
+              is an edge with two integers: start/end node index
+ output:
+        newedge: reordered edge node list
+
+==== function [X,V,E,F]=mesheuler(face) ====
+ [X,V,E,F]=mesheuler(face)
+ Euler's charastistics of a mesh
+ input: 
+   face: a closed surface mesh
+ output:
+   X: Euler's charastistics
+   V: number of vertices 
+   E: number of edges
+   F: number of faces
+
+==== function seg=bbxflatsegment(node,loop) ====
+ seg=bbxflatsegment(node,loop)
+ decompose edge loops into flat segments alone x/y/z 
+ planes of the bounding box
+ input:   
+    node:  x,y,z coordinates of each node of the mesh
+    loop:  input, a single vector separated by NaN, each segment
              is a close-polygon consisted by node IDs 
-      mask:  output, a cell, each element is a close-polygon 
-             on x/y/z plane 
+ output:
+    seg:   output, a single vector separated by NaN, each segment
+             is a close-polygon on x/y/z plane 
+=== # Mesh processing and reparing ===
 
-==== internalpoint.m ====
-function p=internalpoint(v,aloop)
-   internalpoint: imperical function to find an internal point
-                  of a planar polygon
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters:   
-      v:     x,y,z coordinates of each node of the mesh
-      aloop:  input, a single vector separated by NaN, each segment
-               is a close-polygon consisted by node IDs 
-      p:   output, [x y z] of an internal point of aloop
+==== function [node,elem]=meshcheckrepair(node,elem,opt) ====
+ [node,elem]=meshcheckrepair(node,elem,opt)
+ check and repair a surface mesh
+ input/output:
+      node: input/output, surface node list, dimension (nn,3)
+      elem: input/output, surface face element list, dimension (be,3)
+      opt: options, including
+            'duplicated': remove duplicated elements
+            'isolated': remove isolated nodes
+            'deep': call external jmeshlib to remove non-manifold vertices
 
+==== function newelem=meshreorient(node,elem) ====
+ newelem=meshreorient(node,elem)
+ reorder nodes in a surface or tetrahedral mesh to ensure all
+ elements are oriented consistently
+ input:
+    node: list of nodes
+    elem: list of elements (each row are indices of nodes of each element)
+ output:
+    newelem: the element list with consistent ordering
 
-==== meshconn.m ====
-function [conn,connnum,count]=meshconn(elem,nn);
-   meshconn: create node neighbor list from a mesh
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters:
-      elem:  element table of a mesh
-      nn  :  total node number of the mesh
-      conn:  output, a cell structure of length nn, conn{n}
-             contains a list of all neighboring node ID for node n
-      connnum: vector of length nn, denotes the neighbor number of each node
-      count: total neighbor numbers
+==== function elem=removedupelem(elem) ====
+ elem=removedupelem(elem)
+ remove doubly duplicated elements
+ input:
+    elem: list of elements (node indices)
+ output:
+    elem: element list after removing the duplicated elements
 
+==== function [newnode,newelem]=removedupnodes(node,elem) ====
+ [newnode,newelem]=removedupnodes(node,elem)
+ removing the duplicated nodes from a mesh
+ input:
+   elem: integer array with dimensions of NE x 4, each row contains
+         the indices of all the nodes for each tetrahedron
+   node: node coordinates, 3 columns for x, y and z respectively
+ output:
+   newnode: nodes without duplicates
+   newelem: elements with only the unique nodes
 
-==== orderloopedge.m ====
-function newedge=orderloopedge(edge)
-   order the node list of a simple loop based on connection sequence
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   inputs: 
-          edge: a loop consisted by a sequence of edges, each row 
-                is an edge with two integers: start/end node index
-          newedge: reordered edge node list
-   (this subroutine can not process bifercation)
+==== function [no,el]=removeisolatednode(node,elem) ====
+ [no,el]=removeisolatednode(node,elem)
+ remove isolated nodes: nodes that are not included in any element
+ input:
+     node: list of node coordinates
+     elem: list of elements of the mesh
+ output:
+     no: node coordinates after removing the isolated nodes
+     el: element list of the resulting mesh
 
-==== surfedge.m ====
-function tri=surfedge(f)
-   surfedge: find the edge of an open surface
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters:
-        v: input, surface node list, dimension (nn,3)
-        f: input, surface face element list, dimension (be,3)
+==== function fnew=removeisolatedsurf(v,f,maxdiameter) ====
+ fnew=removeisolatedsurf(v,f,maxdiameter)
+ remove disjointed surface fragment by using mesh diameter
+ input:
+    v: list of nodes of the input surface
+    f: list of triangles of the input surface
+    maxdiameter: maximum bounding box size for surface removal
+ ouput:
+    fnew: new face list after removing the components smaller than 
+          maxdiameter
 
-=== # Binary image pre-processing (hole-filling and island removing) ===
+==== function f=surfaceclean(f,v) ====
+ f=surfaceclean(f,v)
+ remove surface patches that are located inside 
+               the bounding box faces
+ input: 
+      v: surface node list, dimension (nn,3)
+      f: surface face element list, dimension (be,3)  
+ output:
+      f: faces free of those on the bounding box
 
-==== bwislands.m ====
-function islands=bwislands(img)
-   decompose a 2D binary image into isolated regions
-   and return the indices of the region pixels as a cell array
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters:
-        img: a binary (0-1) 2D image
-        islands:a cell array of length of region numbers, each 
-                element stores all indices in img for that region
+==== function eid=getintersecttri(tmppath) ====
+ eid=getintersecttri(tmppath)
+ get the IDs of self-intersecting elements from tetgen
+ call this when tetgen complains about self-intersection
+ input: 
+   tmppath: working dir, use mwpath('') in most cases
+ output:
+   eid: an array of all intersecting surface elements, 
+     one can read the corresponding node/elem by
+     [no,el]=readoff(mwpath('post_vmesh.off'));
 
-==== deislands2d.m ====
-function cleanimg=deislands2d(img,sizelim)
-   remove all small islands smaller than specified size from  
-   a binary image
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters:
-       	img: a binary (0-1) 2D image
-        sizelim: maximum pixel counts of the islands to be removed
-        cleanimg: a binary image after removing the small islands
+==== function elem=delendelem(elem,mask) ====
+ elem=delendelem(elem,mask)
+ delete elements whose nodes are all edge nodes
+ input/output: 
+      elem: input/output, surface/volumetric element list
+      mask: of length of node number, =0 for internal nodes, =1 for edge nodes
+=== # Mesh resampling and optimization ===
 
-==== deislands3d.m ====
-function cleanimg=deislands3d(img,sizelim)
-   remove all small islands smaller than specified size from
-   a 3D binary image (it applies deislands2d for each image slice)
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters:
-        img: a binary (0-1) 3D image
-        sizelim: maximum pixel counts of the islands to	be removed
-       	cleanimg: a binary image after removing	the small islands 
+==== function [node,elem]=meshresample(v,f,keepratio) ====
+ [node,elem]=meshresample(v,f,keepratio)
+ resample mesh using CGAL mesh simplification utility
+ input:
+    v: list of nodes
+    f: list of surface elements (each row for each triangle)
+    keepratio: decimation rate, a number less than 1, as the percentage
+               of the elements after the sampling
+ output:
+    node: the node coordinates of the sampled surface mesh
+    elem: the element list of the sampled surface mesh
 
-=== # File IO ===
+==== function [newno,newfc]=remeshsurf(node,face,opt) ====
+ [newno,newfc]=remeshsurf(node,face,opt)
+ remesh a triangular surface and the output is guaranteed to be
+ free of self-intersecting element. This function is similar to 
+ meshresample, but it can both downsample or upsample a mesh
+ input:
+	 node: list of nodes on the input suface mesh, 3 columns for x,y,z
+	 face: list of trianglular elements on the surface, [n1,n2,n3,region_id]
+	 opt: function parameters
+	   opt.gridsize:  resolution for the voxelization of the mesh
+	   opt.closesize: if there are openings, set the closing diameter
+	   opt.elemsize:  the size of the element of the output surface
+	   if opt is a scalar, it defines the elemsize and gridsize=opt/4
+ output:
+	 newno:  list of nodes on the resulting suface mesh, 3 columns for x,y,z
+	 newfc:  list of trianglular elements on the surface, [n1,n2,n3,region_id]
 
-==== readoff.m ====
-function [node,elem]=readoff(fname)
-   readoff: read  Geomview Object File Format
-   by FangQ, 2008/03/28
+==== function p=smoothsurf(node,mask,conn,iter,useralpha,usermethod,userbeta) ====
+ p=smoothsurf(node,mask,conn,iter,useralpha,usermethod,userbeta)
+ smoothing a surface mesh
+ input:
+    node:  node coordinates of a surface mesh
+    mask:  flag whether a node is movable: 0 movable, 1 non-movable
+           if mask=[], it assumes all nodes are movable
+    conn:  input, a cell structure of length size(node), conn{n}
+           contains a list of all neighboring node ID for node n,
+           this can be computed from meshconn function
+    iter:  smoothing iteration number
+    useralpha: scaler, smoothing parameter, v(k+1)=alpha*v(k)+(1-alpha)*mean(neighbors)
+    usermethod: smoothing method, including 'laplacian','laplacianhc' and 'lowpass'
+    userbeta: scaler, smoothing parameter, for 'laplacianhc'
+ output:
+    p: output, the smoothed node coordinates
+ recommendations
+    Based on [Bade2006], 'Lowpass' method outperforms 'Laplacian-HC' in volume
+    preserving and both are significantly better than the standard Laplacian method
+    [Bade2006]  R. Bade, H. Haase, B. Preim, "Comparison of Fundamental Mesh 
+                Smoothing Algorithms for Medical Surface Models," 
+                Simulation and Visualization, pp. 289-304, 2006. 
 
-==== readsmf.m ====
-function [node,elem]=readsmf(fname)
-   readsmf: read simple model format
-   by FangQ, 2007/11/21
+==== function [no,el,fc,nodemap]=sortmesh(origin,node,elem,ecol,face,fcol) ====
+ [no,el,fc]=sortmesh(origin,node,elem,face)
+ sort nodes and elements in a mesh so that the indexed
+ nodes and elements are closer to each order
+ (this may reduce cache-miss in a calculation)
+ input:
+    origin: sorting all nodes and elements with the distance and
+            angles wrt this location, if origin=[], it will be 
+            node(1,:)
+    node: list of nodes
+    elem: list of elements (each row are indices of nodes of each element)
+    ecol: list of columns in elem to participate sorting
+    face: list of surface triangles (this can be omitted)
+    fcol: list of columns in face to participate sorting
+ output:
+    no: node coordinates in the sorted order
+    el: the element list in the sorted order
+    fc: the surface triangle list in the sorted order (can be ignored)
+    nodemap: the new node mapping order, no=node(nodemap,:)
+=== # File I/O ===
 
-==== readtetgen.m ====
-function [node,elem,bound]=readtetgen(fstub)
-   readtetgen: read tetgen output files
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters:
-      fstub: file name stub
+==== function saveasc(v,f,fname) ====
+ saveasc(v,f,fname)
+ save a surface mesh to FreeSurfer ASC mesh format
+ input:
+      v: input, surface node list, dimension (nn,3)
+      f: input, surface face element list, dimension (be,3)
+      fname: output file name
 
-==== saveoff.m ====
-function saveoff(v,f,fname)
-   saveoff: save a surface mesh to  Geomview Object File Format
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters:
-        v: input, surface node list, dimension (nn,3)
-        f: input, surface face element list, dimension (be,3)
-        fname: output file name
+==== function savedxf(node,elem,face,fname) ====
+ savedxf(node,elem,face,fname)
+ save a surface mesh to DXF format
+ input:
+      node: input, surface node list, dimension (nn,3)
+      elem: input, tetrahedral element list, dimension (ne,4)
+      face: input, surface face element list, dimension (be,3)
+      fname: output file name
 
-==== savesmf.m ====
-function savesmf(v,f,fname)
-   savesmf: save a surface mesh to smf format
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters:
-        v: input, surface node list, dimension (nn,3)
-        f: input, surface face element list, dimension (be,3)
-        fname: output file name
+==== function saveinr(vol,fname) ====
+ saveinr(vol,fname)
+ save a surface mesh to INR Format
+ input:
+      vol: input, a binary volume
+      fname: output file name
 
-==== savesurfpoly.m ====
-function savesurfpoly(v,f,p0,p1,fname)
-   meshconn: create node neighbor list from a mesh
-   author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
-   parameters:
-        v: input, surface node list, dimension (nn,3)
-        f: input, surface face element list, dimension (be,3)
-        p0: input, coordinates of one corner of the bounding box, p0=[x0 y0 z0]
-        p1: input, coordinates of the other corner of the bounding box, p1=[x1 y1 z1]
-        fname: output file name
+==== function saveoff(v,f,fname) ====
+ saveoff(v,f,fname)
+ save a surface mesh to Geomview Object File Format (OFF)
+ input:
+      v: input, surface node list, dimension (nn,3)
+      f: input, surface face element list, dimension (be,3)
+      fname: output file name
 
-==== mwpath.m ====
-function fullname=mwpath(fname)
-    get full temp-file name by prepend working-directory and current session name.
-    author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+==== function savesmf(v,f,fname) ====
+ savesmf(v,f,fname)
+ save a surface mesh to smf format
+ input:
+      v: input, surface node list, dimension (nn,3)
+      f: input, surface face element list, dimension (be,3)
+      fname: output file name
 
+==== function savesurfpoly(v,f,holelist,regionlist,p0,p1,fname,forcebox) ====
+ savesurfpoly(v,f,holelist,regionlist,p0,p1,fname)
+ save a set of surfaces into poly format (for tetgen)
+ input:
+      v: input, surface node list, dimension (nn,3)
+         if v has 4 columns, the last column specifies mesh density near each node
+      f: input, surface face element list, dimension (be,3)
+      holelist: list of holes, each hole is represented by an internal point
+      regionlist: list of regions, similar to holelist
+      p0: coordinate of one of the end of the bounding box
+      p1: coordinate for the other end of the bounding box
+      fname: output file name
+      forcebox: non-empty: add bounding box, []: automatic
+                if forcebox is a 8x1 vector, it will be used to 
+                specify max-edge size near the bounding box corners
+
+==== function savevrml(node,elem,face,fname) ====
+ savevrml(node,elem,face,fname)
+ save a surface mesh to VRML 1.0 format
+ input:
+      node: input, surface node list, dimension (nn,3)
+      elem: input, tetrahedral element list, dimension (ne,4)
+      face: input, surface face element list, dimension (be,3)
+      fname: output file name
+
+==== function [node,elem]=readasc(fname) ====
+ [node,elem]=readasc(fname)
+ read FreeSurfer ASC mesh format
+ input:
+      fname: name of the asc file
+ output:
+      node: node positions of the mesh
+      elem: element list of the mesh
+
+==== function dat=readinr(fname) ====
+ vol=readinr(fname)
+ load a volume from an INR file
+ input:
+      fname: input file name
+ output:
+      dat: output, data read from the inr file
+
+==== function [node,elem,face]=readmedit(filename) ====
+ [node,elem,face]=readmedit(filename)
+ read Medit mesh format
+ input:
+    fname: name of the medit data file
+ output:
+    node: node coordinates of the mesh
+    elem: list of elements of the mesh	    
+    face: list of surface triangles of the mesh	    
+
+==== function [node,elem]=readoff(fname) ====
+ [node,elem]=readoff(fname)
+ read Geomview Object File Format (OFF)
+ input:
+    fname: name of the OFF data file
+ output:
+    node: node coordinates of the mesh
+    elem: list of elements of the mesh	    
+
+==== function [node,elem]=readsmf(fname) ====
+ [node,elem]=readsmf(fname)
+ read simple model format (SMF)
+ input: 
+    fname: name of the	SMF data file
+ output:
+    node: node coordinates of the mesh
+    elem: list of elements of the mesh
+
+==== function [node,elem,face]=readtetgen(fstub) ====
+ [node,elem,face]=readtetgen(fstub)
+ read tetgen output files
+ input:
+    fstub: file name stub
+ output:
+    node: node coordinates of the tetgen mesh
+    elem: tetrahedra element list of the tetgen mesh
+    face: surface triangles of the tetgen mesh
+
+==== function flag=deletemeshfile(fname) ====
+ flag=deletemeshfile(fname)
+ delete a given work mesh file under the working directory
+ input: 
+     fname: specified file name (without path)
+ output:
+     flag: not used
+
+==== function binname=mcpath(fname) ====
+ binname=mcpath(fname)
+ get full executable path by prepending a command directory path
+ parameters:
+ input:
+    fname: input, a file name string
+ output:
+    binname: output, full file name located in the bin directory
+    if global variable ISO2MESH_BIN is set in 'base', it will
+    use [ISO2MESH_BIN filesep cmdname] as the command full path,
+    otherwise, let matlab pass the cmdname to the shell, which
+    will search command in the directories listed in system
+    $PATH variable.
+
+==== function tempname=mwpath(fname) ====
+ tempname=meshtemppath(fname)
+ get full temp-file name by prepend working-directory and current session name
+ input:
+    fname: input, a file name string
+ output:
+    tempname: output, full file name located in the working directory
     if global variable ISO2MESH_TEMP is set in 'base', it will use it
     as the working directory; otherwise, will use matlab function tempdir
     to return a working directory.
-
-    if global variable ISO2MESH_SESSION is set in 'base', it will be 
+    if global variable ISO2MESH_SESSION is set in 'base', it will be
     prepended for each file name, otherwise, use supplied file name.
+=== # Volumetric image pre-processing ===
 
-==== mcpath.m ====
-function fullname=mcpath(cmdname)
-    get full executable path by prepending a command directory path
-    
-    if global variable ISO2MESH_BIN is set in 'base', it will
-    use [ISO2MESH_BIN filesep cmdname] as the command full path,
-    otherwise, let matlab pass the cmdname to the shell, which 
-    will search command in the directories listed in system 
-    $PATH variable.
+==== function islands=bwislands(img) ====
+ islands=bwislands(img)
+ return the indices of non-zero elements in a 2D or 3D image
+ grouped by connected regions in a cell array
+ input:
+	 img: a 2D or 3D array
+ output:
+	 islands: a cell array, each cell records the indices 
+		  of the non-zero elements in img for a connected 
+		  region (or an island)
+
+==== function resimg=fillholes3d(img,ballsize) ====
+ resimg=fillholes3d(img,ballsize)
+ close a 3D image with the speicified gap size and then fill the holes
+ input:
+    img: a 3D binary image
+    ballsize: maximum gap size for image closing
+ output:
+    resimg: the image free of holes
+ this function requires the image processing toolbox for matlab/octave
+
+==== function cleanimg=deislands2d(img,sizelim) ====
+ cleanimg=deislands2d(img,sizelim)
+ remove isolated islands on a 2D image below speicified size limit
+ input:
+ 	img: a 2D binary image
+ 	sizelim: a integer as the maximum pixel size of a isolated region
+ output:
+ 	cleanimg: a binary image after removing islands below sizelim
+
+==== function cleanimg=deislands3d(img,sizelim) ====
+ cleanimg=deislands3d(img,sizelim)
+ remove isolated islands for 3D image (for each slice)
+ input:
+      img: a 3D volumetric image
+      sizelim: maximum island size (in pixels) for each x/y/z slice
+ output:
+      cleanimg: 3D image after removing the islands
+
+==== function imgdiff=imedge3d(binimg,isdiff) ====
+ imgdiff=imedge3d(binimg,isdiff)
+ Extract the boundary voxels from a binary image
+ author: Aslak Grinsted <ag at glaciology.net>
+ input: 
+   binimg: a 3D binary image
+   isdiff: if isdiff=1, output will be all voxels which 
+         is different from its neighbors; if isdiff=0 or 
+         ignored, output will be the edge voxels of the 
+         non-zero regions in binimg
+ output:
+   imgdiff: a 3D logical array with the same size as binimg
+            with 1 for voxels on the boundary and 0 otherwise 
+
+==== function p=internalpoint(v,aloop) ====
+ p=internalpoint(v,aloop)
+ imperical function to find an internal point
+ of a planar polygon
+ input:   
+    v:     x,y,z coordinates of each node of the mesh
+    aloop:  input, a single vector separated by NaN, each segment
+             is a close-polygon consisted by node IDs 
+ output:
+    p:   output, [x y z] of an internal point of aloop
+
+==== function vol=smoothbinvol(vol,layer) ====
+ vol=smoothbinvol(vol,layer)
+ convolve a 3x3 gaussian kernel to a binary image multiple times
+ input:
+     vol: a 3D volumetric image to be smoothed
+     layer: number of iterations for the smoothing
+ output:
+     vol: the volumetric image after smoothing
+
+==== function vol=thickenbinvol(vol,layer) ====
+ vol=thickenbinvol(vol,layer)
+ thickening a binary volume by a given pixel width
+ this is similar to bwmorph(vol,'thicken',3) except 
+ this does it in 3d and only does thickening for 
+ non-zero elements (and hopefully faster)
+ input:
+     vol: a volumetric binary image
+     layer: number of iterations for the thickenining
+ output:
+     vol: the volume image after the thickening
+
+==== function vol=thinbinvol(vol,layer) ====
+ vol=thickenbinvol(vol,layer)
+ thining a binary volume by a given pixel width
+ this is similar to bwmorph(vol,'thin',3) except 
+ this does it in 3d and only does thickening for 
+ non-zero elements (and hopefully faster)
+ input:
+     vol: a volumetric binary image
+     layer: number of iterations for the thickenining
+ output:
+     vol: the volume image after the thickening
+=== # Mesh plotting ===
+
+==== function hm=plotmesh(node,varargin) ====
+ hm=plotmesh(node,face,elem,opt)
+ plot surface and volumetric meshes
+ input: 
+      node: a node coordinate list, 3 columns for x/y/z
+      face: a triangular surface face list
+      elem: a tetrahedral element list
+      opt:  additional options for the plotting
+            for simple point plotting, opt can be markers
+            or color options, such as 'r.', or opt can be 
+            a logic statement to select a subset of the mesh,
+            such as 'x>0 & y+z<1'; opt can have more than one
+            items to combine these options, for example: 
+            plotmesh(...,'x>0','r.'); the range selector must
+            appear before the color/marker specifier
+ output:
+   hm: handle or handles (vector) to the plotted surfaces
+ example:
+   h=plotmesh(node,'r.');
+   h=plotmesh(node,'x<20','r.');
+   h=plotmesh(node,face);
+   h=plotmesh(node,face,'y>10');
+   h=plotmesh(node,face,'facecolor','r');
+   h=plotmesh(node,elem,'x<20');
+   h=plotmesh(node,elem,'x<20 & y>0');
+   h=plotmesh(node,face,elem);
+   h=plotmesh(node,face,elem,'linestyle','--');
+
+==== function hm=plotsurf(node,face,varargin) ====
+ hm=plotsurf(node,face,opt)
+ plot 3D surface meshes
+ input: 
+      node: node coordinates, dimension (nn,3)
+      face: triangular surface face list
+      opt:  additional options for the plotting, see trisurf
+ output:
+   hm: handle or handles (vector) to the plotted surfaces
+ example:
+   h=plotsurf(node,face);
+   h=plotsurf(node,face,'facecolor','r');
+
+==== function hm=plottetra(node,elem,varargin) ====
+ hm=plottetra(node,elem,opt)
+ plot 3D surface meshes
+ input: 
+      node: node coordinates, dimension (nn,3)
+      elem: tetrahedral element list
+      opt:  additional options for a patch object
+ output:
+   hm: handle or handles (vector) to the plotted surfaces
+ example:
+   h=plottetra(node,elem);
+   h=plottetra(node,elem,'facealpha',0.5);
+
+==== function [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,plane) ====
+ [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,plane)
+ fast tetrahedral mesh cross-section plot
+ input: 
+   elem: integer array with dimensions of NE x 4, each row contains
+         the indices of all the nodes for each tetrahedron
+   node: node coordinates, 3 columns for x, y and z respectively
+   value: a scalar array with the length of node numbers, can have 
+          multiple columns 
+   plane: defines a plane by 3 points: plane=[x1 y1 z1;x2 y2 z2;x3 y3 z3]
+ output:
+   cutpos: all the intersections of mesh edges by the plane
+           cutpos is similar to node, containing 3 columns for x/y/z
+   cutvalue: interpolated values at the intersections, with row number
+           being the num. of the intersections, column number being the 
+           same as "value".
+   facedata: define the intersection polygons in the form of patch "Faces"
+ the outputs of this subroutine can be easily plotted using 
+     patch('Vertices',cutpos,'Faces',facedata,'FaceVertexCData',cutvalue,...
+           'FaceColor','interp');
+=== # Miscellaneous functions ===
+
+==== function valnew=surfdiffuse(node,tri,val,ddt,iter,type1,opt) ====
+ valnew=surfdiffuse(node,tri,val,ddt,iter,type1,opt)
+ apply a smoothing/diffusion process on a surface
+ input:
+     node: list of nodes of the surface mesh
+     tri: triangular element list of the surface
+     val: vector, scalar value for each node
+     ddt: diffusion coefficient multiplied by delta t
+     iter: iterations for applying the smoothing
+     type1: indices of the nodes which will not be updated
+     opt: method, 'grad' for gradient based, and 'simple' for simple average
+ output:
+     valnew: nodal value vector after the smoothing
+
+==== function [node,elem,face]=volmap2mesh(img,ix,iy,iz,elemnum,maxvol,thickness,Amat,Bvec) ====
+ [node,elem,face]=vol2mesh(img,ix,iy,iz,thickness,elemnum,maxvol,A,B)
+ convert a binary volume to tetrahedral mesh
+ input: 
+        img, ix,iy,iz, elemnum and  maxvol: see vol2mesh.m
+        Amat: a 3x3 transformation matrix
+        Bvec: a 3x1 vector
+        Amat and Bvec maps the image index space to real world coordnate system by
+         [x,y,z]_new=Amat*[x,y,z]_old+Bvec
+         thickness: scale z-dimension of the mesh to specified thickness, if thickness==0, scaling is bypassed
+
+==== function isoctave=isoctavemesh ====
+ isoctave=isoctavemesh
+ determine whether the code is running in octave
+ output:
+   isoctave: 1 if in octave, otherwise 0
+
+==== function p=getvarfrom(ws,name) ====
+ p=getvarfrom(ws,name)
+ get variable value by name from specified work-space
+ input:
+    ws: name of the work-space, for example, 'base'
+    name: name string of the variable
+ output:
+    p: the value of the specified variable, if the variable does not
+       exist, return empty array
+
+==== function [a,b,c,d]=getplanefrom3pt(plane) ====
+ [a,b,c,d]=getplanefrom3pt(plane)
+ define a plane equation ax+by+cz+d=0 from three 3D points
+ input: 
+    plane: a 3x3 matrix with each row specifying a 3D point (x,y,z)
+ output:
+    a,b,c,d: the coefficient for plane equation ax+by+cz+d=0
+
+==== function exesuff=getexeext() ====
+ exesuff=getexeext()
+ get meshing external tool extension names for the current platform
+ output:
+     exesuff: file extension for iso2mesh tool binaries
 
 
 == # Acknowledgement ==
@@ -477,7 +1063,7 @@ Therefore, the license of iso2mesh and these utilities are independent.
 The iso2mesh license only applies to the scripts and documents/data
 in this package and exclude those programs stored in the bin/ directory.
 The source codes of the modified meshing utilities are available
-separatly at iso2mesh's website and retain their upstream licenses.
+separately at iso2mesh's website and retain their upstream licenses.
 
 Your acknowledgement of iso2mesh in your publications or 
 presentations would be greatly appreciated by the author of 

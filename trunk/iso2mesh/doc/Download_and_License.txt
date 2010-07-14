@@ -4,96 +4,105 @@ How to obtain iso2mesh
 
           1. [2]Download the latest release
 
-          2. [3]Download Development Snapshot from CVS (not fully tested)
+          2. [3]Download Development Snapshot from SVN (not fully tested)
 
-                2.1. [4]Anonymous CVS Access
+                2.1. [4]Anonymous SVN Access
 
-                2.2. [5]Developer CVS Access via SSH
+                2.2. [5]Developer SVN Access
 
           3. [6]Important Note on Licenses
 
 1. Download the latest release
 
-iso2mesh 0.7.9-1, beta codenamed Hotpot
+iso2mesh 0.8.0, codenamed Hotpot (stable)
 
-   Please download the latest v0.7.9-1 release at our [7]registration/download page. We are
-   greatly appreciated if you can tell us a little bit about you and your related research by
-   [8][registering your copy of iso2mesh].
+   Please download the latest v0.8.0 release at our [7]registration/download page. We are greatly appreciated if you can tell us a little bit
+   about you and your related research by [8]registering your copy of iso2mesh.
 
-2. Download Development Snapshot from CVS (not fully tested)
+2. Download Development Snapshot from SVN (not fully tested)
 
-   If you want to get the latest development branch of iso2mesh, you can download it from our
-   cvs. First, make sure you have installed cvs client on your system. If you are using
-   Debian-based GNU/Linux systems (such as Ubuntu, Knoppix etc), you can install cvs by
- sudo apt-get install cvs
+   If you want to get the latest development branch of iso2mesh, you can download it from our svn. You have to be aware that an SVN snapshot is
+   not a stable release. It may have partially implemented features and, thus, cause crash or erroneous results.
 
-   if you are using Redhat-based GNU/Linux systems (such as Fedora, CentOS etc), you can do
-   this by
- sudo yum install cvs
+   First, make sure you have installed svn client on your system. If you are using a Debian-based GNU/Linux system (such as Ubuntu, Knoppix
+   etc), you can install svn by
+ sudo apt-get install subversion
 
-   If your operation system is Windows, we recommend you to install [9][TortoiseCVS].
+   if you are using a Redhat-based GNU/Linux system (such as Fedora, CentOS etc), you can do this by
+ sudo yum install subversion
 
-2.1. Anonymous CVS Access
+   If your operating system is Windows, we recommend you to install [9]TortoiseSVN.
 
-   This project's CVS repository can be checked out through anonymous (pserver) CVS with the
-   following instruction set. The module you wish to check out must be specified as the
-   modulename. When prompted for a password for anonymous, simply press the Enter key.
+2.1. Anonymous SVN Access
 
- cvs -d :pserver:anonymous@orbit.nmr.mgh.harvard.edu:/cvsroot/iso2mesh login
- cvs -d :pserver:anonymous@orbit.nmr.mgh.harvard.edu:/cvsroot/iso2mesh checkout iso2mesh
+   The latest code snapshot can be checked out from project's SVN repository. This can be done anonymously by the following command.
 
-2.2. Developer CVS Access via SSH
+ svn checkout --username anonymous_user [10]https://orbit.nmr.mgh.harvard.edu/svn/iso2mesh/trunk/iso2mesh iso2mesh
 
-   Only project developers can access the CVS tree via this method. SSH must be installed on
-   your client machine. Substitute modulename and developername with the proper values. Enter
-   your site password when prompted.
+   The password is the same as the username. After checking out the code, you need to set up the path based on the [11]installation
+   instructions. Then you can start matlab or octave, and run the example scripts under the sample directory.
 
- export CVS_RSH=ssh
- cvs -d :ext:developername@orbit.nmr.mgh.harvard.edu:/cvsroot/iso2mesh checkout iso2mesh
+2.2. Developer SVN Access
+
+   If you are one of the developers who have SVN write permission, you can checkout the latest code with the following command:
+
+ svn checkout --username youraccount [12]https://orbit.nmr.mgh.harvard.edu/svn/iso2mesh/trunk/iso2mesh iso2mesh
+
+   where youraccount is your registered account in [13]orbit (of course, you have to [14]register first and ask the [15]project maintainer to
+   grant you svn write permission).
+
+   You can simply make changes or debug your changes in your local copy. If your local changes have passed review by other co-developers, you
+   can then commit your changes back to the svn repository by
+ cd /path/to/iso2mesh/local/copy
+ svn commit -m "a short summary of your changes"
 
 3. Important Note on Licenses
 
-   The iso2mesh toolbox is licensed under [10][GNU Public License (GPL)]. However, it included
-   a number of external tools (under bin/ directory) to perform certain functionalities by
-   means of [11][pipelines]. These external tools are subjected to their upstream licenses and
-   are not necessarily GPL (or GPL compatible). The complete list of these external commands
-   and their author info and licenses can be found from the [12][README page].
+   The iso2mesh toolbox is licensed under [16]GNU Public License (GPL). However, it included a number of external tools (under bin/ directory)
+   to perform certain functionalities by means of [17]pipelines. These external tools are subjected to their upstream licenses and are not
+   necessarily GPL (or GPL compatible). The complete list of these external commands and their author info and licenses can be found from the
+   [18]README page.
 
-   Particularly, the 3D meshing tool, tetgen, is licensed under a non-free license: it can be
-   freely used, modified, redistributed only for research and academic purposes, any
-   commercial utility of tetgen requires a permission from its [13][original author]. iso2mesh
-   calls tetgen in the background to produce 3D mesh, that means if anyone needs to uses the
-   3D mesh produced by iso2mesh in a commercial product, you MUST contact the author of tetgen
-   to get permission. Processing binary images and produce surfaces are not subject to this
-   limitation.
+   Particularly, the 3D meshing tool, tetgen, is licensed under a non-free license: it can be freely used, modified, redistributed only for
+   research and academic purposes, any commercial utility of tetgen requires a permission from its [19]original author. iso2mesh calls tetgen in
+   the background to produce 3D mesh, that means if anyone needs to uses the 3D mesh produced by iso2mesh in a commercial product, you MUST
+   contact the author of tetgen to get permission. Processing binary images and produce surfaces are not subject to this limitation.
 
-   In additional to the licenses, if you use this tool in your research, we are greatly
-   appreciated if you can add iso2mesh to your references:
+   In additional to the licenses, if you use this tool in your research, we are greatly appreciated if you can add iso2mesh to your references:
 
- Qianqian Fang, iso2mesh: a matlab-based 3D tetrahedral mesh generator, URL: [14]http://iso2mesh.sou
-rceforge.net, 2008
+ Qianqian Fang, iso2mesh: a matlab-based 3D tetrahedral mesh generator, URL: [20]http://iso2mesh.sourceforge.net, 2008
 
    or
 
- Qianqian Fang and David Boas, "Tetrahedral mesh generation from volumetric binary and
- gray-scale images," IEEE International Symposium on Biomedical Imaging 2009 (accepted)
+ Qianqian Fang and David Boas, "Tetrahedral mesh generation from volumetric binary and gray-scale images,"
+ Proceedings of IEEE International Symposium on Biomedical Imaging 2009, pp. 1142-1145, 2009
 
-   alternatively, you can cite [15][our papers that described this toolbox].
+   If you used cgalsurf or cgalmesh options in your mesh preparation, you should also acknowledge [21]CGAL publications. If you generated your
+   mesh with the tetgen module in iso2mesh instead of CGAL mesher, you may need to [22]acknowledge tetgen in your publications, you can find
+   more references from [23]this link.
 
 References
 
    1. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=rss
    2. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Download#Download_the_latest_release
-   3. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Download#Download_Development_Snapshot_from_CVS_not_fully_tested
-   4. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Download#Anonymous_CVS_Access
-   5. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Download#Developer_CVS_Access_via_SSH
+   3. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Download#Download_Development_Snapshot_from_SVN_not_fully_tested
+   4. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Download#Anonymous_SVN_Access
+   5. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Download#Developer_SVN_Access
    6. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Download#Important_Note_on_Licenses
    7. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?register/iso2mesh
    8. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=edit&id=register/iso2mesh
-   9. http://www.tortoisecvs.org/download.shtml
-  10. http://www.gnu.org/licenses/gpl-2.0.html
-  11. http://en.wikipedia.org/wiki/Unix_pipe
-  12. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/README#Acknowledgement
-  13. http://www.wias-berlin.de/~si
-  14. http://iso2mesh.sourceforge.net/
-  15. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/References
+   9. http://tortoisesvn.net/downloads
+  10. https://orbit.nmr.mgh.harvard.edu/svn/iso2mesh/trunk/iso2mesh
+  11. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/Installation
+  12. https://orbit.nmr.mgh.harvard.edu/svn/iso2mesh/trunk/iso2mesh
+  13. https://orbit.nmr.mgh.harvard.edu/
+  14. https://orbit.nmr.mgh.harvard.edu/account/register.php
+  15. https://orbit.nmr.mgh.harvard.edu/users/fangq/
+  16. http://www.gnu.org/licenses/gpl-2.0.html
+  17. http://en.wikipedia.org/wiki/Unix_pipe
+  18. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/README#Acknowledgement
+  19. http://www.wias-berlin.de/~si
+  20. http://iso2mesh.sourceforge.net/
+  21. http://www.cgal.org/bibliography.html
+  22. http://tetgen.berlios.de/reference.html
+  23. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/References
