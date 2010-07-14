@@ -1,8 +1,8 @@
-==========================================================
+============================================================================
 
      iso2mesh - a powerful yet simple-to-use mesh generator
 
-----------------------------------------------------------
+----------------------------------------------------------------------------
 
 iso2mesh ChangeLog:
 2010/07/14 (0.9.8, codename: Toufu-beta)
@@ -25,7 +25,7 @@ iso2mesh ChangeLog:
        17. added demo scripts for remeshsurf and mesh smoothing
        18. unify help text format, add bash script to generate function list
        19. use opt.side to specify upper/lower interface of a labeled region
-       20. added flexible mesh plotting function - plotmesh
+       20. added a mesh plotting function - plotmesh
 
 2009/05/04 (0.8.0, codename: Hotpot)
         1. added stopping criteria for cgalsurf surface extractor to 
