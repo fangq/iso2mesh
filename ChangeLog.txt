@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------
 
 iso2mesh ChangeLog:
-2010/07/14 (0.9.8, codename: Toufu-beta)
+2010/07/14 (0.9.8, codename: Tofu-beta)
         1. added surf2vol, converting a closed surface to a binary volume
         2. fixed deletemeshfile bug for Windows
         3. automatic repairing when meshresample fails
