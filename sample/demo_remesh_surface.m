@@ -22,6 +22,7 @@ node=node(:,1:3);
 face=face(:,1:3);
 
 plotmesh(node,face);
+axis equal
 
 [newno,newfc]=remeshsurf(node,face,1);
 
@@ -29,3 +30,4 @@ newno=sms(newno,newfc(:,1:3),3,0.5);
 
 figure;
 plotmesh(newno,newfc);
+axis equal
