@@ -1,5 +1,19 @@
    #[1]iso2mesh: a Matlab/Octave-based mesh generator
 
+   [2][Home]
+     * [3]Home
+     * [4]Doc
+     * [5]RecentChanges
+     * [6]Register
+     * [7]Login
+     * [8]RSS Feed
+
+   __________
+     * [9]Doc/Installation
+     * [10]Edit this page
+     * [11]View other revisions
+     * [12]Discuss
+
 Installation Instructions for iso2mesh toolbox
 
 System Requirements
@@ -7,12 +21,12 @@ System Requirements
    iso2mesh is written in Matlab language and is compatible with GNU
    Octave, therefore, any system that is able to run Matlab (or Octave)
    should be able to use this toolbox. However, as we described in the
-   [2]Doc/README, this toolbox relies on multiple external tools/libraries
-   for full functionality. So far, we have compiled these external tools
-   for Linux (32/64bit), Mac OS (intel based or powerpc based) and Windows
-   (95~vista, 32/64bit). If your platform is not mentioned (such as
-   Solaris, AIX etc), please download the [3][source code of these tools]
-   and compile them on your own machine.
+   [13]Doc/README, this toolbox relies on multiple external
+   tools/libraries for full functionality. So far, we have compiled these
+   external tools for Linux (32/64bit), Mac OS (intel based or powerpc
+   based) and Windows (95~vista, 32/64bit). If your platform is not
+   mentioned (such as Solaris, AIX etc), please download the [14]source
+   code of these tools and compile them on your own machine.
 
    The recommended system configuration for running this toolbox includes
      * a computer running GNU/Linux, Windows, Mac OS (either 32bit/64bit)
@@ -30,7 +44,7 @@ Installation
        /home/myaccount/work/iso2mesh, let's call it the "root directory"
        of iso2mesh;
      * add the bin/ folder under the iso2mesh root directory to your
-       system's PATH environment variable, see [4]more details here;
+       system's PATH environment variable, see [15]more details here;
      * start your Maltab from a new shell (make sure the PATH setting is
        effective), type addpath('/home/myaccount/work/iso2mesh') to add
        iso2mesh to your matlab search path for the current session
@@ -47,31 +61,44 @@ Installation
 
 For restricted users
 
-   You do not have to have system administrator (or root) right in order
-   to install/use iso2mesh toolbox. Most of the installation instructions
-   can be done in a per user basis. The only issue a restricted user may
-   encounter is to save the "pathtool" path list when they try to add the
-   iso2mesh path permanently. If this happens, you may work in a
-   multi-user or network-based system, you normally need to create file
-   named startup.m under [5][your home directory] (~/matlab/ for
-   Linux/Unix), and put the addpath('/path/to/iso2mesh/'); into this file.
-   It will be automatically executed when Matlab starts. For Octave, this
-   file is [6][.octaverc].
+   You do not have to be a system administrator (or root) in order to
+   install/use iso2mesh toolbox. Most of the installation instructions can
+   be done on a per-user basis. The only issue a restricted user may
+   encounter is the "permission error" when saving the "pathtool" path
+   list in order to add iso2mesh permanently. If this happens, you may
+   work in a multi-user or network-based system. For Matlab users, you
+   typically need to create file named [16]startup.m under your home
+   directory (~/matlab/ for Linux/Unix), and put
+   addpath('/path/to/iso2mesh/'); into this file. It will be automatically
+   executed when Matlab starts. For Octave, this file is [17].octaverc.
 
    When using this toolbox under an extensively restricted mode, one may
    encounter a "write to file" error, this may likely be caused by the
    default output folder is not writable from your account. If you do have
    another folder which you have permission to write, you need to
-   [7]define an variable ISO2MESH_TEMP in Matlab/Octave's "base workspace"
-   and set the value as the writable folder path, then rerun your meshing
-   commands.
+   [18]define an variable ISO2MESH_TEMP in Matlab/Octave's "base
+   workspace" and set the value as the writable folder path, then rerun
+   your meshing commands.
+   [19]Powered by Habitat
 
 References
 
    1. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=rss
-   2. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/README
-   3. https://orbit.nmr.mgh.harvard.edu/plugins/scmcvs/cvsweb.php/?cvsroot=iso2mesh
-   4. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/AddPath
-   5. http://www.mathworks.com/access/helpdesk/help/techdoc/index.html?/access/helpdesk/help/techdoc/matlab_env/f8-10506.html&http://www.google.com/search?hl=en&q=matlab+startup.m++folder&btnG=Search
-   6. http://en.wikibooks.org/wiki/MATLAB_Programming/Differences_between_Octave_and_MATLAB#startup.m
-   7. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Advanced
+   2. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Home
+   3. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Home
+   4. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc
+   5. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?RecentChanges
+   6. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=newlogin
+   7. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=login
+   8. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=rss
+   9. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?back=/Installation
+  10. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=edit&id=Doc/Installation
+  11. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=history&id=Doc/Installation
+  12. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=discuss&id=Doc/Installation
+  13. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/README
+  14. https://orbit.nmr.mgh.harvard.edu/plugins/scmcvs/cvsweb.php/?cvsroot=iso2mesh
+  15. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/AddPath
+  16. http://www.mathworks.com/access/helpdesk/help/techdoc/matlab_env/f8-4994.html#brlkmbe-1
+  17. http://en.wikibooks.org/wiki/MATLAB_Programming/Differences_between_Octave_and_MATLAB#startup.m
+  18. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Advanced
+  19. http://wenq.org/habitat/
