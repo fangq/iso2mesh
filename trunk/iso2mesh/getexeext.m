@@ -20,13 +20,13 @@ if(isunix)
 	end
 end
 if(isoctavemesh)
-      if(isempty(strfind(computer,'msdos')))
-	 if(isempty(regexp(computer,'86_64')))
-	    exesuff='.mexglx';
-	 else
-            exesuff='.mexa64';
-	 end
-      else
-          exesuff='.exe';
-      end
+   if(isempty(strfind(computer,'msdos')) & isempty(strfind(computer,'mingw')))
+	   if(isempty(regexp(computer,'86_64')))
+	      exesuff='.mexglx';
+	   else
+        exesuff='.mexa64';
+	   end
+   else
+     exesuff='.exe';
+   end
 end
