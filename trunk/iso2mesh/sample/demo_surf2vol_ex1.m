@@ -46,7 +46,7 @@ if(isoctavemesh)
   if(~exist('bwfill'))
     error('you need to install octave-image toolbox first');
   end
-  img2=zeros(size(img));
+  img2=zeros(size(img),'uint8');
   for i=1:size(img,3)
     img2(:,:,i)=bwfill(img(:,:,i),'holes');
   end

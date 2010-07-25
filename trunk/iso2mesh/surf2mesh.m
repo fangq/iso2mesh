@@ -32,6 +32,12 @@ fprintf(1,'generating tetrahedral mesh from closed surfaces ...\n');
 
 exesuff=getexeext;
 
+if(keepratio>1 | keepratio<0)
+   warn(['The "keepratio" parameter is required to be between 0 and 1. '...
+         'Your input is out of this range. surf2mesh will not perform '...
+	 'simplification. Please double check to correct this.']);
+end
+
 % first, resample the surface mesh with cgal
 if(keepratio<1-1e-9 | ~iscell(f))
 	fprintf(1,'resampling surface mesh ...\n');

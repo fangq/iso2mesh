@@ -19,7 +19,7 @@ function img=surf2volz(node,face,xi,yi,zi)
 %
 
 ne=size(face,1);
-img=zeros(length(xi),length(yi),length(zi));
+img=zeros(length(xi),length(yi),length(zi),'uint8');
 
 dx0=min(abs(diff(xi)));
 dx=dx0/2;
