@@ -152,6 +152,10 @@ if(~isempty(elem))
    end
 end
 
+if(~isempty(h) & ishold)
+  hold off;
+end
+
 if(~isempty(h) & nargout>=1)
   hm=h;
 end
