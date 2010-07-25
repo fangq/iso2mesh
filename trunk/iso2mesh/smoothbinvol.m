@@ -21,6 +21,7 @@ dxy=dim(1)*dim(2);
 fulllen=prod(dim);
 
 weight=1./6.;
+step=4000;
 
 % in case vol is a logical
 vol=double(vol);
@@ -37,9 +38,12 @@ for i=1:layer
     % for all neighboring voxels, add a fraction from the non-0 voxels
     % problematic when running in parallel (racing)
     len=length(goodidx);
-    for j=1:len
-        vol(nextidx(goodidx(j)))=vol(nextidx(goodidx(j)))+weight*val(goodidx(j));
+    
+    % control granualarity with step
+    for j=1:step:len-step
+        vol(nextidx(goodidx(j:j+step-1)))=vol(nextidx(goodidx(j:j+step-1)))+weight*val(goodidx(j:j+step-1));
     end
+    vol(nextidx(goodidx(j+step:end)))=vol(nextidx(goodidx(j+step:end)))+weight*val(goodidx(j+step:end));
     % the above line may change the values of the non-zero voxels, recover
     % them
     vol(idx)=val(:,1);
