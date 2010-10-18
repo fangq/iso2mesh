@@ -17,12 +17,15 @@ function nodevol=nodevolume(node,elem)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-vol=elemvolume(node,elem(:,1:4));
+dim=4;
+if(size(elem,2)==3) dim=3; end
+
+vol=elemvolume(node,elem(:,1:dim));
 
 elemnum=size(elem,1);
 nodenum=size(node,1);
 nodevol=zeros(nodenum,1);
 for i=1:elemnum
-      nodevol(elem(i,1:4))=nodevol(elem(i,1:4))+vol(i);
+      nodevol(elem(i,1:dim))=nodevol(elem(i,1:dim))+vol(i);
 end
-nodevol=nodevol/4;
+nodevol=nodevol/dim;

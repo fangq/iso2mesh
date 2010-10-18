@@ -39,7 +39,7 @@ if(keepratio>1 | keepratio<0)
 end
 
 % first, resample the surface mesh with cgal
-if(keepratio<1-1e-9 | ~iscell(f))
+if(keepratio<1-1e-9 & ~iscell(f))
 	fprintf(1,'resampling surface mesh ...\n');
 	[no,el]=meshresample(v(:,1:3),f(:,1:3),keepratio);
 	el=unique(sort(el,2),'rows');
