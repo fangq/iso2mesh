@@ -1,6 +1,6 @@
-function savevrml(node,elem,face,fname)
+function savevrml(node,face,elem,fname)
 %
-% savevrml(node,elem,face,fname)
+% savevrml(node,face,elem,fname)
 %
 % save a surface mesh to VRML 1.0 format
 %
@@ -9,12 +9,22 @@ function savevrml(node,elem,face,fname)
 %
 % input:
 %      node: input, surface node list, dimension (nn,3)
-%      elem: input, tetrahedral element list, dimension (ne,4)
 %      face: input, surface face element list, dimension (be,3)
+%      elem: input, tetrahedral element list, dimension (ne,4)
 %      fname: output file name
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
+
+if(nargin==2)
+   fname=face;
+   face=[];
+end
+
+if(nargin==3)
+   fname=elem;
+   elem=[];
+end
 
 fid=fopen(fname,'wt');
 if(fid==-1)

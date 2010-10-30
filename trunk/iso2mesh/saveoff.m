@@ -22,6 +22,10 @@ end
 fprintf(fid,'OFF\n');
 fprintf(fid,'%d %d %d\n',length(v),length(f),0);
 fprintf(fid,'%f %f %f\n',v');
-fprintf(fid,'3 %d %d %d\n',(f-1)');
+for i=1:size(f,1)
+   fprintf(fid,'%d ',size(f,2));
+   fprintf(fid,'%d ',f(i,:)-1);
+   fprintf(fid,'\n');
+end
 fclose(fid);
 
