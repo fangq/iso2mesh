@@ -38,7 +38,7 @@ func_fileio="saveasc savedxf saveinr saveoff savesmf savesurfpoly
 func_binimage="bwislands fillholes3d deislands2d deislands3d 
                 imedge3d internalpoint smoothbinvol 
 		thickenbinvol thinbinvol"
-func_plotting="plotmesh plotsurf plottetra qmeshcut"
+func_plotting="plotmesh plotsurf plottetra qmeshcut plottetview"
 func_misc="surfdiffuse volmap2mesh isoctavemesh getvarfrom 
 		getplanefrom3pt getexeext"
 

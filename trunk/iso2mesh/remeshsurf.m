@@ -50,7 +50,7 @@ if(~isempty(eg) & isstruct(opt))
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% step 2: fill holes in the 
+% step 2: fill holes in the volumetric binary image
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 img=fillholes3d(img,ballsize);
