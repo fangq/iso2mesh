@@ -1,6 +1,6 @@
-function savedxf(node,elem,face,fname)
+function savedxf(node,face,elem,fname)
 %
-% savedxf(node,elem,face,fname)
+% savedxf(node,face,elem,fname)
 %
 % save a surface mesh to DXF format
 %
@@ -9,8 +9,8 @@ function savedxf(node,elem,face,fname)
 %
 % input:
 %      node: input, surface node list, dimension (nn,3)
-%      elem: input, tetrahedral element list, dimension (ne,4)
 %      face: input, surface face element list, dimension (be,3)
+%      elem: input, tetrahedral element list, dimension (ne,4)
 %      fname: output file name
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
@@ -18,12 +18,7 @@ function savedxf(node,elem,face,fname)
 
 fid=fopen(fname,'wt');
 if(fid==-1)
-    error(['You do not have permission to save mesh files, if you are working in a multi-user ',...
-         'environment, such as Unix/Linux and there are other users using iso2mesh, ',...
-         'you may need to define ISO2MESH_SESSION=''yourstring'' to make your output ',...
-         'files different from others; if you do not have permission to ',mwpath(''),...
-         ' as the temporary directory, you have to define ISO2MESH_TEMP=''/folder/you/have/write/permission'' ',...
-         'in matlab/octave base workspace.']);
+    error('You do not have permission to save mesh files.');
 end
 
 fprintf(fid,'0\nSECTION\n2\nHEADER\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n');
