@@ -16,6 +16,16 @@ function savedxf(node,face,elem,fname)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
+if(nargin==2)
+   fname=face;
+   face=[];
+end
+
+if(nargin==3)
+   fname=elem;
+   elem=[];
+end
+
 fid=fopen(fname,'wt');
 if(fid==-1)
     error('You do not have permission to save mesh files.');
