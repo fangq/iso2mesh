@@ -29,7 +29,7 @@ title('cross-cut view of the generated surface mesh');
 
 fprintf(1,'extracting the left-hemisphere pial surface\n')
 
-LHwhitemat=elem(find(elem(:,5)==3),:);
+LHwhitemat=elem(find(elem(:,5)==5),:);
 wmsurf=volface(LHwhitemat(:,1:4));
 
 figure;
