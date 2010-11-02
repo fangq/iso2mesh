@@ -69,9 +69,16 @@ end
 
 saveinr(vol,mwpath('pre_cgalmesh.inr'));
 deletemeshfile(mwpath('post_cgalmesh.mesh'));
-cmd=sprintf('"%s%s" "%s" "%s" %f %f %f %f %f',mcpath('cgalmesh'),exesuff,...
+
+randseed=hex2dec('623F9A9E9A9E'); % "U+623F U+9A9E U+9A9E"
+
+if(~isempty(getvarfrom('base','ISO2MESH_RANDSEED')))
+        randseed=getvarfrom('base','ISO2MESH_RANDSEED');
+end
+
+cmd=sprintf('"%s%s" "%s" "%s" %f %f %f %f %f %d',mcpath('cgalmesh'),exesuff,...
     mwpath('pre_cgalmesh.inr'),mwpath('post_cgalmesh.mesh'),ang,ssize,...
-    approx,reratio,maxvol);
+    approx,reratio,maxvol,randseed);
 system(cmd);
 if(~exist(mwpath('post_cgalmesh.mesh'),'file'))
     error(['output file was not found, something must have gone wrong when running command: \n',cmd]);
