@@ -70,7 +70,7 @@ end
 saveinr(vol,mwpath('pre_cgalmesh.inr'));
 deletemeshfile(mwpath('post_cgalmesh.mesh'));
 
-randseed=hex2dec('623F9A9E9A9E'); % "U+623F U+9A9E U+9A9E"
+randseed=hex2dec('623F9A9E'); % "U+623F U+9A9E"
 
 if(~isempty(getvarfrom('base','ISO2MESH_RANDSEED')))
         randseed=getvarfrom('base','ISO2MESH_RANDSEED');
