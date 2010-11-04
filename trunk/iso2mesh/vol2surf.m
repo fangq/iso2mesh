@@ -190,8 +190,9 @@ if(~isempty(img))
 	  elseif(strcmp(surfside,'lower'))
 	      newimg(find(newimg>=isovalues(i)+1e-9))=isovalues(i)+1e-9;
 	  end
-
-          [v0,f0]=vol2restrictedtri(newimg,isovalues(i),regions(i,:),...
+          perturb=1e-4*abs(max(isovalues));
+          if(all(newimg>isovalues(i)-perturb)) perturb=-perturb;  end
+          [v0,f0]=vol2restrictedtri(newimg,isovalues(i)-perturb,regions(i,:),...
                      sum(newdim.*newdim)*2,30,radbound,distbound,maxsurfnode);
 
 	  if(~isempty(surfside))
