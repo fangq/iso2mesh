@@ -26,5 +26,5 @@ opt.radbound=2;
 
 %% visualize the resulting mesh
 
-plotmesh(node,face);
+plotmesh(node,face(:,1:3));
 axis equal;
