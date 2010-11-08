@@ -4,39 +4,49 @@
 
 ----------------------------------------------------------------------------
 
-iso2mesh ChangeLog:
+iso2mesh ChangeLog (key features marked by *):
+2010/11/08 (1.0.0-pre, codename: Tofu)
+        1.*specifying seeds for cgalsurf and cgalmesh modules
+        2.*perturbing isovalues to avoid non-manifold geometries
+        3. added plottetview to call tetview for mesh display on octave
+        4. added a new demo - a "hello world" example
+        5. speed optimization for octave
+        6. optimized memory use for surf2vol
+        7. made nodevolume support surfaces
+        8. added savemedit to export tetrahedral mesh in Medit format
+
 2010/07/14 (0.9.8, codename: Tofu-beta)
-        1. added surf2vol, converting a closed surface to a binary volume
+        1.*added surf2vol, converting a closed surface to a binary volume
         2. fixed deletemeshfile bug for Windows
         3. automatic repairing when meshresample fails
         4. fast faceneighbors unit
-        5. added CGAL 3D mesher for robust meshing of segmented volumes
+        5.*added CGAL 3D mesher for robust meshing of segmented volumes
         6. added CGAL 3D polyhedral mesher as an alternative to tetgen
         7. corrected bugs in Laplacian-HC and Lowpass smoothing algorithms
         8. added sms.m as the shortcut for surfsmooth
         9. added exporters for DXF and VRML mesh formats
-       10. added user name to the temporary files avoid permission conflict
+       10. added user name to the temporary files to avoid permission conflict
        11. added force-bounding-box option for surf2mesh
        12. added nodevolume, elemvolume from FEMcore and meshreorient
        13. added sortmesh to optimize node and element ordering
-       14. mesh refinement using the 4-th column of surface node
+       14.*mesh refinement using the 4-th column of surface node
        15. thining a volumetric binary image
-       16. added remeshsurf to repair self-intersecting surfaces
+       16.*added remeshsurf to repair self-intersecting surfaces
        17. added demo scripts for remeshsurf and mesh smoothing
        18. unify help text format, add bash script to generate function list
        19. use opt.side to specify upper/lower interface of a labeled region
-       20. added a mesh plotting function - plotmesh
+       20.*added a mesh plotting function - plotmesh
 
 2009/05/04 (0.8.0, codename: Hotpot)
         1. added stopping criteria for cgalsurf surface extractor to 
            avoid hanging for certain datasets
-        2. added support for mesh generation from 3D gray-scale images
+        2.*added support for mesh generation from 3D gray-scale images
         3. more robust and fast imedge3d (thanks to Aslak Grinsted)
         4. fixed the origins for 'simplify' and 'cgalsurf', the origin is now
            set to the exterior vertex for voxel (1,1,1) (as a cube)
         5. updated documents
         6. renamed "bound" to "face" to avoid confusions
-        7. added v2m, v2s and s2m as the shortcuts for vol2mesh, vol2surf 
+        7.*added v2m, v2s and s2m as the shortcuts for vol2mesh, vol2surf 
            and surf2mesh, respectively; added demo script for shortcuts
         8. mcpath searches <iso2mesh>/bin first, no PATH setting is required
            (thanks to Aslak Grinsted)
@@ -45,13 +55,13 @@ iso2mesh ChangeLog:
 2009/02/11 (0.7.9-1, codename: Hotpot-beta)
         1. compiled all the binaries on Mac OS (PowerPC) and
            tested on an Intel Mac
-        2. recompiled all linux and windows binaries with optimized speed
+        2.*recompiled all linux and windows binaries with optimized speed
            and reduced system dependencies
         3. speeded up bounary field calculation with dedicated imedge3d
         4. added TODO
 
 2009/02/07 (0.7.9, codename: Hotpot-alpha)
-        1. incorporated CGAL Surface mesher as the default vol2surf
+        1.*incorporated CGAL Surface mesher as the default vol2surf
            mesh extraction scheme (thank to Pierre Alliez's suggestion
            and Laurent Rineau and Mariette Yvinec for developing this utility)
         2. added sub-region labeling for multi-valued images
