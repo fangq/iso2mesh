@@ -29,5 +29,5 @@ axis equal
 newno=sms(newno,newfc(:,1:3),3,0.5);
 
 figure;
-plotmesh(newno,newfc);
+plotmesh(newno,newfc(:,1:3));
 axis equal
