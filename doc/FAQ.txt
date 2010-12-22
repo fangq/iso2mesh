@@ -1,37 +1,23 @@
    #[1]iso2mesh: a Matlab/Octave-based mesh generator
 
-   [2][Home]
-     * [3]Home
-     * [4]Doc
-     * [5]RecentChanges
-     * [6]Register
-     * [7]Login
-     * [8]RSS Feed
-
-   __________
-     * [9]Doc/FAQ
-     * [10]Edit this page
-     * [11]View other revisions
-     * [12]Discuss
-
 Frequently asked questions about iso2mesh
 
-          1. [13]I am getting a "Two subfaces ... are found intersecting
+          1. [2]I am getting a "Two subfaces ... are found intersecting
           each other" error, what should I do?
 
-          2. [14]After mesh generation, the plotted surface looked messed
-          up, what was wrong?
+          2. [3]After mesh generation, the surface plot looks messed up,
+          what was wrong?
 
-          3. [15]Matlab complains about imread, imclose or imfill missing
+          3. [4]Matlab complains about imread, imclose or imfill missing
 
-          4. [16]iso2mesh failed when writing files to disk
+          4. [5]iso2mesh failed when writing files to disk
 
-          5. [17]When displaying the surface produced by iso2mesh with
+          5. [6]When displaying the surface produced by iso2mesh with
           OpenGL, there are lot of holes, how to fix this?
 
-          6. [18]Subroutine meshresample returns empty mesh, why?
+          6. [7]Subroutine meshresample returns empty mesh, why?
 
-          7. [19]Which meshing option should I choose?
+          7. [8]Which meshing option should I choose?
 
 1. I am getting a "Two subfaces ... are found intersecting each other" error,
 what should I do?
@@ -59,7 +45,7 @@ segments
        centroids.
 
    If you have any better suggestions to enable iso2mesh to handle this
-   situation, please let [20]me know.
+   situation, please let [9]me know.
 
 2. you are using 'simplify' method to mesh a complex domain
 
@@ -82,8 +68,7 @@ segments
    intersect each other at sharp edges if your surface element is too big.
    Please use a small opt.radbound value to run the mesh generation again.
 
-2. After mesh generation, the plotted surface looked messed up, what was
-wrong?
+2. After mesh generation, the surface plot looks messed up, what was wrong?
 
    It is very likely you incorrectly used the output variables. The output
    of vol2mesh or surf2mesh include elem: the tetrahedral element indices,
@@ -117,7 +102,7 @@ wrong?
    temporary files as it does not have the permissions to overwrite those
    files created by A. To solve this issue, please define your own
    temporary folder, or set your session id, you can find more info at
-   [21]Advanced page.
+   [10]Advanced page.
 
 5. When displaying the surface produced by iso2mesh with OpenGL, there are
 lot of holes, how to fix this?
@@ -161,12 +146,12 @@ lot of holes, how to fix this?
        and clearly labels the element and surfaces for each individual
        sub-region. However, it is not perfect. It can not extract
        iso-surfaces from a gray-scale image. When you want to control mesh
-       densities near a specific isosurface (such as [22]this case),
+       densities near a specific isosurface (such as [11]this case),
        cgalmesh option is not as flexible as the other two. In short,
        cgalmesh is the best choice for producing uniform-sized meshes from
        an arbitrary segmented volume.
      * cgalsurf: cgalsurf option produces surface and volumetric meshes
-       with a standard 2-step process as shown in the [23]workflow. When
+       with a standard 2-step process as shown in the [12]workflow. When
        extracting multiple isosurfaces, it will do the extraction
        sequentially. The strengths of cgalsurf include 1) all the
        extracted surfaces are guaranteed to be free of self-intersecting
@@ -190,31 +175,17 @@ lot of holes, how to fix this?
     3. when meshing a gray-scale volume, use 'cgalsurf'
     4. when other options fail, try 'simplify'.
 
-   [24]Powered by Habitat
-
 References
 
    1. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=rss
-   2. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Home
-   3. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Home
-   4. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc
-   5. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?RecentChanges
-   6. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=newlogin
-   7. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=login
-   8. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=rss
-   9. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?back=/FAQ
-  10. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=edit&id=Doc/FAQ
-  11. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=history&id=Doc/FAQ
-  12. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=discuss&id=Doc/FAQ
-  13. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#I_am_getting_a_Two_subfaces_are_found_intersecting_each_other_error_what_should_I_do
-  14. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#After_mesh_generation_the_plotted_surface_looked_messed_up_what_was_wrong
-  15. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#Matlab_complains_about_imread_imclose_or_imfill_missing
-  16. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#iso2mesh_failed_when_writing_files_to_disk
-  17. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#When_displaying_the_surface_produced_by_iso2mesh_with_OpenGL_there_are_lot_of_holes_how_to_fix_this
-  18. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#Subroutine_meshresample_returns_empty_mesh_why
-  19. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#Which_meshing_option_should_I_choose
-  20. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?FangQ
-  21. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Advanced
-  22. http://iso2mesh.sourceforge.net/upload/head_mesh.jpg
-  23. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/Workflow
-  24. http://wenq.org/habitat/
+   2. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#I_am_getting_a_Two_subfaces_are_found_intersecting_each_other_error_what_should_I_do
+   3. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#After_mesh_generation_the_surface_plot_looks_messed_up_what_was_wrong
+   4. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#Matlab_complains_about_imread_imclose_or_imfill_missing
+   5. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#iso2mesh_failed_when_writing_files_to_disk
+   6. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#When_displaying_the_surface_produced_by_iso2mesh_with_OpenGL_there_are_lot_of_holes_how_to_fix_this
+   7. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#Subroutine_meshresample_returns_empty_mesh_why
+   8. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#Which_meshing_option_should_I_choose
+   9. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?FangQ
+  10. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Advanced
+  11. http://iso2mesh.sourceforge.net/upload/head_mesh.jpg
+  12. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/Workflow

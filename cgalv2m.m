@@ -2,7 +2,7 @@ function [node,elem,face]=cgalv2m(vol,opt,maxvol)
 %
 % [node,elem,face]=cgalv2m(vol,opt,maxvol)
 %
-% wrapper for CGAL 3D mesher (CGAL 3.5)
+% wrapper for CGAL 3D mesher (CGAL 3.5 or up)
 % convert a binary (or multi-valued) volume to tetrahedral mesh
 %
 % http://www.cgal.org/Manual/3.5/doc_html/cgal_manual/Mesh_3/Chapter_main.html
