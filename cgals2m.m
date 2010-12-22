@@ -35,9 +35,7 @@ function [node,elem,face]=cgals2m(v,f,opt,maxvol)
 fprintf(1,'creating surface and tetrahedral mesh from a polyhedral surface ...\n');
 
 exesuff=getexeext;
-if(strcmp(exesuff,'.mexa64')) % cgalmesh.mexglx can be used for both
-	exesuff='.mexglx';
-end
+exesuff=fallbackexeext(exesuff,'cgalpoly');
 
 ang=30;
 ssize=6;

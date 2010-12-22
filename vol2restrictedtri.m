@@ -32,9 +32,7 @@ if(radbound<1)
 end
 
 exesuff=getexeext;
-if(strcmp(exesuff,'.mexa64')) % cgalsurf.mexglx can be used for both
-	exesuff='.mexglx';
-end
+exesuff=fallbackexeext(exesuff,'cgalsurf');
 
 saveinr(vol,mwpath('pre_extract.inr'));
 deletemeshfile(mwpath('post_extract.off'));

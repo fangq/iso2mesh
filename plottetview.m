@@ -14,9 +14,7 @@ function plottetview(session,method)
 %
 
 exesuff=getexeext;
-if(strcmp(exesuff,'.mexa64')) % tetview.mexglx can be used for both
-	exesuff='.mexglx';
-end
+exesuff=fallbackexeext(exesuff,'tetview');
 
 sid=getvarfrom('base','ISO2MESH_SESSION');
 if(nargin>=1)

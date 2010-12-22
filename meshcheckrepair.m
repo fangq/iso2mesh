@@ -39,6 +39,7 @@ if(nargin==3 && strcmp(opt,'open'))
     end
 end
 exesuff=getexeext;
+exesuff=fallbackexeext(exesuff,'meshfix');
 
 if(nargin<3 || strcmp(opt,'deep'))
     deletemeshfile(mwpath('post_sclean.off'));
