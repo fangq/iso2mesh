@@ -15,18 +15,15 @@ function exesuff=getexeext()
 exesuff='.exe';
 if(isunix) 
 	exesuff=['.',mexext];
-	if(strcmp(exesuff,'.mexmaci'))
-		exesuff='.mexmac'; % will use universal binary for Mac
-	end
 end
 if(isoctavemesh)
    if(isempty(strfind(computer,'msdos')) & isempty(strfind(computer,'mingw')))
 	   if(isempty(regexp(computer,'86_64')))
 	      exesuff='.mexglx';
 	   else
-        exesuff='.mexa64';
+              exesuff='.mexa64';
 	   end
    else
-     exesuff='.exe';
+      exesuff='.exe';
    end
 end

@@ -47,9 +47,7 @@ if(~any(vol))
 end
 
 exesuff=getexeext;
-if(strcmp(exesuff,'.mexa64')) % cgalmesh.mexglx can be used for both
-	exesuff='.mexglx';
-end
+exesuff=fallbackexeext(exesuff,'cgalmesh');
 
 ang=30;
 ssize=6;

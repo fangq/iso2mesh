@@ -616,13 +616,13 @@ reference:
       f: input, surface face element list, dimension (be,3)
       fname: output file name
 
-==== function savedxf(node,elem,face,fname) ====
- savedxf(node,elem,face,fname)
+==== function savedxf(node,face,elem,fname) ====
+ savedxf(node,face,elem,fname)
  save a surface mesh to DXF format
  input:
       node: input, surface node list, dimension (nn,3)
-      elem: input, tetrahedral element list, dimension (ne,4)
       face: input, surface face element list, dimension (be,3)
+      elem: input, tetrahedral element list, dimension (ne,4)
       fname: output file name
 
 ==== function saveinr(vol,fname) ====
@@ -664,13 +664,13 @@ reference:
                 if forcebox is a 8x1 vector, it will be used to 
                 specify max-edge size near the bounding box corners
 
-==== function savevrml(node,elem,face,fname) ====
- savevrml(node,elem,face,fname)
+==== function savevrml(node,face,elem,fname) ====
+ savevrml(node,face,elem,fname)
  save a surface mesh to VRML 1.0 format
  input:
       node: input, surface node list, dimension (nn,3)
-      elem: input, tetrahedral element list, dimension (ne,4)
       face: input, surface face element list, dimension (be,3)
+      elem: input, tetrahedral element list, dimension (ne,4)
       fname: output file name
 
 ==== function [node,elem]=readasc(fname) ====
@@ -762,6 +762,15 @@ reference:
     to return a working directory.
     if global variable ISO2MESH_SESSION is set in 'base', it will be
     prepended for each file name, otherwise, use supplied file name.
+
+==== function savemedit(node,face,elem,fname) ====
+ savedmedit(node,face,elem,fname)
+ save a surface or tetrahedral mesh to Medit format
+ input:
+      node: input, surface node list, dimension (nn,3)
+      face: input, surface face element list, dimension (be,3)
+      elem: input, tetrahedral element list, dimension (ne,4)
+      fname: output file name
 === # Volumetric image pre-processing ===
 
 ==== function islands=bwislands(img) ====
@@ -936,6 +945,13 @@ reference:
  the outputs of this subroutine can be easily plotted using 
      patch('Vertices',cutpos,'Faces',facedata,'FaceVertexCData',cutvalue,...
            'FaceColor','interp');
+
+==== function plottetview(session,method) ====
+ runtetview(session,method)
+ wrapper for tetview to plot the generated mesh
+ input:
+	 session: a string to identify the output files for plotting
+        method:  method 
 === # Miscellaneous functions ===
 
 ==== function valnew=surfdiffuse(node,tri,val,ddt,iter,type1,opt) ====
@@ -993,6 +1009,14 @@ reference:
  output:
      exesuff: file extension for iso2mesh tool binaries
 
+==== function exesuff=fallbackexeext(exesuffix, exename) ====
+ exesuff=fallbackexeext(exesuffix, exename)
+ get the fallback external tool extension names for the current platform
+ input:
+     exesuffix: the output executable suffix from getexeext
+     exename: the executable name
+ output:
+     exesuff: file extension for iso2mesh tool binaries
 
 == # Acknowledgement ==
 
