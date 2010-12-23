@@ -20,18 +20,18 @@ hw3d=1-repmat(hw,[1 1 50]);
 
 figure;
 subplot(211);
-plotmesh(node,face);axis equal;view([90,60]);
+plotmesh(node,face);axis equal;view(90,60);
 subplot(212);
-plotmesh(node,elem,'z<20');axis equal;view([90,60]);
+plotmesh(node,elem,'z<20');axis equal;view(90,60);
 
 % mesh with denser surface    |----> surface triangle size is now 2
 [node,elem,face]=v2m(hw3d,0.7,2,40);
 
 figure;
 subplot(211);
-plotmesh(node,face);axis equal;view([90,60]);
+plotmesh(node,face);axis equal;view(90,60);
 subplot(212);
-plotmesh(node,elem,'z<20');axis equal;view([90,60]);
+plotmesh(node,elem,'z<20');axis equal;view(90,60);
 
 %% create 3D mesh from gray-scale image to get smoother boundary
 hw=imread('helloworld_gray.png');
@@ -40,9 +40,9 @@ hw3d=255-repmat(hw,[1 1 50]);
 
 figure;
 subplot(211);
-plotmesh(node,face);axis equal;view([90,60]);
+plotmesh(node,face);axis equal;view(90,60);
 subplot(212);
-plotmesh(node,elem,'z<20');axis equal;view([90,60]);
+plotmesh(node,elem,'z<20');axis equal;view(90,60);
 
 %% create 3D mesh from gray-scale image with advanced distbound control
 
@@ -52,7 +52,7 @@ opt.distbound=0.2;    % set max distance that deviates from the level-set
 
 figure;
 subplot(211);
-plotmesh(node,face);axis equal;view([90,60]);
+plotmesh(node,face);axis equal;view(90,60);
 subplot(212);
-plotmesh(node,elem,'z<20');axis equal;view([90,60]);
+plotmesh(node,elem,'z<20');axis equal;view(90,60);
 
