@@ -16,6 +16,11 @@ function openedge=surfedge(f)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
+if(isempty(f))
+    openedge=[];
+    return;
+end
+
 if(size(f,2)==3)
     edges=[f(:,[1,2]);
            f(:,[2,3]);

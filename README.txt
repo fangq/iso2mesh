@@ -204,7 +204,7 @@ reference:
 
 ==== function [node,elem,face]=cgalv2m(vol,opt,maxvol) ====
  [node,elem,face]=cgalv2m(vol,opt,maxvol)
- wrapper for CGAL 3D mesher (CGAL 3.5)
+ wrapper for CGAL 3D mesher (CGAL 3.5 or up)
  convert a binary (or multi-valued) volume to tetrahedral mesh
  http://www.cgal.org/Manual/3.5/doc_html/cgal_manual/Mesh_3/Chapter_main.html
  input:
@@ -281,6 +281,82 @@ reference:
 	 xi,yi,zi: x/y/z grid for the resulting volume
  output:
 	 img: a volumetric binary image at position of ndgrid(xi,yi,zi)
+=== # iso2mesh primitive meshing functions ===
+
+==== function [node,elem,face]=meshabox(p0,p1,opt,nodesize) ====
+ [node,elem,face]=meshabox(p0,p1,opt,maxvol)
+ create the surface and tetrahedral mesh of a box geometry
+ input: 
+   p0:  coordinates (x,y,z) for one end of the box diagnoal
+   p1:  coordinates (x,y,z) for the other end of the box diagnoal
+   opt: maximum volume of the tetrahedral elements
+   nodesize: 1 or a 8x1 array, size of the element near each vertex
+ output:
+   node: node coordinates, 3 columns for x, y and z respectively
+   face: integer array with dimensions of NB x 3, each row represents
+         a surface mesh face element 
+   elem: integer array with dimensions of NE x 4, each row represents
+         a tetrahedron 
+ example:
+   [node,elem,face]=meshabox([2 3 2],[6 12 15],0.1,1);
+   plotmesh(node,elem,'x>4');
+
+==== function [node,face,elem]=meshasphere(c0,r,tsize,maxvol) ====
+ [node,face,elem]=meshasphere(c0,r,opt)
+ create the surface and tetrahedral mesh of a sphere
+ input: 
+   c0:  center coordinates (x0,y0,z0) of the sphere
+   r:   radius of the sphere
+   tsize: maximum surface triangle size on the sphere
+   maxvol: maximu volume of the tetrahedral elements
+ output
+   node: node coordinates, 3 columns for x, y and z respectively
+   face: integer array with dimensions of NB x 3, each row represents
+         a surface mesh face element 
+   elem: integer array with dimensions of NE x 4, each row represents
+         a tetrahedron 
+
+==== function [node,face,elem]=meshanellip(c0,rr,tsize,maxvol) ====
+ [node,face,elem]=meshanellip(c0,rr,opt)
+ create the surface and tetrahedral mesh of an ellipsoid
+ input: 
+   c0:  center coordinates (x0,y0,z0) of the ellipsoid
+   rr:  radii of an ellipsoid, 
+        if rr is a scalar, this is a sphere with radius rr
+        if rr is a 1x3 or 3x1 vector, it specifies the ellipsoid radii [a,b,c]
+        if rr is a 1x5 or 5x1 vector, it specifies [a,b,c,theta,phi]
+           where theta and phi are the rotation angles along z and x 
+           axes, respectively. Rotation is applied before translation.
+   tsize: maximum surface triangle size on the sphere
+   maxvol: maximu volume of the tetrahedral elements
+ output:
+   node: node coordinates, 3 columns for x, y and z respectively
+   face: integer array with dimensions of NB x 3, each row represents
+         a surface mesh face element 
+   elem: integer array with dimensions of NE x 4, each row represents
+         a tetrahedron; if ignored, only produces the surface
+ example:
+   [node,face,elem]=meshanellip([10,10,-10],[30,20,10,pi/4,pi/4],0.5,0.4);
+   plotmesh(node,elem,'x>10');axis equal;
+
+==== function [node,face,elem]=meshunitsphere(tsize,maxvol) ====
+ [node,face,elem]=meshunitsphere(tsize,maxvol)
+ create the surface and/or volumetric mesh of a unit sphere 
+ centered at [0 0 0] and radius 1
+ input: 
+   tsize: maximum size of the surface triangles (from 0 to 1)
+   maxvol: maximum volume of the tetrahedron; if one wants to return
+           elem without specifying maxvol, maxvol=tsize^3
+ output:
+   node: node coordinates, 3 columns for x, y and z respectively
+   face: integer array with dimensions of NB x 3, each row represents
+         a surface mesh face element 
+   elem: integer array with dimensions of NE x 4, each row represents
+         a tetrahedron. If ignored, this function only produces the surface
+ example:
+   [node,face]=meshunitsphere(0.05);
+   [node,face,elem]=meshunitsphere(0.05,0.01);
+   plotmesh(node,elem,'x>0'); axis equal;
 === # Mesh decomposition and query ===
 
 ==== function facecell=finddisconnsurf(f) ====
@@ -1017,6 +1093,7 @@ reference:
      exename: the executable name
  output:
      exesuff: file extension for iso2mesh tool binaries
+
 
 == # Acknowledgement ==
 

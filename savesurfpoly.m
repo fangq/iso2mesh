@@ -113,7 +113,9 @@ fprintf(fp,'%d %f %f %f\n',node');
 if(~iscell(f))
     fprintf(fp,'#facet list\n%d 1\n',length(f)+bbxnum);
     elem=[3*ones(length(f),1),f-1,ones(length(f),1)];
-    fprintf(fp,'1 0\n%d %d %d %d %d\n',elem');
+    if(~isempty(elem))
+	fprintf(fp,'1 0\n%d %d %d %d %d\n',elem');
+    end
 else % if the surface is recorded as a cell array
     totalplc=0;
     for i=1:length(f)
