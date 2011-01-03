@@ -72,7 +72,7 @@ if(nargin>=9)
 end
 
 % dump surface mesh to .poly file format
-if(~iscell(el))
+if(~iscell(el) & ~isempty(no) & ~isempty(el))
 	saveoff(no(:,1:3),el(:,1:3),mwpath('post_vmesh.off'));
 end
 deletemeshfile(mwpath('post_vmesh.mtr'));
