@@ -56,8 +56,10 @@ if(nargin>1)
 		if(i==1)
 			face=[];elem=[];
 		elseif(i==2)
-			if(iscell(varargin{1}) | size(varargin{1},2)<4 || (size(varargin{1},2)==4 & max(varargin{1}(:,4))<10) )
-				face=varargin{1}; elem=[];
+			if(iscell(varargin{1}) | size(varargin{1},2)<4)
+				face=varargin{1}; elem=[];                
+            elseif(size(varargin{1},2)==4 & mesheuler(varargin{1})<0) 
+				face=varargin{1}(:,1:3); elem=[];
 			else
 				elem=varargin{1}; face=[];
 			end
@@ -76,6 +78,8 @@ if(nargin>1)
 		if(length(varargin)>2) opt=varargin(3:end); end
 	elseif(iscell(varargin{1}) | size(varargin{1},2)<4)
 		face=varargin{1}; elem=[];
+    elseif(size(varargin{1},2)==4 & mesheuler(varargin{1})<0) 
+	    face=varargin{1}(:,1:3); elem=[];
 	else
 		elem=varargin{1}; face=[];
 	end
@@ -155,7 +159,9 @@ end
 if(~isempty(h) & ishold)
   hold off;
 end
-
+if(~isempty(h)) 
+  axis equal;
+end
 if(~isempty(h) & nargout>=1)
   hm=h;
 end

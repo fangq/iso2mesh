@@ -32,7 +32,7 @@ func_inquery="finddisconnsurf surfedge volface extractloops meshconn
 func_meshfix="meshcheckrepair meshreorient removedupelem 
                 removedupnodes removeisolatednode removeisolatedsurf
                 surfaceclean getintersecttri delendelem"
-func_remesh="meshresample remeshsurf smoothsurf sortmesh"
+func_remesh="meshresample remeshsurf smoothsurf sortmesh mergemesh"
 func_fileio="saveasc savedxf saveinr saveoff savesmf savesurfpoly 
                 savevrml readasc readinr readmedit readoff readsmf
 	        readtetgen deletemeshfile mcpath mwpath savemedit"

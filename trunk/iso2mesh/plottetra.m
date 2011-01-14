@@ -22,6 +22,13 @@ function hm=plottetra(node,elem,varargin)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
+randseed=hex2dec('623F9A9E'); % "U+623F U+9A9E"
+
+if(~isempty(getvarfrom('base','ISO2MESH_RANDSEED')))
+        randseed=getvarfrom('base','ISO2MESH_RANDSEED');
+end
+rand('state',randseed);
+
 if(~iscell(elem))
 	if(size(elem,2)>4)
 		tag=elem(:,5);
@@ -43,6 +50,9 @@ if(~iscell(elem))
 	end
 end
 
+if(~isempty(h)) 
+  axis equal;
+end
 if(~isempty(h) & nargout>=1)
   hm=h;
 end
