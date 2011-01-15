@@ -37,7 +37,7 @@ clear xi yi zi;
 % extract a level-set at v=thresh, being a sphere with R=thresh
 % the maximum element size of the surface triangles is tsize*dim
 
-[node,face]=vol2restrictedtri(dist,thresh,[dim dim dim],dim*dim*thresh,30,esize,esize,40000);
+[node,face]=vol2restrictedtri(dist,thresh,[dim dim dim],dim*dim*thresh*thresh,30,esize,esize,40000);
 node=(node-0.5)*0.5;
 
 % iso2mesh will also produce a surface for the bounding box, remove it

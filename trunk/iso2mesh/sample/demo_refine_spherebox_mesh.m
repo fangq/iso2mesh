@@ -8,40 +8,10 @@
 % addpath('/path/to/iso2mesh/toolbox/');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  Part 0.  How to Create a Spherical Mesh Using Iso2mesh
+%  Part 0.  Create a Spherical Mesh
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% first create a gray-scale field representing distance from the sphere center
-
-dim=60;
-[xi,yi,zi]=meshgrid(0:0.5:dim,0:0.5:dim,0:0.5:dim);
-dist=sqrt((xi-30).^2+(yi-30).^2+(zi-30).^2);
-clear xi yi zi;
-
-% extract a level-set at v=20, being a sphere with R=20
-% the maximum element size of the surface triangles is 2
-
-[v0,f0]=vol2restrictedtri(dist,20,[60 60 60],60*60*20,30,2,2,40000);
-v0=(v0-0.5)*0.5;
-
-% iso2mesh will also produce a surface for the bounding box, remove it
-facecell=finddisconnsurf(f0);
-sphsurf=facecell{1};
-
-if( sum((v0(sphsurf(1,1),:)-[30 30 30]).^2) > 25*25 )
-   sphsurf=facecell{2};
-end
-plotmesh(v0,sphsurf);
-axis equal;
-idx=unique(sphsurf);  % this is the index of all the nodes on the sphere
-
-% show the histogram of the displacement error for the nodes on the sphere
-r0=sqrt((v0(idx,1)-30).^2+(v0(idx,2)-30).^2+(v0(idx,3)-30).^2);
-figure;hist(r0,100);
-
-% we only take the nodes on the surface
-[no,el]=removeisolatednode(v0,sphsurf);
-[no,el]=meshcheckrepair(no,el);
+[no,el]=meshasphere([30 30 30],20,2.5);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  Part I.  A Coarse Mesh for a Sphere Inside a Box with Refinement

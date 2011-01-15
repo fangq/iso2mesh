@@ -25,3 +25,4 @@ g12=g1.*g2;
 
 [node,elem,face]=v2m(log10(abs(g12))+10,2.4,2,10,'cgalsurf');
 
+plotmesh(node,face);
