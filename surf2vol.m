@@ -19,7 +19,7 @@ function img=surf2vol(node,face,xi,yi,zi)
 
 fprintf(1,'converting a closed surface to a volumetric binary image ...\n');
 
-img=surf2volz(node,face,xi,yi,zi);
-img=img | shiftdim(surf2volz(node(:,[3 1 2]),face,zi,xi,yi),1);
-img=img | shiftdim(surf2volz(node(:,[2 3 1]),face,yi,zi,xi),2);
+img=surf2volz(node(:,1:3),face(:,1:3),xi,yi,zi);
+img=img | shiftdim(surf2volz(node(:,[3 1 2]),face(:,1:3),zi,xi,yi),1);
+img=img | shiftdim(surf2volz(node(:,[2 3 1]),face(:,1:3),yi,zi,xi),2);
 

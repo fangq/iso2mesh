@@ -21,7 +21,7 @@ print_group()
    done
 }
 
-func_shortcut="v2m v2s s2m sms"
+func_shortcut="v2m v2s s2m s2v sms"
 func_mainfun="vol2mesh vol2surf surf2mesh surf2vol"
 func_backend="binsurface cgalv2m cgals2m vol2restrictedtri surf2volz"
 func_primitive="meshabox meshasphere meshanellip meshunitsphere"
