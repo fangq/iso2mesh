@@ -41,7 +41,7 @@ func_binimage="bwislands fillholes3d deislands2d deislands3d
 		thickenbinvol thinbinvol"
 func_plotting="plotmesh plotsurf plottetra qmeshcut plottetview"
 func_misc="surfdiffuse volmap2mesh isoctavemesh getvarfrom 
-		getplanefrom3pt getexeext fallbackexeext"
+		getplanefrom3pt getexeext fallbackexeext iso2meshver"
 
 echo === "#" Streamlined mesh generation - shortcuts ===
 print_group $func_shortcut
