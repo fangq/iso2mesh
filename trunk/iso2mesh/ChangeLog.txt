@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------
 
 iso2mesh ChangeLog (key features marked by *):
-2011/01/31 (1.0.0-RC1, codename: Tofu)
+2011/01/31 (0.9.9, codename: Tofu-RC1)
         1.*specifying seeds for cgalsurf and cgalmesh modules
         2.*perturbing isovalues to avoid non-manifold geometries
         3. added plottetview to call tetview for mesh display on octave
@@ -20,6 +20,7 @@ iso2mesh ChangeLog (key features marked by *):
        12. added meshmerge to merge multiple meshes and surfaces
        13. added s2v shortcut for surf2vol
        14. updated cgalsurf to specify initial point cloud size
+       15. added iso2meshver to track version numbers
 
 2010/07/14 (0.9.8, codename: Tofu-beta)
         1.*added surf2vol, converting a closed surface to a binary volume

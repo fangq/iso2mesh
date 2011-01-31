@@ -6,7 +6,7 @@
 **      Martinos Center for Biomedical Imaging
 **      Massachusetts General Hospital (Harvard Medical School)
 **      Bldg. 149, 13th St., Charlestown, MA 02148
-*'''Version''': 0.9.8 (Tofu alpha)
+*'''Version''': 0.9.9 (Tofu RC1)
 *'''License''': GPL v2 or later (see COPYING) 
 **      (this license does not cover the binaries under the bin/ 
 **       directory, see Section III for more details)
@@ -1124,6 +1124,20 @@ reference:
      exename: the executable name
  output:
      exesuff: file extension for iso2mesh tool binaries
+
+==== function [major,minor,patchnum,extra]=iso2meshver ====
+ [major,minor,patchnum,extra]=iso2meshver
+      or
+ v=iso2meshver
+ get the version number of iso2mesh toolbox
+ output:
+    if you ask for a single output:
+      v: a string denotes the current version number; the string is 
+       typically in the following format: "major.minor.patch-extra"
+       where major/minor/patch are typically integers, and extra can
+       be an arbitrary string and is optional
+    if you ask for 4 outputs:
+     [major,minor,patchnum,extra] are each field of the version string
 
 
 == # Acknowledgement ==
