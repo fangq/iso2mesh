@@ -74,6 +74,17 @@ reference:
  volumetric mesh generation from a closed surface, shortcut for surf2mesh
  inputs and outputs are similar to those defined in surf2mesh
 
+==== function img=s2v(node,face,div) ====
+ img=s2v(node,face,div)
+ shortcut for surf2vol, coverting a surface to a volumetric image
+ input:
+	 node: node list of the triangular surface, 3 columns for x/y/z
+	 face: triangle node indices, each row is a triangle
+	 div:  division number along the shortest edge of the mesh (resolution)
+              if not given, div=50
+ output:
+	 img: a volumetric binary image at position of ndgrid(xi,yi,zi)
+
 ==== function newnode=sms(node,face,iter,alpha) ====
  newnode=sms(node,face,iter,useralpha)
  simplified version of surface mesh smoothing
@@ -682,6 +693,26 @@ reference:
     el: the element list in the sorted order
     fc: the surface triangle list in the sorted order (can be ignored)
     nodemap: the new node mapping order, no=node(nodemap,:)
+
+==== function [newnode,newelem]=mergemesh(node,elem,varargin) ====
+ [newnode,newelem]=mergemesh(node,elem,varargin)
+ merge two or more tetrahedral meshes or triangular surfaces
+ input: 
+      node: node coordinates, dimension (nn,3)
+      elem: tetrahedral element or triangle surface (nn,3) to (nn,5)
+ output:
+      newnode: the node coordinates after merging, dimension (nn,3)
+      newelem: tetrahedral element or surfaces after merging (nn,4) or (nhn,5)
+ note: you can call meshcheckrepair for the output newnode and
+ newelem to remove the duplicated nodes or elements
+ example:
+   [node1,elem1,face1]=meshabox([0 0 0],[10 10 10],1,1);
+   [node2,face2,elem2]=meshasphere([5 5 13.1],3,0.3,3);
+   [newnode,newelem]=mergemesh(node1,elem1,node2,elem2);
+   plotmesh(newnode,newelem);
+   figure;
+   [newnode,newface]=mergemesh(node1,face1,node2,face2);
+   plotmesh(newnode,newface,'x>5');
 === # File I/O ===
 
 ==== function saveasc(v,f,fname) ====
