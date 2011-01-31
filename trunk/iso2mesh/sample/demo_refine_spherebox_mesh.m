@@ -31,7 +31,7 @@ nfull=[no;fixednodes];                   % append additional control points
 [node3,elem3,face3]=surf2mesh([nfull,nodesize],el,[0 0 0],[61 61 61],1,8,[30 30 30],[],[2 2 2 2 6 6 6 6]);
                              % ^- add node size as the last            ^ max volume     ^- edge sizes at the 8 
                              %    column to node                                           corners of the bounding box
-[node3,elem3]=sortmesh(srcpos,node3,elem3,1:4);  % reorder the nodes/elements 
+[node3,elem3,face3]=sortmesh(srcpos,node3,elem3,1:4,face3,1:3);  % reorder the nodes/elements 
                                                  % so that the nodes near earch order
                                                  % are more clustered in the memory
 elem3(:,1:4)=meshreorient(node3,elem3(:,1:4));   % reorient elements to ensure the volumns are positive
@@ -50,7 +50,7 @@ nodesize=[0.7*ones(size(no,1),1) ; 0.2; 2];  % set target edge size to 0.7 near 
 
 figure; plotmesh(node2,face2(:,1:3),'y>30');axis equal;
 
-[node2,elem2]=sortmesh(srcpos,node2,elem2,1:4);
+[node2,elem2,face2]=sortmesh(srcpos,node2,elem2,1:4,face2,1:3);
 elem2(:,1:4)=meshreorient(node2,elem2(:,1:4));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -66,7 +66,7 @@ ISO2MESH_SESSION='demo_sph1_';
 % mesh with maximum volume of 10
 
 [node1,elem1,face1]=surf2mesh(no2,el2,[0 0 0],[61 61 61],1,10,[30 30 30],[],1);
-[node1,elem1]=sortmesh(srcpos,node1,elem1,1:4);
+[node1,elem1,face1]=sortmesh(srcpos,node1,elem1,1:4,face1,1:3);
 elem1(:,1:4)=meshreorient(node1,elem1(:,1:4));
 
 clear ISO2MESH_SESSION

@@ -29,27 +29,21 @@ function [node,face,elem]=meshunitsphere(tsize,maxvol)
 
 dim=60;
 esize=tsize*dim;
-thresh=dim/2-2*esize;
+thresh=dim/2-1;
 [xi,yi,zi]=meshgrid(0:0.5:dim,0:0.5:dim,0:0.5:dim);
-dist=sqrt((xi-30).^2+(yi-30).^2+(zi-30).^2);
+dist=thresh-sqrt((xi-30).^2+(yi-30).^2+(zi-30).^2);
+dist(find(dist<0))=0;
 clear xi yi zi;
 
 % extract a level-set at v=thresh, being a sphere with R=thresh
 % the maximum element size of the surface triangles is tsize*dim
 
-[node,face]=vol2restrictedtri(dist,thresh,[dim dim dim],dim*dim*thresh*thresh,30,esize,esize,40000);
+[node,face]=vol2restrictedtri(dist,1,[dim dim dim],dim*dim*dim,30,esize,esize,40000);
 node=(node-0.5)*0.5;
-
-% iso2mesh will also produce a surface for the bounding box, remove it
-facecell=finddisconnsurf(face);
-face=facecell{1};
-if( sum((node(face(1,1),:)-[30 30 30]).^2) > (thresh+0.5)*(thresh+0.5) )
-   face=facecell{2};
-end
 
 [node,face]=removeisolatednode(node,face);
 
-node=(node-30)/thresh;
+node=(node-30)/28;
 r0=sqrt(sum((node.*node)'));
 node=node.*repmat(1./r0(:),1,3);
 
