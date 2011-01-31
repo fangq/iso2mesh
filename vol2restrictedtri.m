@@ -42,9 +42,15 @@ randseed=hex2dec('623F9A9E'); % "U+623F U+9A9E"
 if(~isempty(getvarfrom('base','ISO2MESH_RANDSEED')))
 	randseed=getvarfrom('base','ISO2MESH_RANDSEED');
 end
+
+initnum=50;
+if(~isempty(getvarfrom('base','ISO2MESH_INITSIZE')))
+        initnum=getvarfrom('base','ISO2MESH_INITSIZE');
+end
+
 system([' "' mcpath('cgalsurf') exesuff '" "' mwpath('pre_extract.inr') ...
     '" ' sprintf('%f %f %f %f %f %f %f %f %d ',thres,cent,brad,ang,radbound,distbound,maxnode) ...
-    ' "' mwpath('post_extract.off') '" ' sprintf('%.0f',randseed)]);
+    ' "' mwpath('post_extract.off') '" ' sprintf('%.0f %d',randseed,initnum)]);
 [node,elem]=readoff(mwpath('post_extract.off'));
 
 % assuming the origin [0 0 0] is located at the lower-bottom corner of the image
