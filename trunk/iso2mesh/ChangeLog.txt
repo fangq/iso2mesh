@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------
 
 iso2mesh ChangeLog (key features marked by *):
-2010/11/08 (1.0.0-pre, codename: Tofu)
+2011/01/31 (1.0.0-RC1, codename: Tofu)
         1.*specifying seeds for cgalsurf and cgalmesh modules
         2.*perturbing isovalues to avoid non-manifold geometries
         3. added plottetview to call tetview for mesh display on octave
@@ -14,6 +14,12 @@ iso2mesh ChangeLog (key features marked by *):
         6. optimized memory use for surf2vol
         7. made nodevolume support surfaces
         8. added savemedit to export tetrahedral mesh in Medit format
+        9. compress most binaries with upx to save space
+       10. set up binary file extension fallback to help Mac users
+       11.*added functions to mesh simple geometries such as a sphere etc
+       12. added meshmerge to merge multiple meshes and surfaces
+       13. added s2v shortcut for surf2vol
+       14. updated cgalsurf to specify initial point cloud size
 
 2010/07/14 (0.9.8, codename: Tofu-beta)
         1.*added surf2vol, converting a closed surface to a binary volume
