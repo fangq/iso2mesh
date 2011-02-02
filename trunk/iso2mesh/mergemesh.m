@@ -30,7 +30,7 @@ function [newnode,newelem]=mergemesh(node,elem,varargin)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-len=size(varargin);
+len=length(varargin);
 newnode=node;
 newelem=elem;
 if(len>0 & mod(len,2)~=0)
