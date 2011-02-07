@@ -156,12 +156,12 @@ if(~isempty(elem))
    end
 end
 
-if(~isempty(h) & ishold)
+if(exist('h','var') & ishold)
   hold off;
 end
-if(~isempty(h)) 
+if(exist('h','var')) 
   axis equal;
 end
-if(~isempty(h) & nargout>=1)
+if(exist('h','var') & nargout>=1)
   hm=h;
 end
