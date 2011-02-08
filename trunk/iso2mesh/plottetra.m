@@ -38,14 +38,14 @@ if(~iscell(elem))
 		for i=1:length(types)
 			idx=find(tag==types(i));
 			face=volface(elem(idx,1:4));
-			h=[h plotsurf(node,face,'facecolor',rand(3,1))];
+			h=[h plotsurf(node,face,'facecolor',rand(3,1),varargin{:})];
 		end
 	else
 		face=volface(elem(:,1:4));
 		if(nargin<3) 
 			h=plotsurf(node,face);
 		else
-                        h=plotsurf(node,face,varargin{:});
+			h=plotsurf(node,face,varargin{:});
 		end
 	end
 end
