@@ -59,7 +59,7 @@ if(nargin>1)
 			if(iscell(varargin{1}) | size(varargin{1},2)<4)
 				face=varargin{1}; elem=[];                
             elseif(size(varargin{1},2)==4 & mesheuler(varargin{1})<0) 
-				face=varargin{1}(:,1:3); elem=[];
+				face=varargin{1}; elem=[];
 			else
 				elem=varargin{1}; face=[];
 			end
@@ -79,7 +79,7 @@ if(nargin>1)
 	elseif(iscell(varargin{1}) | size(varargin{1},2)<4)
 		face=varargin{1}; elem=[];
     elseif(size(varargin{1},2)==4 & mesheuler(varargin{1})<0) 
-	    face=varargin{1}(:,1:3); elem=[];
+	    face=varargin{1}; elem=[];
 	else
 		elem=varargin{1}; face=[];
 	end
@@ -114,7 +114,7 @@ if(~isempty(face))
         if(isempty(opt))
    		h=plotsurf(node,face);
 	else
-   		h=plotsurf(node,face,opt);
+   		h=plotsurf(node,face,opt{:});
 	end
    else
 	cent=meshcentroid(node,face(:,1:3));
@@ -126,7 +126,7 @@ if(~isempty(face))
 	    if(isempty(opt))
 		h=plotsurf(node,face(idx,:));
 	    else
-		h=plotsurf(node,face(idx,:),opt);
+		h=plotsurf(node,face(idx,:),opt{:});
 	    end
 	end
    end
@@ -138,7 +138,7 @@ if(~isempty(elem))
         if(isempty(opt))
    		h=plottetra(node,elem);
 	else
-   		h=plottetra(node,elem,opt);
+   		h=plottetra(node,elem,opt{:});
 	end
    else
 	cent=meshcentroid(node,elem(:,1:4));
@@ -150,7 +150,7 @@ if(~isempty(elem))
 	    if(isempty(opt))
 		h=plottetra(node,elem(idx,:));
 	    else
-		h=plottetra(node,elem(idx,:),opt);
+		h=plottetra(node,elem(idx,:),opt{:});
 	    end
 	end
    end
