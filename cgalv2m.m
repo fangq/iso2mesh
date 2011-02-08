@@ -15,7 +15,7 @@ function [node,elem,face]=cgalv2m(vol,opt,maxvol)
 %	 opt: parameters for CGAL mesher, if opt is a structure, then
 %	     opt.radbound: defines the maximum surface element size
 %	     opt.angbound: defines the miminum angle of a surface triangle
-%	     opt.surfaceapprox: defines the maximum distance between the 
+%	     opt.distbound: defines the maximum distance between the 
 %		 center of the surface bounding circle and center of the 
 %		 element bounding sphere
 %	     opt.reratio:  maximum radius-edge ratio
@@ -51,7 +51,7 @@ exesuff=fallbackexeext(exesuff,'cgalmesh');
 
 ang=30;
 ssize=6;
-approx=4;
+approx=0.5;
 reratio=3;
 
 if(~isstruct(opt))
@@ -61,7 +61,7 @@ end
 if(isstruct(opt) & length(opt)==1)  % does not support settings for multiple labels
 	if(isfield(opt,'radbound'))   ssize=opt.radbound; end
 	if(isfield(opt,'angbound'))   ang=opt.angbound; end
-	if(isfield(opt,'surfapprox')) approx=opt.surfapprox; end
+	if(isfield(opt,'distbound')) approx=opt.distbound; end
 	if(isfield(opt,'reratio'))    reratio=opt.reratio; end
 end
 
