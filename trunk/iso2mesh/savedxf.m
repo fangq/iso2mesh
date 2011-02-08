@@ -38,10 +38,12 @@ if(~isempty(face))
 end
 
 if(~isempty(node))
+  node=node(:,1:3);
   fprintf(fid,'0\nVERTEX\n8\nI2M\n10\n%f\n20\n%f\n30\n%f\n70\n192\n',node');
 end
 
 if(~isempty(face))
+  face=face(:,1:3);
   fprintf(fid,'0\nVERTEX\n8\nI2M\n62\n254\n10\n0.0\n20\n0.0\n30\n0.0\n70\n128\n71\n%d\n72\n%d\n73\n%d\n',face');
 end
 
