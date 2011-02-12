@@ -24,7 +24,7 @@ function binname=mcpath(fname)
 
 p=getvarfrom('base','ISO2MESH_BIN');
 binname=[];
-if(isempty(p) | ~exist(p))
+if(isempty(p))
 	% the bin folder under iso2mesh is searched first
 	tempname=[fileparts(which(mfilename)) filesep 'bin' filesep fname];
 	if(exist([fileparts(which(mfilename)) filesep 'bin'])==7)

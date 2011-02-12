@@ -36,7 +36,7 @@ if(~isempty(username))
 end
 
 tempname=[];
-if(isempty(p) | ~exist(p))
+if(isempty(p))
       if(isoctavemesh & tempdir=='\')
 		tempname=['.'  filesep session fname];
 	else

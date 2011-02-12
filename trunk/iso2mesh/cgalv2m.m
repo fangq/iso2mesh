@@ -83,5 +83,7 @@ if(~exist(mwpath('post_cgalmesh.mesh'),'file'))
 end
 [node,elem,face]=readmedit(mwpath('post_cgalmesh.mesh'));
 
+fprintf(1,'node number:\t%d\ntriangles:\t%d\ntetrahedra:\t%d\nregions:\t%d\n',...
+    size(node,1),size(face,1),size(elem,1),length(unique(elem(:,end))));
 fprintf(1,'surface and volume meshes complete\n');
 
