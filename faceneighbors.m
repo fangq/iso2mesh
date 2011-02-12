@@ -76,5 +76,7 @@ end
 if(nargin==2)
   if(strcmp(opt,'surface'))
 	facenb=faces(find(facenb==0),:);
+  else
+        error(['supplied option "' opt '" is not supported.']);
   end
 end
