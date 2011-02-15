@@ -4,30 +4,34 @@
 
 == high priority ==
 
-1. detect multi-value interfaces (i.e. voxels where more than 2 values meet)
+* detect multi-value interfaces (i.e. voxels where more than 2 values meet) \
 and perturb the levelset surface mesh to avoid intersection [proposed on 02/11/09]
 
-2. if one levelset contains multiple disjointed surfaces, separate them, 
+* if one levelset contains multiple disjointed surfaces, separate them, \
 and do sub-region labeling for each component [proposed on 02/11/09]
-
-3. setting RNG seeds when calling CGAL tools to ensure repeatibility
-of the meshing [proposed 07/17/2010]
 
 == low priority ==
 
-1. processing gray-scale images directly [proposed on 02/11/09]
+* 2D image-based mesh generation support ? [proposed on 02/11/09]
+
+* adaptive refining [proposed on 02/11/09]
+
+* moving mesh
+
+* edge sharpening
+
+
+
+== completed ==
+
+* on Windows, the deletemeshfile will gave warning message, seemed the \
+files were opened but not closed and can not be deleted \
 - done, by FangQ 2009/05/04
 
-2. 2D image-based mesh generation support ? [proposed on 02/11/09]
+* processing gray-scale images directly [proposed on 02/11/09] \
+- done, by FangQ 2009/05/04
 
-3. adaptive refining [proposed on 02/11/09]
+* setting RNG seeds when calling CGAL tools to ensure repeatibility \
+of the meshing [proposed 07/17/2010] \
+- done, by FangQ 2010/11/08
 
-4. moving mesh
-
-5. edge sharpening
-
-== Known issues ==
-
-1. on Windows, the deletemeshfile will gave warning message, seemed the
-files were opened but not closed and can not be deleted
-- solved, by FangQ 2009/05/04

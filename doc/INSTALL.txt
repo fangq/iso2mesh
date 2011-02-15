@@ -29,8 +29,9 @@ Installation
      * extract the toolbox to a folder, for example,
        /home/myaccount/work/iso2mesh, let's call it the "root directory"
        of iso2mesh;
-     * add the bin/ folder under the iso2mesh root directory to your
-       system's PATH environment variable, see [4]more details here;
+     * (this step is no longer needed) add the bin/ folder under the
+       iso2mesh root directory to your system's PATH environment variable,
+       see [4]more details here;
      * start your Maltab from a new shell (make sure the PATH setting is
        effective), type addpath('/home/myaccount/work/iso2mesh') to add
        iso2mesh to your matlab search path for the current session

@@ -81,6 +81,11 @@ segments
 
    and don't use the full face array as the first parameter.
 
+   If you are using iso2mesh newer than 0.9.8, you can use a function
+   called "plotmesh" to visualize the produced surfaces and volumes. The
+   script will attempt to recognize the extra column of "face" by using
+   the Euler characteristics and automatically ignore it if present.
+
 3. Matlab complains about imread, imclose or imfill missing
 
    Under the sample/ directory, demo_vol2mesh_ex2.m requires imread, which
