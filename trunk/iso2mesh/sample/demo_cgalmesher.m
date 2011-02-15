@@ -16,7 +16,6 @@ fprintf(1,'meshing the segmented brain (this may take a few minutes) ...\n');
 
 [node,elem,face]=v2m(brain,[],2,100,'cgalmesh');
 
-centroid=meshcentroid(node(:,1:4),face(:,1:3));
 figure
 hs=plotmesh(node,face(:,1:3),'y>100');
 

@@ -14,10 +14,11 @@ How to obtain iso2mesh
 
 1. Download the latest release
 
-iso2mesh 0.9.8, codenamed Tofu (beta)
+iso2mesh 0.9.9, codenamed Tofu (RC1)
 
-   Please download the latest v0.9.8 release at our [7]registration/download page. We are greatly appreciated if you can tell us a little bit
+   Please download the latest v0.9.9 release at our [7]registration/download page. We are greatly appreciated if you can tell us a little bit
    about you and your related research by [8]registering your copy of iso2mesh.
+     * This software is supported on [os-icons3.png]
 
 iso2mesh 0.8.0, codenamed Hotpot (stable)
 
