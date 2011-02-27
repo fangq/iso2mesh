@@ -5,7 +5,7 @@
 
 fprintf(1,'loading segmented brain image...\n');
 for i=1:256
-  brain(:,:,i)=imread('headseg.tif',i);
+  brain(:,:,i)=imread('brain_seg.tif',i);
 end
 brain=uint8(brain);
 

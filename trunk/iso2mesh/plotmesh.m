@@ -101,7 +101,9 @@ if(nargin>1)
 end
 
 holdstate=ishold;
-
+if(~holdstate)
+    cla;
+end
 if(isempty(face) & isempty(elem))
    if(isempty(selector))
         if(isempty(opt))

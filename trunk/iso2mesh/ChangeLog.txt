@@ -1,11 +1,11 @@
 ============================================================================
 
-     iso2mesh - a powerful yet simple-to-use mesh generator
+     iso2mesh - a simple-to-use yet powerful 3D mesh generator
 
 ----------------------------------------------------------------------------
 
 iso2mesh ChangeLog (key features marked by *):
-2011/02/27 (1.0.0, codename: Tofu)
+2011/02/27 (1.0.0, codename: Mapo Tofu)
         1. fixed mwpath/mcpath octave warning
 	2. used consistent opt.distbound flag for cgalv2m and cgalv2s
 	3. fixed a bug in plotmesh to allow using plotting styles
@@ -16,8 +16,9 @@ iso2mesh ChangeLog (key features marked by *):
 	8.*robust and fast surface interior point determination
 	9.*label multi-part surfaces inside vol2surf
        10. new functions surfplane/surfseeds/surfinterior/meshedge
-	
-2011/01/31 (0.9.9, codename: Tofu-RC1)
+       11. use SVN revison number as the default extra version tag
+
+2011/01/31 (0.9.9, codename: Mapo Tofu-RC1)
         1.*specifying seeds for cgalsurf and cgalmesh modules
         2.*perturbing isovalues to avoid non-manifold geometries
         3. added plottetview to call tetview for mesh display on octave
@@ -35,14 +36,14 @@ iso2mesh ChangeLog (key features marked by *):
        15. added iso2meshver to track version numbers
        16. automatic handling of label column in face and elem plots
 
-2010/07/14 (0.9.8, codename: Tofu-beta)
+2010/07/14 (0.9.8, codename: Mapo Tofu-beta)
         1.*added surf2vol, converting a closed surface to a binary volume
         2. fixed deletemeshfile bug for Windows
         3. automatic repairing when meshresample fails
         4. fast faceneighbors unit
         5.*added CGAL 3D mesher for robust meshing of segmented volumes
         6. added CGAL 3D polyhedral mesher as an alternative to tetgen
-        7. corrected bugs in Laplacian-HC and Lowpass smoothing algorithms
+        7. corrected bugs in Laplacian+HC and Lowpass smoothing algorithms
         8. added sms.m as the shortcut for surfsmooth
         9. added exporters for DXF and VRML mesh formats
        10. added user name to the temporary files to avoid permission conflict
@@ -94,7 +95,7 @@ iso2mesh ChangeLog (key features marked by *):
 2008/12/27 (0.7.8, codename: Hotpot-alpha)
         1. try to handle the self-intersecting element problems, 
            added getintersecttri.m to extract intesecting element IDs
-        2. implemented Laplacian-HC and Low-pass filter mesh smoothing
+        2. implemented Laplacian+HC and Low-pass filter mesh smoothing
            algorithms; unfortunately, they are not effective to remove the 
            self-intersecting elements
         3. sent email to CGAL list to ask advices to handle self-intersecting

@@ -10,7 +10,7 @@
 % to windows/Linux/Unix PATH environment variable
 
 %% load the sample data
-load sampleVol2Mesh.mat
+load rat_head.mat
 
 % volimage is a volumetric image such as an X-ray or MRI image
 %% v2m is the short-hand version of vol2mesh
