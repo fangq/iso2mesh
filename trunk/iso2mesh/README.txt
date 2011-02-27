@@ -2,15 +2,15 @@
 = iso2mesh: an image-based 3D surface and volumetric mesh generator  =
 ----------------------------------------------------------------------
 
-*'''Author''': Qianqian Fang <fangq at nmr.mgh.harvard.edu>
-**      Martinos Center for Biomedical Imaging
-**      Massachusetts General Hospital (Harvard Medical School)
-**      Bldg. 149, 13th St., Charlestown, MA 02148
-*'''Version''': 0.9.9 (Tofu RC1)
-*'''License''': GPL v2 or later (see COPYING) 
-**      (this license does not cover the binaries under the bin/ 
-**       directory, see Section III for more details)
-*'''URL''': http://iso2mesh.sf.net
+Author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+      Martinos Center for Biomedical Imaging
+      Massachusetts General Hospital (Harvard Medical School)
+      Bldg. 149, 13th St., Charlestown, MA 02148
+Version: 1.0.0 (Tofu)
+License: GPL v2 or later (see COPYING) 
+      (this license does not cover the binaries under the bin/ 
+       directory, see Section III for more details)
+URL: http://iso2mesh.sf.net
 
 
 == Table of Content ==
@@ -29,7 +29,7 @@ from MRI or CT scans, making it particularly suitable
 for multi-modality medical imaging data analysis or 
 multi-physics modeling.
 
-Creating quality surface or tetrahedral meshes from 
+Creating high-quality surface or tetrahedral meshes from 
 volumetric images has been a challenging task where 
 very limited software and resources could be found. 
 Commercial tools, such as Mimics and Amira, are both 
@@ -53,6 +53,7 @@ reference:
  gray-scale images," Proceedings of IEEE International Symposium on Biomedical Imaging \
  (ISBI 2009), pp. 1142-1145, 2009
 
+== # Function List ==
 
 === # Streamlined mesh generation - shortcuts ===
 
