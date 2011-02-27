@@ -29,6 +29,8 @@ function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
 %	   opt(1,2,..).regions: user specified regions interior pt list
 %	   opt(1,2,..).surf.{node,elem}: add additional surfaces
 %	   opt(1,2,..).{A,B}: linear transformation for each surface
+%	   opt.autoregion: if set to 1, vol2surf will try to determine 
+%              the interior points for each closed surface automatically
 %	 dofix: 1: perform mesh validation&repair, 0: skip repairing
 %	 method: - if method is 'simplify', iso2mesh will first call
 %		   binsurface to generate a voxel-based surface mesh and then
@@ -80,55 +82,30 @@ if(~isempty(img))
         maxlevel=length(isovalues);
     end
 
-    % to accelerate the boundary field calculation
-    bfield=imedge3d(newimg);
-    if(any(bfield(:))) 
-      for i=1:maxlevel
-        if(i<maxlevel)
-            levelmask=(newimg>=isovalues(i) & newimg<isovalues(i+1));
-        else
-            levelmask=(newimg>=isovalues(i));
-        end
-        idx=find(levelmask);
-
-        bb=zeros(size(newimg));
-        bb(idx)=1;
-        bfield=(imedge3d(bb) | bfield);
-        clear bb;
-      end
-    end
-
-    % create region list. To do this, we need to find an interior point
-    % for each region, and make sure this point is not close to the 
-    % boundary (otherwise, after mesh simplification, it may move to outside)
-
-    % The trick is to use a bfield matrix, by smoothing it for a few iterations,
-    % we will get a field with values related to the distances to the boundary; 
-    % for each region we find the lowest field point as the interior point
-
-    % smooth bfield 4 times, this makes the min distance to the boundaries 4
-    % voxels: I am assuming that the subsequent mesh-resample will not cause
-    % boundary changes more than 4 voxels, if it moved more, then increase this
-    % number
-
-    bfield=smoothbinvol(bfield,4);
-
     for i=1:maxlevel
       if(i<maxlevel)
           levelmask=(newimg>=isovalues(i) & newimg<isovalues(i+1));
       else
           levelmask=(newimg>=isovalues(i));
       end
-      idx=find(levelmask);
-      if(~isempty(idx))
-          % for each level, find the bfield voxels with the min values
-          [idx,idy]=find(levelmask & bfield==min(bfield(idx)));
-          if(~isempty(idx))
-              % pick the first 1 for all min points
-              [idy,idz]=ind2sub([size(newimg,2),size(newimg,3)],idy(1));
-              % because binsurface makes the bfield shift by 1 in all axes
-              disp(sprintf('region %d centroid : %d %d %d\n', i, [idx(1),idy,idz]-1));
-              regions(end+1,:)=[idx(1),idy,idz]-1;
+      [levelno,levelel]=binsurface(levelmask);
+      if(~isempty(levelel))
+          if(isstruct(opt) & isfield(opt,'autoregion'))
+              if(opt.autoregion)
+                  seeds=surfseeds(levelno,levelel);
+              else
+                  seeds=surfinterior(levelno,levelel);
+              end
+          else
+              seeds=surfinterior(levelno,levelel);
+          end
+          if(~isempty(seeds))
+              disp([sprintf('region %d centroid :',i) sprintf('\t%f %f %f\n', seeds')]);
+              if(~isempty(regions))
+                  regions(end+1:end+size(seeds,1),:)=seeds;
+              else
+                  regions=seeds;
+              end
           end
       end
     end

@@ -45,9 +45,10 @@ subplot(212);
 plotmesh(node,elem,'z<20');axis equal;view(90,60);
 
 %% create 3D mesh from gray-scale image with advanced distbound control
-
+clear opt
 opt.radbound=4;       % set surface triangle maximum size
 opt.distbound=0.2;    % set max distance that deviates from the level-set
+opt.autoregion=1;
 [node,elem,face]=v2m(hw3d,128,opt,40);
 
 figure;
