@@ -7,7 +7,7 @@
 % addpath('../');
 
 %% load the sample data
-load sampleVol2Mesh.mat
+load rat_head.mat
 
 % first, generate a surface from the original image
 % similar to demo_shortcuts_ex1.m

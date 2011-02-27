@@ -23,6 +23,6 @@ g12=g1.*g2;
 
 % create a mesh based on the level-set at log(J)=-7.5
 
-[node,elem,face]=v2m(log10(abs(g12))+10,2.4,2,10,'cgalsurf');
+[node,elem,face]=v2m(log10(abs(g12))+10,2.5,2,10,'cgalsurf');
 
 plotmesh(node,face);

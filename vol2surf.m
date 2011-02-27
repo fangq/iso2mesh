@@ -84,9 +84,9 @@ if(~isempty(img))
 
     for i=1:maxlevel
       if(i<maxlevel)
-          levelmask=(newimg>=isovalues(i) & newimg<isovalues(i+1));
+          levelmask=int8(newimg>=isovalues(i) & newimg<isovalues(i+1));
       else
-          levelmask=(newimg>=isovalues(i));
+          levelmask=int8(newimg>=isovalues(i));
       end
       [levelno,levelel]=binsurface(levelmask);
       if(~isempty(levelel))

@@ -10,7 +10,7 @@
 % to windows/Linux/Unix PATH environment variable
 
 %% load the sample data
-load surfmesh_demo.mat
+load tube_surface.mat
 
 % f and v stores the surface patch faces and nodes
 %% perform mesh generation

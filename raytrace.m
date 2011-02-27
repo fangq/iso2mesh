@@ -55,7 +55,9 @@ P=(p'*den'+v'*t')';
 u=dot(P',N1')'+den.*d1;
 v=dot(P',N2')'+den.*d2;
 
-den=1./den;
+idx=find(den);
+den(idx)=1./den(idx);
+
 t=t.*den;
 u=u.*den;
 v=v.*den;

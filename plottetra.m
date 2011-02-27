@@ -23,6 +23,7 @@ function hm=plottetra(node,elem,varargin)
 %
 
 randseed=hex2dec('623F9A9E'); % "U+623F U+9A9E"
+if(isoctavemesh) randseed=randseed+3; end
 
 if(~isempty(getvarfrom('base','ISO2MESH_RANDSEED')))
         randseed=getvarfrom('base','ISO2MESH_RANDSEED');
