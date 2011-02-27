@@ -18,15 +18,10 @@ Getting Started with iso2mesh
 
  load mydata.mat
  [node,elem,face]=v2m(mydata,0.5,5,100);
- % or you can use the verbose form:
- % [node,elem,face]=vol2mesh(mydata>0.5,1:size(mydata,1),1:size(mydata,2),...
-                           1:size(mydata,3), 5, 100, 1,'cgalsurf');
  plotmesh(node,face)
- % be careful, the last column of face is a label, should not be used for plotti
-ng, same for elem
 
    Needless to say, the first line loads the data to your current session.
-   The second line calls an iso2mesh function, 'v2m', shortcut for
+   The second line calls an iso2mesh function, 'v2m', the shortcut for
    vol2mesh, to construct a volumetric mesh from this data array. The
    first argument of v2m, "mydata", is the volumetric image you are about
    to mesh; the 2nd argument is the threshold value at which you define

@@ -28,7 +28,8 @@ func_primitive="meshabox meshasphere meshanellip meshunitsphere"
 func_inquery="finddisconnsurf surfedge volface extractloops meshconn  
                 meshcentroid nodevolume elemvolume neighborelem 
 		faceneighbors maxsurf flatsegment orderloopedge  
-		mesheuler bbxflatsegment"
+		mesheuler bbxflatsegment surfplane surfinterior 
+                surfseeds meshquality meshedge"
 func_meshfix="meshcheckrepair meshreorient removedupelem 
                 removedupnodes removeisolatednode removeisolatedsurf
                 surfaceclean getintersecttri delendelem"
@@ -40,7 +41,7 @@ func_binimage="bwislands fillholes3d deislands2d deislands3d
                 imedge3d internalpoint smoothbinvol 
 		thickenbinvol thinbinvol"
 func_plotting="plotmesh plotsurf plottetra qmeshcut plottetview"
-func_misc="surfdiffuse volmap2mesh isoctavemesh getvarfrom 
+func_misc="surfdiffuse volmap2mesh isoctavemesh getvarfrom raytrace
 		getplanefrom3pt getexeext fallbackexeext iso2meshver"
 
 echo === "#" Streamlined mesh generation - shortcuts ===

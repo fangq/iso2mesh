@@ -54,7 +54,6 @@ reference:
  (ISBI 2009), pp. 1142-1145, 2009
 
 
-== # List of functions ==
 === # Streamlined mesh generation - shortcuts ===
 
 ==== function [node,elem,face]=v2m(img,isovalues,opt,maxvol,method) ====
@@ -85,20 +84,21 @@ reference:
  output:
 	 img: a volumetric binary image at position of ndgrid(xi,yi,zi)
 
-==== function newnode=sms(node,face,iter,alpha) ====
- newnode=sms(node,face,iter,useralpha)
+==== function newnode=sms(node,face,iter,alpha,method) ====
+ newnode=sms(node,face,iter,useralpha,method)
  simplified version of surface mesh smoothing
  input:
     node:  node coordinates of a surface mesh
     face:  face element list of the surface mesh
     iter:  smoothing iteration number
     alpha: scaler, smoothing parameter, v(k+1)=alpha*v(k)+(1-alpha)*mean(neighbors)
+    method: same as in smoothsurf, default is 'laplacianhc'
  output:
     newnode: output, the smoothed node coordinates
 === # Streamlined mesh generation ===
 
-==== function [node,elem,face]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalues) ====
- [node,elem,face]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalues)
+==== function [node,elem,face,regions]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalues) ====
+ [node,elem,face,regions]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalues)
  convert a binary (or multi-valued) volume to tetrahedral mesh
  input:
 	 img: a volumetric binary image
@@ -123,6 +123,8 @@ reference:
 	       column is the region ID
 	 face: output, mesh surface element list of the tetrahedral mesh
 	       the last column denotes the boundary ID
+    region: optional output. if opt.autoregion is set to 1, region
+          saves the interior points for each closed surface component
 
 ==== function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues) ====
  [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
@@ -150,6 +152,8 @@ reference:
 	   opt(1,2,..).regions: user specified regions interior pt list
 	   opt(1,2,..).surf.{node,elem}: add additional surfaces
 	   opt(1,2,..).{A,B}: linear transformation for each surface
+	   opt.autoregion: if set to 1, vol2surf will try to determine 
+              the interior points for each closed surface automatically
 	 dofix: 1: perform mesh validation&repair, 0: skip repairing
 	 method: - if method is 'simplify', iso2mesh will first call
 		   binsurface to generate a voxel-based surface mesh and then
@@ -224,7 +228,7 @@ reference:
 	 opt: parameters for CGAL mesher, if opt is a structure, then
 	     opt.radbound: defines the maximum surface element size
 	     opt.angbound: defines the miminum angle of a surface triangle
-	     opt.surfaceapprox: defines the maximum distance between the 
+	     opt.distbound: defines the maximum distance between the 
 		 center of the surface bounding circle and center of the 
 		 element bounding sphere
 	     opt.reratio:  maximum radius-edge ratio
@@ -242,7 +246,7 @@ reference:
 
 ==== function [node,elem,face]=cgals2m(v,f,opt,maxvol) ====
  [node,elem,face]=cgals2m(v,f,opt,maxvol)
- wrapper for CGAL 3D mesher (CGAL 3.5)
+ wrapper for CGAL 3D mesher (CGAL 3.5 and newer)
  convert a binary (or multi-valued) volume to tetrahedral mesh
  http://www.cgal.org/Manual/3.5/doc_html/cgal_manual/Mesh_3/Chapter_main.html
  input:
@@ -251,7 +255,7 @@ reference:
 	 opt: parameters for CGAL mesher, if opt is a structure, then
 	     opt.radbound: defines the maximum surface element size
 	     opt.angbound: defines the miminum angle of a surface triangle
-	     opt.surfaceapprox: defines the maximum distance between the 
+	     opt.distbound: defines the maximum distance between the 
 		 center of the surface bounding circle and center of the 
 		 element bounding sphere
 	     opt.reratio:  maximum radius-edge ratio
@@ -530,6 +534,65 @@ reference:
  output:
     seg:   output, a single vector separated by NaN, each segment
              is a close-polygon on x/y/z plane 
+
+==== function plane=surfplane(node,face) ====
+ plane=surfplane(node,face)
+ plane equation coefficients for each face in a surface
+ input:
+   node: a list of node coordinates (nn x 3)
+   face: a surface mesh triangle list (ne x 3)
+ output:
+   plane: a (ne x 4) array, in each row, it has [a b c d]
+        to denote the plane equation as "a*x+b*y+c*z+d=0"
+
+==== function [pt,p0,v0,t,idx]=surfinterior(node,face) ====
+ [pt,p0,v0,t,idx]=surfinterior(node,face)
+ identify a point that is enclosed by the (closed) surface
+ input:
+   node: a list of node coordinates (nn x 3)
+   face: a surface mesh triangle list (ne x 3)
+ output:
+   pt: the interior point coordinates [x y z]
+   p0: ray origin used to determine the interior point
+   v0: the vector used to determine the interior point
+   t : ray-tracing intersection distance (with signs) from p0. the
+       intersection coordinates can be expressed as p0+ts(i)*v0
+   idx: index to the face elements that intersect with the ray, order
+       match that of t
+
+==== function seeds=surfseeds(node,face) ====
+ seeds=surfseeds(node,face)
+ calculate a set of interior points with each enclosed by a closed
+ component of a surface
+ input:
+   node: a list of node coordinates (nn x 3)
+   face: a surface mesh triangle list (ne x 3)
+ output:
+   seeds: the interior points coordinates for each closed-surface
+          component
+
+==== function quality=meshquality(node,elem) ====
+ quality=meshquality(node,elem)
+ compute Joe-Liu mesh quality measure of a tetrahedral mesh
+ input:
+    node:  node coordinates of the mesh (nn x 3)
+    elem:  element table of a tetrahedral mesh (ne x 4)
+ output
+    edge:  edge list; each row is an edge, specified by the starting and
+           ending node indices, the total edge number is
+           size(elem,1) x nchoosek(size(elem,2),2). All edges are ordered
+           by looping through each element first. 
+
+==== function edges=meshedge(elem) ====
+ edges=meshedge(elem)
+ return all edges in a surface or volumetric mesh
+ input:
+    elem:  element table of a mesh (support N-d space element)
+ output
+    edge:  edge list; each row is an edge, specified by the starting and
+           ending node indices, the total edge number is
+           size(elem,1) x nchoosek(size(elem,2),2). All edges are ordered
+           by looping through each element first. 
 === # Mesh processing and reparing ===
 
 ==== function [node,elem]=meshcheckrepair(node,elem,opt) ====
@@ -946,7 +1009,7 @@ reference:
 
 ==== function vol=smoothbinvol(vol,layer) ====
  vol=smoothbinvol(vol,layer)
- convolve a 3x3 gaussian kernel to a binary image multiple times
+ perform a memory-limited 3D image smoothing
  input:
      vol: a 3D volumetric image to be smoothed
      layer: number of iterations for the smoothing
@@ -1054,11 +1117,13 @@ reference:
            'FaceColor','interp');
 
 ==== function plottetview(session,method) ====
- runtetview(session,method)
+ plottetview(session,method)
  wrapper for tetview to plot the generated mesh
  input:
-	 session: a string to identify the output files for plotting
-        method:  method 
+	 session: a string to identify the output files for plotting, '' for
+	          the default session
+    method:  method can be 'cgalsurf' (default), 'simplify', 'cgalpoly'
+             'cgalmesh' and 'remesh'
 === # Miscellaneous functions ===
 
 ==== function valnew=surfdiffuse(node,tri,val,ddt,iter,type1,opt) ====
@@ -1076,15 +1141,16 @@ reference:
      valnew: nodal value vector after the smoothing
 
 ==== function [node,elem,face]=volmap2mesh(img,ix,iy,iz,elemnum,maxvol,thickness,Amat,Bvec) ====
- [node,elem,face]=vol2mesh(img,ix,iy,iz,thickness,elemnum,maxvol,A,B)
- convert a binary volume to tetrahedral mesh
+ [node,elem,face]=volmap2mesh(img,ix,iy,iz,thickness,elemnum,maxvol,A,B)
+ convert a binary volume to tetrahedral mesh followed by an Affine transform
  input: 
         img, ix,iy,iz, elemnum and  maxvol: see vol2mesh.m
+        thickness: scale z-dimension of the mesh to specified thickness, 
+                   if thickness==0, scaling is bypassed
         Amat: a 3x3 transformation matrix
         Bvec: a 3x1 vector
         Amat and Bvec maps the image index space to real world coordnate system by
-         [x,y,z]_new=Amat*[x,y,z]_old+Bvec
-         thickness: scale z-dimension of the mesh to specified thickness, if thickness==0, scaling is bypassed
+                   [x,y,z]_new=Amat*[x,y,z]_old+Bvec
 
 ==== function isoctave=isoctavemesh ====
  isoctave=isoctavemesh
@@ -1101,6 +1167,29 @@ reference:
  output:
     p: the value of the specified variable, if the variable does not
        exist, return empty array
+
+==== function [t,u,v]=raytrace(p,v,node,face) ====
+ [t,u,v]=raytrace(p,v,node,face)
+ perform a Havel-styled ray tracing for a triangular surface
+ input:
+   p: starting point coordinate of the ray
+   v: directional vector of the ray
+   node: a list of node coordinates (nn x 3)
+   face: a surface mesh triangle list (ne x 3)
+ output:
+   t: signed distance from p to the intersection point
+   u: bary-centric coordinate 1 of the intersection point
+   v: bary-centric coordinate 2 of the intersection point
+      the final bary-centric triplet is [u,v,1-u-v]
+  users can find the IDs of the elements intersecting with the ray by
+    idx=find(u>=0 & v>=0 & u+v<=1.0);
+ Reference: 
+  [1] J. Havel and A. Herout, "Yet faster ray-triangle intersection (using 
+          SSE4)," IEEE Trans. on Visualization and Computer Graphics,
+          16(3):434-438 (2010)
+  [2] Q. Fang, "Comment on 'A study on tetrahedron-based inhomogeneous 
+          Monte-Carlo optical simulation'," Biomed. Opt. Express, (in
+          press)
 
 ==== function [a,b,c,d]=getplanefrom3pt(plane) ====
  [a,b,c,d]=getplanefrom3pt(plane)
