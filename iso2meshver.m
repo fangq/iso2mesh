@@ -20,9 +20,9 @@ function [major,minor,patchnum,extra]=iso2meshver
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-major=0;
-minor=9;
-patchnum=9;
+major=1;
+minor=0;
+patchnum=0;
 extra='$Rev::      $';
 extra=regexprep(extra,'[\s$:]', '');
 

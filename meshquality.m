@@ -20,6 +20,9 @@ function quality=meshquality(node,elem)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
+if(size(elem,2)>4)
+    elem=elem(:,1:4);
+end
 enum=size(elem,1);
 vol=elemvolume(node,elem);
 edges=meshedge(elem);

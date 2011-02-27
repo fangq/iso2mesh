@@ -5,13 +5,17 @@
 ----------------------------------------------------------------------------
 
 iso2mesh ChangeLog (key features marked by *):
-2011/02/14 (1.0.0pre, codename: Tofu)
+2011/02/27 (1.0.0, codename: Tofu)
         1. fixed mwpath/mcpath octave warning
 	2. used consistent opt.distbound flag for cgalv2m and cgalv2s
 	3. fixed a bug in plotmesh to allow using plotting styles
 	4. added a method parameter in sms
 	5. fixed a bug in mergemesh with more than 2 inputs
-	6. added mesh quality metric function
+	6. added mesh quality metric function (Joe-Liu metric)
+	7.*added ray-tracing functions (using the Havel's method)
+	8.*robust and fast surface interior point determination
+	9.*label multi-part surfaces inside vol2surf
+       10. new functions surfplane/surfseeds/surfinterior/meshedge
 	
 2011/01/31 (0.9.9, codename: Tofu-RC1)
         1.*specifying seeds for cgalsurf and cgalmesh modules
