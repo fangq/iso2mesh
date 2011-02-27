@@ -1,14 +1,16 @@
 function plottetview(session,method)
 %
-% runtetview(session,method)
+% plottetview(session,method)
 %
 % wrapper for tetview to plot the generated mesh
 %
 % author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
 %
 % input:
-%	 session: a string to identify the output files for plotting
-%        method:  method 
+%	 session: a string to identify the output files for plotting, '' for
+%	          the default session
+%    method:  method can be 'cgalsurf' (default), 'simplify', 'cgalpoly'
+%             'cgalmesh' and 'remesh'
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %

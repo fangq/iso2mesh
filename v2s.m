@@ -18,6 +18,8 @@ end
 
 if(strcmp(method,'cgalmesh'))
    [no,tet,el]=v2m(uint8(img),isovalues,opt,1000,method);
+   el=unique(el(:,1:3),'rows');
+   [no,el]=removeisolatednode(no(:,1:3),el(:,1:3));
    regions=[]; holes=[];
    return;
 end

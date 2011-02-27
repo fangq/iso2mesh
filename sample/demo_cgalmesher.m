@@ -17,7 +17,7 @@ fprintf(1,'meshing the segmented brain (this may take a few minutes) ...\n');
 [node,elem,face]=v2m(brain,[],2,100,'cgalmesh');
 
 figure
-hs=plotmesh(node,face(:,1:3),'y>100');
+hs=plotmesh(node,face,'y>100');
 
 axis equal;
 title('cross-cut view of the generated surface mesh');

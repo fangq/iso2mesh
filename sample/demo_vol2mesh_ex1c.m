@@ -19,7 +19,7 @@ load sampleVol2Mesh.mat
 %% use the alternative 'cgalmesh' method. This will call 
 % cgalmesher to process labled volume to produce surfaces
 % and tetrahedral mesh in a single run.
-
+clear opt
 opt.radbound=2;
 [node,elem,face]=v2m(uint8(volimage),0.5,opt,100,'cgalmesh');
 

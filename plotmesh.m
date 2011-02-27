@@ -57,9 +57,16 @@ if(nargin>1)
 			face=[];elem=[];
 		elseif(i==2)
 			if(iscell(varargin{1}) | size(varargin{1},2)<4)
-				face=varargin{1}; elem=[];                
-            elseif(size(varargin{1},2)==4 & mesheuler(varargin{1})<0) 
 				face=varargin{1}; elem=[];
+                        elseif(size(varargin{1},2)==4)
+                            faceid=unique(varargin{1}(:,4));
+                            if(length(faceid)==1)
+                                face=varargin{1}; elem=[];
+                            elseif(any(hist(varargin{1}(:,4),unique(varargin{1}(:,4)))>50))
+                                face=varargin{1}; elem=[];
+                            else
+                                elem=varargin{1}; face=[];
+                            end
 			else
 				elem=varargin{1}; face=[];
 			end
@@ -78,13 +85,22 @@ if(nargin>1)
 		if(length(varargin)>2) opt=varargin(3:end); end
 	elseif(iscell(varargin{1}) | size(varargin{1},2)<4)
 		face=varargin{1}; elem=[];
-    elseif(size(varargin{1},2)==4 & mesheuler(varargin{1})<0) 
-	    face=varargin{1}; elem=[];
+	elseif(size(varargin{1},2)==4)
+	    faceid=unique(varargin{1}(:,4));
+            if(length(faceid)==1)
+	        face=varargin{1}; elem=[];
+	    elseif(any(hist(varargin{1}(:,4),unique(varargin{1}(:,4)))>50))
+                face=varargin{1}; elem=[];
+	    else
+                elem=varargin{1}; face=[];
+	    end
 	else
 		elem=varargin{1}; face=[];
 	end
    end
 end
+
+holdstate=ishold;
 
 if(isempty(face) & isempty(elem))
    if(isempty(selector))
@@ -98,12 +114,14 @@ if(isempty(face) & isempty(elem))
 	y=node(:,2);
 	z=node(:,3);
 	idx=eval(['find(' selector ')']);
-        if(~isempty(idx))
+    if(~isempty(idx))
 	    if(isempty(opt))
 		h=plot3(node(idx,1),node(idx,2),node(idx,3),'o');
 	    else
 		h=plot3(node(idx,1),node(idx,2),node(idx,3),opt{:});
-	    end
+        end
+    else
+        warning('nothing to plot');
 	end
    end
 end
@@ -119,15 +137,17 @@ if(~isempty(face))
    else
 	cent=meshcentroid(node,face(:,1:3));
 	x=cent(:,1);
-        y=cent(:,2);
+    y=cent(:,2);
 	z=cent(:,3);
-        idx=eval(['find(' selector ')']);
-        if(~isempty(idx))
+    idx=eval(['find(' selector ')']);
+    if(~isempty(idx))
 	    if(isempty(opt))
 		h=plotsurf(node,face(idx,:));
 	    else
 		h=plotsurf(node,face(idx,:),opt{:});
-	    end
+        end
+    else
+        warning('no surface to plot');
 	end
    end
 end
@@ -143,20 +163,22 @@ if(~isempty(elem))
    else
 	cent=meshcentroid(node,elem(:,1:4));
 	x=cent(:,1);
-        y=cent(:,2);
+    y=cent(:,2);
 	z=cent(:,3);
-        idx=eval(['find(' selector ')']);
-        if(~isempty(idx))
+    idx=eval(['find(' selector ')']);
+    if(~isempty(idx))
 	    if(isempty(opt))
 		h=plottetra(node,elem(idx,:));
 	    else
 		h=plottetra(node,elem(idx,:),opt{:});
-	    end
+        end
+    else
+        warning('no tetrahedral element to plot');
 	end
    end
 end
 
-if(exist('h','var') & ishold)
+if(exist('h','var') & ~holdstate)
   hold off;
 end
 if(exist('h','var')) 
