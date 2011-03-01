@@ -25,7 +25,7 @@ tools via pipes and disk files. Thus, iso2mesh and these tools
 are considered as "aggregate" and they can be distributed independently
 under different licenses.
 
-Nontheless, all of the above tools except tetgen and 
+Nonetheless, all of the above tools except tetgen and 
 tetview are free-software (free as in free-beer and 
 freedom). They are distributed under one of the 
 OSI-approved open-source licenses. In the case of 
