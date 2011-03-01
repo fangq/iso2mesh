@@ -19,6 +19,8 @@ Frequently asked questions about iso2mesh
 
           7. [8]Which meshing option should I choose?
 
+          8. [9]How do I control mesh density in iso2mesh?
+
 1. I am getting a "Two subfaces ... are found intersecting each other" error,
 what should I do?
 
@@ -45,7 +47,7 @@ segments
        centroids.
 
    If you have any better suggestions to enable iso2mesh to handle this
-   situation, please let [9]me know.
+   situation, please let [10]me know.
 
 2. you are using 'simplify' method to mesh a complex domain
 
@@ -107,7 +109,7 @@ segments
    temporary files as it does not have the permissions to overwrite those
    files created by A. To solve this issue, please define your own
    temporary folder, or set your session id, you can find more info at
-   [10]Advanced page.
+   [11]Advanced page.
 
 5. When displaying the surface produced by iso2mesh with OpenGL, there are
 lot of holes, how to fix this?
@@ -151,12 +153,12 @@ lot of holes, how to fix this?
        and clearly labels the element and surfaces for each individual
        sub-region. However, it is not perfect. It can not extract
        iso-surfaces from a gray-scale image. When you want to control mesh
-       densities near a specific isosurface (such as [11]this case),
+       densities near a specific isosurface (such as [12]this case),
        cgalmesh option is not as flexible as the other two. In short,
        cgalmesh is the best choice for producing uniform-sized meshes from
        an arbitrary segmented volume.
      * cgalsurf: cgalsurf option produces surface and volumetric meshes
-       with a standard 2-step process as shown in the [12]workflow. When
+       with a standard 2-step process as shown in the [13]workflow. When
        extracting multiple isosurfaces, it will do the extraction
        sequentially. The strengths of cgalsurf include 1) all the
        extracted surfaces are guaranteed to be free of self-intersecting
@@ -180,6 +182,22 @@ lot of holes, how to fix this?
     3. when meshing a gray-scale volume, use 'cgalsurf'
     4. when other options fail, try 'simplify'.
 
+8. How do I control mesh density in iso2mesh?
+
+   Iso2mesh uses two parameters to quantitatively control the mesh
+   density. In v2m or vol2mesh, parameter opt sets the maximum edge length
+   of the surface triangles (i.e. controlling the density of the mesh on
+   the surface), and maxvol sets the maximum tetrahedron volume.
+
+   If you want to let the mesh be denser on the surface and coarser
+   inside, you can use a small opt value and a large maxvol value.
+
+   If you want to control the surface mesh density so that it adapts
+   depending on the curvature, you can do so by defining opt as a struct,
+   and set the opt.radbound and opt.distbound values. You can find
+   examples from [14]this presentation (slide 15). This example can also
+   be accessed from iso2mesh/sample/demo_helloworld.m
+
 References
 
    1. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=rss
@@ -190,7 +208,9 @@ References
    6. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#When_displaying_the_surface_produced_by_iso2mesh_with_OpenGL_there_are_lot_of_holes_how_to_fix_this
    7. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#Subroutine_meshresample_returns_empty_mesh_why
    8. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#Which_meshing_option_should_I_choose
-   9. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?FangQ
-  10. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Advanced
-  11. http://iso2mesh.sourceforge.net/upload/head_mesh.jpg
-  12. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/Workflow
+   9. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/FAQ#How_do_I_control_mesh_density_in_iso2mesh
+  10. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?FangQ
+  11. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Advanced
+  12. http://iso2mesh.sourceforge.net/upload/head_mesh.jpg
+  13. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/Workflow
+  14. http://iso2mesh.sf.net/upload/iso2mesh_a_one_liner_mesh_generator.pdf
