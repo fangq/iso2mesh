@@ -14,8 +14,8 @@ function [pt,p0,v0,t,idx]=surfinterior(node,face)
 %   pt: the interior point coordinates [x y z]
 %   p0: ray origin used to determine the interior point
 %   v0: the vector used to determine the interior point
-%   t : ray-tracing intersection distance (with signs) from p0. the
-%       intersection coordinates can be expressed as p0+ts(i)*v0
+%   t : ray-tracing intersection distances (with signs) from p0. the
+%       intersection coordinates can be expressed as p0+t(i)*v0
 %   idx: index to the face elements that intersect with the ray, order
 %       match that of t
 %
@@ -32,10 +32,13 @@ for i=1:len
    [t,u,v]=raytrace(p0,v0,node,face);
 
    idx=find(u>=0 & v>=0 & u+v<=1.0);
-   if(~isempty(idx) & mod(length(idx),2)==0)
-       ts=unique(sort(t(idx)));
-       [maxv,maxi]=max(diff(ts));
-       pt=p0+v0*(ts(maxi)+ts(maxi+1))*0.5;
+   [ts, uidx]=unique(sort(t(idx)));
+   if(~isempty(ts) & mod(length(ts),2)==0)
+       ts=reshape(ts,[2 length(ts)/2]);
+       tdiff=ts(2,:)-ts(1,:);
+       [maxv,maxi]=max(tdiff);
+       pt=p0+v0*(ts(1,maxi)+ts(2,maxi))*0.5;
+       idx=idx(uidx);
        t=t(idx);
        break;
    end

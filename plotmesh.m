@@ -7,9 +7,14 @@ function hm=plotmesh(node,varargin)
 % author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
 %
 % input: 
-%      node: a node coordinate list, 3 columns for x/y/z
-%      face: a triangular surface face list
-%      elem: a tetrahedral element list
+%      node: a node coordinate list, 3 columns for x/y/z; if node has a 
+%            4th column, it will be used to set the color at each node.
+%      face: a triangular surface face list; if face has a 4th column,
+%            it will be used to separate the surface into 
+%            sub-surfaces and display them in different colors.
+%      elem: a tetrahedral element list; if elem has a 5th column,
+%            it will be used to separate the mesh into 
+%            sub-domains and display them in different colors.
 %      opt:  additional options for the plotting
 %
 %            for simple point plotting, opt can be markers
@@ -19,6 +24,11 @@ function hm=plotmesh(node,varargin)
 %            items to combine these options, for example: 
 %            plotmesh(...,'x>0','r.'); the range selector must
 %            appear before the color/marker specifier
+%
+% in the event where all of the above inputs have extra settings related to 
+% the color of the plot, the priorities are given in the following order:
+%
+%          opt > node(:,4) > elem(:,5) > face(:,4)
 %
 % output:
 %   hm: handle or handles (vector) to the plotted surfaces
