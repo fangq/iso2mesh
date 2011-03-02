@@ -23,9 +23,12 @@ dim=size(vol);
 dxy=dim(1)*dim(2);
 fulllen=prod(dim);
 
+offs=[1,-1,dim(1),-dim(1),dxy,-dxy];
 for i=1:layer
 	idx=find(vol);
-	idxnew=[idx+1; idx-1;idx+dim(1);idx-dim(1);idx+dxy;idx-dxy];
-	idxnew=idxnew(find(idxnew>0 & idxnew<fulllen));
-	vol(idxnew)=1;
+    for j=1:6
+    	idxnew=idx+offs(j);
+        idxnew=idxnew(find(idxnew>0 & idxnew<fulllen));
+    	vol(idxnew)=1;
+    end
 end
