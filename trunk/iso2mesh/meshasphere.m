@@ -1,6 +1,6 @@
 function [node,face,elem]=meshasphere(c0,r,tsize,maxvol)
 %
-% [node,face,elem]=meshasphere(c0,r,opt)
+% [node,face,elem]=meshasphere(c0,r,tsize,maxvol)
 %
 % create the surface and tetrahedral mesh of a sphere
 %
