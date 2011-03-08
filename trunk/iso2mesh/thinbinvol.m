@@ -1,10 +1,10 @@
 function vol=thinbinvol(vol,layer)
 %
-% vol=thickenbinvol(vol,layer)
+% vol=thinbinvol(vol,layer)
 %
-% thining a binary volume by a given pixel width
-% this is similar to bwmorph(vol,'thin',3) except 
-% this does it in 3d and only does thickening for 
+% thinning a binary volume by a given pixel width
+% this is similar to bwmorph(vol,'thin',n) except 
+% this does it in 3d and only does thinning for 
 % non-zero elements (and hopefully faster)
 %
 % author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
