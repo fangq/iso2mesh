@@ -11,7 +11,7 @@ function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
 %	      return user defined surfaces via opt.surf if it exists
 %	 ix,iy,iz: subvolume selection indices in x,y,z directions
 %	 opt: function parameters
-%	   if method is 'cgalsurf':
+%	   if method is 'cgalsurf' or 'cgalpoly':
 %	     opt=a float number>1: max radius of the Delaunay sphere(element size) 
 %	     opt.radbound: same as above, max radius of the Delaunay sphere
 %	     opt.distbound: maximum deviation from the specified isosurfaces
@@ -133,7 +133,7 @@ if(~isempty(img))
 
           if(dofix) [v0,f0]=meshcheckrepair(v0,f0); end
 
-        elseif(nargin<7 | strcmp(method,'cgalsurf'))
+        elseif(nargin<7 | strcmp(method,'cgalsurf') | strcmp(method,'cgalpoly'))
           if(isstruct(opt) & length(opt)==maxlevel) radbound=opt(i).radbound;
           elseif (isstruct(opt) & length(opt)==1) radbound=opt.radbound;
           else radbound=opt;  end;
@@ -177,7 +177,7 @@ if(~isempty(img))
 	    clear newimg0;
 	  end
         else
-            error('method can only be one of "cgalsurf" or "simplify".');
+            error('method can only be one of "cgalsurf", "cgalpoly" or "simplify".');
         end
 
         % if use defines maxsurf=1, take only the largest closed surface

@@ -52,7 +52,7 @@ if(isstruct(opt) & length(opt)==1)  % does not support settings for multiple lab
 	if(isfield(opt,'distbound'))  approx=opt.distbound; end
 	if(isfield(opt,'reratio'))    reratio=opt.reratio; end
 end
-
+[v,f]=meshcheckrepair(v,f);
 saveoff(v,f,mwpath('pre_cgalpoly.off'));
 deletemeshfile(mwpath('post_cgalpoly.mesh'));
 

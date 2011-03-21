@@ -17,7 +17,7 @@ load rat_head.mat
 %% perform mesh generation
 
 [node,elem,face]=vol2mesh(volimage>0.05,1:size(volimage,1),1:size(volimage,2),...
-                           1:size(volimage,3),2,2,1);
+                           1:size(volimage,3),2,2,1,'cgalpoly');
 
 %% alternatively, one can use the following cmd as a less robust approach
 % [node,elem,face]=vol2mesh(volimage>0.05,1:size(volimage,1),1:size(volimage,2),...
