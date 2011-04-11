@@ -67,7 +67,7 @@ cmd=sprintf('"%s%s" "%s" "%s" %f %f %f %f %f %d',mcpath('cgalpoly'),exesuff,...
     approx,reratio,maxvol,randseed);
 system(cmd);
 if(~exist(mwpath('post_cgalpoly.mesh'),'file'))
-    error(sprintf('output file was not found, something must have gone wrong when running command: \n%s\n',cmd));
+    error(sprintf('output file was not found, failure was encountered when running command: \n%s\n',cmd));
 end
 [node,elem,face]=readmedit(mwpath('post_cgalpoly.mesh'));
 

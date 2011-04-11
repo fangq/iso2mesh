@@ -62,8 +62,11 @@ else
         [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,'cgalsurf');
 end
 %then, create volumetric mesh from the surface mesh
-if(strcmp(method,'cgalpoly'))
+if(nargin>=8)
+   if(strcmp(method,'cgalpoly'))
 	[node,elem,face]=cgals2m(no(:,1:3),el(:,1:3),opt,maxvol);
-else
-	[node,elem,face]=surf2mesh(no,el,[],[],1,maxvol,regions,holes);
+        return;
+   end
 end
+
+[node,elem,face]=surf2mesh(no,el,[],[],1,maxvol,regions,holes);
