@@ -79,7 +79,7 @@ cmd=sprintf('"%s%s" "%s" "%s" %f %f %f %f %f %d',mcpath('cgalmesh'),exesuff,...
     approx,reratio,maxvol,randseed);
 system(cmd);
 if(~exist(mwpath('post_cgalmesh.mesh'),'file'))
-    error(['output file was not found, something must have gone wrong when running command: \n',cmd]);
+    error(['output file was not found, failure was encountered when running command: \n',cmd]);
 end
 [node,elem,face]=readmedit(mwpath('post_cgalmesh.mesh'));
 
