@@ -24,18 +24,18 @@ end
 if(size(f,2)==3)
     edges=[f(:,[1,2]);
            f(:,[2,3]);
-           f(:,[1,3])];             % create all the edges
+           f(:,[3,1])];             % create all the edges
 elseif(size(f,2)==4)
     edges=[f(:,[1,2,3]);
-           f(:,[1,2,4]);
+           f(:,[2,1,4]);
            f(:,[1,3,4]);
-           f(:,[2,3,4])];             % create all the edges
+           f(:,[2,4,3])];             % create all the edges
 else
-    error('surfedge only support 2D and 3D elements');
+    error('surfedge only supports 2D and 3D elements');
 end
 % node4=[f(:,3);f(:,2);f(:,1)];   % node idx concatinated
-edges=sort(edges,2);
-[foo,ix,jx]=unique(edges,'rows');
+edgesort=sort(edges,2);
+[foo,ix,jx]=unique(edgesort,'rows');
 
 if(isoctavemesh)
         u=unique(jx);
