@@ -1,10 +1,18 @@
 ============================================================================
 
-     iso2mesh - a simple-to-use yet powerful 3D mesh generator
+     iso2mesh - a compact, powerful yet simple-to-use 3D mesh generator
 
 ----------------------------------------------------------------------------
 
 iso2mesh ChangeLog (key features marked by *):
+2011/06/03 (1.0.1, codename: Mapo Tofu - Update 1)
+        1. added 64bit CGAL binaries for Linux (Windows/MacOS are not yet supported)
+        2.*plotmesh can use the 4th column of node input as colormap/value
+        3.*accept "cgalpoly" method option in v2m and vol2mesh
+        4. savemedit output supports the label column
+        5.*orient all triangles counter-clockwise for surface plotting
+        6. added edgeneighbors to report neighboring triangles in a surface
+
 2011/02/27 (1.0.0, codename: Mapo Tofu)
         1. fixed mwpath/mcpath octave warning
 	2. used consistent opt.distbound flag for cgalv2m and cgalv2s
