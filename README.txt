@@ -6,7 +6,7 @@ Author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
       Martinos Center for Biomedical Imaging
       Massachusetts General Hospital (Harvard Medical School)
       Bldg. 149, 13th St., Charlestown, MA 02148
-Version: 1.0.0 (Mapo Tofu)
+Version: 1.0.1 (Mapo Tofu - Update 1)
 License: GPL v2 or later (see COPYING) 
       (this license does not cover the binaries under the bin/ 
        directory, see Section III for more details)
@@ -135,7 +135,7 @@ reference:
 	      return user defined surfaces via opt.surf if it exists
 	 ix,iy,iz: subvolume selection indices in x,y,z directions
 	 opt: function parameters
-	   if method is 'cgalsurf':
+	   if method is 'cgalsurf' or 'cgalpoly':
 	     opt=a float number>1: max radius of the Delaunay sphere(element size) 
 	     opt.radbound: same as above, max radius of the Delaunay sphere
 	     opt.distbound: maximum deviation from the specified isosurfaces
@@ -318,7 +318,7 @@ reference:
    plotmesh(node,elem,'x>4');
 
 ==== function [node,face,elem]=meshasphere(c0,r,tsize,maxvol) ====
- [node,face,elem]=meshasphere(c0,r,opt)
+ [node,face,elem]=meshasphere(c0,r,tsize,maxvol)
  create the surface and tetrahedral mesh of a sphere
  input: 
    c0:  center coordinates (x0,y0,z0) of the sphere
@@ -482,6 +482,24 @@ reference:
  output:
      facenb: see opt
 
+==== function edgenb=edgeneighbors(t,opt) ====
+ edgenb=edgeneighbors(t,opt)
+ to find neighboring triangular elements in a triangule surface
+ input:
+     t: a triangular surface element list, 3 columns of integers
+     opt: if opt='general', return the edge neighbors for a general
+          triangular surface: each edge can be shared by more than 2
+          triangles; if ignored, we assume all triangles are shared by no
+          more than 2 triangles.
+ output:
+     edgenb: if opt is not supplied, edgenb is a size(t,1) by 3 array with
+     each element being the triangle ID of the edge neighbor of that
+     triangle. For each row, the order of the neighbors is listed as those
+     sharing edges [1 2], [2 3] and [3 1] between the triangle nodes.
+     when opt='general', edgenb is a cell array with a length of size(t).
+     each member of the cell array is a list of edge neighbors (the order 
+     is not defined).
+
 ==== function f=maxsurf(facecell) ====
  f=maxsurf(facecell)
  return the surface with the maximum element number (not 
@@ -556,8 +574,8 @@ reference:
    pt: the interior point coordinates [x y z]
    p0: ray origin used to determine the interior point
    v0: the vector used to determine the interior point
-   t : ray-tracing intersection distance (with signs) from p0. the
-       intersection coordinates can be expressed as p0+ts(i)*v0
+   t : ray-tracing intersection distances (with signs) from p0. the
+       intersection coordinates can be expressed as p0+t(i)*v0
    idx: index to the face elements that intersect with the ray, order
        match that of t
 
@@ -938,9 +956,9 @@ reference:
  savedmedit(node,face,elem,fname)
  save a surface or tetrahedral mesh to Medit format
  input:
-      node: input, surface node list, dimension (nn,3)
-      face: input, surface face element list, dimension (be,3)
-      elem: input, tetrahedral element list, dimension (ne,4)
+      node: input, surface node list, dimension (nn,3 or 4)
+      face: input, surface face element list, dimension (be,3 or 4)
+      elem: input, tetrahedral element list, dimension (ne,4 or 5)
       fname: output file name
 === # Volumetric image pre-processing ===
 
@@ -1030,10 +1048,10 @@ reference:
      vol: the volume image after the thickening
 
 ==== function vol=thinbinvol(vol,layer) ====
- vol=thickenbinvol(vol,layer)
- thining a binary volume by a given pixel width
- this is similar to bwmorph(vol,'thin',3) except 
- this does it in 3d and only does thickening for 
+ vol=thinbinvol(vol,layer)
+ thinning a binary volume by a given pixel width
+ this is similar to bwmorph(vol,'thin',n) except 
+ this does it in 3d and only does thinning for 
  non-zero elements (and hopefully faster)
  input:
      vol: a volumetric binary image
@@ -1046,9 +1064,14 @@ reference:
  hm=plotmesh(node,face,elem,opt)
  plot surface and volumetric meshes
  input: 
-      node: a node coordinate list, 3 columns for x/y/z
-      face: a triangular surface face list
-      elem: a tetrahedral element list
+      node: a node coordinate list, 3 columns for x/y/z; if node has a 
+            4th column, it will be used to set the color at each node.
+      face: a triangular surface face list; if face has a 4th column,
+            it will be used to separate the surface into 
+            sub-surfaces and display them in different colors.
+      elem: a tetrahedral element list; if elem has a 5th column,
+            it will be used to separate the mesh into 
+            sub-domains and display them in different colors.
       opt:  additional options for the plotting
             for simple point plotting, opt can be markers
             or color options, such as 'r.', or opt can be 
@@ -1057,6 +1080,9 @@ reference:
             items to combine these options, for example: 
             plotmesh(...,'x>0','r.'); the range selector must
             appear before the color/marker specifier
+ in the event where all of the above inputs have extra settings related to 
+ the color of the plot, the priorities are given in the following order:
+          opt > node(:,4) > elem(:,5) > face(:,4)
  output:
    hm: handle or handles (vector) to the plotted surfaces
  example:
@@ -1074,9 +1100,12 @@ reference:
  hm=plotsurf(node,face,opt)
  plot 3D surface meshes
  input: 
-      node: node coordinates, dimension (nn,3)
-      face: triangular surface face list
-      opt:  additional options for the plotting, see trisurf
+      node: node coordinates, dimension (nn,3); if node has a 
+            4th column, it will be used to set the color at each node.
+      face: triangular surface face list; if face has a 4th column,
+            it will be used to separate the surface into 
+            sub-surfaces and display them in different colors.
+      opt:  additional options for the plotting, see plotmesh
  output:
    hm: handle or handles (vector) to the plotted surfaces
  example:
@@ -1087,9 +1116,12 @@ reference:
  hm=plottetra(node,elem,opt)
  plot 3D surface meshes
  input: 
-      node: node coordinates, dimension (nn,3)
-      elem: tetrahedral element list
-      opt:  additional options for a patch object
+      node: a node coordinate list, 3 columns for x/y/z; if node has a 
+            4th column, it will be used to set the color at each node.
+      elem: a tetrahedral element list; if elem has a 5th column,
+            it will be used to separate the mesh into 
+            sub-domains and display them in different colors.
+      opt:  additional options for a patch object, see plotmesh
  output:
    hm: handle or handles (vector) to the plotted surfaces
  example:

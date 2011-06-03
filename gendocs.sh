@@ -27,7 +27,7 @@ func_backend="binsurface cgalv2m cgals2m vol2restrictedtri surf2volz"
 func_primitive="meshabox meshasphere meshanellip meshunitsphere"
 func_inquery="finddisconnsurf surfedge volface extractloops meshconn  
                 meshcentroid nodevolume elemvolume neighborelem 
-		faceneighbors maxsurf flatsegment orderloopedge  
+		faceneighbors edgeneighbors maxsurf flatsegment orderloopedge  
 		mesheuler bbxflatsegment surfplane surfinterior 
                 surfseeds meshquality meshedge"
 func_meshfix="meshcheckrepair meshreorient removedupelem 
