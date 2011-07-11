@@ -113,9 +113,10 @@ function c = next_char
 
 function skip_whitespace
     global pos inStr len
-    while pos <= len & isspace(inStr(pos))
+    while pos <= len && isspace(inStr(pos))
         pos = pos + 1;
     end
+
 %----------------------------------------------------------------
 function str = parseStr
     global pos inStr len  esc index_esc len_esc
@@ -171,9 +172,17 @@ function str = parseStr
 
 function num = parse_number
     global pos inStr len
-    [num, one, err, delta] = sscanf(inStr(pos:min(len,pos+20)), '%f', 1);
-    if ~isempty(err)
-        error_pos('Error reading number at position %d');
+    currstr=inStr(pos:end);
+    numstr=0;
+    if(exist('OCTAVE_VERSION')~=0)
+        numstr=regexp(currstr,'^\s*-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+\-]?\d+)?','end');
+        [num, one] = sscanf(currstr, '%f', 1);
+        delta=numstr+1;
+    else
+        [num, one, err, delta] = sscanf(currstr, '%f', 1);
+        if ~isempty(err)
+            error_pos('Error reading number at position %d');
+        end
     end
     pos = pos + delta-1;
 %----------------------------------------------------------------
@@ -233,5 +242,8 @@ function str = valid_field(str)
 % followed by any combination of letters, digits, and underscores.
 % Invalid characters will be converted to underscores, and the prefix
 % "s_" will be added if first character is not a letter.
-    str=genvarname(str);
+    if ~isletter(str(1))
+        str = ['s_' str];
+    end
+    str(~isletter(str) & ~('0' <= str & str <= '9')) = '_';
 %----------------------------------------------------------------
