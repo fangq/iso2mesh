@@ -83,6 +83,13 @@ if(~exist(mwpath('post_cgalmesh.mesh'),'file'))
 end
 [node,elem,face]=readmedit(mwpath('post_cgalmesh.mesh'));
 
+% if a transformation matrix/offset vector supplied, apply them
+if (isstruct(opt) & length(opt)==1)
+    if(isfield(opt,'A') & isfield(opt,'B'))
+        node(:,1:3)=(opt.A*node(:,1:3)'+repmat(opt.B(:),1,size(node,1)))';
+    end
+end
+
 fprintf(1,'node number:\t%d\ntriangles:\t%d\ntetrahedra:\t%d\nregions:\t%d\n',...
     size(node,1),size(face,1),size(elem,1),length(unique(elem(:,end))));
 fprintf(1,'surface and volume meshes complete\n');
