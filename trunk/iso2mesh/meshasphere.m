@@ -12,7 +12,7 @@ function [node,face,elem]=meshasphere(c0,r,tsize,maxvol)
 %   tsize: maximum surface triangle size on the sphere
 %   maxvol: maximu volume of the tetrahedral elements
 %
-% output
+% output:
 %   node: node coordinates, 3 columns for x, y and z respectively
 %   face: integer array with dimensions of NB x 3, each row represents
 %         a surface mesh face element 

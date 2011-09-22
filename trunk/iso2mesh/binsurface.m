@@ -12,7 +12,7 @@ function [node,elem]=binsurface(img,nface)
 %          nface=4 - square faces
 %          nface=0 - return a boundary mask image via node
 %
-% output
+% output:
 %   elem: integer array with dimensions of NE x nface, each row represents
 %         a surface mesh face element 
 %   node: node coordinates, 3 columns for x, y and z respectively

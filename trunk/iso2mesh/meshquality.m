@@ -2,7 +2,7 @@ function quality=meshquality(node,elem)
 %
 % quality=meshquality(node,elem)
 %
-% compute Joe-Liu mesh quality measure of a tetrahedral mesh
+% compute the Joe-Liu mesh quality measure of a tetrahedral mesh
 %
 % author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % date: 2011/02/26
@@ -11,11 +11,16 @@ function quality=meshquality(node,elem)
 %    node:  node coordinates of the mesh (nn x 3)
 %    elem:  element table of a tetrahedral mesh (ne x 4)
 %
-% output
-%    edge:  edge list; each row is an edge, specified by the starting and
-%           ending node indices, the total edge number is
-%           size(elem,1) x nchoosek(size(elem,2),2). All edges are ordered
-%           by looping through each element first. 
+% output:
+%    quality: a vector of the same length as size(elem,1), with 
+%           each element being the Joe-Liu mesh quality metric (0-1) of 
+%           the corresponding element. A value close to 1 represents
+%           higher mesh quality (1 means equilateral tetrahedron); 
+%           a value close to 0 means nearly degenerated element.
+%
+% reference:
+%    A. Liu, B. Joe, Relationship between tetrahedron shape measures, 
+%                    BIT 34 (2) (1994) 268–287.
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %

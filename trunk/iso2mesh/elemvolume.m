@@ -13,7 +13,7 @@ function vol=elemvolume(node,elem,option)
 %    option: if option='signed', the volume is the raw determinant,
 %            else, the results will be the absolute values
 %
-% output
+% output:
 %    vol:   volume values for all elements
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
