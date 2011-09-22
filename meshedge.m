@@ -10,7 +10,7 @@ function edges=meshedge(elem)
 % input:
 %    elem:  element table of a mesh (support N-d space element)
 %
-% output
+% output:
 %    edge:  edge list; each row is an edge, specified by the starting and
 %           ending node indices, the total edge number is
 %           size(elem,1) x nchoosek(size(elem,2),2). All edges are ordered
