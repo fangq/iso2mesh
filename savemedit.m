@@ -1,6 +1,6 @@
 function savemedit(node,face,elem,fname)
 %
-% savedmedit(node,face,elem,fname)
+% savemedit(node,face,elem,fname)
 %
 % save a surface or tetrahedral mesh to Medit format
 %

@@ -74,7 +74,7 @@ function object = parse_object
     parse_char('}');
 %----------------------------------------------------------------
 
-function object = parse_array
+function object = parse_array % JSON array is written in row-major order
     parse_char('[');
     object = cell(0, 1);
     if next_char ~= ']'
@@ -86,6 +86,13 @@ function object = parse_array
             end
             parse_char(',');
         end
+    end
+    try
+        object=cell2mat(object')';
+        if(size(object,1)>1 && ndims(object)==2)
+            object=object';
+        end
+    catch
     end
     parse_char(']');
 %----------------------------------------------------------------
@@ -142,6 +149,15 @@ function str = parseStr
         nstr = length(str); switch inStr(pos)
             case '"'
                 pos = pos + 1;
+                if(~isempty(str) && str(1)=='_')
+                    if(strcmp(str,'_Inf'))
+                        str=Inf;
+                    elseif(strcmp(str,'-_Inf'))
+                        str=-Inf;
+                    elseif(strcmp(str,'_NaN'))
+                        str=NaN;
+                    end
+                end
                 return;
             case '\'
                 if pos+1 > len

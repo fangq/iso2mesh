@@ -31,7 +31,8 @@ if(fid==-1)
     error('You do not have permission to save mesh files.');
 end
 
-mesh=struct('MeshNode',node,'MeshTri',face,'MeshTetra',elem,'CreateTime',datestr(now));
-fpritnf(fid,'%s\n',savejson('',mesh));
+mesh=struct('MeshNode',node,'MeshTri',face,'MeshTetra',elem,...
+            'CreateTime',datestr(now),'Comment','Created by iso2mesh http://iso2mesh.sf.net');
+fprintf(fid,'%s\n',savejson('',mesh));
 
 fclose(fid);
