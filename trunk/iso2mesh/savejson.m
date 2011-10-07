@@ -11,10 +11,19 @@ function json=savejson(rootname,obj,varargin)
 % input:
 %      rootname: name of the root-object, if set to '', will use variable name
 %      obj: a MATLAB object (array, cell, cell array, struct, struct array)
-%      opt: additional options, use [] if no option
+%      opt: a struct for additional options, use [] if all use default
+%        opt can have the following fields (first in [.|.] is the default)
+%        opt.FloatFormat ['%g'|string]: format to show each numeric element
+%                         of a 1D/2D array;
+%        opt.ArrayIndent [1|0]: if 1, output explicit data array with
+%                         precedent indentation; if 0, no indentation
+%        opt.ArrayToArray[0|1]: when set to 0, savejson outputs 1D/2D
+%                         array in JSON array format; if sets to 1, an
+%                         array will be shown as a struct with fields
+%                         "_ArrayType", "_ArraySize" and "_ArrayData";
 %
 % output:
-%      json: a string in the JSON format
+%      json: a string in the JSON format (see http://json.org)
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
@@ -88,7 +97,8 @@ for e=1:len
   end
   if(~isempty(names))
     for i=1:length(names)
-	    txt=sprintf('%s%s',txt,obj2json(names{i},getfield(item(e),names{i}),level+1+(len>1),varargin{:}));
+	    txt=sprintf('%s%s',txt,obj2json(names{i},getfield(item(e),...
+             names{i}),level+1+(len>1),varargin{:}));
         if(i<length(names)) txt=sprintf('%s%s',txt,','); end
         txt=sprintf('%s%s',txt,sprintf('\n'));
     end
@@ -106,23 +116,30 @@ if(~ischar(item))
         error('input is not a string');
 end
 len=size(item,1);
-sep=',\n';
+sep=sprintf(',\n');
 
-if(len>1) txt=sprintf('%s[\n',repmat('\t',1,level+1)); end
+padding1=repmat(sprintf('\t'),1,level);
+padding0=repmat(sprintf('\t'),1,level+1);
+
+if(~isempty(name)) 
+    if(len>1) txt=sprintf('%s"%s": [\n',padding1,name); end
+else
+    if(len>1) txt=sprintf('%s[\n',padding1); end
+end
 for e=1:len
     val=regexprep(item(e,:),'([^\\])"','$1\\"');
     val=regexprep(val,'^"','\\"');
     if(len==1)
         obj=['"' name '": ' '"',val,'"'];
 	if(isempty(name)) obj=['"',val,'"']; end
-        txt=sprintf('%s%s%s%s',txt,repmat(sprintf('\t'),1,level+(len>1)),obj);
+        txt=sprintf('%s%s%s%s',txt,repmat(sprintf('\t'),1,level),obj);
     else
-        txt=sprintf('%s%s%s%s',txt,repmat(sprintf('\t'),1,level+1+(len>1)),['"',val,'"']);
+        txt=sprintf('%s%s%s%s',txt,repmat(sprintf('\t'),1,level+1),['"',val,'"']);
     end
     if(e==len) sep=''; end
     txt=sprintf('%s%s',txt,sep);
 end
-if(len>1) txt=sprintf('%s%s%s',txt,repmat(sprintf('\t'),1,level+1),']'); end
+if(len>1) txt=sprintf('%s\n%s%s',txt,padding1,']'); end
 
 %%----------------------------------------------
 function txt=mat2json(name,item,level,varargin)
@@ -133,17 +150,19 @@ end
 padding1=repmat(sprintf('\t'),1,level);
 padding0=repmat(sprintf('\t'),1,level+1);
 
-if(length(size(item))>2 || issparse(item))
+if(length(size(item))>2 || issparse(item) || jsonopt('ArrayToStruct',0,varargin{:}))
     if(isempty(name))
-    	txt=sprintf('%s{\n%s"_ArrayType": "%s",\n%s"_ArraySize": %s,\n',padding1,padding0,class(item),padding0,regexprep(mat2str(size(item)),'\s+',',') );
+    	txt=sprintf('%s{\n%s"_ArrayType": "%s",\n%s"_ArraySize": %s,\n',...
+              padding1,padding0,class(item),padding0,regexprep(mat2str(size(item)),'\s+',',') );
     else
-    	txt=sprintf('%s"%s": {\n%s"_ArrayType": "%s",\n%s"_ArraySize": %s,\n',padding1,name,padding0,class(item),padding0,regexprep(mat2str(size(item)),'\s+',',') );
+    	txt=sprintf('%s"%s": {\n%s"_ArrayType": "%s",\n%s"_ArraySize": %s,\n',...
+              padding1,name,padding0,class(item),padding0,regexprep(mat2str(size(item)),'\s+',',') );
     end
 else
     if(isempty(name))
-    	txt=sprintf('%s%s',padding1,matdata2json(item,level+1));
+    	txt=sprintf('%s%s',padding1,matdata2json(item,level+1,varargin{:}));
     else
-    	txt=sprintf('%s"%s": %s',padding1,name,matdata2json(item,level+1));
+    	txt=sprintf('%s"%s": %s',padding1,name,matdata2json(item,level+1,varargin{:}));
     end
     return;
 end
@@ -153,17 +172,20 @@ if(issparse(item))
     [ix,iy]=find(item);
     txt=sprintf(dataformat,txt,padding0,'"_ArrayIsSparse": ','1', sprintf(',\n'));
     if(find(size(item)==1))
-        txt=sprintf(dataformat,txt,padding0,'"_ArrayData": ',matdata2json([ix,item(find(item))],level+2), sprintf('\n'));
+        txt=sprintf(dataformat,txt,padding0,'"_ArrayData": ',...
+           matdata2json([ix,full(item(find(item)))],level+2,varargin{:}), sprintf('\n'));
     else
-        txt=sprintf(dataformat,txt,padding0,'"_ArrayData": ',matdata2json([ix,iy,item(find(item))],level+2), sprintf('\n'));
+        txt=sprintf(dataformat,txt,padding0,'"_ArrayData": ',...
+           matdata2json([ix,iy,full(item(find(item)))],level+2,varargin{:}), sprintf('\n'));
     end
 else
-    txt=sprintf(dataformat,txt,padding0,'"_ArrayData": ',matdata2json(item(:)',level+2), sprintf('\n'));
+    txt=sprintf(dataformat,txt,padding0,'"_ArrayData": ',...
+        matdata2json(item(:)',level+2,varargin{:}), sprintf('\n'));
 end
 txt=sprintf('%s%s%s',txt,padding1,'}');
 
 %%----------------------------------------------
-function txt=matdata2json(mat,level)
+function txt=matdata2json(mat,level,varargin)
 if(size(mat,1)==1)
     pre='';
     post='';
@@ -176,15 +198,31 @@ if(isempty(mat))
     txt='null';
     return;
 end
-txt=regexprep(mat2str(mat),'\s+',',');
-txt=regexprep(txt,';',sprintf('],\n['));
-if(nargin>=2 && size(mat,1)>1)
-    txt=regexprep(txt,'\[',[repmat(sprintf('\t'),1,level) '[']);
+floatformat=jsonopt('FloatFormat','%g',varargin{:});
+formatstr=['[' repmat([floatformat ','],1,size(mat,2)-1) [floatformat sprintf('],\n')]];
+
+if(nargin>=2 && size(mat,1)>1 && jsonopt('ArrayIndent',1,varargin{:}))
+    formatstr=[repmat(sprintf('\t'),1,level) formatstr];
 end
+txt=sprintf(formatstr,mat');
+txt(end-1:end)=[];
+%txt=regexprep(mat2str(mat),'\s+',',');
+%txt=regexprep(txt,';',sprintf('],\n['));
+% if(nargin>=2 && size(mat,1)>1)
+%     txt=regexprep(txt,'\[',[repmat(sprintf('\t'),1,level) '[']);
+% end
 txt=[pre txt post];
-if(any(isinf(mat)))
+if(any(isinf(mat(:))))
     txt=regexprep(txt,'([-+]*)Inf','"$1_Inf"');
 end
-if(any(isnan(mat)))
+if(any(isnan(mat(:))))
     txt=regexprep(txt,'NaN','"_NaN"');
+end
+%%----------------------------------------------
+function val=jsonopt(key,default,varargin)
+val=default;
+if(nargin<=2) return; end
+opt=varargin{1};
+if(isstruct(opt) && isfield(opt,key))
+    val=getfield(opt,key);
 end
