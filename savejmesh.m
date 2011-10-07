@@ -1,6 +1,6 @@
-function savejmesh(node,face,elem,fname)
+function savejmesh(node,face,elem,fname,varargin)
 %
-% savejmesh(node,face,elem,fname)
+% savejmesh(node,face,elem,fname,opt)
 %
 % save a mesh to jMesh format
 %
@@ -33,6 +33,6 @@ end
 
 mesh=struct('MeshNode',node,'MeshTri',face,'MeshTetra',elem,...
             'CreateTime',datestr(now),'Comment','Created by iso2mesh http://iso2mesh.sf.net');
-fprintf(fid,'%s\n',savejson('',mesh));
+fprintf(fid,'%s\n',savejson('',mesh,varargin{:}));
 
 fclose(fid);
