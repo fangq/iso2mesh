@@ -24,7 +24,7 @@ function data = readjson(fname)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-global pos inStr len  esc index_esc len_esc
+global pos inStr len  esc index_esc len_esc isoct
 
 if(regexp(fname,'[\{\}]'))
    string=fname;
@@ -37,6 +37,7 @@ else
 end
 
 pos = 1; len = length(string); inStr = string;
+isoct=exist('OCTAVE_VERSION','var');
 
 % String delimiters and escape chars identified to improve speed:
 esc = find(inStr=='"' | inStr=='\' ); % comparable to: regexp(inStr, '["\\]');
@@ -75,16 +76,25 @@ function object = parse_object
 %----------------------------------------------------------------
 
 function object = parse_array % JSON array is written in row-major order
+global pos inStr len
     parse_char('[');
     object = cell(0, 1);
     if next_char ~= ']'
-        while 1
+        endpos=matching_bracket(inStr,pos);
+        arraystr=['[' regexprep(inStr(pos-1:endpos),sprintf('[\r\n]'),'')];
+        arraystr=regexprep(arraystr,'\]\s*,','\];');
+        try
+           object=eval(arraystr);
+           pos=endpos;
+        catch
+         while 1
             val = parse_value;
             object{end+1} = val;
             if next_char == ']'
                 break;
             end
             parse_char(',');
+         end
         end
     end
     try
@@ -187,10 +197,10 @@ function str = parseStr
 %----------------------------------------------------------------
 
 function num = parse_number
-    global pos inStr len
+    global pos inStr len isoct
     currstr=inStr(pos:end);
     numstr=0;
-    if(exist('OCTAVE_VERSION')~=0)
+    if(isoct~=0)
         numstr=regexp(currstr,'^\s*-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+\-]?\d+)?','end');
         [num, one] = sscanf(currstr, '%f', 1);
         delta=numstr+1;
@@ -263,3 +273,39 @@ function str = valid_field(str)
     end
     str(~isletter(str) & ~('0' <= str & str <= '9')) = '_';
 %----------------------------------------------------------------
+function endpos = matching_quote(str,pos)
+len=length(str);
+while(pos<len)
+    if(str(pos)=='"')
+        if(~(pos>1 && str(pos-1)=='\'))
+            endpos=pos;
+            return;
+        end        
+    end
+    pos=pos+1;
+end
+%----------------------------------------------------------------
+function endpos = matching_bracket(str,pos)
+len=length(str);
+level=1;
+endpos=0;
+while(pos<len)
+    if(str(pos)==']')
+        level=level-1;
+        if(level==0)
+            endpos=pos;
+            return
+        end
+    end
+    if(str(pos)=='[')
+        level=level+1;
+    end
+    if(str(pos)=='"')
+        pos=matching_quote(str,pos+1);
+    end
+    pos=pos+1;
+end
+if(endpos==0) 
+    error('unmatched "]"');
+end
+
