@@ -14,7 +14,7 @@ function data = readjson(fname)
 %            date: 2008/07/03
 %
 % input:
-%      fname: input file name, if fname contains "{", fname
+%      fname: input file name, if fname contains "{}" or "[]", fname
 %      will be interpreted as a JSON string
 %
 % output:
@@ -26,7 +26,7 @@ function data = readjson(fname)
 
 global pos inStr len  esc index_esc len_esc isoct
 
-if(regexp(fname,'[\{\}]'))
+if(regexp(fname,'[\{\}\]\[]'))
    string=fname;
 elseif(exist(fname,'file'))
    fid = fopen(fname,'rt');
@@ -37,7 +37,7 @@ else
 end
 
 pos = 1; len = length(string); inStr = string;
-isoct=exist('OCTAVE_VERSION','var');
+isoct=exist('OCTAVE_VERSION');
 
 % String delimiters and escape chars identified to improve speed:
 esc = find(inStr=='"' | inStr=='\' ); % comparable to: regexp(inStr, '["\\]');
@@ -54,6 +54,44 @@ if pos <= len
     end
 end % if
 
+len=length(data);
+if(len==1)
+    data=jstruct2array(data);
+else
+    for i=1:len
+        if(isstruct(data(i)))
+            data(i)=jstruct2array(data(i));
+        end
+    end
+end
+
+%%-------------------------------------------------------------------------
+function newdata=jstruct2array(data)
+
+fn=fieldnames(data);
+newdata=data;
+for i=1:length(fn) % depth-first
+    if(isstruct(getfield(data,fn{i})))
+        newdata=setfield(newdata,fn{i},jstruct2array(getfield(data,fn{i})));
+    end
+end
+if(~isempty(strmatch('x_ArrayType',fn)) && ~isempty(strmatch('x_ArrayData',fn)))
+    newdata=cast(data.x_ArrayData,data.x_ArrayType);
+    if(~isempty(strmatch('x_ArrayIsSparse',fn)))
+        if(data.x_ArrayIsSparse)
+            if(~isempty(strmatch('x_ArraySize',fn)))
+                dim=data.x_ArraySize;
+                newdata=sparse(newdata(:,1),newdata(:,2),newdata(:,3),dim(1),prod(dim(2:end)));
+            else
+                newdata=sparse(newdata(:,1),newdata(:,2),newdata(:,3));
+            end
+        end
+    elseif(~isempty(strmatch('x_ArraySize',fn)))
+        newdata=reshape(newdata(:),data.x_ArraySize);
+    end
+end
+
+%%-------------------------------------------------------------------------
 function object = parse_object
     parse_char('{');
     object = [];
@@ -73,7 +111,8 @@ function object = parse_object
         end
     end
     parse_char('}');
-%----------------------------------------------------------------
+
+%%-------------------------------------------------------------------------
 
 function object = parse_array % JSON array is written in row-major order
 global pos inStr len
@@ -81,7 +120,9 @@ global pos inStr len
     object = cell(0, 1);
     if next_char ~= ']'
         endpos=matching_bracket(inStr,pos);
-        arraystr=['[' regexprep(inStr(pos-1:endpos),sprintf('[\r\n]'),'')];
+        arraystr=['[' inStr(pos-1:endpos)];
+        arraystr(find(arraystr==sprintf('\n')))=[];
+        arraystr(find(arraystr==sprintf('\r')))=[];
         arraystr=regexprep(arraystr,'\]\s*,','\];');
         try
            object=eval(arraystr);
@@ -105,7 +146,8 @@ global pos inStr len
     catch
     end
     parse_char(']');
-%----------------------------------------------------------------
+
+%%-------------------------------------------------------------------------
 
 function parse_char(c)
     global pos inStr len
@@ -116,7 +158,8 @@ function parse_char(c)
         pos = pos + 1;
         skip_whitespace;
     end
-%----------------------------------------------------------------
+
+%%-------------------------------------------------------------------------
 
 function c = next_char
     global pos inStr len
@@ -126,7 +169,8 @@ function c = next_char
     else
         c = inStr(pos);
     end
-%----------------------------------------------------------------
+
+%%-------------------------------------------------------------------------
 
 function skip_whitespace
     global pos inStr len
@@ -134,7 +178,7 @@ function skip_whitespace
         pos = pos + 1;
     end
 
-%----------------------------------------------------------------
+%%-------------------------------------------------------------------------
 function str = parseStr
     global pos inStr len  esc index_esc len_esc
  % len, ns = length(inStr), keyboard
@@ -159,7 +203,7 @@ function str = parseStr
         nstr = length(str); switch inStr(pos)
             case '"'
                 pos = pos + 1;
-                if(~isempty(str) && str(1)=='_')
+                if(~isempty(str))
                     if(strcmp(str,'_Inf'))
                         str=Inf;
                     elseif(strcmp(str,'-_Inf'))
@@ -194,7 +238,8 @@ function str = parseStr
         end
     end
     error_pos('End of file while expecting end of inStr');
-%----------------------------------------------------------------
+
+%%-------------------------------------------------------------------------
 
 function num = parse_number
     global pos inStr len isoct
@@ -211,7 +256,8 @@ function num = parse_number
         end
     end
     pos = pos + delta-1;
-%----------------------------------------------------------------
+
+%%-------------------------------------------------------------------------
 
 function val = parse_value
     global pos inStr len
@@ -231,26 +277,26 @@ function val = parse_value
             val = parse_number;
             return;
         case 't'
-            if pos+3 <= len & strcmp(lower(inStr(pos:pos+3)), 'true')
+            if pos+3 <= len && strcmpi(inStr(pos:pos+3), 'true')
                 val = true;
                 pos = pos + 4;
                 return;
             end
         case 'f'
-            if pos+4 <= len & strcmp(lower(inStr(pos:pos+4)), 'false')
+            if pos+4 <= len && strcmpi(inStr(pos:pos+4), 'false')
                 val = false;
                 pos = pos + 5;
                 return;
             end
         case 'n'
-            if pos+3 <= len & strcmp(lower(inStr(pos:pos+3)), 'null')
+            if pos+3 <= len && strcmpi(inStr(pos:pos+3), 'null')
                 val = [];
                 pos = pos + 4;
                 return;
             end
     end
     error_pos('Value expected at position %d');
-%----------------------------------------------------------------
+%%-------------------------------------------------------------------------
 
 function error_pos(msg)
     global pos inStr len
@@ -261,18 +307,37 @@ function error_pos(msg)
     msg = [sprintf(msg, pos) ': ' ...
     inStr(poShow(1):poShow(2)) '<error>' inStr(poShow(3):poShow(4)) ];
     error( ['JSONparser:invalidFormat: ' msg] );
-%----------------------------------------------------------------
+
+%%-------------------------------------------------------------------------
 
 function str = valid_field(str)
+global isoct
 % From MATLAB doc: field names must begin with a letter, which may be
 % followed by any combination of letters, digits, and underscores.
 % Invalid characters will be converted to underscores, and the prefix
-% "s_" will be added if first character is not a letter.
+% "x_" will be added if first character is not a letter.
     if ~isletter(str(1))
-        str = ['s_' str];
+        str = ['x' str];
     end
-    str(~isletter(str) & ~('0' <= str & str <= '9')) = '_';
-%----------------------------------------------------------------
+    if(isempty(regexp(str,'[^0-9A-Za-z_]', 'once' ))) return;  end
+    if(~isoct)
+        str=regexprep(str,'([^0-9A-Za-z_])','_0x${sprintf(''%X'',unicode2native($1))}_');
+    else
+        pos=regexp(str,'[^0-9A-Za-z_]');
+        if(isempty(pos)) return; end
+        str0=str;
+        pos0=[0 pos(:)' length(str)];
+        str='';
+        for i=1:length(pos)
+            str=[str str0(pos0(i)+1:pos(i)-1) sprintf('_0x%X_',str0(pos(i)))]
+        end
+        if(pos(end)~=length(str))
+            str=[str str0(pos0(end-1)+1:pos0(end))];
+        end
+    end
+    %str(~isletter(str) & ~('0' <= str & str <= '9')) = '_';
+
+%%-------------------------------------------------------------------------
 function endpos = matching_quote(str,pos)
 len=length(str);
 while(pos<len)
@@ -284,23 +349,25 @@ while(pos<len)
     end
     pos=pos+1;
 end
-%----------------------------------------------------------------
+
+%%-------------------------------------------------------------------------
 function endpos = matching_bracket(str,pos)
 len=length(str);
 level=1;
 endpos=0;
-while(pos<len)
-    if(str(pos)==']')
+while(pos<=len)
+    c=str(pos);
+    if(c==']')
         level=level-1;
         if(level==0)
             endpos=pos;
             return
         end
     end
-    if(str(pos)=='[')
+    if(c=='[')
         level=level+1;
     end
-    if(str(pos)=='"')
+    if(c=='"')
         pos=matching_quote(str,pos+1);
     end
     pos=pos+1;
