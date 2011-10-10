@@ -13,17 +13,27 @@ function json=savejson(rootname,obj,varargin)
 %      obj: a MATLAB object (array, cell, cell array, struct, struct array)
 %      opt: a struct for additional options, use [] if all use default
 %        opt can have the following fields (first in [.|.] is the default)
-%        opt.FloatFormat ['%g'|string]: format to show each numeric element
+%        opt.FloatFormat ['%.10g'|string]: format to show each numeric element
 %                         of a 1D/2D array;
 %        opt.ArrayIndent [1|0]: if 1, output explicit data array with
 %                         precedent indentation; if 0, no indentation
-%        opt.ArrayToArray[0|1]: when set to 0, savejson outputs 1D/2D
+%        opt.ArrayToStruct[0|1]: when set to 0, savejson outputs 1D/2D
 %                         array in JSON array format; if sets to 1, an
 %                         array will be shown as a struct with fields
-%                         "_ArrayType", "_ArraySize" and "_ArrayData";
+%                         "_ArrayType", "_ArraySize" and "_ArrayData"; for
+%                         sparse arrays, the non-zero elements will be
+%                         saved to _ArrayData field in triplet-format i.e.
+%                         (ix,iy,val) and "_ArrayIsSparse" will be added
+%                         with a value of 1.
 %
 % output:
 %      json: a string in the JSON format (see http://json.org)
+%
+% examples:
+%      a=struct('node',[1  9  10; 2 1 1.2], 'elem',[9 1;1 2;2 3],...
+%           'face',[9 01 2; 1 2 3; NaN,Inf,-Inf], 'author','FangQ');
+%      savejson('mesh',a)
+%      savejson('',a,struct('ArrayIndent',0,'FloatFormat','\t%.5g'))
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
@@ -32,17 +42,24 @@ varname=inputname(2);
 if(~isempty(rootname))
    varname=rootname;
 end
-json=obj2json(varname,obj,1,varargin{:});
-json=sprintf('{\n%s\n}\n',json);
+rootisarray=0;
+rootlevel=1;
+if((isnumeric(obj) || islogical(obj) || ischar(obj)) && isempty(rootname))
+    rootisarray=1;
+    rootlevel=0;
+    varname='';
+end
+json=obj2json(varname,obj,rootlevel,varargin{:});
+if(rootisarray)
+    json=sprintf('%s\n',json);
+else
+    json=sprintf('{\n%s\n}\n',json);
+end
 
-%%----------------------------------------------
+%%-------------------------------------------------------------------------
 function txt=obj2json(name,item,level,varargin)
 
 cname=class(item);
-varname=inputname(2);
-if(isempty(name))
-   name=varname;
-end
 
 if(iscell(item))
     txt=cell2json(name,item,level,varargin{:});
@@ -54,7 +71,7 @@ else
     txt=mat2json(name,item,level,varargin{:});
 end
 
-%%----------------------------------------------
+%%-------------------------------------------------------------------------
 function txt=cell2json(name,item,level,varargin)
 txt='';
 if(~iscell(item))
@@ -72,7 +89,7 @@ for i=1:len
 end
 if(len>1) txt=sprintf('%s\n%s]',txt,padding0); end
 
-%%----------------------------------------------
+%%-------------------------------------------------------------------------
 function txt=struct2json(name,item,level,varargin)
 txt='';
 if(~isstruct(item))
@@ -109,7 +126,7 @@ for e=1:len
 end
 if(len>1) txt=sprintf('%s\n%s]',txt,padding1); end
 
-%%----------------------------------------------
+%%-------------------------------------------------------------------------
 function txt=str2json(name,item,level,varargin)
 txt='';
 if(~ischar(item))
@@ -141,7 +158,7 @@ for e=1:len
 end
 if(len>1) txt=sprintf('%s\n%s%s',txt,padding1,']'); end
 
-%%----------------------------------------------
+%%-------------------------------------------------------------------------
 function txt=mat2json(name,item,level,varargin)
 if(~isnumeric(item) && ~islogical(item))
         error('input is not an array');
@@ -184,7 +201,7 @@ else
 end
 txt=sprintf('%s%s%s',txt,padding1,'}');
 
-%%----------------------------------------------
+%%-------------------------------------------------------------------------
 function txt=matdata2json(mat,level,varargin)
 if(size(mat,1)==1)
     pre='';
@@ -198,7 +215,7 @@ if(isempty(mat))
     txt='null';
     return;
 end
-floatformat=jsonopt('FloatFormat','%g',varargin{:});
+floatformat=jsonopt('FloatFormat','%.10g',varargin{:});
 formatstr=['[' repmat([floatformat ','],1,size(mat,2)-1) [floatformat sprintf('],\n')]];
 
 if(nargin>=2 && size(mat,1)>1 && jsonopt('ArrayIndent',1,varargin{:}))
@@ -218,7 +235,8 @@ end
 if(any(isnan(mat(:))))
     txt=regexprep(txt,'NaN','"_NaN"');
 end
-%%----------------------------------------------
+
+%%-------------------------------------------------------------------------
 function val=jsonopt(key,default,varargin)
 val=default;
 if(nargin<=2) return; end
