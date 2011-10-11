@@ -1,6 +1,6 @@
-function data = readjson(fname)
+function data = loadjson(fname)
 %
-% data=readjson(fname)
+% data=loadjson(fname)
 %
 % parse a JSON (JavaScript Object Notation) file or string
 %
@@ -21,7 +21,10 @@ function data = readjson(fname)
 %      dat: a cell array, where {...} blocks are converted into cell arrays,
 %           and [...] are converted to arrays
 %
-% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+% license:
+%     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+%
+% -- this function is part of jsonlab toolbox (http://iso2mesh.sf.net/cgi-bin/index.cgi?jsonlab)
 %
 
 global pos inStr len  esc index_esc len_esc isoct
