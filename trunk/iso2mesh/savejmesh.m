@@ -19,6 +19,7 @@ function savejmesh(node,face,elem,fname,varargin)
 if(nargin==2)
    fname=face;
    face=[];
+   elem=[];
 end
 
 if(nargin==3)
@@ -31,8 +32,8 @@ if(fid==-1)
     error('You do not have permission to save mesh files.');
 end
 
-mesh=struct('MeshNode',node,'MeshTri',face,'MeshTetra',elem,...
-            'CreateTime',datestr(now),'Comment','Created by iso2mesh http://iso2mesh.sf.net');
+mesh=struct('MeshNode',node,'MeshSurf',face,'MeshElem',elem,...
+            'CreateTime',datestr(now),'Comment','Created by iso2mesh (http://iso2mesh.sf.net)');
 fprintf(fid,'%s\n',savejson('',mesh,varargin{:}));
 
 fclose(fid);

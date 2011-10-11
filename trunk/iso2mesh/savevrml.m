@@ -19,6 +19,7 @@ function savevrml(node,face,elem,fname)
 if(nargin==2)
    fname=face;
    face=[];
+   elem=[];
 end
 
 if(nargin==3)

@@ -123,7 +123,7 @@ global pos inStr len
         arraystr=['[' inStr(pos-1:endpos)];
         arraystr(find(arraystr==sprintf('\n')))=[];
         arraystr(find(arraystr==sprintf('\r')))=[];
-        arraystr=regexprep(arraystr,'\]\s*,','\];');
+        arraystr=regexprep(arraystr,'\]\s*,','];');
         try
            object=eval(arraystr);
            pos=endpos;
