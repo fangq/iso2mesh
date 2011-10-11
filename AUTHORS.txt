@@ -1,4 +1,4 @@
-The author of "iso2mesh" toolbox is Qianqian Fang PhD. Dr. Fang
+The author of "iso2mesh" toolbox is Qianqian Fang. Qianqian
 is currently an Instructor at Massachusetts General Hospital, 
 Harvard Medical School.
 
