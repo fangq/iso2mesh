@@ -59,7 +59,7 @@ if pos <= len
 end % if
 
 len=length(data);
-if(len==1)
+if(len==1 && isstruct(data))
     data=jstruct2array(data);
 else
     for i=1:len
@@ -71,7 +71,6 @@ end
 
 %%-------------------------------------------------------------------------
 function newdata=jstruct2array(data)
-
 fn=fieldnames(data);
 newdata=data;
 for i=1:length(fn) % depth-first
@@ -81,8 +80,17 @@ for i=1:length(fn) % depth-first
 end
 if(~isempty(strmatch('x_ArrayType_',fn)) && ~isempty(strmatch('x_ArrayData_',fn)))
     newdata=cast(data.x_ArrayData_,data.x_ArrayType_);
+    iscpx=0;
+    if(~isempty(strmatch('x_ArrayIsComplex_',fn)))
+        if(data.x_ArrayIsComplex_)
+           iscpx=1;
+        end
+    end
     if(~isempty(strmatch('x_ArrayIsSparse_',fn)))
         if(data.x_ArrayIsSparse_)
+            if(iscpx && size(newdata,2)==4)
+                newdata(:,3)=complex(newdata(:,3),newdata(:,4));
+            end
             if(~isempty(strmatch('x_ArraySize_',fn)))
                 dim=data.x_ArraySize_;
                 newdata=sparse(newdata(:,1),newdata(:,2),newdata(:,3),dim(1),prod(dim(2:end)));
@@ -91,6 +99,9 @@ if(~isempty(strmatch('x_ArrayType_',fn)) && ~isempty(strmatch('x_ArrayData_',fn)
             end
         end
     elseif(~isempty(strmatch('x_ArraySize_',fn)))
+        if(iscpx && size(newdata,2)==2)
+             newdata=complex(newdata(:,1),newdata(:,2));
+        end
         newdata=reshape(newdata(:),data.x_ArraySize_);
     end
 end

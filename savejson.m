@@ -24,7 +24,12 @@ function json=savejson(rootname,obj,varargin)
 %                         sparse arrays, the non-zero elements will be
 %                         saved to _ArrayData_ field in triplet-format i.e.
 %                         (ix,iy,val) and "_ArrayIsSparse_" will be added
-%                         with a value of 1.
+%                         with a value of 1; for a complex array, the 
+%                         _ArrayData_ array will include two columns 
+%                         (4 for sparse) to record the real and imaginary 
+%                         parts, and also "_ArrayIsComplex_":1 is added. 
+%        opt.ParseLogical [0|1]: if this is set to 1, logical array elem
+%                         will use true/false rather than 1/0.
 %
 % output:
 %      json: a string in the JSON format (see http://json.org)
@@ -131,6 +136,7 @@ if(len>1) txt=sprintf('%s\n%s]',txt,padding1); end
 
 %%-------------------------------------------------------------------------
 function txt=str2json(name,item,level,varargin)
+global isoct
 txt='';
 if(~ischar(item))
         error('input is not a string');
@@ -147,9 +153,15 @@ else
     if(len>1) txt=sprintf('%s[\n',padding1); end
 end
 for e=1:len
-    val=regexprep(item(e,:),'\\','\\\\');
-    val=regexprep(val,'"','\\"');
-    val=regexprep(val,'^"','\\"');
+    if(isoct)
+        val=regexprep(item(e,:),'\\','\\');
+        val=regexprep(val,'"','\"');
+        val=regexprep(val,'^"','\"');
+    else
+        val=regexprep(item(e,:),'\\','\\\\');
+        val=regexprep(val,'"','\\"');
+        val=regexprep(val,'^"','\\"');
+    end
     if(len==1)
         obj=['"' name '": ' '"',val,'"'];
 	if(isempty(name)) obj=['"',val,'"']; end
@@ -171,7 +183,7 @@ end
 padding1=repmat(sprintf('\t'),1,level);
 padding0=repmat(sprintf('\t'),1,level+1);
 
-if(length(size(item))>2 || issparse(item) || jsonopt('ArrayToStruct',0,varargin{:}))
+if(length(size(item))>2 || issparse(item) || ~isreal(item) || jsonopt('ArrayToStruct',0,varargin{:}))
     if(isempty(name))
     	txt=sprintf('%s{\n%s"_ArrayType_": "%s",\n%s"_ArraySize_": %s,\n',...
               padding1,padding0,class(item),padding0,regexprep(mat2str(size(item)),'\s+',',') );
@@ -191,17 +203,28 @@ dataformat='%s%s%s%s%s';
 
 if(issparse(item))
     [ix,iy]=find(item);
+    data=full(item(find(item)));
+    if(~isreal(item))
+       data=[real(data(:)),imag(data(:))];
+       txt=sprintf(dataformat,txt,padding0,'"_ArrayIsComplex_": ','1', sprintf(',\n'));
+    end
     txt=sprintf(dataformat,txt,padding0,'"_ArrayIsSparse_": ','1', sprintf(',\n'));
     if(find(size(item)==1))
         txt=sprintf(dataformat,txt,padding0,'"_ArrayData_": ',...
-           matdata2json([ix,full(item(find(item)))],level+2,varargin{:}), sprintf('\n'));
+           matdata2json([ix,data],level+2,varargin{:}), sprintf('\n'));
     else
         txt=sprintf(dataformat,txt,padding0,'"_ArrayData_": ',...
-           matdata2json([ix,iy,full(item(find(item)))],level+2,varargin{:}), sprintf('\n'));
+           matdata2json([ix,iy,data],level+2,varargin{:}), sprintf('\n'));
     end
 else
-    txt=sprintf(dataformat,txt,padding0,'"_ArrayData_": ',...
-        matdata2json(item(:)',level+2,varargin{:}), sprintf('\n'));
+    if(isreal(item))
+        txt=sprintf(dataformat,txt,padding0,'"_ArrayData_": ',...
+            matdata2json(item(:)',level+2,varargin{:}), sprintf('\n'));
+    else
+        txt=sprintf(dataformat,txt,padding0,'"_ArrayIsComplex_": ','1', sprintf(',\n'));
+        txt=sprintf(dataformat,txt,padding0,'"_ArrayData_": ',...
+            matdata2json([real(item(:)) imag(item(:))],level+2,varargin{:}), sprintf('\n'));
+    end
 end
 txt=sprintf('%s%s%s',txt,padding1,'}');
 
@@ -222,11 +245,15 @@ end
 floatformat=jsonopt('FloatFormat','%.10g',varargin{:});
 formatstr=['[' repmat([floatformat ','],1,size(mat,2)-1) [floatformat sprintf('],\n')]];
 
-if(nargin>=2 && size(mat,1)>1 && jsonopt('ArrayIndent',1,varargin{:}))
+if(nargin>=2 && size(mat,1)>1 && jsonopt('ArrayIndent',1,varargin{:})==1)
     formatstr=[repmat(sprintf('\t'),1,level) formatstr];
 end
 txt=sprintf(formatstr,mat');
 txt(end-1:end)=[];
+if(islogical(mat) && jsonopt('ParseLogical',0,varargin{:})==1)
+   txt=regexprep(txt,'1','true');
+   txt=regexprep(txt,'0','false');
+end
 %txt=regexprep(mat2str(mat),'\s+',',');
 %txt=regexprep(txt,';',sprintf('],\n['));
 % if(nargin>=2 && size(mat,1)>1)
