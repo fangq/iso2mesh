@@ -36,7 +36,8 @@ func_meshfix="meshcheckrepair meshreorient removedupelem
 func_remesh="meshresample remeshsurf smoothsurf sortmesh mergemesh"
 func_fileio="saveasc savedxf saveinr saveoff savesmf savesurfpoly 
                 savevrml readasc readinr readmedit readoff readsmf
-	        readtetgen deletemeshfile mcpath mwpath savemedit"
+	        readtetgen deletemeshfile mcpath mwpath savemedit
+		savejson loadjson savejmesh savemphtxt"
 func_binimage="bwislands fillholes3d deislands2d deislands3d 
                 imedge3d internalpoint smoothbinvol 
 		thickenbinvol thinbinvol"

@@ -1,6 +1,6 @@
-function resimg=fillholes3d(img,ballsize)
+function resimg=fillholes3d(img,maxgap)
 %
-% resimg=fillholes3d(img,ballsize)
+% resimg=fillholes3d(img,maxgap)
 %
 % close a 3D image with the speicified gap size and then fill the holes
 %
@@ -8,7 +8,7 @@ function resimg=fillholes3d(img,ballsize)
 % 
 % input:
 %    img: a 3D binary image
-%    ballsize: maximum gap size for image closing
+%    maxgap: maximum gap size for image closing
 %
 % output:
 %    resimg: the image free of holes
@@ -18,8 +18,8 @@ function resimg=fillholes3d(img,ballsize)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-if(ballsize)
-  resimg = imclose(img,strel(ones(ballsize,ballsize,ballsize)));
+if(maxgap)
+  resimg = imclose(img,strel(ones(maxgap,maxgap,maxgap)));
 else
   resimg=img;
 end

@@ -41,11 +41,11 @@ end
 img=surf2vol(node,face,p0(1)-dx:dx:p1(1)+dx,p0(2)-dx:dx:p1(2)+dx,p0(3)-dx:dx:p1(3)+dx);
 
 eg=surfedge(face);
-ballsize=0;
+closesize=0;
 
 if(~isempty(eg) & isstruct(opt))
    if(isfield(opt,'closesize'))
-     ballsize=opt.closesize;
+     closesize=opt.closesize;
    end
 end
 
@@ -53,7 +53,7 @@ end
 % step 2: fill holes in the volumetric binary image
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-img=fillholes3d(img,ballsize);
+img=fillholes3d(img,closesize);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % step 3: convert the filled volume to a new surface
