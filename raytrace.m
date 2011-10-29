@@ -13,13 +13,14 @@ function [t,u,v]=raytrace(p,v,node,face)
 %   face: a surface mesh triangle list (ne x 3)
 %
 % output:
-%   t: signed distance from p to the intersection point
-%   u: bary-centric coordinate 1 of the intersection point
-%   v: bary-centric coordinate 2 of the intersection point
+%   t: signed distance from p to the intersection point for each surface
+%      triangle, if ray is parallel to the triangle, t is set to Inf
+%   u: bary-centric coordinate 1 of all intersection points
+%   v: bary-centric coordinate 2 of all intersection points
 %      the final bary-centric triplet is [u,v,1-u-v]
 %
 %  users can find the IDs of the elements intersecting with the ray by
-%    idx=find(u>=0 & v>=0 & u+v<=1.0);
+%    idx=find(u>=0 & v>=0 & u+v<=1.0 & ~isinf(t));
 %
 % Reference: 
 %  [1] J. Havel and A. Herout, "Yet faster ray-triangle intersection (using 
@@ -61,3 +62,6 @@ den(idx)=1./den(idx);
 t=t.*den;
 u=u.*den;
 v=v.*den;
+
+ % if den==0, ray is parallel to triangle, set t to infinity
+t(find(den==0))=Inf;
