@@ -11,7 +11,11 @@ function hm=plotsurf(node,face,varargin)
 %            4th column, it will be used to set the color at each node.
 %      face: triangular surface face list; if face has a 4th column,
 %            it will be used to separate the surface into 
-%            sub-surfaces and display them in different colors.
+%            sub-surfaces and display them in different colors;
+%            face can be a cell array, each element of the array represents
+%            a polyhedral facet of the mesh, if an element is an array with
+%            two array subelements, the first one is the node index, the
+%            second one is a scalar as the group id of the facet.
 %      opt:  additional options for the plotting, see plotmesh
 %
 % output:
@@ -28,28 +32,72 @@ function hm=plotsurf(node,face,varargin)
 rngstate = rand ('state');
 
 if(nargin>=2)
-    if(size(face,2)==4)
-        randseed=hex2dec('623F9A9E'); % "U+623F U+9A9E"
-	if(isoctavemesh) randseed=randseed+3; end
-        if(~isempty(getvarfrom('base','ISO2MESH_RANDSEED')))
-                randseed=getvarfrom('base','ISO2MESH_RANDSEED');
-        end
-        rand('state',randseed);
+  randseed=hex2dec('623F9A9E'); % "U+623F U+9A9E"
+  if(isoctavemesh) randseed=randseed+3; end
+  if(~isempty(getvarfrom('base','ISO2MESH_RANDSEED')))
+        randseed=getvarfrom('base','ISO2MESH_RANDSEED');
+  end
+  rand('state',randseed);
 
+  if(iscell(face))
+    sc=sparse(10,3); % face colormap
+    sc(1:10,:)=rand(3,10)';
+    len=length(face);
+    newsurf=cell(1);
+    % reorganizing each labeled surface into a new cell
+    for i=1:len
+        fc=face{i};
+        if(iscell(fc) && length(fc)>=2)
+            if(fc{2}+1>10)
+                sc(fc{2}+1,:)=rand(1,3);
+            end
+            if(fc{2}+1>length(newsurf))
+                newsurf{fc{2}+1}={};
+            end
+            newsurf{fc{2}+1}{end+1}=fc{1};
+        else % unlabeled facet is tagged by 0
+            if(iscell(fc))
+                newsurf{1}{end+1}=cell2mat(fc);
+            else
+                newsurf{1}{end+1}=fc;
+            end
+        end
+    end
+    hold on;
+	h=[];
+    newlen=length(newsurf);
+
+    for i=1:newlen
+        if(isempty(newsurf{i})); continue; end
+        try 
+            subface=cell2mat(newsurf{i}')';
+            if(size(subface,1)>1 && ndims(subface)==2)
+               subface=subface';
+            end
+            h=[h patch('Vertices',node,'Faces',subface,'facecolor',sc(i,:),varargin{:})];
+        catch
+            for j=1:length(newsurf{i})
+                h=[h patch('Vertices',node,'Faces',newsurf{i}{j},'facecolor',sc(i,:),varargin{:})];
+            end
+        end
+    end
+  else
+    if(size(face,2)==4)
         tag=face(:,4);
 		types=unique(tag);
         hold on;
 		h=[];
-	for i=1:length(types)
-	    if(size(node,2)==3)
-        	h=[h plotasurf(node,face(find(tag==types(i)),1:3),'facecolor',rand(3,1),varargin{:})];
-	    else
+	    for i=1:length(types)
+            if(size(node,2)==3)
+                h=[h plotasurf(node,face(find(tag==types(i)),1:3),'facecolor',rand(3,1),varargin{:})];
+            else
                 h=[h plotasurf(node,face(find(tag==types(i)),1:3),varargin{:})];
-	    end
+            end
         end
     else
         h=plotasurf(node,face,varargin{:});
     end
+  end
 end    
 if(~isempty(h)) 
   axis equal;
@@ -57,7 +105,7 @@ if(~isempty(h))
       view(3);
   end
 end
-if(~isempty(h) & nargout>=1)
+if(~isempty(h) && nargout>=1)
   hm=h;
 end
 

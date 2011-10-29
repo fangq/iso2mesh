@@ -11,7 +11,11 @@ function hm=plotmesh(node,varargin)
 %            4th column, it will be used to set the color at each node.
 %      face: a triangular surface face list; if face has a 4th column,
 %            it will be used to separate the surface into 
-%            sub-surfaces and display them in different colors.
+%            sub-surfaces and display them in different colors;
+%            face can be a cell array, each element of the array represents
+%            a polyhedral facet of the mesh, if an element is an array with
+%            two array subelements, the first one is the node index, the
+%            second one is a scalar as the group id of the facet.
 %      elem: a tetrahedral element list; if elem has a 5th column,
 %            it will be used to separate the mesh into 
 %            sub-domains and display them in different colors.
@@ -147,16 +151,20 @@ if(~isempty(face))
    		h=plotsurf(node,face,opt{:});
 	end
    else
-	cent=meshcentroid(node,face(:,1:3));
+    if(iscell(face))
+       cent=meshcentroid(node,face);
+    else
+       cent=meshcentroid(node,face(:,1:3));
+    end
 	x=cent(:,1);
     y=cent(:,2);
 	z=cent(:,3);
     idx=eval(['find(' selector ')']);
     if(~isempty(idx))
-	    if(isempty(opt))
-		h=plotsurf(node,face(idx,:));
-	    else
-		h=plotsurf(node,face(idx,:),opt{:});
+        if(iscell(face))
+            h=plotsurf(node,face(idx),opt{:});
+        else
+    		h=plotsurf(node,face(idx,:),opt{:});
         end
     else
         warning('no surface to plot');

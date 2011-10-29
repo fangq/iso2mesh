@@ -17,6 +17,22 @@ function centroid=meshcentroid(v,f)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-ec=reshape(v(f(:,1:size(f,2))',:)', [size(v,2) size(f,2) size(f,1)]);
-centroid=squeeze(mean(ec,2))';
+if(~iscell(f))
+    ec=reshape(v(f(:,1:size(f,2))',:)', [size(v,2) size(f,2) size(f,1)]);
+    centroid=squeeze(mean(ec,2))';
+else
+    len=length(f);
+    centroid=zeros(len,size(v,2));
+    try
+        for i=1:len
+            fc=f{i};
+            if(~isempty(fc)) % need to set centroid to NaN if fc is empty?
+                vlist=fc{1};
+                centroid(i,:)=mean(v(vlist(find(~isnan(vlist))),:));
+            end
+        end
+    catch
+        error('malformed face cell array');
+    end
+end
 
