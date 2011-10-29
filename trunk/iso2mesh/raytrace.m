@@ -1,6 +1,6 @@
-function [t,u,v]=raytrace(p,v,node,face)
+function [t,u,v,idx]=raytrace(p,v,node,face)
 %
-% [t,u,v]=raytrace(p,v,node,face)
+% [t,u,v,idx]=raytrace(p,v,node,face)
 %
 % perform a Havel-styled ray tracing for a triangular surface
 %
@@ -18,9 +18,10 @@ function [t,u,v]=raytrace(p,v,node,face)
 %   u: bary-centric coordinate 1 of all intersection points
 %   v: bary-centric coordinate 2 of all intersection points
 %      the final bary-centric triplet is [u,v,1-u-v]
+%   idx: optional output, if requested, idx lists the IDs of the face
+%      elements that intersects the ray; users can manually calc idx by
 %
-%  users can find the IDs of the elements intersecting with the ray by
-%    idx=find(u>=0 & v>=0 & u+v<=1.0 & ~isinf(t));
+%      idx=find(u>=0 & v>=0 & u+v<=1.0 & ~isinf(t));
 %
 % Reference: 
 %  [1] J. Havel and A. Herout, "Yet faster ray-triangle intersection (using 
@@ -65,3 +66,7 @@ v=v.*den;
 
  % if den==0, ray is parallel to triangle, set t to infinity
 t(find(den==0))=Inf;
+
+if(nargout>=4)
+    idx=find(u>=0 & v>=0 & u+v<=1.0 & ~isinf(t));
+end
