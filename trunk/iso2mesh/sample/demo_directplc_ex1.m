@@ -46,5 +46,6 @@ fc{count}={[1+length(t)*3:1+length(t)*4-1 nan fliplr(1+length(t)*2:1+length(t)*3
 %[node,elem,face]=s2m(no,face,1,50);
 [node,elem,face]=surf2mesh(no,fc,min(no),max(no),1,50,[0 0 1],[],0);
 
+plotmesh(no,fc,'y>-0.1');
+figure
 plotmesh(node,elem,'x>0 | y>0');
-axis equal;
