@@ -1,8 +1,8 @@
-function [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,plane)
+function [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,cutat)
 %
-% [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,plane)
+% [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,cutat)
 %
-% fast tetrahedral mesh cross-section plot
+% fast tetrahedral mesh slicer
 %
 % author:Qianqian Fang, <fangq at nmr.mgh.harvard.edu>
 %
@@ -12,10 +12,25 @@ function [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,plane)
 %   node: node coordinates, 3 columns for x, y and z respectively
 %   value: a scalar array with the length of node numbers, can have 
 %          multiple columns 
-%   plane: defines a plane by 3 points: plane=[x1 y1 z1;x2 y2 z2;x3 y3 z3]
+%   cutat: cutat can have different forms:
+%          if cutat is a 3x3 matrix, it defines a cutat by 3 points: 
+%                 cutat=[x1 y1 z1;x2 y2 z2;x3 y3 z3]
+%          if cutat is a vector of 4 element, it defines a plane by
+%                 a*x+b*y+c*z+d=0  and cutat=[a b c d]
+%          if cutat is a single scalar, it defines an isosurface 
+%                 inside the mesh at value=cutat
+%          if cutat is a string, it defines an implicit surface
+%                 at which the cut is made. it must has form expr1=expr2
+%                 where expr1 expr2 are expressions made of x,y,z,v and
+%                 contstants
+%          if cutat is a cell in the form of {'expression',scalar}, 
+%                 the expression will be evaluated at each node to 
+%                 produce a new value and an isosurface is produced 
+%                 at the levelset where new value=scalar; the 
+%                 expression can contain constants and x,y,z,v
 %
 % output:
-%   cutpos: all the intersections of mesh edges by the plane
+%   cutpos: all the intersections of mesh edges by the cutat
 %           cutpos is similar to node, containing 3 columns for x/y/z
 %   cutvalue: interpolated values at the intersections, with row number
 %           being the num. of the intersections, column number being the 
@@ -29,15 +44,40 @@ function [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,plane)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-% get the coefficients of the plane equation: ax+by+cz+d=0
-[a,b,c,d]=getplanefrom3pt(plane);
+% get the coefficients of the cutat equation: ax+by+cz+d=0
 
-% compute which side of the plane for all nodes in the mesh
-co=repmat([a b c],size(node,1),1);
-dist=sum( (co.*node)' )+d;
-asign=dist;
-asign(find(asign>=0))=1;
-asign(find(asign<0))=-1;
+if(ischar(cutat) || (iscell(cutat) && length(cutat)==2 && ischar(cutat{1})))
+    x=node(:,1);
+    y=node(:,2);
+    z=node(:,3);
+    v=value;
+    if(ischar(cutat))
+        expr=regexp(cutat,'(.+)=(.+)','tokens','once'); %regexp(cutat,'=','split');
+        if(length(expr)~=2) error('single expression must contain a single "=" sign'); end
+        dist=eval(expr{1})-eval(expr{2});
+    else
+        dist=eval(cutat{1})-cutat{2};
+    end
+    asign=double(dist>0);
+    asign(asign==0)=-1;
+elseif(numel(cutat)==9 || numel(cutat)==4)
+    if(numel(cutat)==9)
+        [a,b,c,d]=getplanefrom3pt(cutat);
+    else
+        [a,b,c,d]=deal(cutat(:));
+    end
+
+    % compute which side of the cutat for all nodes in the mesh
+    co=repmat([a b c],size(node,1),1);
+    dist=sum( (co.*node)' )+d;
+    asign=dist;
+    asign(find(asign>=0))=1;
+    asign(find(asign<0))=-1;
+else
+    dist=value-cutat;
+    asign=double(dist>0);
+    asign(asign==0)=-1;
+end
 
 % get all the edges of the mesh
 esize=size(elem,2);
@@ -63,7 +103,7 @@ cutedges=find(edgemask==0);
 cutweight=dist(edges(cutedges,:));
 totalweight=diff(cutweight');
 
-%caveat: if an edge is co-planar to the plane, then totalweight will be 0
+%caveat: if an edge is co-planar to the cutat, then totalweight will be 0
 %        and dividing zero will cause trouble for cutweight
 
 cutweight=abs(cutweight./repmat(totalweight(:),1,2));
@@ -72,8 +112,12 @@ cutweight=abs(cutweight./repmat(totalweight(:),1,2));
 
 cutpos=node(edges(cutedges,1),:).*repmat(cutweight(:,2),[1 3])+...
        node(edges(cutedges,2),:).*repmat(cutweight(:,1),[1 3]);
-cutvalue=value(edges(cutedges,1),:).*repmat(cutweight(:,2),[1 size(value,2)])+...
-       value(edges(cutedges,2),:).*repmat(cutweight(:,1),[1 size(value,2)]);
+if(iscell(cutat) || ischar(cutat) || numel(cutat)==9 || numel(cutat)==4)
+    cutvalue=value(edges(cutedges,1),:).*repmat(cutweight(:,2),[1 size(value,2)])+...
+           value(edges(cutedges,2),:).*repmat(cutweight(:,1),[1 size(value,2)]);
+elseif(numel(cutat)==1)
+    cutvalue=ones(size(cutpos,1),1)*cutat;
+end
    
 % organize all cross-cuts into patch facedata format
 
