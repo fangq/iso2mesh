@@ -22,7 +22,7 @@ exesuff=getexeext;
 exesuff=fallbackexeext(exesuff,'tetgen');
 
 [status,str] = system(['"' mcpath('tetgen') exesuff '" -d "' ...
-                        tmppath filesep 'post_vmesh.poly"']);
+                        tmppath 'post_vmesh.poly"'])
 
 eid=[];
 if(status==0)
