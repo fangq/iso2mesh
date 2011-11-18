@@ -13,7 +13,7 @@ function [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,cutat)
 %   value: a scalar array with the length of node numbers, can have 
 %          multiple columns 
 %   cutat: cutat can have different forms:
-%          if cutat is a 3x3 matrix, it defines a cutat by 3 points: 
+%          if cutat is a 3x3 matrix, it defines a plane by 3 points: 
 %                 cutat=[x1 y1 z1;x2 y2 z2;x3 y3 z3]
 %          if cutat is a vector of 4 element, it defines a plane by
 %                 a*x+b*y+c*z+d=0  and cutat=[a b c d]
@@ -22,10 +22,10 @@ function [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,cutat)
 %          if cutat is a string, it defines an implicit surface
 %                 at which the cut is made. it must has form expr1=expr2
 %                 where expr1 expr2 are expressions made of x,y,z,v and
-%                 contstants
+%                 constants
 %          if cutat is a cell in the form of {'expression',scalar}, 
 %                 the expression will be evaluated at each node to 
-%                 produce a new value and an isosurface is produced 
+%                 produce a new value, then an isosurface is produced 
 %                 at the levelset where new value=scalar; the 
 %                 expression can contain constants and x,y,z,v
 %
