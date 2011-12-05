@@ -22,16 +22,39 @@ elem=[];
 fid=fopen(fname,'rt');
 line=fgetl(fid);
 dim=fscanf(fid,'%d',3);
-node=fscanf(fid,'%f',[3,dim(1)])';
-elem=fscanf(fid,'%f',inf);
-fclose(fid);
-if(length(elem)==4*dim(2))
-    elem=reshape(elem,[4,dim(2)])';
-elseif(length(elem)==8*dim(2))
-    elem=reshape(elem,[8,dim(2)])';
-end
-if(size(elem,2)<=3)
-    elem=round(elem(:,2:3))+1;
+line=nonemptyline(fid);
+nodalcount=3;
+if(~isempty(line))
+    [val nodalcount]=sscanf(line,'%f',inf);
 else
-    elem=round(elem(:,2:4))+1;
+    return;
+end
+node=fscanf(fid,'%f',[nodalcount,dim(1)-1])';
+node=[val(:)';node];
+
+line=nonemptyline(fid);
+facetcount=4;
+if(~isempty(line))
+    [val facetcount]=sscanf(line,'%f',inf);
+else
+    return;
+end
+elem=fscanf(fid,'%f',[facetcount,dim(2)-1])';
+elem=[val(:)';elem];
+fclose(fid);
+elem(:,1)=[];
+
+if(size(elem,2)<=3)
+    elem(:,1:3)=round(elem(:,1:3))+1;
+else
+    elem(:,1:4)=round(elem(:,1:4))+1;
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function str=nonemptyline(fid)
+str='';
+if(fid==0) error('invalid file'); end
+while(isempty(strtrim(str)) && ~feof(fid))
+    str=fgetl(fid);
 end
