@@ -55,6 +55,6 @@ end
 function str=nonemptyline(fid)
 str='';
 if(fid==0) error('invalid file'); end
-while(isempty(strtrim(str)) && ~feof(fid))
+while(isempty(regexp(str,'\S')) && ~feof(fid))
     str=fgetl(fid);
 end
