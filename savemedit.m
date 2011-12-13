@@ -33,7 +33,7 @@ end
 if(~isempty(face))
   if(size(face,2)<=3) face(1,4)=0; end
   fprintf(fid,'Triangles\t%d\n',size(face,1));
-  fprintf(fid,'%d\t%d\t%d\t%d\n',face(:,1:3)');
+  fprintf(fid,'%d\t%d\t%d\t%d\n',face(:,1:4)');
 end
 
 if(~isempty(elem))
