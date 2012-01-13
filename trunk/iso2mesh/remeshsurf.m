@@ -65,11 +65,11 @@ if(isstruct(opt))
       [newno,newfc]=v2s(img,0.5,opt,'cgalsurf');
    end
 else
-  opt.radbound=opt/dx;
+  opt=struct('radbound',opt/dx);
   [newno,newfc]=v2s(img,0.5,opt,'cgalsurf');
 end
 
 newno(:,1:3)=newno(:,1:3)*dx;
-newno(:,1)=newno(:,1)-min(newno(:,1))+p0(1);
-newno(:,2)=newno(:,2)-min(newno(:,2))+p0(2);
-newno(:,3)=newno(:,3)-min(newno(:,3))+p0(3);
+newno(:,1)=newno(:,1)+p0(1);
+newno(:,2)=newno(:,2)+p0(2);
+newno(:,3)=newno(:,3)+p0(3);
