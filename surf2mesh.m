@@ -90,7 +90,7 @@ fprintf(1,sprintf('\n%s\n%s\n',...
      'WARNING: the license for "tetgen" is non-free and does not permit commercial use.', ...
      'Please use the "cgalmesh" or "cgalpoly" options where free-software is desired.'));
 
-cmdopt=getvarfrom('base','ISO2MESH_TETGENOPT');
+cmdopt=getvarfrom({'caller','base'},'ISO2MESH_TETGENOPT');
 if(isempty(cmdopt))
   system([' "' mcpath('tetgen') exesuff '" -A -q1.414a' num2str(maxvol) ' ' moreopt ' "' mwpath('post_vmesh.poly') '"']);
 else
