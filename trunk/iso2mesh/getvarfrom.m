@@ -17,10 +17,17 @@ function p=getvarfrom(ws,name)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-isdefined=evalin(ws,['exist(''' name ''')']);
-if(isdefined==1)
-        p=evalin(ws,name);
-else
-        p=[];
+wsname=ws;
+if(~iscell(ws))
+   wsname=cell(1);
+   wsname{1}=ws;
 end
 
+p=[];
+for i=1:length(wsname)
+    isdefined=evalin(wsname{i},['exist(''' name ''')']);
+    if(isdefined==1)
+        p=evalin(ws,name);
+        break;
+    end
+end

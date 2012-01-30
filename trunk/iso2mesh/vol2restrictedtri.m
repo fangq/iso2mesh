@@ -39,13 +39,13 @@ deletemeshfile(mwpath('post_extract.off'));
 
 randseed=hex2dec('623F9A9E'); % "U+623F U+9A9E"
 
-if(~isempty(getvarfrom('base','ISO2MESH_RANDSEED')))
-	randseed=getvarfrom('base','ISO2MESH_RANDSEED');
+if(~isempty(getvarfrom({'caller','base'},'ISO2MESH_RANDSEED')))
+	randseed=getvarfrom({'caller','base'},'ISO2MESH_RANDSEED');
 end
 
 initnum=50;
-if(~isempty(getvarfrom('base','ISO2MESH_INITSIZE')))
-        initnum=getvarfrom('base','ISO2MESH_INITSIZE');
+if(~isempty(getvarfrom({'caller','base'},'ISO2MESH_INITSIZE')))
+        initnum=getvarfrom({'caller','base'},'ISO2MESH_INITSIZE');
 end
 
 system([' "' mcpath('cgalsurf') exesuff '" "' mwpath('pre_extract.inr') ...

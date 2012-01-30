@@ -22,8 +22,8 @@ function tempname=mwpath(fname)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-p=getvarfrom('base','ISO2MESH_TEMP');
-session=getvarfrom('base','ISO2MESH_SESSION');
+p=getvarfrom({'caller','base'},'ISO2MESH_TEMP');
+session=getvarfrom({'caller','base'},'ISO2MESH_SESSION');
 
 username=getenv('USER'); % for Linux/Unix/Mac OS
 

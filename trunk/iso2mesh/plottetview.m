@@ -18,7 +18,7 @@ function plottetview(session,method)
 exesuff=getexeext;
 exesuff=fallbackexeext(exesuff,'tetview');
 
-sid=getvarfrom('base','ISO2MESH_SESSION');
+sid=getvarfrom({'caller','base'},'ISO2MESH_SESSION');
 if(nargin>=1)
   if(~ischar(session)) error('session name must be a string');  end
   if(~isempty(session))

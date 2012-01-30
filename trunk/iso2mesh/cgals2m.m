@@ -58,8 +58,8 @@ deletemeshfile(mwpath('post_cgalpoly.mesh'));
 
 randseed=hex2dec('623F9A9E'); % "U+623F U+9A9E"
 
-if(~isempty(getvarfrom('base','ISO2MESH_RANDSEED')))
-        randseed=getvarfrom('base','ISO2MESH_RANDSEED');
+if(~isempty(getvarfrom({'caller','base'},'ISO2MESH_RANDSEED')))
+        randseed=getvarfrom({'caller','base'},'ISO2MESH_RANDSEED');
 end
 
 cmd=sprintf('"%s%s" "%s" "%s" %f %f %f %f %f %d',mcpath('cgalpoly'),exesuff,...
