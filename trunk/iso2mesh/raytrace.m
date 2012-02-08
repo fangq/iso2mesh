@@ -1,14 +1,14 @@
-function [t,u,v,idx]=raytrace(p,v,node,face)
+function [t,u,v,idx]=raytrace(p0,v0,node,face)
 %
-% [t,u,v,idx]=raytrace(p,v,node,face)
+% [t,u,v,idx]=raytrace(p0,v0,node,face)
 %
 % perform a Havel-styled ray tracing for a triangular surface
 %
 % author: Qianqian Fang, <fangq at nmr.mgh.harvard.edu>
 %
 % input:
-%   p: starting point coordinate of the ray
-%   v: directional vector of the ray
+%   p0: starting point coordinate of the ray
+%   v0: directional vector of the ray
 %   node: a list of node coordinates (nn x 3)
 %   face: a surface mesh triangle list (ne x 3)
 %
@@ -34,8 +34,8 @@ function [t,u,v,idx]=raytrace(p,v,node,face)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-p=p(:)';
-v=v(:)';
+p0=p0(:)';
+v0=v0(:)';
 
 AB=node(face(:,2),1:3)-node(face(:,1),1:3);
 AC=node(face(:,3),1:3)-node(face(:,1),1:3);
@@ -51,9 +51,9 @@ d1=-dot(N1',node(face(:,1),1:3)')';
 N2=cross(N',AB')'.*repmat(Rn2,1,3);
 d2=-dot(N2',node(face(:,1),1:3)')';
 
-den=(v*N')';
-t=-(d+(p*N')');
-P=(p'*den'+v'*t')';
+den=(v0*N')';
+t=-(d+(p0*N')');
+P=(p0'*den'+v0'*t')';
 u=dot(P',N1')'+den.*d1;
 v=dot(P',N2')'+den.*d2;
 

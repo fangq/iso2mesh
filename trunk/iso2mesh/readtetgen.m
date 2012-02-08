@@ -26,6 +26,7 @@ end
 [dim,count] = fscanf(fp,'%d',4);
 if(count<4) error('wrong node file'); end
 node=fscanf(fp,'%f',[4,dim(1)]);
+idx=node(1,:);
 node=node(2:4,:)';
 fclose(fp);
 
@@ -37,7 +38,9 @@ end
 [dim,count] = fscanf(fp,'%d',3);
 if(count<3) error('wrong elem file'); end
 elem=fscanf(fp,'%d',[dim(2)+dim(3)+1,dim(1)]);
-elem=elem(2:end,:)'+1;
+elem=elem';
+elem(:,1)=[];
+elem(:,1:dim(2))=elem(:,1:dim(2))+(1-idx(1));
 fclose(fp);
 
 % read surface mesh file
