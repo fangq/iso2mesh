@@ -37,13 +37,15 @@ func_remesh="meshresample remeshsurf smoothsurf sortmesh mergemesh"
 func_fileio="saveasc savedxf saveinr saveoff savesmf savesurfpoly 
                 savevrml readasc readinr readmedit readoff readsmf
 	        readtetgen deletemeshfile mcpath mwpath savemedit
-		savejson loadjson savejmesh savemphtxt"
+		savejson loadjson savejmesh savemphtxt savetetgenele
+                savetetgennode"
 func_binimage="bwislands fillholes3d deislands2d deislands3d 
                 imedge3d internalpoint smoothbinvol 
 		thickenbinvol thinbinvol"
 func_plotting="plotmesh plotsurf plottetra qmeshcut plottetview"
 func_misc="surfdiffuse volmap2mesh isoctavemesh getvarfrom raytrace
-		getplanefrom3pt getexeext fallbackexeext iso2meshver"
+		getplanefrom3pt getexeext fallbackexeext iso2meshver
+                raysurf"
 
 echo === "#" Streamlined mesh generation - shortcuts ===
 print_group $func_shortcut
