@@ -1,4 +1,19 @@
 function savetetgenele(elem,fname)
+%
+% savetetgenele(elem,fname)
+%
+% save a mesh tetrahedral element list to tetgen .ele format
+%
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+%
+% input:
+%      elem: tetrahedral element list, dimension (ne,4)
+%            columns beyound the 4rd column are treated as 
+%            markers and attributes associated with the element
+%      fname: output file name
+%
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 hasprop=0;
 attrstr='';
