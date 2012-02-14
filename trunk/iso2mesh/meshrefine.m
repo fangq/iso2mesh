@@ -12,7 +12,7 @@ function [newnode,newelem,newface]=meshrefine(node,elem,varargin)
 %      face: (optional) existing tetrahedral mesh surface triangle list
 %      opt:  options for mesh refinement:
 %        if opt is a Nx3 array, opt is treated as a list of new nodes to
-%          be inserted into the mesh
+%          be inserted into the mesh (must be located on the surface or inside)
 %        if opt is a struct, it can have the following fields:
 %          opt.newnode: same as setting opt to an Nx3 array
 %          opt.reratio: radius-edge ratio, by default, iso2mesh uses 1.414
