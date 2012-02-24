@@ -29,12 +29,13 @@ func_inquery="finddisconnsurf surfedge volface extractloops meshconn
                 meshcentroid nodevolume elemvolume neighborelem 
 		faceneighbors edgeneighbors maxsurf flatsegment orderloopedge  
 		mesheuler bbxflatsegment surfplane surfinterior 
-                surfseeds meshquality meshedge"
+                surfseeds meshquality meshedge surfnorm"
 func_meshfix="meshcheckrepair meshreorient removedupelem 
                 removedupnodes removeisolatednode removeisolatedsurf
                 surfaceclean getintersecttri delendelem"
 func_remesh="meshresample remeshsurf smoothsurf sortmesh mergemesh meshrefine"
-func_fileio="saveasc savedxf saveinr saveoff savesmf savesurfpoly 
+func_fileio="saveasc savedxf savestl savebinstl saveinr saveoff 
+                savesmf savesurfpoly savegts 
                 savevrml readasc readinr readmedit readoff readsmf
 	        readtetgen deletemeshfile mcpath mwpath savemedit
 		savejson loadjson savejmesh savemphtxt savetetgenele
@@ -45,7 +46,7 @@ func_binimage="bwislands fillholes3d deislands2d deislands3d
 func_plotting="plotmesh plotsurf plottetra qmeshcut plottetview"
 func_misc="surfdiffuse volmap2mesh isoctavemesh getvarfrom raytrace
 		getplanefrom3pt getexeext fallbackexeext iso2meshver
-                raysurf"
+                raysurf getoptkey"
 
 echo === "#" Streamlined mesh generation - shortcuts ===
 print_group $func_shortcut

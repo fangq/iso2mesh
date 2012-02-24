@@ -1,6 +1,6 @@
-function edges=meshedge(elem)
+function edges=meshedge(elem,varargin)
 %
-% edges=meshedge(elem)
+% edges=meshedge(elem,opt)
 %
 % return all edges in a surface or volumetric mesh
 %
@@ -9,6 +9,11 @@ function edges=meshedge(elem)
 %
 % input:
 %    elem:  element table of a mesh (support N-d space element)
+%    opt: optional input, giving the additional options. If opt
+%         is a struct, it can have the following field:
+%       opt.nodeorder: if 1, assuming the elem node indices is in CCW 
+%                      orientation; 0 use nchoosek() output to order edges
+%         you can replace opt by a series of ('param', value) pairs.
 %
 % output:
 %    edge:  edge list; each row is an edge, specified by the starting and

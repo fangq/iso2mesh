@@ -1,6 +1,6 @@
 function savestl(node,elem,fname,solidname)
 %
-% savestl(node,elem,fname)
+% savestl(node,elem,fname,solidname)
 %
 % save a tetrahedral mesh to an STL (Standard Tessellation Language) file
 %
@@ -40,7 +40,8 @@ if(~isempty(elem))
 	elem=meshreorient(node,elem);
 	elem=volface(elem);
   end
-  ev=trisurfnorm(node,elem);
+  ev=surfplane(node,elem);
+  ev=ev(:,1:3)./repmat(sqrt(sum(ev(:,1:3).*ev(:,1:3),2)),1,3);
   len=size(elem,1);
   for i=1:len
       fprintf(fid,['facet normal %e %e %e\n' ...
