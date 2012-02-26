@@ -1,4 +1,4 @@
-function [node,elem]=meshcheckrepair(node,elem,opt)
+function [node,elem]=meshcheckrepair(node,elem,opt,varargin)
 %
 % [node,elem]=meshcheckrepair(node,elem,opt)
 % 
@@ -41,9 +41,19 @@ end
 exesuff=getexeext;
 exesuff=fallbackexeext(exesuff,'meshfix');
 
+extra=varargin2struct(varargin{:});
+moreopt=' -q -a 0.01 ';
+if(ispc)
+    moreopt=' -a 0.01 ';
+end
+if(isstruct(extra) && isfield(extra,'MeshfixParam'))
+    moreopt=extra.MeshfixParam;
+end
 if(nargin<3 || strcmp(opt,'deep'))
-    deletemeshfile(mwpath('post_sclean.off'));
+    deletemeshfile(mwpath('pre_sclean.off'));
+    deletemeshfile(mwpath('pre_sclean_fixed.off'));
     saveoff(node,elem,mwpath('pre_sclean.off'));
-    system([' "' mcpath('meshfix') exesuff '" "' mwpath('pre_sclean.off') '" "' mwpath('post_sclean.off') '"']);
-    [node,elem]=readoff(mwpath('post_sclean.off'));
+    system([' "' mcpath('meshfix') exesuff '" "' mwpath('pre_sclean.off') ...
+        '" ' moreopt]);
+    [node,elem]=readoff(mwpath('pre_sclean_fixed.off'));
 end

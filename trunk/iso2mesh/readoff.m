@@ -21,7 +21,8 @@ node=[];
 elem=[];
 fid=fopen(fname,'rt');
 line=fgetl(fid);
-dim=fscanf(fid,'%d',3);
+line=nonemptyline(fid);
+dim=sscanf(line,'%d',3);
 line=nonemptyline(fid);
 nodalcount=3;
 if(~isempty(line))
@@ -55,6 +56,6 @@ end
 function str=nonemptyline(fid)
 str='';
 if(fid==0) error('invalid file'); end
-while(isempty(regexp(str,'\S')) && ~feof(fid))
+while((isempty(regexp(str,'\S')) || ~isempty(regexp(str,'^#')))  && ~feof(fid))
     str=fgetl(fid);
 end
