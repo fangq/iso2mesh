@@ -20,7 +20,7 @@ function [newnode,newelem]=mergemesh(node,elem,varargin)
 % example:
 %
 %   [node1,elem1,face1]=meshabox([0 0 0],[10 10 10],1,1);
-%   [node2,face2,elem2]=meshasphere([5 5 13.1],3,0.3,3);
+%   [node2,elem2,face2]=meshasphere([5 5 13.1],3,0.3,3);
 %   [newnode,newelem]=mergemesh(node1,elem1,node2,elem2);
 %   plotmesh(newnode,newelem);
 %   figure;
