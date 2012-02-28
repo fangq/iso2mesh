@@ -45,13 +45,38 @@ for i=1:3:len
    el=varargin{i+2};
    deletemeshfile(mwpath('pre_surfbool*.gts'));
    deletemeshfile(mwpath('post_surfbool.gts'));
+   if(strcmp(op,'all'))
+      deletemeshfile(mwpath('s1out2.gts'));
+      deletemeshfile(mwpath('s1in2.gts'));
+      deletemeshfile(mwpath('s2out1.gts'));
+      deletemeshfile(mwpath('s2in1.gts'));
+   end
    savegts(newnode(:,1:3),newelem(:,1:3),mwpath('pre_surfbool1.gts'));
    savegts(no(:,1:3),el(:,1:3),mwpath('pre_surfbool2.gts'));
-   cmd=sprintf('"%s%s" "%s" "%s" "%s" -v > "%s"',mcpath('gtsset'),exesuff,...
+   cmd=sprintf('cd "%s";"%s%s" "%s" "%s" "%s" -v > "%s"',mwpath(''),mcpath('gtsset'),exesuff,...
        op,mwpath('pre_surfbool1.gts'),mwpath('pre_surfbool2.gts'),mwpath('post_surfbool.gts'));
    status=system(cmd);
    if(status~=0)
        error(['surface boolean command failed:' cmd]);
    end
-   [newnode,newelem]=readgts(mwpath('post_surfbool.gts'));
+   if(strcmp(op,'all'))
+      % tag the 4 piceses of meshes, this tag do not propagate to the next boolean operation
+      [nnode nelem]=readgts(mwpath('s1out2.gts'));
+      newelem=[nelem ones(size(nelem,1),1)];
+      newnode=[nnode ones(size(nnode,1),1)];
+
+      [nnode nelem]=readgts(mwpath('s1in2.gts'));
+      newelem=[newelem; nelem+size(newnode,1) 3*ones(size(nelem,1),1)];
+      newnode=[newnode; nnode 3*ones(size(nnode,1),1)];
+
+      [nnode nelem]=readgts(mwpath('s2out1.gts'));
+      newelem=[newelem; nelem+size(newnode,1) 2*ones(size(nelem,1),1)];
+      newnode=[newnode; nnode 2*ones(size(nnode,1),1)];
+
+      [nnode nelem]=readgts(mwpath('s2in1.gts'));
+      newelem=[newelem; nelem+size(newnode,1) 4*ones(size(nelem,1),1)];
+      newnode=[newnode; nnode 4*ones(size(nnode,1),1)];
+   else
+      [newnode,newelem]=readgts(mwpath('post_surfbool.gts'));
+   end
 end
