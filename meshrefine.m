@@ -54,29 +54,55 @@ if(isstruct(opt) && isfield(opt,'newnode'))
 end
 
 % call tetgen to create volumetric mesh
-deletemeshfile(mwpath('pre_refine.1.*'));
-deletemeshfile(mwpath('pre_refine.2.*'));
+deletemeshfile(mwpath('pre_refine.*'));
+deletemeshfile(mwpath('post_refine.*'));
 
 moreopt='';
 if(~isempty(newpt))
 	savetetgennode(newpt,mwpath('pre_refine.1.a.node'));
 	moreopt=' -i ';
 end
-savetetgennode(node, mwpath('pre_refine.1.node'));
-savetetgenele (elem, mwpath('pre_refine.1.ele'));
+if(size(elem,2)==3)
+    if(~isempty(newpt))
+        error('inserting new point can not be used for surfaces');
+    end
+    nedge=savegts(node, elem,mwpath('pre_refine.gts'));
+    exesuff=fallbackexeext(getexeext,'gtsrefine');
+else
+    savetetgennode(node, mwpath('pre_refine.1.node'));
+    savetetgenele (elem, mwpath('pre_refine.1.ele'));
+end
 
 fprintf(1,'refining the input mesh ...\n');
 
 if(isstruct(opt) && isfield(opt,'reratio'))
-	moreopt=[moreopt sprintf(' -q%.10f ',opt.reratio)];
+	moreopt=[moreopt sprintf(' -q %.10f ',opt.reratio)];
 end
 if(isstruct(opt) && isfield(opt,'maxvol'))
-        moreopt=[moreopt sprintf(' -a%.10f ',opt.maxvol)];
+    moreopt=[moreopt sprintf(' -a %.10f ',opt.maxvol)];
 end
-system([' "' mcpath('tetgen') exesuff '" ' moreopt ' -r "' mwpath('pre_refine.1') '"']);
+if(size(elem,2)==3)
+    if(isstruct(opt) && isfield(opt,'scale'))
+        moreopt=sprintf('%s -n %d ',moreopt,round(nedge*opt.scale));
+    else
+        error('you must give opt.scale value for refining a surface');
+    end
+end
+if(isstruct(opt) && isfield(opt,'moreopt'))
+	moreopt=[moreopt opt.moreopt];
+end
+
+if(size(elem,2)==3)
+    system([' "' mcpath('gtsrefine') exesuff '" ' moreopt ' < "' ...
+          mwpath('pre_refine.gts') '" > "' mwpath('post_refine.gts') '"']);
+    [newnode,newelem]=readgts(mwpath('post_refine.gts'));
+    newface=newelem;
+else
+    system([' "' mcpath('tetgen') exesuff '" ' moreopt ' -r "' mwpath('pre_refine.1') '"']);
+    [newnode,newelem,newface]=readtetgen(mwpath('pre_refine.2'));
+end
 
 % read in the generated mesh
-[newnode,newelem,newface]=readtetgen(mwpath('pre_refine.2'));
 
 fprintf(1,'mesh refinement is complete\n');
 

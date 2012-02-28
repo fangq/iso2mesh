@@ -43,9 +43,6 @@ exesuff=fallbackexeext(exesuff,'meshfix');
 
 extra=varargin2struct(varargin{:});
 moreopt=' -q -a 0.01 ';
-if(ispc)
-    moreopt=' -a 0.01 ';
-end
 if(isstruct(extra) && isfield(extra,'MeshfixParam'))
     moreopt=extra.MeshfixParam;
 end
