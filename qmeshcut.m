@@ -1,6 +1,6 @@
-function [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,cutat)
+function [cutpos,cutvalue,facedata,elemid]=qmeshcut(elem,node,value,cutat)
 %
-% [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,cutat)
+% [cutpos,cutvalue,facedata,elemid]=qmeshcut(elem,node,value,cutat)
 %
 % fast tetrahedral mesh slicer
 %
@@ -36,21 +36,33 @@ function [cutpos,cutvalue,facedata]=qmeshcut(elem,node,value,cutat)
 %           being the num. of the intersections, column number being the 
 %           same as "value".
 %   facedata: define the intersection polygons in the form of patch "Faces"
+%   elemid: the index of the elem in which each intersection polygon locates
 %
 % the outputs of this subroutine can be easily plotted using 
-%     patch('Vertices',cutpos,'Faces',facedata,'FaceVertexCData',cutvalue,...
-%           'FaceColor','interp');
+%
+%  % if value has a length of node:
+%     patch('Vertices',cutpos,'Faces',facedata,'FaceVertexCData',cutvalue,'FaceColor','interp');
+%
+%  % if value has a length of elem:
+%     patch('Vertices',cutpos,'Faces',facedata,'CData',cutvalue,'FaceColor','flat');
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
 % get the coefficients of the cutat equation: ax+by+cz+d=0
-
+if(nargin<4)
+    error('qmeshcut requires at least 4 inputs');
+end
+if(size(value,1)~=size(node,1) && size(value,1)~=size(elem,1) && ~isempty(value))
+    error('the length of value must be either that of node or elem');
+end
+if(isempty(value))
+    cutvalue=[];
+end
 if(ischar(cutat) || (iscell(cutat) && length(cutat)==2 && ischar(cutat{1})))
     x=node(:,1);
     y=node(:,2);
     z=node(:,3);
-    v=value;
     if(ischar(cutat))
         expr=regexp(cutat,'(.+)=(.+)','tokens','once'); %regexp(cutat,'=','split');
         if(length(expr)~=2) error('single expression must contain a single "=" sign'); end
@@ -74,6 +86,9 @@ elseif(numel(cutat)==9 || numel(cutat)==4)
     asign(find(asign>=0))=1;
     asign(find(asign<0))=-1;
 else
+    if(size(value,1)~=size(node,1))
+        error('must use nodal value list when cutting mesh at an isovalue');
+    end
     dist=value-cutat;
     asign=double(dist>0);
     asign(asign==0)=-1;
@@ -112,13 +127,14 @@ cutweight=abs(cutweight./repmat(totalweight(:),1,2));
 
 cutpos=node(edges(cutedges,1),:).*repmat(cutweight(:,2),[1 3])+...
        node(edges(cutedges,2),:).*repmat(cutweight(:,1),[1 3]);
-if(iscell(cutat) || ischar(cutat) || numel(cutat)==9 || numel(cutat)==4)
-    cutvalue=value(edges(cutedges,1),:).*repmat(cutweight(:,2),[1 size(value,2)])+...
-           value(edges(cutedges,2),:).*repmat(cutweight(:,1),[1 size(value,2)]);
-elseif(numel(cutat)==1)
-    cutvalue=ones(size(cutpos,1),1)*cutat;
-end
-   
+if(size(value,1)==size(node,1))
+  if(iscell(cutat) || ischar(cutat) || numel(cutat)==9 || numel(cutat)==4)
+      cutvalue=value(edges(cutedges,1),:).*repmat(cutweight(:,2),[1 size(value,2)])+...
+               value(edges(cutedges,2),:).*repmat(cutweight(:,1),[1 size(value,2)]);
+  elseif(numel(cutat)==1)
+      cutvalue=ones(size(cutpos,1),1)*cutat;
+  end
+end 
 % organize all cross-cuts into patch facedata format
 
 emap=zeros(size(edges,1),1);
@@ -134,24 +150,32 @@ facelen=length(faceid);
 % cross-cuts can only be triangles or quadrilaterals for tetrahedral mesh
 % (co-plannar mesh needs to be considered)
 
-etag=sum(emap>0,2);
+etag=sum(emap>0,2); % emap & etag are of length size(elem,1)
 
 if(esize==3)  % surface mesh cut by a plane
 	linecut=find(etag==2);
 	lineseg=emap(linecut,:)';
 	facedata=reshape(lineseg(find(lineseg)),[2,length(linecut)])';
+    elemid=linecut;
+    if(size(value,1)==size(elem,1) && ~exist('cutvalue','var'))
+        cutvalue=value(elemid,:);
+    end
 	return;
 end
 
 tricut=find(etag==3);
 quadcut=find(etag==4);
-
+elemid=[tricut(:);quadcut(:)];
+if(size(value,1)==size(elem,1) && ~exist('cutvalue','var'))
+    cutvalue=value(elemid,:);
+end
 % fast way (vector-form) to get all triangles
 
 tripatch=emap(tricut,:)';
 tripatch=reshape(tripatch(find(tripatch)),[3,length(tricut)])';
 
-% fast wall to get all quadrilaterals in convexhull form (avoid using convhulln)
+% fast wall to get all quadrilaterals in convexhull form (avoid using
+% convhulln)
 
 quadpatch=emap(quadcut,:)';
 quadpatch=reshape(quadpatch(find(quadpatch)),[4,length(quadpatch)])';
