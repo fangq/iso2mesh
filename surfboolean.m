@@ -1,6 +1,6 @@
-function [newnode,newelem]=surfboolean(node,elem,varargin)
+function [newnode,newelem,newelem0]=surfboolean(node,elem,varargin)
 %
-% [newnode,newelem]=surfboolean(node1,elem1,op2,node2,elem2,op3,node3,elem3,...)
+% [newnode,newelem,newelem0]=surfboolean(node1,elem1,op2,node2,elem2,op3,node3,elem3,...)
 %
 % merge two or more triangular meshes and resolve intersecting elements
 % 
@@ -10,11 +10,27 @@ function [newnode,newelem]=surfboolean(node,elem,varargin)
 %      node: node coordinates, dimension (nn,3)
 %      elem: tetrahedral element or triangle surface (nn,3)
 %      op:  a string of a boolean operator, possible op values include
-%           'union' and 'diff'
+%           'union': the outter surface of the union of the enclosed space
+%           'diff': the surface of the domain in mesh 1 excluding that of
+%                   mesh 2
+%           'inter': the surface of the domain contained by both meshes
+%           'all': the output contains 4 subsurfaces, identified by the 4th
+%                  column of newelem:
+%                    1: mesh 1 outside of mesh 2
+%                    2: mesh 2 outside of mesh 1
+%                    3: mesh 1 inside of mesh 2
+%                    4: mesh 2 inside of mesh 1
+%                  you can use newelem(find(mod(newelem(:,4),2)==1),:) to
+%                  get mesh 1 cut by mesh 2, or newelem(find(mod(newelem(:,4),2)==0),:) 
+%                  to get mesh 2 cut by mesh 1;
+%           'self': test for self-intersections; only the first mesh is
+%                   tested; other inputs are ignored.
 %
 % output:
 %      newnode: the node coordinates after boolean operations, dimension (nn,3)
 %      newelem: tetrahedral element or surfaces after boolean operations (nn,4) or (nhn,5)
+%      newelem0: when the operator is 'self', return the intersecting
+%               element list in terms of the input node list (experimental)
 %
 % example:
 %
@@ -36,8 +52,7 @@ if(len>0 && mod(len,3)~=0)
    error('you must give operator, node and element in trilet forms');
 end
 
-exesuff=getexeext;
-exesuff=fallbackexeext(exesuff,'gtsset');
+exesuff=fallbackexeext(getexeext,'gtsset');
 
 for i=1:3:len
    op=varargin{i};
@@ -53,11 +68,21 @@ for i=1:3:len
    end
    savegts(newnode(:,1:3),newelem(:,1:3),mwpath('pre_surfbool1.gts'));
    savegts(no(:,1:3),el(:,1:3),mwpath('pre_surfbool2.gts'));
-   cmd=sprintf('cd "%s";"%s%s" "%s" "%s" "%s" -v > "%s"',mwpath(''),mcpath('gtsset'),exesuff,...
+   if(strcmp(op,'self'))
+       op='inter -s';
+   end
+   cmd=sprintf('cd "%s";"%s%s" %s "%s" "%s" -v > "%s"',mwpath(''),mcpath('gtsset'),exesuff,...
        op,mwpath('pre_surfbool1.gts'),mwpath('pre_surfbool2.gts'),mwpath('post_surfbool.gts'));
-   status=system(cmd);
-   if(status~=0)
+   [status outstr]=system(cmd);
+   if(status~=0 && strcmp(op,'inter -s')==0)
        error(['surface boolean command failed:' cmd]);
+   end
+   if(status~=0 && strcmp(op,'inter -s') && ~isempty(strfind(outstr,'(new_ear): assertion failed')))
+       fprintf(1,'no self-intersection was found! (ignore the above error)\n');
+       newnode=[];
+       newelem=[];
+       newelem0=[];
+       return;
    end
    if(strcmp(op,'all'))
       % tag the 4 piceses of meshes, this tag do not propagate to the next boolean operation
@@ -78,5 +103,16 @@ for i=1:3:len
       newnode=[newnode; nnode 4*ones(size(nnode,1),1)];
    else
       [newnode,newelem]=readgts(mwpath('post_surfbool.gts'));
+      if(strcmp(op,'inter -s'))
+          fprintf(1,'a total of %d self-intersecting elements were found\n',size(newelem,1));
+          if(nargout>=3)
+              [found,newelem0]=ismember(newnode,node,'rows');
+              if(~all(found))
+                  error('self intersecting elements contain new nodes');
+              end
+              newelem0=newelem0(newelem);
+          end
+          return;
+      end
    end
 end
