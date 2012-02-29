@@ -27,7 +27,7 @@ p=[];
 for i=1:length(wsname)
     isdefined=evalin(wsname{i},['exist(''' name ''')']);
     if(isdefined==1)
-        p=evalin(ws,name);
+        p=evalin(wsname{i},name);
         break;
     end
 end

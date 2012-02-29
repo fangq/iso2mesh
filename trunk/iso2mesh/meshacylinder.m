@@ -48,7 +48,7 @@ cy=r*sin(theta);
 p0=[cx(:) cy(:) zeros(ndiv,1)];
 p1=[cx(:) cy(:) len*ones(ndiv,1)];
 pp=[p0;p1];
-no=rotatevec3d(pp,v0);
+no=rotatevec3d(pp,v0)+repmat(c0',size(pp,1),1);
 
 count=1;
 for i=1:ndiv-1
