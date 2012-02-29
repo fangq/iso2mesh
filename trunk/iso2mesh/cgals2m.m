@@ -1,9 +1,9 @@
-function [node,elem,face]=cgals2m(v,f,opt,maxvol)
+function [node,elem,face]=cgals2m(v,f,opt,maxvol,varargin)
 %
 % [node,elem,face]=cgals2m(v,f,opt,maxvol)
 %
 % wrapper for CGAL 3D mesher (CGAL 3.5 and newer)
-% convert a binary (or multi-valued) volume to tetrahedral mesh
+% convert a triangular surface to tetrahedral mesh
 %
 % http://www.cgal.org/Manual/3.5/doc_html/cgal_manual/Mesh_3/Chapter_main.html
 %
@@ -34,25 +34,28 @@ function [node,elem,face]=cgals2m(v,f,opt,maxvol)
 
 fprintf(1,'creating surface and tetrahedral mesh from a polyhedral surface ...\n');
 
-exesuff=getexeext;
-exesuff=fallbackexeext(exesuff,'cgalpoly');
+exesuff=fallbackexeext(getexeext,'cgalpoly');
 
 ang=30;
 ssize=6;
 approx=0.5;
 reratio=3;
 
+flags=varargin2struct(varargin{:});
+
 if(~isstruct(opt))
 	ssize=opt;
 end
 
-if(isstruct(opt) & length(opt)==1)  % does not support settings for multiple labels
+if(isstruct(opt) && length(opt)==1)  % does not support settings for multiple labels
 	if(isfield(opt,'radbound'))   ssize=opt.radbound; end
 	if(isfield(opt,'angbound'))   ang=opt.angbound; end
 	if(isfield(opt,'distbound'))  approx=opt.distbound; end
 	if(isfield(opt,'reratio'))    reratio=opt.reratio; end
 end
-[v,f]=meshcheckrepair(v,f);
+if(getoptkey('DoRepair',0,flags)==1)
+    [v,f]=meshcheckrepair(v,f);
+end
 saveoff(v,f,mwpath('pre_cgalpoly.off'));
 deletemeshfile(mwpath('post_cgalpoly.mesh'));
 

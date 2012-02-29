@@ -24,18 +24,19 @@ print_group()
 func_shortcut="v2m v2s s2m s2v sms"
 func_mainfun="vol2mesh vol2surf surf2mesh surf2vol"
 func_backend="binsurface cgalv2m cgals2m vol2restrictedtri surf2volz"
-func_primitive="meshabox meshasphere meshanellip meshunitsphere"
+func_primitive="meshabox meshasphere meshanellip meshunitsphere meshacylinder"
 func_inquery="finddisconnsurf surfedge volface extractloops meshconn  
                 meshcentroid nodevolume elemvolume neighborelem 
 		faceneighbors edgeneighbors maxsurf flatsegment orderloopedge  
 		mesheuler bbxflatsegment surfplane surfinterior 
-                surfseeds meshquality meshedge surfnorm"
+                surfseeds meshquality meshedge surfnorm uniqedges"
 func_meshfix="meshcheckrepair meshreorient removedupelem 
                 removedupnodes removeisolatednode removeisolatedsurf
                 surfaceclean getintersecttri delendelem"
-func_remesh="meshresample remeshsurf smoothsurf sortmesh mergemesh meshrefine"
+func_remesh="meshresample remeshsurf smoothsurf sortmesh mergemesh 
+                meshrefine mergesurf surfboolean"
 func_fileio="saveasc savedxf savestl savebinstl saveinr saveoff 
-                savesmf savesurfpoly savegts 
+                savesmf savesurfpoly savegts readgts
                 savevrml readasc readinr readmedit readoff readsmf
 	        readtetgen deletemeshfile mcpath mwpath savemedit
 		savejson loadjson savejmesh savemphtxt savetetgenele
@@ -46,7 +47,7 @@ func_binimage="bwislands fillholes3d deislands2d deislands3d
 func_plotting="plotmesh plotsurf plottetra qmeshcut plottetview"
 func_misc="surfdiffuse volmap2mesh isoctavemesh getvarfrom raytrace
 		getplanefrom3pt getexeext fallbackexeext iso2meshver
-                raysurf getoptkey"
+                raysurf getoptkey rotatevec3d rotmat2vec"
 
 echo === "#" Streamlined mesh generation - shortcuts ===
 print_group $func_shortcut
