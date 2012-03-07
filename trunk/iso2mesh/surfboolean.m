@@ -8,13 +8,13 @@ function [newnode,newelem,newelem0]=surfboolean(node,elem,varargin)
 %
 % input:
 %      node: node coordinates, dimension (nn,3)
-%      elem: tetrahedral element or triangle surface (nn,3)
+%      elem: tetrahedral element or triangle surface (ne,3)
 %      op:  a string of a boolean operator, possible op values include
-%           'union': the outter surface of the union of the enclosed space
-%           'diff': the surface of the domain in mesh 1 excluding that of
+%           'union' or 'or': the outter surface of the union of the enclosed space
+%           'inter' or 'and': the surface of the domain contained by both meshes
+%           'diff' or '-': the surface of the domain in mesh 1 excluding that of
 %                   mesh 2
-%           'inter': the surface of the domain contained by both meshes
-%           'all': the output contains 4 subsurfaces, identified by the 4th
+%           'all' or 'xor' or '+': the output contains 4 subsurfaces, identified by the 4th
 %                  column of newelem:
 %                    1: mesh 1 outside of mesh 2
 %                    2: mesh 2 outside of mesh 1
@@ -60,9 +60,18 @@ for i=1:3:len
    op=varargin{i};
    no=varargin{i+1};
    el=varargin{i+2};
+   opstr=op;
+   if(strcmp(op,'or'))   opstr='union'; end
+   if(strcmp(op,'xor'))  opstr='all';   end
+   if(strcmp(op,'and'))  opstr='inter'; end
+   if(strcmp(op,'-'))    opstr='diff';  end
+   if(strcmp(op,'self')) opstr='inter -s';  end
+   if(strcmp(op,'first') || strcmp(op,'second') || strcmp(op,'+'))
+       opstr='all';
+   end
    deletemeshfile(mwpath('pre_surfbool*.gts'));
    deletemeshfile(mwpath('post_surfbool.gts'));
-   if(strcmp(op,'all') || strcmp(op,'first') || strcmp(op,'second'))
+   if(strcmp(opstr,'all'))
       deletemeshfile(mwpath('s1out2.gts'));
       deletemeshfile(mwpath('s1in2.gts'));
       deletemeshfile(mwpath('s2out1.gts'));
@@ -70,18 +79,11 @@ for i=1:3:len
    end
    savegts(newnode(:,1:3),newelem(:,1:3),mwpath('pre_surfbool1.gts'));
    savegts(no(:,1:3),el(:,1:3),mwpath('pre_surfbool2.gts'));
-   opstr=op;
-   if(strcmp(op,'self'))
-       opstr='inter -s';
-   end
-   if(strcmp(op,'first') || strcmp(op,'second'))
-       opstr='all';
-   end
    cmd=sprintf('cd "%s";"%s%s" %s "%s" "%s" -v > "%s"',mwpath(''),mcpath('gtsset'),exesuff,...
        opstr,mwpath('pre_surfbool1.gts'),mwpath('pre_surfbool2.gts'),mwpath('post_surfbool.gts'));
    [status outstr]=system(cmd);
    if(status~=0 && strcmp(op,'self')==0)
-       error(['surface boolean command failed:' cmd]);
+       error(sprintf('surface boolean command failed:\n%s\nERROR: %s\n',cmd,outstr));
    end
    if(status~=0 && strcmp(op,'self') && ~isempty(strfind(outstr,'(new_ear): assertion failed')))
        fprintf(1,'no self-intersection was found! (ignore the above error)\n');
@@ -90,7 +92,7 @@ for i=1:3:len
        newelem0=[];
        return;
    end
-   if(strcmp(op,'all') || strcmp(op,'first') || strcmp(op,'second'))
+   if(strcmp(opstr,'all'))
       % tag the 4 piceses of meshes, this tag do not propagate to the next boolean operation
       [nnode nelem]=readgts(mwpath('s1out2.gts'));
       newelem=[nelem ones(size(nelem,1),1)];
