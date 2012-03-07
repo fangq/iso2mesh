@@ -100,7 +100,7 @@ conn=meshconn(face(:,1:3),size(node,1));
 
 n1=node;
 for i=1:rownum*colnum-1
-  n1=smoothsurf(n1,[],conn,1,0.5,'lowpass',0.5);
+  n1=smoothsurf(n1,[],conn,1,0.5,'lowpass');
   subplot(rownum,colnum,i+1);
   plotmesh(n1,face(:,1:3));
   title(['iter=' num2str(i)]);
