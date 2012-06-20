@@ -118,7 +118,12 @@ holdstate=ishold;
 if(~holdstate)
     cla;
 end
-if(isempty(face) & isempty(elem))
+if(size(node,2)==4 && size(elem,2)==5)
+    warning(['You have specified the node colors by both the 4th ' ...
+            'and 5th columns of node and face inputs, respectively. ' ...
+            'The node input takes priority']);
+end
+if(isempty(face) && isempty(elem))
    if(isempty(selector))
         if(isempty(opt))
    		h=plot3(node(:,1),node(:,2),node(:,3),'o');
