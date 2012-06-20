@@ -58,4 +58,8 @@ str='';
 if(fid==0) error('invalid file'); end
 while((isempty(regexp(str,'\S')) || ~isempty(regexp(str,'^#')))  && ~feof(fid))
     str=fgetl(fid);
+    if(~ischar(str))
+        str='';
+        return;
+    end
 end

@@ -27,6 +27,8 @@ function [newnode,newelem,newelem0]=surfboolean(node,elem,varargin)
 %           'second': combine 2 and 4 from the output of 'all'
 %           'self': test for self-intersections; only the first mesh is
 %                   tested; other inputs are ignored.
+%           'decouple': separate two shells and make sure there is no intersection;
+%                   the input surfaces must be closed and ordered from outer to inner
 %
 % output:
 %      newnode: the node coordinates after boolean operations, dimension (nn,3)
@@ -47,6 +49,12 @@ function [newnode,newelem,newelem0]=surfboolean(node,elem,varargin)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
+allinputs=varargin;
+opt=struct;
+if(length(allinputs)>0 && isstruct(allinputs{end}))
+    opt=allinputs{end};
+    allinputs{end}=[];
+end
 len=length(varargin);
 newnode=node;
 newelem=elem;
@@ -69,6 +77,7 @@ for i=1:3:len
    if(strcmp(op,'first') || strcmp(op,'second') || strcmp(op,'+'))
        opstr='all';
    end
+
    deletemeshfile(mwpath('pre_surfbool*.gts'));
    deletemeshfile(mwpath('post_surfbool.gts'));
    if(strcmp(opstr,'all'))
@@ -77,10 +86,24 @@ for i=1:3:len
       deletemeshfile(mwpath('s2out1.gts'));
       deletemeshfile(mwpath('s2in1.gts'));
    end
-   savegts(newnode(:,1:3),newelem(:,1:3),mwpath('pre_surfbool1.gts'));
-   savegts(no(:,1:3),el(:,1:3),mwpath('pre_surfbool2.gts'));
-   cmd=sprintf('cd "%s";"%s%s" %s "%s" "%s" -v > "%s"',mwpath(''),mcpath('gtsset'),exesuff,...
-       opstr,mwpath('pre_surfbool1.gts'),mwpath('pre_surfbool2.gts'),mwpath('post_surfbool.gts'));
+   if(strcmp(op,'decouple'))
+       if(exist('node1','var')==0)
+          node1=node;
+          elem1=elem;
+          newnode(:,4)=1;
+          newelem(:,4)=1;
+       end
+       opstr=['--shells 2 --decouple-inin 1'];
+       saveoff(node1(:,1:3),elem1(:,1:3),mwpath('pre_decouple1.off'));
+       saveoff(no(:,1:3),el(:,1:3),mwpath('pre_decouple2.off'));
+       cmd=sprintf('cd "%s";"%s%s" "%s" "%s" %s',mwpath(''),mcpath('meshfix'),exesuff,...
+           mwpath('pre_decouple1.off'),mwpath('pre_decouple2.off'),opstr);
+   else
+       savegts(newnode(:,1:3),newelem(:,1:3),mwpath('pre_surfbool1.gts'));
+       savegts(no(:,1:3),el(:,1:3),mwpath('pre_surfbool2.gts'));
+       cmd=sprintf('cd "%s";"%s%s" %s "%s" "%s" -v > "%s"',mwpath(''),mcpath('gtsset'),exesuff,...
+           opstr,mwpath('pre_surfbool1.gts'),mwpath('pre_surfbool2.gts'),mwpath('post_surfbool.gts'));
+   end
    [status outstr]=system(cmd);
    if(status~=0 && strcmp(op,'self')==0)
        error(sprintf('surface boolean command failed:\n%s\nERROR: %s\n',cmd,outstr));
@@ -119,6 +142,10 @@ for i=1:3:len
           [newnode,nelem]=removeisolatednode(newnode,newelem(:,1:3));
           newelem=[nelem,newelem(:,4)];
       end
+   elseif(strcmp(op,'decouple'))
+      [node1,elem1]=readoff(mwpath('pre_decouple1_fixed.off'));
+      newelem=[newelem;elem1+size(newnode,1) (i+1)*ones(size(elem1,1),1)];
+      newnode=[newnode;node1 (i+1)*ones(size(node1,1),1)];
    else
       [newnode,newelem]=readgts(mwpath('post_surfbool.gts'));
       if(strcmp(op,'self'))
