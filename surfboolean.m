@@ -79,12 +79,12 @@ for i=1:3:len
    end
 
    deletemeshfile(mwpath('pre_surfbool*.gts'));
-   deletemeshfile(mwpath('post_surfbool.gts'));
+   deletemeshfile(mwpath('post_surfbool.off'));
    if(strcmp(opstr,'all'))
-      deletemeshfile(mwpath('s1out2.gts'));
-      deletemeshfile(mwpath('s1in2.gts'));
-      deletemeshfile(mwpath('s2out1.gts'));
-      deletemeshfile(mwpath('s2in1.gts'));
+      deletemeshfile(mwpath('s1out2.off'));
+      deletemeshfile(mwpath('s1in2.off'));
+      deletemeshfile(mwpath('s2out1.off'));
+      deletemeshfile(mwpath('s2in1.off'));
    end
    if(strcmp(op,'decouple'))
        if(exist('node1','var')==0)
@@ -96,13 +96,13 @@ for i=1:3:len
        opstr=['--shells 2 --decouple-inin 1'];
        saveoff(node1(:,1:3),elem1(:,1:3),mwpath('pre_decouple1.off'));
        saveoff(no(:,1:3),el(:,1:3),mwpath('pre_decouple2.off'));
-       cmd=sprintf('cd "%s";"%s%s" "%s" "%s" %s',mwpath(''),mcpath('meshfix'),exesuff,...
+       cmd=sprintf('cd "%s" && "%s%s" "%s" "%s" %s',mwpath,mcpath('meshfix'),exesuff,...
            mwpath('pre_decouple1.off'),mwpath('pre_decouple2.off'),opstr);
    else
        savegts(newnode(:,1:3),newelem(:,1:3),mwpath('pre_surfbool1.gts'));
        savegts(no(:,1:3),el(:,1:3),mwpath('pre_surfbool2.gts'));
-       cmd=sprintf('cd "%s";"%s%s" %s "%s" "%s" -v > "%s"',mwpath(''),mcpath('gtsset'),exesuff,...
-           opstr,mwpath('pre_surfbool1.gts'),mwpath('pre_surfbool2.gts'),mwpath('post_surfbool.gts'));
+       cmd=sprintf('cd "%s" && "%s%s" %s "%s" "%s" -v > "%s"',mwpath,mcpath('gtsset'),exesuff,...
+           opstr,mwpath('pre_surfbool1.gts'),mwpath('pre_surfbool2.gts'),mwpath('post_surfbool.off'));
    end
    [status outstr]=system(cmd);
    if(status~=0 && strcmp(op,'self')==0)
@@ -117,19 +117,19 @@ for i=1:3:len
    end
    if(strcmp(opstr,'all'))
       % tag the 4 piceses of meshes, this tag do not propagate to the next boolean operation
-      [nnode nelem]=readgts(mwpath('s1out2.gts'));
+      [nnode nelem]=readoff(mwpath('s1out2.off'));
       newelem=[nelem ones(size(nelem,1),1)];
       newnode=[nnode ones(size(nnode,1),1)];
 
-      [nnode nelem]=readgts(mwpath('s1in2.gts'));
+      [nnode nelem]=readoff(mwpath('s1in2.off'));
       newelem=[newelem; nelem+size(newnode,1) 3*ones(size(nelem,1),1)];
       newnode=[newnode; nnode 3*ones(size(nnode,1),1)];
 
-      [nnode nelem]=readgts(mwpath('s2out1.gts'));
+      [nnode nelem]=readoff(mwpath('s2out1.off'));
       newelem=[newelem; nelem+size(newnode,1) 2*ones(size(nelem,1),1)];
       newnode=[newnode; nnode 2*ones(size(nnode,1),1)];
 
-      [nnode nelem]=readgts(mwpath('s2in1.gts'));
+      [nnode nelem]=readoff(mwpath('s2in1.off'));
       newelem=[newelem; nelem+size(newnode,1) 4*ones(size(nelem,1),1)];
       newnode=[newnode; nnode 4*ones(size(nnode,1),1)];
 
@@ -147,7 +147,7 @@ for i=1:3:len
       newelem=[newelem;elem1+size(newnode,1) (i+1)*ones(size(elem1,1),1)];
       newnode=[newnode;node1 (i+1)*ones(size(node1,1),1)];
    else
-      [newnode,newelem]=readgts(mwpath('post_surfbool.gts'));
+      [newnode,newelem]=readoff(mwpath('post_surfbool.off'));
       if(strcmp(op,'self'))
           fprintf(1,'a total of %d self-intersecting elements were found\n',size(newelem,1));
           if(nargout>=3)

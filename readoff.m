@@ -21,9 +21,12 @@ node=[];
 elem=[];
 fid=fopen(fname,'rt');
 line=fgetl(fid);
+dim=sscanf(line,'OFF %d %d %d');
 line=nonemptyline(fid);
-dim=sscanf(line,'%d',3);
-line=nonemptyline(fid);
+if(size(dim,1)~=3)
+    dim=sscanf(line,'%d',3);
+    line=nonemptyline(fid);
+end
 nodalcount=3;
 if(~isempty(line))
     [val nodalcount]=sscanf(line,'%f',inf);
