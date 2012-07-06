@@ -46,14 +46,23 @@ if(nargin==3 && strcmp(opt,'open'))
     end
 end
 
-exesuff=fallbackexeext(getexeext,'meshfix');
+if(nargin<3 || strcmp(opt,'deep'))
+    exesuff=getexeext;
+    exesuff=fallbackexeext(exesuff,'jmeshlib');
+    deletemeshfile(mwpath('post_sclean.off'));
+    saveoff(node(:,1:3),elem(:,1:3),mwpath('pre_sclean.off'));
+    system([' "' mcpath('jmeshlib') exesuff '" "' mwpath('pre_sclean.off') '" "' mwpath('post_sclean.off') '"']);
+    [node,elem]=readoff(mwpath('post_sclean.off'));
+end
 
+exesuff=fallbackexeext(getexeext,'meshfix');
 extra=varargin2struct(varargin{:});
 moreopt=' -q -a 0.01 ';
 if(isstruct(extra) && isfield(extra,'MeshfixParam'))
     moreopt=extra.MeshfixParam;
 end
-if(nargin<3 || strcmp(opt,'deep'))
+
+if(nargin>=3 && strcmp(opt,'meshfix'))
     deletemeshfile(mwpath('pre_sclean.off'));
     deletemeshfile(mwpath('pre_sclean_fixed.off'));
     saveoff(node,elem,mwpath('pre_sclean.off'));
