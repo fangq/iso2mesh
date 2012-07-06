@@ -10,6 +10,7 @@ c0=mean(meshcentroid(node0,face0(:,1:3)));
 c1=2*[18.5 20.7 20.9]-c0;
 
 [cnode,cface]=meshacylinder(c0,c1,4);
+[cnode,cface]=meshcheckrepair(cnode,cface(:,1:3));
 
 % combine two surfaces, producing 4 pieces of subsurfaces: surf 1
 % outside/inside of surf2 and surf2 outside/inside of surf1
