@@ -31,6 +31,7 @@ nodalcount=3;
 if(~isempty(line))
     [val nodalcount]=sscanf(line,'%f',inf);
 else
+    fclose(fid);
     return;
 end
 node=fscanf(fid,'%f',[nodalcount,dim(1)-1])';
@@ -41,6 +42,7 @@ facetcount=4;
 if(~isempty(line))
     [val facetcount]=sscanf(line,'%f',inf);
 else
+    fclose(fid);
     return;
 end
 elem=fscanf(fid,'%f',[facetcount,dim(2)-1])';
