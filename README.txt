@@ -299,8 +299,8 @@ reference:
 	 img: a volumetric binary image at position of ndgrid(xi,yi,zi)
 === # iso2mesh primitive meshing functions ===
 
-==== function [node,elem,face]=meshabox(p0,p1,opt,nodesize) ====
- [node,elem,face]=meshabox(p0,p1,opt,maxvol)
+==== function [node,face,elem]=meshabox(p0,p1,opt,nodesize) ====
+ [node,face,elem]=meshabox(p0,p1,opt,maxvol)
  create the surface and tetrahedral mesh of a box geometry
  input: 
    p0:  coordinates (x,y,z) for one end of the box diagnoal
@@ -314,7 +314,7 @@ reference:
    elem: integer array with dimensions of NE x 4, each row represents
          a tetrahedron 
  example:
-   [node,elem,face]=meshabox([2 3 2],[6 12 15],0.1,1);
+   [node,face,elem]=meshabox([2 3 2],[6 12 15],0.1,1);
    plotmesh(node,elem,'x>4');
 
 ==== function [node,face,elem]=meshasphere(c0,r,tsize,maxvol) ====
@@ -788,7 +788,7 @@ reference:
  note: you can call meshcheckrepair for the output newnode and
  newelem to remove the duplicated nodes or elements
  example:
-   [node1,elem1,face1]=meshabox([0 0 0],[10 10 10],1,1);
+   [node1,face1,elem1]=meshabox([0 0 0],[10 10 10],1,1);
    [node2,face2,elem2]=meshasphere([5 5 13.1],3,0.3,3);
    [newnode,newelem]=mergemesh(node1,elem1,node2,elem2);
    plotmesh(newnode,newelem);
