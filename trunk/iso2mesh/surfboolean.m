@@ -32,14 +32,15 @@ function [newnode,newelem,newelem0]=surfboolean(node,elem,varargin)
 %
 % output:
 %      newnode: the node coordinates after boolean operations, dimension (nn,3)
-%      newelem: tetrahedral element or surfaces after boolean operations (nn,4) or (nhn,5)
-%      newelem0: when the operator is 'self', return the intersecting
+%   
+newelem: tetrahedral element or surfaces after boolean operations (nn,4) or (nhn,5)
+% de     newelem0: when the operator is 'self', return the intersecting
 %               element list in terms of the input node list (experimental)
 %
 % example:
 %
-%   [node1,elem1,face1]=meshabox([0 0 0],[10 10 10],1,1);
-%   [node2,elem2,face2]=meshabox([0 0 0]+5,[10 10 10]+5,1,1);
+%   [node1,face1,elem1]=meshabox([0 0 0],[10 10 10],1,1);
+%   [node2,face2,elem2]=meshabox([0 0 0]+5,[10 10 10]+5,1,1);
 %   [newnode,newface]=surfboolean(node1,face1,'union',node2,face2);
 %   plotmesh(newnode,newface);
 %   figure;
@@ -93,11 +94,24 @@ for i=1:3:len
           newnode(:,4)=1;
           newelem(:,4)=1;
        end
-       opstr=['--shells 2 --decouple-inin 1'];
+       opstr=['-q --shells 2'];
        saveoff(node1(:,1:3),elem1(:,1:3),mwpath('pre_decouple1.off'));
-       saveoff(no(:,1:3),el(:,1:3),mwpath('pre_decouple2.off'));
-       cmd=sprintf('cd "%s" && "%s%s" "%s" "%s" %s',mwpath,mcpath('meshfix'),exesuff,...
-           mwpath('pre_decouple1.off'),mwpath('pre_decouple2.off'),opstr);
+       if(isstruct(el))
+           if(isfield(el,'MoreOptions'))
+               opstr=[opstr el.MoreOptions];
+           end
+       else
+           opstr=[opstr ' --decouple-inin 1'];
+       end
+       if(size(no,2)~=3)
+           opstr=['-q --shells ' num2str(no)];
+           cmd=sprintf('cd "%s" && "%s%s" "%s" %s',mwpath,mcpath('meshfix'),exesuff,...
+               mwpath('pre_decouple1.off'),opstr);
+       else
+           saveoff(no(:,1:3),el(:,1:3),mwpath('pre_decouple2.off'));
+           cmd=sprintf('cd "%s" && "%s%s" "%s" "%s" %s',mwpath,mcpath('meshfix'),exesuff,...
+               mwpath('pre_decouple1.off'),mwpath('pre_decouple2.off'),opstr);
+       end
    else
        savegts(newnode(:,1:3),newelem(:,1:3),mwpath('pre_surfbool1.gts'));
        savegts(no(:,1:3),el(:,1:3),mwpath('pre_surfbool2.gts'));

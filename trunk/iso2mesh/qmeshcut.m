@@ -1,4 +1,4 @@
-function [cutpos,cutvalue,facedata,elemid]=qmeshcut(elem,node,value,cutat)
+function [cutpos,cutvalue,facedata,elemid]=qmeshcut(elem,node,value,cutat,varargin)
 %
 % [cutpos,cutvalue,facedata,elemid]=qmeshcut(elem,node,value,cutat)
 %
@@ -188,5 +188,6 @@ facedata=[tripatch(:,[1 2 3 3]); quadpatch(:,[1 2 4 3])];
 
 % plot your results with the following command
 
-%patch('Vertices',cutpos,'Faces',facedata,'FaceVertexCData',cutvalue,'facecolor','interp');
-
+if(nargout==0)
+  patch('Vertices',cutpos,'Faces',facedata,'FaceVertexCData',cutvalue,'facecolor','interp',varargin{:});
+end
