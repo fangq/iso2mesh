@@ -50,7 +50,7 @@ facenb=zeros(size(t));
 % doing this is 60 times faster than doing find(jx==qx(i))
 % inside a loop
 
-if(datenum(version('-date'))>datenum('January 27, 2006')) % compare to matlab 7.2
+if(isoctavemesh || datenum(version('-date'))>datenum('January 27 2006')) % compare to matlab 7.2
 	[ujx,ii]=unique(jx,'first');
 	[ujx,ii2]=unique(jx,'last');
 else
