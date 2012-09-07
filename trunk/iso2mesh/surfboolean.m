@@ -32,9 +32,8 @@ function [newnode,newelem,newelem0]=surfboolean(node,elem,varargin)
 %
 % output:
 %      newnode: the node coordinates after boolean operations, dimension (nn,3)
-%   
-newelem: tetrahedral element or surfaces after boolean operations (nn,4) or (nhn,5)
-% de     newelem0: when the operator is 'self', return the intersecting
+%      newelem: tetrahedral element or surfaces after boolean operations (nn,4) or (nhn,5)
+%      newelem0: when the operator is 'self', return the intersecting
 %               element list in terms of the input node list (experimental)
 %
 % example:
