@@ -61,7 +61,7 @@ if(~isempty(elem))
   elsetall='';
   for i=1:len
       idx=find(elem(:,5)==labels(i));
-      fprintf(fid,'*ELEMENT, ELSET=MeshTetra%d, TYPE=S4R\n',labels(i));
+      fprintf(fid,'*ELEMENT, ELSET=MeshTetra%d, TYPE=C3D4\n',labels(i));
       fprintf(fid,'%d,\t%d,\t%d,\t%d,\t%d\n',[count+(1:length(idx))' elem(idx,1:4)]');
       count=count+length(idx);
       if(length(elsetall)==0)
