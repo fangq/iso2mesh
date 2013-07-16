@@ -24,7 +24,9 @@ function hm=plotmesh(node,varargin)
 %            for simple point plotting, opt can be markers
 %            or color options, such as 'r.', or opt can be 
 %            a logic statement to select a subset of the mesh,
-%            such as 'x>0 & y+z<1'; opt can have more than one
+%            such as 'x>0 & y+z<1', or an equation defining
+%            a plane at which a mesh cross-section is plotted, for
+%            example 'y=2*x'; opt can have more than one
 %            items to combine these options, for example: 
 %            plotmesh(...,'x>0','r.'); the range selector must
 %            appear before the color/marker specifier
@@ -48,6 +50,7 @@ function hm=plotmesh(node,varargin)
 %   h=plotmesh(node,elem,'x<20 & y>0');
 %   h=plotmesh(node,face,elem);
 %   h=plotmesh(node,face,elem,'linestyle','--');
+%   h=plotmesh(node,elem,'z=20');
 % 
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %

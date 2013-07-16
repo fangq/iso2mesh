@@ -6,7 +6,7 @@
       Martinos Center for Biomedical Imaging
       Massachusetts General Hospital (Harvard Medical School)
       Bldg. 149, 13th St., Charlestown, MA 02148
-*Version: 1.4.9 (Laba Porridge - beta)
+*Version: 1.5.0 (Laba Porridge)
 *License: GPL v2 or later (see COPYING) 
       (this license does not cover the binaries under the bin/ 
        directory, see Section III for more details)
