@@ -61,7 +61,7 @@ if(nargin>1)
    hasopt=0;
    for i=1:length(varargin)
    	if(ischar(varargin{i}))
-		if(regexp(varargin{i},'[0-9&|]'))
+		if(regexp(varargin{i},'[0-9x-zX-Z><=&|]'))
 			selector=varargin{i};
 			if(nargin>=i+1) opt=varargin(i+1:end); end
 		else
@@ -190,17 +190,28 @@ if(~isempty(elem))
 	x=cent(:,1);
     y=cent(:,2);
 	z=cent(:,3);
-    idx=eval(['find(' selector ')']);
-    if(~isempty(idx))
+    if(regexp(selector,'='))
+      if(size(node,2)==4)
+          [cutpos,cutvalue,facedata]=qmeshcut(elem,node(:,1:3),node(:,1:4),selector);  
+      elseif(size(node,2)==3)
+          [cutpos,cutvalue,facedata]=qmeshcut(elem,node,node(:,3),selector);
+      else
+          error('plotmesh can only plot 3D tetrahedral meshes');
+      end
+      h=patch('Vertices',cutpos,'Faces',facedata,'FaceVertexCData',cutvalue,'facecolor','interp',opt{:});
+    else
+      idx=eval(['find(' selector ')']);
+      if(~isempty(idx))
 	    if(isempty(opt))
 		h=plottetra(node,elem(idx,:));
 	    else
 		h=plottetra(node,elem(idx,:),opt{:});
         end
-    else
+      else
         warning('no tetrahedral element to plot');
 	end
-   end
+     end
+    end
 end
 
 if(exist('h','var') & ~holdstate)
