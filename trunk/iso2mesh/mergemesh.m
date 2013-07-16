@@ -2,7 +2,7 @@ function [newnode,newelem]=mergemesh(node,elem,varargin)
 %
 % [newnode,newelem]=mergemesh(node,elem,varargin)
 %
-% merge two or more tetrahedral meshes or triangular surfaces
+% concatenate two or more tetrahedral meshes or triangular surfaces
 % 
 % author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
 %
@@ -15,7 +15,9 @@ function [newnode,newelem]=mergemesh(node,elem,varargin)
 %      newelem: tetrahedral element or surfaces after merging (nn,4) or (nhn,5)
 %
 % note: you can call meshcheckrepair for the output newnode and
-% newelem to remove the duplicated nodes or elements
+% newelem to remove the duplicated nodes or elements. mergemesh does
+% detect self-intersecting elements when merging; to remove self-intersecting
+% elements, you need to use mergesurf().
 %
 % example:
 %

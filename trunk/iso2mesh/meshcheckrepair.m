@@ -11,9 +11,15 @@ function [node,elem]=meshcheckrepair(node,elem,opt,varargin)
 %      node: input/output, surface node list, dimension (nn,3)
 %      elem: input/output, surface face element list, dimension (be,3)
 %      opt: options, including
-%            'duplicated': remove duplicated elements
+%            'dupnode': remove duplicated nodes
+%            'dupelem' or 'duplicated': remove duplicated elements
+%            'dup': both above
 %            'isolated': remove isolated nodes
+%            'open': abort when open surface is found
 %            'deep': call external jmeshlib to remove non-manifold vertices
+%            'meshfix': repair a closed surface by the meshfix utility (new)
+%                       it can remove self-intersecting elements and fill holes
+%            'intersect': test a surface for self-intersecting elements
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %

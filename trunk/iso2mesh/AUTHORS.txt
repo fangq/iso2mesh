@@ -19,3 +19,4 @@ Other people had also contributed to this toolbox, they include
 - Donghyeon Kim <danielkim at gist.ac.kr>
 - Blake Johnson <bjohnso at bbn.com>
 - Niclas Borlin <Niclas.Borlin at cs.umu.se>
+- Peter Varga <peter.varga at charite.de>

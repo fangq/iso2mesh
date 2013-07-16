@@ -33,9 +33,12 @@ Frequently asked questions about iso2mesh
 
    This is most likely happening when you see the above error message. Try
    to plot your volume slice by slice, and pay attention to any voxels
-   whose neighbors have more than 2 different values. If you do see these
-   type of voxels (junctions), unfortunately, iso2mesh can not handle this
-   situation at this point. Here are two possible temporary work-arounds:
+   whose neighbors have more than 2 different values. If this is the case,
+   you can only use this type of input with vol2mesh/v2m with 'cgalmesh'
+   option as the "method" parameter. If you use either "simplify" or
+   "cgalsurf" (default) options, iso2mesh will fail. If for some reason
+   you have to use these options, here are two possible temporary
+   work-arounds:
     1. if there are not many junction voxels, you may want to manually
        edit your image and disconnect the regions that share the same
        boundary and make sure all the sub-regions are either completely
