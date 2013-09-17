@@ -195,7 +195,7 @@ if(~isempty(elem))
 	z=cent(:,3);
     if(regexp(selector,'='))
       if(size(node,2)==4)
-          [cutpos,cutvalue,facedata]=qmeshcut(elem,node(:,1:3),node(:,1:4),selector);  
+          [cutpos,cutvalue,facedata]=qmeshcut(elem,node(:,1:3),node(:,4),selector);  
       elseif(size(node,2)==3)
           [cutpos,cutvalue,facedata]=qmeshcut(elem,node,node(:,3),selector);
       else
