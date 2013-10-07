@@ -11,7 +11,7 @@ function json=saveubjson(rootname,obj,varargin)
 % author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 %            created on 2013/08/17
 %
-% $Id: saveubjson.m 410 2013-08-24 03:33:18Z fangq $
+% $Id: saveubjson.m 413 2013-08-28 18:36:54Z fangq $
 %
 % input:
 %      rootname: name of the root-object, if set to '', will use variable name
