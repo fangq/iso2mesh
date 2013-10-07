@@ -9,7 +9,7 @@ function data = loadubjson(fname,varargin)
 % authors:Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 %            date: 2013/08/01
 %
-% $Id: loadubjson.m 410 2013-08-24 03:33:18Z fangq $
+% $Id: loadubjson.m 415 2013-10-07 16:38:31Z fangq $
 %
 % input:
 %      fname: input file name, if fname contains "{}" or "[]", fname
@@ -168,7 +168,18 @@ end
 function object = parse_object(varargin)
     parse_char('{');
     object = [];
+    type='';
+    count=-1;
+    if(next_char == '$')
+        type=inStr(pos+1); % TODO
+        pos=pos+2;
+    end
+    if(next_char == '#')
+        pos=pos+1;
+        count=double(parse_number());
+    end
     if next_char ~= '}'
+        num=0;
         while 1
             str = parseStr(varargin{:});
             if isempty(str)
@@ -176,14 +187,17 @@ function object = parse_object(varargin)
             end
             %parse_char(':');
             val = parse_value(varargin{:});
+            num=num+1;
             eval( sprintf( 'object.%s  = val;', valid_field(str) ) );
-            if next_char == '}'
+            if next_char == '}' || (count>=0 && num>=count)
                 break;
             end
             %parse_char(',');
         end
     end
-    parse_char('}');
+    if(count==-1)
+        parse_char('}');
+    end
 
 %%-------------------------------------------------------------------------
 function [cid,len]=elem_info(type)
@@ -250,7 +264,6 @@ global pos inStr isoct
             return;
         end
     end
-    
     if next_char ~= ']'
          while 1
             val = parse_value(varargin{:});
@@ -313,7 +326,7 @@ function str = parseStr(varargin)
     global pos inStr esc index_esc len_esc
  % len, ns = length(inStr), keyboard
     type=inStr(pos);
-    if type ~= 'S' && type ~= 'C'
+    if type ~= 'S' && type ~= 'C' && type ~= 'H'
         error_pos('String starting with S expected at position %d');
     else
         pos = pos + 1;
@@ -355,7 +368,7 @@ function val = parse_value(varargin)
     true = 1; false = 0;
 
     switch(inStr(pos))
-        case {'S','C'}
+        case {'S','C','H'}
             val = parseStr(varargin{:});
             return;
         case '['
@@ -363,6 +376,13 @@ function val = parse_value(varargin)
             return;
         case '{'
             val = parse_object(varargin{:});
+            if isstruct(val)
+                if(~isempty(strmatch('x0x5F_ArrayType_',fieldnames(val), 'exact')))
+                    val=jstruct2array(val);
+                end
+            elseif isempty(val)
+                val = struct;
+            end
             return;
         case {'i','U','I','l','L','d','D'}
             val = parse_number(varargin{:});
