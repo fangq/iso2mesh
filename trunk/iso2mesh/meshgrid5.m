@@ -6,7 +6,7 @@ function [node,elem]=meshgrid5(varargin)
 % each hypercube into 5 tetrahedra
 %
 % author: John D'Errico
-% URL: http://www.mathkb.com/Uwe/Forum.aspx/matlab/50484/Constant-surfaces
+% URL: http://www.mathworks.com/matlabcentral/newsreader/view_thread/107191
 % modified by Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 %
 % input:
