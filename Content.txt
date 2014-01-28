@@ -346,7 +346,8 @@
  [node,elem]=meshgrid5(v1,v2,v3,...)
  mesh an ND rectangular lattice by splitting 
  each hypercube into 5 tetrahedra
- URL: http://www.mathkb.com/Uwe/Forum.aspx/matlab/50484/Constant-surfaces
+ author: John D'Errico
+ URL: http://www.mathworks.com/matlabcentral/newsreader/view_thread/107191
  input:
     v1,v2,v3,... - numeric vectors defining the lattice in
                    each dimension.
@@ -364,7 +365,8 @@
  [node,elem]=meshgrid6(v1,v2,v3,...)
  mesh an ND rectangular lattice by splitting 
  each hypercube into 6 tetrahedra
- URL: http://www.mathkb.com/Uwe/Forum.aspx/matlab/50484/Constant-surfaces
+ author: John D'Errico
+ URL: http://www.mathworks.com/matlabcentral/newsreader/view_thread/107191
  input:
     v1,v2,v3,... - numeric vectors defining the lattice in
                    each dimension.
