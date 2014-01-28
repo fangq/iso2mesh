@@ -125,9 +125,8 @@ below:
 === bin/tetgen ===
 
 *Summary:tetgen is a compact and fast 3D mesh generator
-*License: ('''IMPORTANT''') tetgen is free for academic research \
-and non-commertial uses only.
-*URL: http://tetgen.berlios.de/
+*License: GNU Affero General Public License version 3
+*URL: http://tetgen.org/
 *Author: Hang Si <si at wias-berlin.de>
 ::Research Group: Numerical Mathematics and Scientific Computing
 ::Weierstrass Institute for Applied Analysis and Stochastics
