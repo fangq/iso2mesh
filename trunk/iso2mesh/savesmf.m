@@ -16,6 +16,6 @@ function savesmf(v,f,fname)
 %
 
 fid=fopen(fname,'wt');
-fprintf(fid,'v %f %f %f\n',v');
+fprintf(fid,'v %.16f %.16f %.16f\n',v');
 fprintf(fid,'f %d %d %d\n',f');
 fclose(fid);

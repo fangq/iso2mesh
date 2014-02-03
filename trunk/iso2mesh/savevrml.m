@@ -38,7 +38,7 @@ fprintf(fid,'Separator {\nSwitch {\n\tDEF %s\n\tSeparator {\n',fname);
 if(~isempty(node))
   node=node(:,1:3);
   fprintf(fid,'\t\tCoordinate3 {\n\t\t\tpoint [\n');
-  fprintf(fid,'%f %f %f,\n',node');
+  fprintf(fid,'%.16f %.16f %.16f,\n',node');
   fprintf(fid,'\t\t\t]\n\t\t}\n');
 end
 

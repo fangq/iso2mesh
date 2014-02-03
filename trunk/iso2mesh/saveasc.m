@@ -21,6 +21,6 @@ if(fid==-1)
 end
 fprintf(fid,'#!ascii raw data file %s\n',fname);
 fprintf(fid,'%d %d\n',length(v),length(f));
-fprintf(fid,'%f %f %f 0\n',v');
+fprintf(fid,'%.16f %.16f %.16f 0\n',v');
 fprintf(fid,'%d %d %d 0\n',(f-1)');
 fclose(fid);

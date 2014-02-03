@@ -29,7 +29,7 @@ f=f(:,1:3);
 nedge=size(edges,1);
 
 fprintf(fid,'%d %d %d\n',size(v,1),nedge,size(f,1));
-fprintf(fid,'%f %f %f\n',v');
+fprintf(fid,'%.16f %.16f %.16f\n',v');
 fprintf(fid,'%d %d\n',edges');
 fprintf(fid,'%d %d %d\n',edgemap');
 fclose(fid);
