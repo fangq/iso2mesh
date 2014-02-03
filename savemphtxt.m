@@ -26,7 +26,7 @@ fprintf(fp,'0 0 1\n4 Mesh\n2\n3\n%d\n1\n',n_node);
 
 % Write Node information
 for i = 1:n_node
-    fprintf(fp,'%f %f %f\n',node(i,1),node(i,2),node(i,3));
+    fprintf(fp,'%.16f %.16f %.16f\n',node(i,1),node(i,2),node(i,3));
 end
 fprintf(fp, '\n2\n\n3 tri\n');
 

@@ -108,7 +108,7 @@ node=[(0:size(node,1)-1)',node];
 
 fp=fopen(fname,'wt');
 fprintf(fp,'#node list\n%d 3 0 0\n',length(node));
-fprintf(fp,'%d %f %f %f\n',node');
+fprintf(fp,'%d %.16f %.16f %.16f\n',node');
 
 if(~iscell(f))
     fprintf(fp,'#facet list\n%d 1\n',length(f)+bbxnum);
@@ -158,9 +158,9 @@ else % if the surface is recorded as a cell array
             end
             for j=1:length(holeid)
                 if(j==length(holeid))
-                    fprintf(fp,'%d %f %f %f\n',j,mean(node(plc(holeid(j)+1:end),2:4)));
+                    fprintf(fp,'%d %.16f %.16f %.16f\n',j,mean(node(plc(holeid(j)+1:end),2:4)));
                 else
-                    fprintf(fp,'%d %f %f %f\n',j,mean(node(plc(holeid(j)+1:holeid(j+1)-1),2:4)));
+                    fprintf(fp,'%d %.16f %.16f %.16f\n',j,mean(node(plc(holeid(j)+1:holeid(j+1)-1),2:4)));
                 end
             end
          else
@@ -192,7 +192,7 @@ if(dobbx|~isempty(edges))
             for k=1:length(endid)
                 j=endid(k);
                 subloop=loops(seg(j)+1:seg(j+1)-1);
-                fprintf(fp,'%d %f %f %f\n',k,internalpoint(v,subloop)); %mean(v(subloop,:)));
+                fprintf(fp,'%d %.16f %.16f %.16f\n',k,internalpoint(v,subloop)); %mean(v(subloop,:)));
             end
         end
     end
@@ -201,7 +201,7 @@ end
 if(size(holelist,1))
         fprintf(fp,'#hole list\n%d\n',size(holelist,1));
         for i=1:size(holelist,1)
-                fprintf(fp,'%d %f %f %f\n', i, holelist(i,:));
+                fprintf(fp,'%d %.16f %.16f %.16f\n', i, holelist(i,:));
         end
 else
 	fprintf(fp,'#hole list\n0\n');
@@ -210,7 +210,7 @@ end
 if(size(regionlist,1))
 	fprintf(fp,'#region list\n%d\n',size(regionlist,1));
 	for i=1:size(regionlist,1)
-		fprintf(fp,'%d %f %f %f %d\n', i, regionlist(i,:),i);
+		fprintf(fp,'%d %.16f %.16f %.16f %d\n', i, regionlist(i,:),i);
 	end
 end
 fclose(fp);
@@ -221,6 +221,6 @@ if(~isempty(nodesize))
 	end
 	fid=fopen(regexprep(fname,'\.poly$','.mtr'),'wt');
 	fprintf(fid,'%d 1\n',size(nodesize,1));
-	fprintf(fid,'%f\n',nodesize);
+	fprintf(fid,'%.16f\n',nodesize);
 	fclose(fid);
 end
