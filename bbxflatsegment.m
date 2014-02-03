@@ -80,7 +80,7 @@ end
 % remove pattern [ ... nan nan ...] in the result
 
 if(length(seg) & any(isnan(seg)))
-    id=regexp(sprintf('%d',isnan(seg)),'11')
+    id=regexp(sprintf('%d',isnan(seg)),'11');
     if(length(id))
         seg(id+1)=[];
     end
