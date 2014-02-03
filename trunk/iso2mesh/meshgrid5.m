@@ -5,9 +5,9 @@ function [node,elem]=meshgrid5(varargin)
 % mesh an ND rectangular lattice by splitting 
 % each hypercube into 5 tetrahedra
 %
-% author: John D'Errico
+% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+% inspired by John D'Errico
 % URL: http://www.mathworks.com/matlabcentral/newsreader/view_thread/107191
-% modified by Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 %
 % input:
 %    v1,v2,v3,... - numeric vectors defining the lattice in
