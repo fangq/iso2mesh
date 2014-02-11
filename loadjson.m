@@ -48,7 +48,7 @@ else
 end
 
 pos = 1; len = length(string); inStr = string;
-isoct=exist('OCTAVE_VERSION');
+isoct=exist('OCTAVE_VERSION','var');
 arraytoken=find(inStr=='[' | inStr==']' | inStr=='"');
 jstr=regexprep(inStr,'\\\\','  ');
 escquote=regexp(jstr,'\\"');
@@ -85,17 +85,6 @@ if(~isempty(data))
       end
 end
 
-
-%%
-function newdata=parse_collection(id,data,obj)
-
-if(jsoncount>0 && exist('data','var')) 
-    if(~iscell(data))
-       newdata=cell(1);
-       newdata{1}=data;
-       data=newdata;
-    end
-end
 
 %%
 function newdata=jcell2array(data)

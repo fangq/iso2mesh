@@ -176,7 +176,7 @@ end
 tripatch=emap(tricut,:)';
 tripatch=reshape(tripatch(find(tripatch)),[3,length(tricut)])';
 
-% fast wall to get all quadrilaterals in convexhull form (avoid using
+% fast way to get all quadrilaterals in convexhull form (avoid using
 % convhulln)
 
 quadpatch=emap(quadcut,:)';
