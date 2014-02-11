@@ -23,7 +23,9 @@ function [mask weight]=mesh2mask(node,face,xi,yi,hf)
 %      mask: a 2D image, the value of each pixel is the index of the
 %            enclosing triangle, if the pixel is outside of the mesh, NaN
 %
-% note: This function only works for matlab
+% note: This function only works in MATLAB when the DISPLAY is not 
+%       disabled. The maximum size of the mask output is limited by the 
+%       screen size.
 %
 % example:
 %
@@ -70,7 +72,7 @@ set(gca,'clim',[1 size(face,1)]);
 
 output_size = round((mx(1:2)-mn(1:2))./df);%Size in pixels
 
-if(isoctavemesh)
+if(isoctavemesh || isempty(getenv('DISPLAY')))
     resolution = 300; %Resolution in DPI
     set(gcf,'PaperPositionMode','manual')
     set(gcf,'paperunits','inches','paperposition',[0 0 output_size/resolution]);
@@ -78,8 +80,14 @@ if(isoctavemesh)
     print(mwpath('post_mesh2mask.png'),'-dpng',['-r' num2str(resolution)]);
     mask=imread(mwpath('post_mesh2mask.png'));
 else
+    pos=get(hf,'position');
+    pos(3:4)=max(pos(3:4),output_size+20);
+    set(hf,'position',pos);
     set(gca, 'Units','pixels','position',[1, 1, output_size(1), output_size(2)]);
     mask=getframe(gca);
+    if(any(size(mask.cdata)<[output_size([2 1]) 3]))
+        error('the requested rasterization grid is larger than the screen resolution');
+    end
     mask=mask.cdata(1:output_size(2),1:output_size(1),:);
 end
 if(nargin<5)
