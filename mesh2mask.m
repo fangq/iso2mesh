@@ -1,10 +1,10 @@
-function [mask weight]=mesh2mask(node,face,xi,yi)
+function [mask weight]=mesh2mask(node,face,xi,yi,hf)
 %
 % [mask weight]=mesh2mask(node,face,Nxy)
 %   or
-% [mask weight]=mesh2mask(node,face,Nx,Ny)
+% [mask weight]=mesh2mask(node,face,[Nx,Ny])
 %   or
-% [mask weight]=mesh2mask(node,face,xi,yi)
+% [mask weight]=mesh2mask(node,face,xi,yi,hf)
 %
 % fast rasterization of a 2D mesh to an image with triangle index labels
 % 
@@ -16,6 +16,8 @@ function [mask weight]=mesh2mask(node,face,xi,yi)
 %      face: a triangle surface, N by 3 or N by 4 array
 %      Nx,Ny,Nxy: output image in x/y dimensions, or both
 %      xi,yi: linear vectors for the output pixel center positions in x/y
+%      hf: (optional) the handle of a pre-created figure window, for faster 
+%          rendering
 %
 % output:
 %      mask: a 2D image, the value of each pixel is the index of the
@@ -40,7 +42,7 @@ elseif(nargin==3 && length(xi)==2 && all(xi>0))
     mn=min(node);
     mx=max(node);
     df=(mx(1:2)-mn(1:2))./xi;
-elseif(nargin==4)
+elseif(nargin==4 || nargin==5)
     mx=[max(xi) max(yi)];
     mn=[min(xi) min(yi)];
     df=[min(diff(xi(:))) min(diff(yi(:)))];
@@ -51,7 +53,11 @@ if(size(node,2)<=1 || size(face,2)<=2)
     error('node must have 2 or 3 columns; face can not have less than 2 columns');
 end
 
-hf=figure('visible','off');
+if(nargin<5)
+    hf=figure('visible','on');
+else
+    clf(hf);
+end
 patch('Vertices',node,'Faces',face,'linestyle','none','FaceColor','flat',...
  'FaceVertexCData',(1:size(face,1))','CDataMapping', 'scaled');
 set(gca, 'Position', [0 0 1 1]);
@@ -76,7 +82,9 @@ else
     mask=getframe(gca);
     mask=mask.cdata(1:output_size(2),1:output_size(1),:);
 end
-close(hf);
+if(nargin<5)
+    close(hf);
+end
 mask=int32(reshape(mask,[size(mask,1)*size(mask,2) size(mask,3)]));
 [isfound,locb]=ismember(mask,floor(cm*255),'rows');
 locb(isfound==0)=nan;
