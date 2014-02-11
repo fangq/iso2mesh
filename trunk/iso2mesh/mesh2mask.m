@@ -1,19 +1,19 @@
-function mask=mesh2mask(node,face,xi,yi)
+function [mask weight]=mesh2mask(node,face,xi,yi)
 %
-% mask=mesh2mask(node,face,Nxy)
+% [mask weight]=mesh2mask(node,face,Nxy)
 %   or
-% mask=mesh2mask(node,face,Nx,Ny)
+% [mask weight]=mesh2mask(node,face,Nx,Ny)
 %   or
-% mask=mesh2mask(node,face,xi,yi)
+% [mask weight]=mesh2mask(node,face,xi,yi)
 %
-% fast convertion from a 2D mesh to an image with triangle index labels
+% fast rasterization of a 2D mesh to an image with triangle index labels
 % 
 % author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
 % date for initial version: July 18,2013
 %
 % input:
-%      node: node coordinates, dimension (nn,2) or (nn,3)
-%      face: a triangle surface (ne,3)
+%      node: node coordinates, dimension N by 2 or N by 3 array
+%      face: a triangle surface, N by 3 or N by 4 array
 %      Nx,Ny,Nxy: output image in x/y dimensions, or both
 %      xi,yi: linear vectors for the output pixel center positions in x/y
 %
@@ -47,6 +47,9 @@ elseif(nargin==4)
 else
     error('you must give at least xi input');
 end
+if(size(node,2)<=1 || size(face,2)<=2)
+    error('node must have 2 or 3 columns; face can not have less than 2 columns');
+end
 
 hf=figure('visible','off');
 patch('Vertices',node,'Faces',face,'linestyle','none','FaceColor','flat',...
@@ -61,19 +64,56 @@ set(gca,'clim',[1 size(face,1)]);
 
 output_size = round((mx(1:2)-mn(1:2))./df);%Size in pixels
 
-resolution = 300; %Resolution in DPI
-set(gcf,'PaperPositionMode','manual')
-set(gcf,'paperunits','inches','paperposition',[0 0 output_size/resolution]);
-
-%set(gcf,'PaperPositionMode','auto');
-
-print(mwpath('post_mesh2mask.png'),'-dpng',['-r' num2str(resolution)]);
-
+if(isoctavemesh)
+    resolution = 300; %Resolution in DPI
+    set(gcf,'PaperPositionMode','manual')
+    set(gcf,'paperunits','inches','paperposition',[0 0 output_size/resolution]);
+    deletemeshfile(mwpath('post_mesh2mask.png'));
+    print(mwpath('post_mesh2mask.png'),'-dpng',['-r' num2str(resolution)]);
+    mask=imread(mwpath('post_mesh2mask.png'));
+else
+    set(gca, 'Units','pixels','position',[1, 1, output_size(1), output_size(2)]);
+    mask=getframe(gca);
+    mask=mask.cdata(1:output_size(2),1:output_size(1),:);
+end
 close(hf);
-
-mask=imread(mwpath('post_mesh2mask.png'));
 mask=int32(reshape(mask,[size(mask,1)*size(mask,2) size(mask,3)]));
 [isfound,locb]=ismember(mask,floor(cm*255),'rows');
 locb(isfound==0)=nan;
 
 mask=rot90(reshape(locb,output_size([2 1]))');
+
+if(nargout>=2)
+    xi=mn(1)+df(1)/2:df(1):mx(1);
+    yi=mn(2)+df(2)/2:df(2):mx(2);
+    weight=barycentricgrid(node,face,xi,yi,mask);
+    if(size(face,2)>=4)
+        badidx=find(weight(1,:,:)<0 | weight(2,:,:)<0 | weight(3,:,:)<0);
+        badidx=badidx(face(mask(badidx),3)~=face(mask(badidx),4));
+        weight2=barycentricgrid(node,face(:,[1 3 4]),xi,yi,mask);
+        weight(:,badidx)=0;
+        weight([1 3 4],badidx)=weight2(:,badidx);
+    end
+end
+
+function weight=barycentricgrid(node,face,xi,yi,mask)
+[xx,yy]=meshgrid(xi,yi);
+idx=find(~isnan(mask));
+eid=mask(idx);
+t1=node(face(:,1),:);
+t2=node(face(:,2),:);
+t3=node(face(:,3),:);
+tt=(t2(:,2)-t3(:,2)).*(t1(:,1)-t3(:,1))+(t3(:,1)-t2(:,1)).*(t1(:,2)-t3(:,2));
+w(:,1)=(t2(eid,2)-t3(eid,2)).*(xx(idx)-t3(eid,1))+(t3(eid,1)-t2(eid,1)).*(yy(idx)-t3(eid,2));
+w(:,2)=(t3(eid,2)-t1(eid,2)).*(xx(idx)-t3(eid,1))+(t1(eid,1)-t3(eid,1)).*(yy(idx)-t3(eid,2));
+w(:,1)=w(:,1)./tt(eid);
+w(:,2)=w(:,2)./tt(eid);
+w(:,3)=1-w(:,1)-w(:,2);
+weight=zeros(3,size(mask,1),size(mask,2));
+ww=zeros(size(mask));
+ww(idx)=w(:,1);
+weight(1,:,:)=ww;
+ww(idx)=w(:,2);
+weight(2,:,:)=ww;
+ww(idx)=w(:,3);
+weight(3,:,:)=ww;
