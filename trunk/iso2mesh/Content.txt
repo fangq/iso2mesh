@@ -147,6 +147,29 @@
 	 xi,yi,zi: x/y/z grid for the resulting volume
  output:
 	 img: a volumetric binary image at position of ndgrid(xi,yi,zi)
+
+==== function [mask weight]=mesh2vol(node,elem,xi,yi,zi) ====
+ [mask weight]=mesh2vol(node,face,Nxyz)
+   or
+ [mask weight]=mesh2vol(node,face,[Nx,Ny,Nz])
+   or
+ [mask weight]=mesh2vol(node,face,xi,yi,zi,hf)
+ fast rasterization of a 3D mesh to a volume with tetrahedron index labels
+ date for initial version: Feb 10,2014
+ input:
+      node: node coordinates, dimension N by 2 or N by 3 array
+      face: a triangle surface, N by 3 or N by 4 array
+      Nx,Ny,Nxy: output image in x/y dimensions, or both
+      xi,yi: linear vectors for the output pixel center positions in x/y
+      hf: the handle of a pre-created figure window for faster rendering
+ output:
+      mask: a 2D image, the value of each pixel is the index of the
+            enclosing triangle, if the pixel is outside of the mesh, NaN
+ note: This function only works for matlab
+ example:
+   [no,el]=meshgrid6(0:5,0:5,0:3);
+   mask=mesh2vol(no,el(:,1:4),0:0.1:5,0:0.1:5,0:0.1:4);
+   imagesc(mask(:,:,3))
 === # iso2mesh main function backend ===
 
 ==== function [node,elem]=binsurface(img,nface) ====
@@ -246,6 +269,32 @@
 	 xi,yi,zi: x/y/z grid for the resulting volume
  output:
 	 img: a volumetric binary image at position of ndgrid(xi,yi,zi)
+
+==== function [mask weight]=mesh2mask(node,face,xi,yi,hf) ====
+ [mask weight]=mesh2mask(node,face,Nxy)
+   or
+ [mask weight]=mesh2mask(node,face,[Nx,Ny])
+   or
+ [mask weight]=mesh2mask(node,face,xi,yi,hf)
+ fast rasterization of a 2D mesh to an image with triangle index labels
+ date for initial version: July 18,2013
+ input:
+      node: node coordinates, dimension N by 2 or N by 3 array
+      face: a triangle surface, N by 3 or N by 4 array
+      Nx,Ny,Nxy: output image in x/y dimensions, or both
+      xi,yi: linear vectors for the output pixel center positions in x/y
+      hf: (optional) the handle of a pre-created figure window, for faster 
+          rendering
+ output:
+      mask: a 2D image, the value of each pixel is the index of the
+            enclosing triangle, if the pixel is outside of the mesh, NaN
+ note: This function only works in MATLAB when the DISPLAY is not 
+       disabled. The maximum size of the mask output is limited by the 
+       screen size.
+ example:
+   [no,fc]=meshgrid6(0:5,0:5);
+   mask=mesh2mask(no,fc,-1:0.1:5,0:0.1:5);
+   imagesc(mask);
 === # iso2mesh primitive meshing functions ===
 
 ==== function [node,face,elem]=meshabox(p0,p1,opt,nodesize) ====
@@ -346,7 +395,7 @@
  [node,elem]=meshgrid5(v1,v2,v3,...)
  mesh an ND rectangular lattice by splitting 
  each hypercube into 5 tetrahedra
- author: John D'Errico
+ inspired by John D'Errico
  URL: http://www.mathworks.com/matlabcentral/newsreader/view_thread/107191
  input:
     v1,v2,v3,... - numeric vectors defining the lattice in
@@ -642,15 +691,15 @@
            size(elem,1) x nchoosek(size(elem,2),2). All edges are ordered
            by looping through each element first. 
 
-==== function snorm=surfnorm(node,face,varargin) ====
- snorm=surfnorm(node,face)
+==== function snorm=surfacenorm(node,face,varargin) ====
+ snorm=surfacenorm(node,face)
     or
- snorm=surfnorm(node,face,'Normalize',0)
+ snorm=surfacenorm(node,face,'Normalize',0)
  compute the normal vectors for a triangular surface
  input:
    node: a list of node coordinates (nn x 3)
    face: a surface mesh triangle list (ne x 3)
-   opt: a list of optional parameters, currently surfnorm supports:
+   opt: a list of optional parameters, currently surfacenorm supports:
         'Normalize': [1|0] if set to 1, the normal vectors will be 
                            unitary (default)
  output:
@@ -1173,7 +1222,7 @@
  convert a MATLAB object (cell, struct or array) into a JSON (JavaScript
  Object Notation) string
             created on 2011/09/09
- $Id: savejson.m 416 2013-10-07 16:40:23Z fangq $
+ $Id: savejson.m 431 2014-02-16 23:51:29Z fangq $
  input:
       rootname: name of the root-object, if set to '', will use variable name
       obj: a MATLAB object (array, cell, cell array, struct, struct array)
@@ -1219,6 +1268,7 @@
                          wrapped inside a function call as 'foo(...);'
         opt.UnpackHex [1|0]: conver the 0x[hex code] output by loadjson 
                          back to the string form
+        opt.SaveBinary [0|1]: 1 - save the JSON file in binary mode; 0 - text mode.
         opt can be replaced by a list of ('param',value) pairs. The param 
         string is equivallent to a field in opt.
  output:
@@ -1240,7 +1290,7 @@
          François Glineur: http://www.mathworks.com/matlabcentral/fileexchange/23393
          Joel Feenstra:
          http://www.mathworks.com/matlabcentral/fileexchange/20565
- $Id: loadjson.m 416 2013-10-07 16:40:23Z fangq $
+ $Id: loadjson.m 431 2014-02-16 23:51:29Z fangq $
  input:
       fname: input file name, if fname contains "{}" or "[]", fname
              will be interpreted as a JSON string
