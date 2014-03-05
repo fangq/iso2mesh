@@ -31,7 +31,7 @@ func_inquery="finddisconnsurf surfedge volface extractloops meshconn
                 meshcentroid nodevolume elemvolume neighborelem 
 		faceneighbors edgeneighbors maxsurf flatsegment orderloopedge  
 		mesheuler bbxflatsegment surfplane surfinterior surfpart
-                surfseeds meshquality meshedge surfnorm uniqedges advancefront"
+                surfseeds meshquality meshedge surfacenorm uniqedges advancefront"
 func_meshfix="meshcheckrepair meshreorient removedupelem 
                 removedupnodes removeisolatednode removeisolatedsurf
                 surfaceclean getintersecttri delendelem surfreorient"
