@@ -19,6 +19,14 @@ function savemphtxt(node, face, elem, filename)
 n_node = size(node,1);
 n_face = size(face,1);
 n_elem = size(elem,1);
+
+if(min(face(:,4))==0)
+    face(:,4)=face(:,4)+1;
+end
+if(min(elem(:,5))==0)
+    elem(:,5)=elem(:,5)+1;
+end
+
 fp = fopen(filename,'w');
 fprintf(fp,'# Created by iso2mesh (http://iso2mesh.sf.net)\n');
 fprintf(fp,'0 1\n1\n5 mesh1\n1\n3 obj\n\n');
