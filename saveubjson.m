@@ -11,7 +11,7 @@ function json=saveubjson(rootname,obj,varargin)
 % author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 %            created on 2013/08/17
 %
-% $Id: saveubjson.m 436 2014-08-05 20:51:40Z fangq $
+% $Id: saveubjson.m 438 2014-09-17 04:09:49Z fangq $
 %
 % input:
 %      rootname: name of the root-object, if set to '', will use variable name
@@ -155,7 +155,7 @@ end
 for j=1:dim(2)
     if(dim(1)>1) txt=[txt '[']; end
     for i=1:dim(1)
-       txt=[txt obj2ubjson(name,item{i},level+(len>1),varargin{:})];
+       txt=[txt obj2ubjson(name,item{i,j},level+(len>1),varargin{:})];
     end
     if(dim(1)>1) txt=[txt ']']; end
 end
@@ -308,7 +308,7 @@ if(size(mat,1)==1)
 end
 type='';
 hasnegtive=(mat<0);
-if(isa(mat,'integer') || (isfloat(mat) && all(mod(mat(:),1) == 0)))
+if(isa(mat,'integer') || isinteger(mat) || (isfloat(mat) && all(mod(mat(:),1) == 0)))
     if(isempty(hasnegtive))
        if(max(mat(:))<=2^8)
            type='U';
