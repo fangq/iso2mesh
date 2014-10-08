@@ -64,7 +64,7 @@ if(nargin>1)
    hasopt=0;
    for i=1:length(varargin)
    	if(ischar(varargin{i}))
-		if(regexp(varargin{i},'[0-9x-zX-Z><=&|]'))
+		if(~isempty(regexp(varargin{i},'[x-zX-Z]')) && ~isempty(regexp(varargin{i},'[><=&|]')))
 			selector=varargin{i};
 			if(nargin>=i+1) opt=varargin(i+1:end); end
 		else
