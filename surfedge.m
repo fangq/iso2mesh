@@ -1,4 +1,4 @@
-function openedge=surfedge(f)
+function openedge=surfedge(f,varargin)
 %
 % openedge=surfedge(f)
 %
@@ -21,6 +21,9 @@ if(isempty(f))
     return;
 end
 
+opt=varargin2struct(varargin{:});
+findjunc=jsonopt('Junction',0,opt);
+
 if(size(f,2)==3)
     edges=[f(:,[1,2]);
            f(:,[2,3]);
@@ -39,10 +42,18 @@ edgesort=sort(edges,2);
 
 if(isoctavemesh)
         u=unique(jx);
-	qx=u(hist(jx,u)==1);
+        if(size(f,2)==3 && findjunc)
+            qx=u(hist(jx,u)>2);
+        else
+	    qx=u(hist(jx,u)==1);
+        end
 else
 	vec=histc(jx,1:max(jx));
-	qx=find(vec==1);
+        if(size(f,2)==3 && findjunc)
+            qx=find(vec>2);
+        else
+	    qx=find(vec==1);
+        end
 end
 openedge=edges(ix(qx),:);
 % node4=node4(ix(qx));
