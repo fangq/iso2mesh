@@ -10,7 +10,9 @@ maxRad = max(rad);
 box = zeros(maxRad+1,maxRad+1,maxRad+1);
 image = box;
 box(1,1,1) = 1;
-DT = bwdist(box,'euclidean');
+%DT = bwdist(box,'euclidean');
+[ix,iy,iz]=meshgrid(1:maxRad+1,1:maxRad+1,1:maxRad+1);
+DT = sqrt((ix - 1).*(ix -1) + (iy - 1).*(iy -1) + (iz - 1).*(iz -1));
 
 for i = 1:size(rad,2)
     ball = DT<=rad(i);
