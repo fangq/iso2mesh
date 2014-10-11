@@ -56,7 +56,9 @@ if(~isempty(edges))
     newloops=[];
     for i=1:segnum
        if(seg(i+1)-(seg(i)+1)==0) continue; end
-       newloops=[newloops nan bbxflatsegment(node,loops(seg(i)+1:seg(i+1)-1))];
+       oneloop=loops(seg(i)+1:seg(i+1)-1);
+       if(oneloop(1)==oneloop(end)) oneloop(end)=[]; end
+       newloops=[newloops nan bbxflatsegment(node,oneloop)];
     end
     loops=[newloops nan];
 
