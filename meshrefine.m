@@ -13,10 +13,19 @@ function [newnode,newelem,newface]=meshrefine(node,elem,varargin)
 %      opt:  options for mesh refinement:
 %        if opt is a Nx3 array, opt is treated as a list of new nodes to
 %          be inserted into the mesh (must be located on the surface or inside)
+%        if opt is a vector with a length that equals to that of node,
+%          it will be used to specify the desired edge-length at each node;
+%          setting a node value to 0 will by-pass the refinement at this node
+%        if opt is a vector with a length that equals to that of elem,
+%          it will be used as the desired maximum element volume of each
+%          tetrahedron; setting to 0 will by-pass the refinement of that element.
 %        if opt is a struct, it can have the following fields:
 %          opt.newnode: same as setting opt to an Nx3 array
 %          opt.reratio: radius-edge ratio, by default, iso2mesh uses 1.414
 %          opt.maxvol: maximum element volume
+%          opt.sizefield: a vector specifying either the desired edge-length
+%              at each node, or the maximum volume constraint within each 
+%              tetrahedron, see above for details.
 %
 % outputs:
 %      newnode: node coordinates of the tetrahedral mesh
@@ -31,26 +40,42 @@ exesuff=getexeext;
 exesuff=fallbackexeext(exesuff,'tetgen');
 
 newpt=[];
+sizefield=[];
+if(size(node,2)==4)
+   sizefield=node(:,4);
+   node=node(:,1:3);
+end
 opt=struct;
 if(length(varargin)==1)
 	face=[];
 	if(isstruct(varargin{1}))
 		opt=varargin{1};
-    else
-		newpt=varargin{1};
+        else
+		if(length(varargin{1})==size(node,1) || length(varargin{1})==size(elem,1))
+			sizefield=varargin{1};
+		else
+			newpt=varargin{1};
+		end
 	end
 elseif(length(varargin)>=2)
     face=varargin{1};
     if(isstruct(varargin{2}))
         opt=varargin{2};
     else
-        newpt=varargin{2};
+        if(length(varargin{2})==size(node,1) || length(varargin{1})==size(elem,1))
+                sizefield=varargin{2};
+        else
+                newpt=varargin{2};
+        end
     end
 else
 	error('meshrefine requires at least 3 inputs');
 end
 if(isstruct(opt) && isfield(opt,'newnode'))
     newpt=opt.newnode;
+end
+if(isstruct(opt) && isfield(opt,'sizefield'))
+    sizefield=opt.sizefield;
 end
 
 % call tetgen to create volumetric mesh
@@ -71,6 +96,23 @@ if(~isempty(newpt))
 	savetetgennode(newpt,mwpath('pre_refine.1.a.node'));
 	moreopt=' -i ';
 end
+
+if(~isempty(sizefield))
+    if(length(sizefield)==size(node,1))
+        fid=fopen(mwpath('pre_refine.1.mtr'),'wt');
+        fprintf(fid,'%d 1\n',size(sizefield,1));
+        fprintf(fid,'%.16f\n',sizefield);
+        fclose(fid);
+	moreopt=[moreopt ' -qa '];
+    else
+        fid=fopen(mwpath('pre_refine.1.vol'),'wt');
+        fprintf(fid,'%d\n',size(sizefield,1));
+        fprintf(fid,'%d\t%.16f\n',[(1:size(sizefield,1))' sizefield]');
+        fclose(fid);
+	moreopt=[moreopt ' -qa '];
+    end
+end
+
 if(size(elem,2)==3 && setquality==0)
     if(~isempty(newpt))
         error('inserting new point can not be used for surfaces');
