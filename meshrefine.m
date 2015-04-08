@@ -12,7 +12,9 @@ function [newnode,newelem,newface]=meshrefine(node,elem,varargin)
 %      face: (optional) existing tetrahedral mesh surface triangle list
 %      opt:  options for mesh refinement:
 %        if opt is a Nx3 array, opt is treated as a list of new nodes to
-%          be inserted into the mesh (must be located on the surface or inside)
+%          be inserted into the mesh. the new nodes must be located on the 
+%          surface or inside the original mesh. external nodes are
+%          discarded, unless the opt.extcmdopt is specified.
 %        if opt is a vector with a length that equals to that of node,
 %          it will be used to specify the desired edge-length at each node;
 %          setting a node value to 0 will by-pass the refinement at this node
@@ -26,12 +28,45 @@ function [newnode,newelem,newface]=meshrefine(node,elem,varargin)
 %          opt.sizefield: a vector specifying either the desired edge-length
 %              at each node, or the maximum volume constraint within each 
 %              tetrahedron, see above for details.
+%          opt.extcmdopt: by default, meshrefine can only insert nodes
+%              that are inside the original mesh. if one prefers to insert
+%              nodes that are outside of the original mesh, one can define
+%              this parameter to specify the meshing option (for tetgen)
+%              for the extended domain, i.e. the convex hull including 
+%              both the original and the external nodes. If not defined, 
+%              '-Y' option is used by default (prevent tetgen from
+%              inserting new nodes on the surface).
+%          opt.extlabel: when external nodes are inserted, the new elements
+%              will be assigned with an element label to group them
+%              together, by default, this label is 0, unless opt.extlabel
+%              is given
+%          opt.extcorelabel: when external nodes are inserted, par of the 
+%              new elements share the polyhedra between the inserted nodes,
+%              these special elements will be marked by opt.extcorelabel, 
+%              otherwise the label will be set to -1 
 %
 % outputs:
 %      newnode: node coordinates of the tetrahedral mesh
 %      newelem: element list of the tetrahedral mesh
 %      newface: mesh surface element list of the tetrahedral mesh 
 %             the last column denotes the boundary ID
+%
+% examples:
+%
+%     [node,face,elem]=meshasphere([0 0 0],24,1,2);
+%     elem(:,5)=1;
+%
+%     % inserting nodes that are inside the original mesh
+%     extnodes=double([1 1 1; 2 2 2; 3 3 3]);
+%     [newno,newel]=meshrefine(node,elem,struct('newnode',extnodes,'extcmdopt','-Y'));
+%     all(ismember(round(extnodes*1e10)*1e-10,round(newno*1e10)*1e-10,'rows'))
+%     plotmesh(newno,[],newel,'x>-3')
+%
+%     % inserting nodes that are external to the original mesh
+%     extnodes=double([-5 -5 25;-5 5 25;5 5 25;5 -5 25]);
+%     [newno,newel]=meshrefine(node,elem,struct('newnode',extnodes,'extcmdopt','-Y'));
+%     figure;
+%     plotmesh(newno,[],newel,'x>-3')
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
@@ -92,7 +127,17 @@ if(isstruct(opt) && isfield(opt,'maxvol'))
     moreopt=[moreopt sprintf(' -a %.10f ',opt.maxvol)];
 end
 
+externalpt=[];
+if(isstruct(opt) && isfield(opt,'extcmdopt'))
+    isinside=tsearchn(node(:,1:3),elem(:,1:4),newpt(:,1:3));
+    externalpt=newpt(isnan(isinside),:);
+    newpt=newpt(find(isnan(isinside)==0),:);
+end
+
 if(~isempty(newpt))
+	if(size(newpt,1)<4)
+		newpt=[newpt; repmat(newpt(1,:),4-size(newpt,1),1)];
+	end
 	savetetgennode(newpt,mwpath('pre_refine.1.a.node'));
 	moreopt=' -i ';
 end
@@ -150,6 +195,58 @@ elseif(size(elem,2)==3)
 else
     system([' "' mcpath('tetgen') exesuff '" ' moreopt ' -r "' mwpath('pre_refine.1') '"']);
     [newnode,newelem,newface]=readtetgen(mwpath('pre_refine.2'));
+end
+
+if(~isempty(externalpt)) % user request to insert nodes that are outside of the original mesh
+    % create a mesh including the external points
+    externalpt=unique(externalpt,'rows');
+    allnode=[newnode;externalpt];
+
+    % define the convexhull as the external surface
+    try
+        outface=convhull(allnode,'simplify',false);
+    catch
+        outface=convhulln(allnode);
+    end
+    outface=sort(outface,2);
+    face=volface(newelem(:,1:4));
+    inface=sort(face(:,1:3),2);
+
+    % define the surface that bounds the newly extended convex hull space
+    bothsides=removedupelem([outface;inface]);
+
+    % define a seed point to avoid meshing the interior space
+    holelist=surfseeds(node,face(:,1:3));
+
+    % mesh the extended space
+    ISO2MESH_TETGENOPT=jsonopt('extcmdopt','-Y',opt);
+    [no,el]=surf2mesh(allnode,bothsides,[],[],1,10,[],holelist);
+
+    [isinside,map]=ismember(round(no*1e10)*1e-10,round(allnode*1e10)*1e-10,'rows');
+    snid=[length(newnode)+1:length(allnode)];
+
+    if(~isempty(map==0))
+        oldsize=size(allnode,1);
+        allnode=[allnode;no(map==0,:)];
+        map(map==0)=oldsize+1:size(allnode,1);
+    end
+    % merge the external space with the original mesh
+    el2=map(el(:,1:4));
+
+    % label all new elements with -1
+    if(size(newelem,2)==5)
+        el2(:,5)=jsonopt('extlabel',0,opt);
+        % search elements that contain source(s) and save their id(s)
+        comb=sort(nchoosek(snid,3),2);  % triangles conncting the external nodes
+        elm=sort(el2(:,1:4),2);        % all sorted elements
+        [iselm,seid]=ismember(comb,elm(:,2:end),'rows');
+        seid=seid(iselm);               % source element id list
+        el2(seid,5)=jsonopt('extcorelabel',-1,opt);
+    end
+
+    % merge nodes/elements and replace the original ones
+    newnode=allnode;
+    newelem=[newelem;el2];
 end
 
 % read in the generated mesh
