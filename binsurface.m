@@ -27,6 +27,9 @@ function [node,elem]=binsurface(img,nface)
 % 
 
 dim=size(img);
+if(length(dim)<3)
+    dim(3)=1;
+end
 newdim=dim+[1 1 1];
 
 % find the jumps (0->1 or 1->0) for all directions
