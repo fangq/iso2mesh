@@ -86,7 +86,15 @@ end
 deletemeshfile(mwpath('post_vmesh.1.*'));
 fprintf(1,'creating volumetric mesh from a surface mesh ...\n');
 
-cmdopt=getvarfrom({'caller','base'},'ISO2MESH_TETGENOPT');
+try
+    cmdopt=evalin('caller','ISO2MESH_TETGENOPT');
+catch
+    try
+        cmdopt=evalin('base','ISO2MESH_TETGENOPT');
+    catch
+        cmdopt='';
+    end
+end
 if(isempty(cmdopt))
   system([' "' mcpath('tetgen') exesuff '" -A -q1.414a' num2str(maxvol) ' ' moreopt ' "' mwpath('post_vmesh.poly') '"']);
 else
