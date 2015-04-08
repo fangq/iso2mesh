@@ -44,6 +44,7 @@ if(dim==2)
     coeff=1;
 end
 quality=coeff*dim*2^(2*(1-1./dim))*3^((dim-1)/2)*vol.^(2/dim)./ed;
-if(max(quality)>1)
-    quality=quality./max(quality);
+maxquality=max(quality);
+if(maxquality>1)
+    quality=quality./maxquality;
 end
