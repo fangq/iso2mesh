@@ -57,9 +57,9 @@ function [newnode,newelem,newface]=meshrefine(node,elem,varargin)
 %     elem(:,5)=1;
 %
 %     % inserting nodes that are inside the original mesh
-%     extnodes=double([1 1 1; 2 2 2; 3 3 3]);
-%     [newno,newel]=meshrefine(node,elem,struct('newnode',extnodes,'extcmdopt','-Y'));
-%     all(ismember(round(extnodes*1e10)*1e-10,round(newno*1e10)*1e-10,'rows'))
+%     innernodes=double([1 1 1; 2 2 2; 3 3 3]);
+%     [newno,newel]=meshrefine(node,elem,innernodes);
+%     all(ismember(round(innernodes*1e10)*1e-10,round(newno*1e10)*1e-10,'rows'))
 %     plotmesh(newno,[],newel,'x>-3')
 %
 %     % inserting nodes that are external to the original mesh
@@ -220,7 +220,11 @@ if(~isempty(externalpt)) % user request to insert nodes that are outside of the 
 
     % mesh the extended space
     ISO2MESH_TETGENOPT=jsonopt('extcmdopt','-Y',opt);
-    [no,el]=surf2mesh(allnode,bothsides,[],[],1,10,[],holelist);
+    if(size(bothsides,1)>=size(inface,1))
+        [no,el]=surf2mesh(allnode,bothsides,[],[],1,10,[],holelist);
+    else
+        [no,el]=surf2mesh(allnode,bothsides,[],[],1,10);
+    end
 
     [isinside,map]=ismember(round(no*1e10)*1e-10,round(allnode*1e10)*1e-10,'rows');
     snid=[length(newnode)+1:length(allnode)];
