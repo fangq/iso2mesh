@@ -66,6 +66,11 @@ elseif(nargin==7)
 	holes=[];
 end
 
+if(size(regions,2)>=4 && ~isempty(maxvol))
+    warning('you specified both maxvol and the region based volume constraint,the maxvol setting will be ignored');
+    maxvol=[];
+end
+
 dobbx=0;
 if(nargin>=9)
 	dobbx=forcebox;

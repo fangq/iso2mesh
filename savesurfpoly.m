@@ -215,9 +215,15 @@ end
 
 if(size(regionlist,1))
 	fprintf(fp,'#region list\n%d\n',size(regionlist,1));
-	for i=1:size(regionlist,1)
+    if(size(regionlist,2)==3)
+	  for i=1:size(regionlist,1)
 		fprintf(fp,'%d %.16f %.16f %.16f %d\n', i, regionlist(i,:),i);
-	end
+      end
+    elseif(size(regionlist,2)==4)
+	  for i=1:size(regionlist,1)
+		fprintf(fp,'%d %.16f %.16f %.16f %d %.16f\n', i, regionlist(i,1:3),i,regionlist(i,4));
+      end
+    end
 end
 fclose(fp);
 
