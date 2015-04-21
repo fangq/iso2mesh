@@ -241,11 +241,8 @@ if(~isempty(externalpt)) % user request to insert nodes that are outside of the 
     if(size(newelem,2)==5)
         el2(:,5)=jsonopt('extlabel',0,opt);
         % search elements that contain source(s) and save their id(s)
-        comb=sort(nchoosek(snid,3),2);  % triangles conncting the external nodes
-        elm=sort(el2(:,1:4),2);        % all sorted elements
-        [iselm,seid]=ismember(comb,elm(:,2:end),'rows');
-        seid=seid(iselm);               % source element id list
-        el2(seid,5)=jsonopt('extcorelabel',-1,opt);
+        iselm=ismember(el2(:,1:4),snid);
+        el2(sum(iselm,2)>=3,5)=jsonopt('extcorelabel',-1,opt);
     end
 
     % merge nodes/elements and replace the original ones
