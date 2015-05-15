@@ -9,7 +9,7 @@ function data = loadubjson(fname,varargin)
 % authors:Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % created on 2013/08/01
 %
-% $Id: loadubjson.m 436 2014-08-05 20:51:40Z fangq $
+% $Id: loadubjson.m 487 2015-05-06 18:19:07Z fangq $
 %
 % input:
 %      fname: input file name, if fname contains "{}" or "[]", fname
@@ -312,7 +312,7 @@ function str = parseStr(varargin)
 %%-------------------------------------------------------------------------
 
 function num = parse_number(varargin)
-    global pos inStr len isoct fileendian systemendian
+    global pos inStr isoct fileendian systemendian
     id=strfind('iUIlLdD',inStr(pos));
     if(isempty(id))
         error_pos('expecting a number at position %d');
@@ -335,7 +335,6 @@ function num = parse_number(varargin)
 
 function val = parse_value(varargin)
     global pos inStr len
-    true = 1; false = 0;
 
     switch(inStr(pos))
         case {'S','C','H'}
