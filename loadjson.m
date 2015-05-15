@@ -69,7 +69,11 @@ elseif(exist(fname,'file'))
    try
        string = fileread(fname);
    catch
-       string = urlread(['file:///',fullfile(pwd,fname)]);
+       try
+           string = urlread(['file://',fname]);
+       catch
+           string = urlread(['file://',fullfile(pwd,fname)]);
+       end
    end
 else
    error('input file does not exist');
@@ -145,7 +149,10 @@ global pos inStr isoct
     object = cell(0, 1);
     dim2=[];
     arraydepth=jsonopt('JSONLAB_ArrayDepth_',1,varargin{:});
-    pbar=jsonopt('progressbar_',-1,varargin{:});
+    pbar=-1;
+    if(isfield(varargin{1},'progressbar_'))
+        pbar=varargin{1}.progressbar_;
+    end
 
     if next_char ~= ']'
 	if(jsonopt('FastArrayParser',1,varargin{:})>=1 && arraydepth>=jsonopt('FastArrayParser',1,varargin{:}))
@@ -236,19 +243,19 @@ global pos inStr isoct
 
 function parse_char(c)
     global pos inStr len
-    skip_whitespace;
+    pos=skip_whitespace(pos,inStr,len);
     if pos > len || inStr(pos) ~= c
         error_pos(sprintf('Expected %c at position %%d', c));
     else
         pos = pos + 1;
-        skip_whitespace;
+        pos=skip_whitespace(pos,inStr,len);
     end
 
 %%-------------------------------------------------------------------------
 
 function c = next_char
     global pos inStr len
-    skip_whitespace;
+    pos=skip_whitespace(pos,inStr,len);
     if pos > len
         c = [];
     else
@@ -257,10 +264,10 @@ function c = next_char
 
 %%-------------------------------------------------------------------------
 
-function skip_whitespace
-    global pos inStr len
-    while pos <= len && isspace(inStr(pos))
-        pos = pos + 1;
+function newpos=skip_whitespace(pos,inStr,len)
+    newpos=pos;
+    while newpos <= len && isspace(inStr(newpos))
+        newpos = newpos + 1;
     end
 
 %%-------------------------------------------------------------------------
@@ -346,9 +353,8 @@ function num = parse_number(varargin)
 function val = parse_value(varargin)
     global pos inStr len
     
-    pbar=jsonopt('progressbar_',-1,varargin{:});
-    if(pbar>0)
-        waitbar(pos/len,pbar,'loading ...');
+    if(isfield(varargin{1},'progressbar_'))
+        waitbar(pos/len,varargin{1}.progressbar_,'loading ...');
     end
     
     switch(inStr(pos))
