@@ -6,7 +6,7 @@
 
 Iso2mesh ChangeLog (key features marked by *):
 
-2015/09/19  (1.8.0, codename: Deviled Egg - beta)
+2015/09/19  (1.7.9, codename: Deviled Egg - beta)
         1. make v2m(method=cgalmesh) output repeatable
         2.**JSONlab update to 1.1
         3. qmeshcut allows to exact plane that are exactly parallel to the faces
