@@ -20,7 +20,7 @@ function val=jsonopt(key,default,varargin)
 % license:
 %     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details
 %
-% -- this function is part of jsonlab toolbox (http://iso2mesh.sf.net/cgi-bin/index.cgi?jsonlab)
+% -- this function is part of JSONlab toolbox (http://iso2mesh.sf.net/cgi-bin/index.cgi?jsonlab)
 % 
 
 val=default;

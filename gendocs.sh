@@ -9,7 +9,7 @@
 print_help()
 {
    awk '/^%/ {dp=1} /-- this function is part of iso2mesh/ {exit} \
-        /-- this function is part of jsonlab/ {exit} \
+        /-- this function is part of JSONLab/ {exit} \
         /^function/ {dp=1} /./ {if(dp==1) print;}' $1 \
      | grep -v 'Qianqian' | grep -v 'date:' | grep -v '^%\s*$'| \
      sed -e 's/^%//g' -e 's/^function\(.*$\)/\n==== function\1 ====/g'
