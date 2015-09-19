@@ -4,7 +4,7 @@ function openedge=surfedge(f,varargin)
 %
 % find the edge of an open surface or surface of a volume
 %
-% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang, <q.fang at neu.edu>
 % date: 2007/11/21
 %
 % input:

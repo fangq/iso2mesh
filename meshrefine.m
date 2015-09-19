@@ -4,7 +4,7 @@ function [newnode,newelem,newface]=meshrefine(node,elem,varargin)
 %
 % refine a tetrahedral mesh by adding new nodes or constraints
 %
-% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang, <q.fang at neu.edu>
 %
 % input parameters:
 %      node: existing tetrahedral mesh node list

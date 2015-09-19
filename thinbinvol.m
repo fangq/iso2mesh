@@ -7,7 +7,7 @@ function vol=thinbinvol(vol,layer,nobd)
 % this does it in 3d and only run thinning for 
 % non-zero elements (and hopefully faster)
 %
-% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang, <q.fang at neu.edu>
 %
 % input:
 %     vol: a volumetric binary image

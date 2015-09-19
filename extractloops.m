@@ -4,7 +4,7 @@ function loops=extractloops(edges)
 %
 % extract individual loop or polyline segment from a collection of edges
 %
-% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang, <q.fang at neu.edu>
 % date: 2007/11/21
 %
 % input:   

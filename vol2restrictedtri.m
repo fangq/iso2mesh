@@ -4,7 +4,7 @@ function [node,elem]=vol2restrictedtri(vol,thres,cent,brad,ang,radbound,distboun
 %
 % surface mesh extraction using CGAL mesher
 %
-% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang, <q.fang at neu.edu>
 % date: 2009/01/06
 %
 % input:

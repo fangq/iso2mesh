@@ -4,7 +4,7 @@ function quality=meshquality(node,elem,maxnode)
 %
 % compute the Joe-Liu mesh quality measure of an N-D mesh (N<=3)
 %
-% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang, <q.fang at neu.edu>
 % date: 2011/02/26
 %
 % input:

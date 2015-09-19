@@ -4,7 +4,7 @@ function saveoff(v,f,fname)
 %
 % save a surface mesh to Geomview Object File Format (OFF)
 %
-% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang, <q.fang at neu.edu>
 % date: 2007/03/28
 %
 % input:

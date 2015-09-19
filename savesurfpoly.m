@@ -4,7 +4,7 @@ function savesurfpoly(v,f,holelist,regionlist,p0,p1,fname,forcebox)
 %
 % save a set of surfaces into poly format (for tetgen)
 %
-% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang, <q.fang at neu.edu>
 % date: 2007/11/21
 %
 % input:

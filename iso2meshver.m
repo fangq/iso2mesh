@@ -6,7 +6,7 @@ function [major,minor,patchnum,extra]=iso2meshver
 %
 % get the version number of iso2mesh toolbox
 %
-% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang, <q.fang at neu.edu>
 %
 % output:
 %    if you ask for a single output:

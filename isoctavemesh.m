@@ -4,7 +4,7 @@ function [isoctave verinfo]=isoctavemesh
 %
 % determine whether the code is running in octave
 %
-% author: Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang, <q.fang at neu.edu>
 %
 % output:
 %   isoctave: 1 if in octave, otherwise 0
