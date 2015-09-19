@@ -6,7 +6,7 @@ function snorm=surfacenorm(node,face,varargin)
 %
 % compute the normal vectors for a triangular surface
 %
-% author: Qianqian Fang, <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang, <q.fang at neu.edu>
 %
 % input:
 %   node: a list of node coordinates (nn x 3)

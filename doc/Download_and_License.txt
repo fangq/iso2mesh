@@ -14,20 +14,20 @@ How to obtain iso2mesh
 
 1. Download the latest release
 
-iso2mesh 2013 beta (1.4.9), codenamed [7]Laba Porridge - beta
+iso2mesh 2013 (1.5.0), codenamed [7]Laba Porridge
 
-   Please download the latest v1.4.9 beta release at our
+   Please download the latest v1.5.0 release at our
    [8]registration/download page. We are greatly appreciated if you can
    tell us a little bit about you and your related research by
    [9]registering your copy of iso2mesh.
-     * Release date: Jan. 20, 2013
+     * Release date: July 16, 2013
      * This software is supported on [os-icons3.png]
 
-iso2mesh 1.0.1, codenamed Mapo Tofu (stable)
+iso2mesh 1.4.9, codenamed Laba Porridge (beta)
 
-   Please download the stable v1.0.1 release at our
+   Please download the stable v1.4.9 release at our
    [10]registration/download page.
-     * Release date: Jun. 3, 2011
+     * Release date: Jan. 20, 2013
 
 2. Download Development Snapshot from SVN (not fully tested)
 
@@ -54,7 +54,7 @@ iso2mesh 1.0.1, codenamed Mapo Tofu (stable)
    The latest code snapshot can be checked out from project's [12]SVN
    repository. It can be checked out anonymously by the following command.
 
- svn checkout https://iso2mesh.svn.sourceforge.net/svnroot/iso2mesh/trunk/iso2mesh iso2mesh
+ svn checkout svn://svn.code.sf.net/p/iso2mesh/code/trunk/iso2mesh iso2mesh
 
    After checking out the code, you need to set up the path based on the
    [13]installation instructions. Then you can start matlab or octave, and
@@ -80,7 +80,7 @@ iso2mesh 1.0.1, codenamed Mapo Tofu (stable)
 
    The iso2mesh toolbox is licensed under [16]GNU Public License (GPL).
    However, it included a number of external tools (under bin/ directory)
-   to perform certain functionalities by means of [17]pipelines. These
+   to perform certain functionality by means of [17]pipelines. These
    external tools are subjected to their upstream licenses and are not
    necessarily GPL (or GPL compatible). The complete list of these
    external commands and their author info and licenses can be found from
@@ -124,7 +124,7 @@ References
    9. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?action=edit&id=register/iso2mesh
   10. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?register/iso2mesh
   11. http://tortoisesvn.net/downloads
-  12. http://iso2mesh.svn.sourceforge.net/viewvc/iso2mesh/trunk/iso2mesh/
+  12. http://sourceforge.net/p/iso2mesh/code/404/tree/
   13. http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc/Installation
   14. https://sourceforge.net/user/registration
   15. http://sourceforge.net/users/fangq

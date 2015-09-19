@@ -192,9 +192,13 @@ if(size(elem,2)==3 && setquality==0)
 elseif(size(elem,2)==3)
     system([' "' mcpath('tetgen') exesuff '" ' moreopt ' -p -A "' mwpath('pre_refine.poly') '"']);
     [newnode,newelem,newface]=readtetgen(mwpath('pre_refine.1'));
-else
+elseif(~isempty(moreopt))
     system([' "' mcpath('tetgen') exesuff '" ' moreopt ' -r "' mwpath('pre_refine.1') '"']);
     [newnode,newelem,newface]=readtetgen(mwpath('pre_refine.2'));
+else
+    newnode=node;
+    newelem=elem;
+    newface=face;
 end
 
 if(~isempty(externalpt)) % user request to insert nodes that are outside of the original mesh

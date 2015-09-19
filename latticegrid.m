@@ -4,7 +4,7 @@ function [node,face,centroids]=latticegrid(varargin)
 %
 % generate a 3D lattice
 %
-% author: Qianqian Fang, <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang, <q.fang at neu.edu>
 %
 % input: 
 %   xrange, yrange, zrange ...: 1D vectors specifying the range of each

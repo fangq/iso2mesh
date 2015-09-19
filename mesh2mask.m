@@ -1,4 +1,4 @@
-function [mask weight]=mesh2mask(node,face,xi,yi,hf)
+function [mask, weight]=mesh2mask(node,face,xi,yi,hf)
 %
 % [mask weight]=mesh2mask(node,face,Nxy)
 %   or
@@ -22,6 +22,8 @@ function [mask weight]=mesh2mask(node,face,xi,yi,hf)
 % output:
 %      mask: a 2D image, the value of each pixel is the index of the
 %            enclosing triangle, if the pixel is outside of the mesh, NaN
+%      weight: (optional) a 3 by Nx by Ny array, where Nx/Ny are the dimensions for
+%            the mask
 %
 % note: This function only works in MATLAB when the DISPLAY is not 
 %       disabled. The maximum size of the mask output is limited by the 
@@ -30,7 +32,7 @@ function [mask weight]=mesh2mask(node,face,xi,yi,hf)
 % example:
 %
 %   [no,fc]=meshgrid6(0:5,0:5);
-%   mask=mesh2mask(no,fc,-1:0.1:5,0:0.1:5);
+%   [mask weight]=mesh2mask(no,fc,-1:0.1:5,0:0.1:5);
 %   imagesc(mask);
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
