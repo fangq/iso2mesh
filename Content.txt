@@ -49,6 +49,7 @@
     method: same as in smoothsurf, default is 'laplacianhc'
  output:
     newnode: output, the smoothed node coordinates
+
 === # Streamlined mesh generation ===
 
 ==== function [node,elem,face,regions]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalues) ====
@@ -184,6 +185,7 @@
    [no,el]=meshgrid6(0:5,0:5,0:3);
    mask=mesh2vol(no,el(:,1:4),0:0.1:5,0:0.1:5,0:0.1:4);
    imagesc(mask(:,:,3))
+
 === # iso2mesh main function backend ===
 
 ==== function [node,elem]=binsurface(img,nface) ====
@@ -311,6 +313,7 @@
    [no,fc]=meshgrid6(0:5,0:5);
    [mask weight]=mesh2mask(no,fc,-1:0.1:5,0:0.1:5);
    imagesc(mask);
+
 === # iso2mesh primitive meshing functions ===
 
 ==== function [node,face,elem]=meshabox(p0,p1,opt,nodesize) ====
@@ -470,6 +473,7 @@
     c0(:,4)=[0.01;0.001];
     [no,el]=surf2mesh(node,face,[],[],1,[],c0);
     figure; plotmesh(no,el)
+
 === # Mesh decomposition and query ===
 
 ==== function facecell=finddisconnsurf(f) ====
@@ -772,6 +776,7 @@
       elist: list of triangles that is enclosed between the two
              edge-fronts
       nextfront: a new edge loop list representing the next edge-front
+
 === # Mesh processing and reparing ===
 
 ==== function [node,elem]=meshcheckrepair(node,elem,opt,varargin) ====
@@ -879,6 +884,7 @@
  output:
     newnode: the output node list, in most cases it equals node
     newface: the face list with consistent ordering
+
 === # Mesh resampling and optimization ===
 
 ==== function [node,elem]=meshresample(v,f,keepratio) ====
@@ -1091,6 +1097,7 @@
    figure;
    [newnode,newface]=surfboolean(node1,face1,'diff',node2,face2);
    plotmesh(newnode,newface,'x>5');
+
 === # File I/O ===
 
 ==== function saveasc(v,f,fname) ====
@@ -1577,6 +1584,7 @@
       elem: input, tetrahedral element list, dimension (ne,4)
       fname: output file name
       heading: optional, a descriptive string for the mesh
+
 === # Volumetric image pre-processing ===
 
 ==== function islands=bwislands(img) ====
@@ -1677,6 +1685,7 @@
             erode. if not given, nobd=0.
  output:
      vol: the volume image after the thinning operations
+
 === # Mesh plotting ===
 
 ==== function hm=plotmesh(node,varargin) ====
@@ -1818,6 +1827,7 @@
      patch('Vertices',cutpos,'Faces',facedata,'FaceVertexCData',cutvalue,'FaceColor','interp');
   % if value has a length of elem:
      patch('Vertices',cutpos,'Faces',facedata,'CData',cutvalue,'FaceColor','flat');
+
 === # Miscellaneous functions ===
 
 ==== function valnew=surfdiffuse(node,tri,val,ddt,iter,type1,opt) ====
@@ -2099,3 +2109,4 @@ end
       ubjdata=struct2jdata(obj);
  license:
      BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+

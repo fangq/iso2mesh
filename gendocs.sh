@@ -20,6 +20,7 @@ print_group()
    do 
       print_help $fun.m
    done
+   echo ''
 }
 
 func_shortcut="v2m v2s s2m s2v m2v sms"
