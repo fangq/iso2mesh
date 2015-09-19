@@ -13,12 +13,17 @@
  inputs and outputs are similar to those defined in vol2surf; In v2s, 
  method can be set to 'cgalmesh' in addition to those allowed by vol2surf.
 
-==== function [node,elem,face]=s2m(v,f,keepratio,maxvol,method) ====
- [node,elem,face]=s2m(v,f,keepratio,maxvol)
+==== function [node,elem,face]=s2m(v,f,keepratio,maxvol,method,regions,holes) ====
+ [node,elem,face]=s2m(v,f,keepratio,maxvol,method)
+ [node,elem,face]=s2m(v,f,keepratio,maxvol,'tetgen',regions,holes)
  volumetric mesh generation from a closed surface, shortcut for surf2mesh
  inputs and outputs are similar to those defined in surf2mesh
  if method='cgalpoly', s2m will call cgals2m and keepratio should be a 
  structure (as the 'opt' input in cgals2m)
+ input default values:
+       method: if ignored, iso2mesh uses surf2mesh ('tetgen') to do the
+               tetrahedral mesh generation
+       regions,holes: if ignored, iso2mesh assumes both are empty
 
 ==== function img=s2v(node,face,div) ====
  img=s2v(node,face,div)
@@ -1313,7 +1318,7 @@
  convert a MATLAB object (cell, struct or array) into a JSON (JavaScript
  Object Notation) string
  created on 2011/09/09
- $Id: savejson.m 495 2015-06-29 19:12:04Z fangq $
+ $Id: savejson.m 500 2015-09-19 17:07:03Z fangq $
  input:
       rootname: the name of the root-object, when set to '', the root name
         is ignored, however, when opt.ForceRootName is set to 1 (see below),
@@ -1392,7 +1397,7 @@
          Joel Feenstra:
          http://www.mathworks.com/matlabcentral/fileexchange/20565
             created on 2008/07/03
- $Id: loadjson.m 492 2015-06-05 20:52:02Z fangq $
+ $Id: loadjson.m 500 2015-09-19 17:07:03Z fangq $
  input:
       fname: input file name, if fname contains "{}" or "[]", fname
              will be interpreted as a JSON string
