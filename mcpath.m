@@ -37,10 +37,20 @@ else
 end
 
 if(exist([binname getexeext],'file')==0)
-        error(sprintf([ 'The following executable:\n' ...
+        exename=[binname getexeext];
+        [pathstr,name,ext]=fileparts(exename);
+        warning(sprintf([ 'The following executable:\n' ...
                         '\t%s%s\n' ...
-                        'is missing. Please download it from ' ...
-                        'https://github.com/fangq/iso2mesh/tree/master/bin/ ' ...
-                        'and save it to the above path, then rerun the script.\n' ...
+                        'is missing. Try downloading ... '
                       ],binname,getexeext));
+        urlwrite(sprintf('https://github.com/fangq/iso2mesh/raw/master/bin/%s%s',name,ext),exename);
+        if(exist(exename,'file')==0)
+            error(sprintf(['File download failed. Please manually download the binary from %s',...
+                'https://github.com/fangq/iso2mesh/raw/master/bin/%s%s'],name,ext));
+        else
+            fprintf(1,'file download successfully!\n');
+        end
+        if(isunix)
+            system(['chmod a+x ' exename]);
+        end
 end
