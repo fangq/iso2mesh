@@ -6,7 +6,7 @@ function data = loadjson(fname,varargin)
 %
 % parse a JSON (JavaScript Object Notation) file or string
 %
-% author: Qianqian Fang, <q.fang at neu.edu>
+% authors:Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
 % created on 2011/09/09, including previous works from 
 %
 %         Nedialko Krouchev: http://www.mathworks.com/matlabcentral/fileexchange/25713
@@ -63,7 +63,7 @@ function data = loadjson(fname,varargin)
 
 global pos inStr len  esc index_esc len_esc isoct arraytoken
 
-if(regexp(fname,'[\{\}\]\[]','once'))
+if(regexp(fname,'^\s*(?:\[.+\])|(?:\{.+\})\s*$','once'))
    string=fname;
 elseif(exist(fname,'file'))
    try
