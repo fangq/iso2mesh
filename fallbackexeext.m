@@ -19,7 +19,6 @@ function exesuff=fallbackexeext(exesuffix, exename)
 exesuff=exesuffix;
 if(strcmp(exesuff,'.mexa64') & exist([mcpath(exename) exesuff],'file')==0) % fall back to i386 linux
         exesuff='.mexglx';
-	return;
 end
 if(strcmp(exesuff,'.mexmaci64') & exist([mcpath(exename) exesuff],'file')==0) % fall back to i386 mac
         exesuff='.mexmaci';
@@ -27,4 +26,6 @@ end
 if(strcmp(exesuff,'.mexmaci') & exist([mcpath(exename) exesuff],'file')==0) % fall back to ppc mac
         exesuff='.mexmac';
 end
-
+if(exist([mcpath(exename) exesuff],'file')==0) % fall back to OS native package
+        exesuff='';
+end
