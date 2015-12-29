@@ -1,9 +1,22 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   demo script for mesh generation from a bounding box
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% preparation
+% user must add the path of iso2mesh to matlab path list
+% addpath('../');
 
-% where to store the tetgen files
-ISO2MESH_TEMP = '/Users/srobertp/software/geometric_pdes_matlab/tmp_iso2mesh_files';
-% prefix to tetgen filenames
-ISO2MESH_SESSION = 'srp_';
+% user need to add the full path to .../iso2mesh/bin directory
+% to windows/Linux/Unix PATH environment variable
+
+%% create mesh
+
+% another option for setting temporary tetgen file locations
+% % where to store the tetgen files
+% ISO2MESH_TEMP = '/Users/srobertp/software/geometric_pdes_matlab/tmp_iso2mesh_files';
+% % prefix to tetgen filenames
+% ISO2MESH_SESSION = 'srp_';
+
 
 p0 = [0,0,0];
 p1 = [1,1,1];
