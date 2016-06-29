@@ -1,4 +1,4 @@
-function node=orthdisk(c0,c1,r,ndiv)
+function node=orthdisk(c0,c1,r,ndiv,v1)
 %
 % node=orthdisk(c0,c1,r,ndiv)
 %
@@ -20,6 +20,13 @@ function node=orthdisk(c0,c1,r,ndiv)
 
 len=sqrt(sum((c0-c1).*(c0-c1)));
 v0=c1-c0;
+
+if(nargin>=5)
+    vt=cross(v0,v1);
+    if(norm(vt)>1e-5) % input is not orthogonal
+        v0=cross(v1,vt);
+    end
+end
 
 if(nargin<=2)
     r=1;
