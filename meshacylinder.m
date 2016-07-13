@@ -3,6 +3,7 @@ function [node,face,elem]=meshacylinder(c0,c1,r,tsize,maxvol,ndiv)
 % [node,face]=meshacylinder(c0,c1,r,tsize,maxvol,ndiv)
 %    or
 % [node,face,elem]=meshacylinder(c0,c1,r,tsize,maxvol,ndiv)
+% [nplc,fplc]=meshacylinder(c0,c1,r,0,0,ndiv);
 %
 % create the surface and (optionally) tetrahedral mesh of a 3D cylinder
 %
@@ -13,13 +14,18 @@ function [node,face,elem]=meshacylinder(c0,c1,r,tsize,maxvol,ndiv)
 %   r:   radius of the cylinder
 %   tsize: maximum surface triangle size on the sphere
 %   maxvol: maximu volume of the tetrahedral elements
+%
+%         if both tsize and maxvol is set to 0, this function sill return 
+%         the piecewise-linear-complex (PLC) in the form of the nodes (as node)
+%         and a cell array (as face).
+%
 %   ndiv: approximate the cylinder surface into ndiv flat pieces, if 
 %         ignored, ndiv is set to 20
 %
 % output:
 %   node: node coordinates, 3 columns for x, y and z respectively
 %   face: integer array with dimensions of NB x 3, each row represents
-%         a surface mesh triangle 
+%         a surface mesh triangle
 %   elem: (optional) integer array with dimensions of NE x 4, each row 
 %         represents a tetrahedron 
 %
@@ -59,6 +65,11 @@ fc{count}={[i i+ndiv 1+ndiv 1],1}; count=count+1;
 fc{count}={1:ndiv,2};count=count+1;  % bottom inner circle
 fc{count}={1+ndiv:2*ndiv,3};count=count+1;  % top inner circle
 
+if(nargout==2 && tsize==0.0 && maxvol==0.0)
+    node=no;
+    face=fc;
+    return;
+end
 if(nargin==3)
     tsize=len/10;
 end

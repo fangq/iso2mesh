@@ -12,6 +12,7 @@ names and origins of these tools are explained below:
 # tetgen.*    - A Quality Tetrahedral Mesh Generator and 3D Delaunay Triangulator by Hang Si
 # tetview.*   - A Mesh Graphing Utility by Hang Si
 # meshfix.*   - Mesh Validation and Repairing Utility (build on JMeshLib) by Marco Attene
+# cork.*      - A robust surface mesh Boolean operation algorithm by Gilbert Bernstein (https://github.com/gilbo/cork)
 
 
 To distinguish binaries for different platforms, we added 
@@ -34,7 +35,9 @@ cgalsimp2 were modified from CGAL 3.x and the binary are
 licensed under QPL (The Q Public License v1.0 
 http://www.opensource.org/licenses/qtpl). The utility
 meshfix was compiled from JMeshLib and is licensed under
-GPL v2 or later. The modified source codes of these utilities
+GPL v2 or later. The cork binary was compiled using
+a modified cork source code, released under the LGPL 
+license. The modified source codes of these utilities
 are provided on the iso2mesh project management website
 (gforge server) and subversion source code repository.
 It is COMPLETELY the user's responsibility to use all 

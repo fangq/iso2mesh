@@ -24,9 +24,11 @@ function [node,elem]=meshcheckrepair(node,elem,opt,varargin)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
+extra=varargin2struct(varargin{:});
+
 if(nargin<3 || strcmp(opt,'dupnode')|| strcmp(opt,'dup'))
     l1=size(node,1);
-    [node,elem]=removedupnodes(node,elem);
+    [node,elem]=removedupnodes(node,elem,jsonopt('Tolerance',0,extra));
     l2=size(node,1);
     if(l2~=l1) fprintf(1,'%d duplicated nodes were removed\n',l1-l2); end
 end
@@ -62,7 +64,6 @@ if(nargin<3 || strcmp(opt,'deep'))
 end
 
 exesuff=fallbackexeext(getexeext,'meshfix');
-extra=varargin2struct(varargin{:});
 moreopt=' -q -a 0.01 ';
 if(isstruct(extra) && isfield(extra,'MeshfixParam'))
     moreopt=extra.MeshfixParam;
