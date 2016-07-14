@@ -20,8 +20,6 @@ function [node,elem,face]=s2m(v,f,keepratio,maxvol,method,regions,holes)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-p0=min(v(:,1:3));
-p1=max(v(:,1:3));
 if(nargin>=5 && strcmp(method,'cgalpoly'))
     [node,elem,face]=cgals2m(v,f,keepratio,maxvol);
     return;
@@ -32,5 +30,5 @@ end
 if(nargin<=6)
     holes=[];
 end
-[node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes);
+[node,elem,face]=surf2mesh(v,f,[],[],keepratio,maxvol,regions,holes);
 

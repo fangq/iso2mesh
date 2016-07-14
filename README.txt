@@ -189,6 +189,13 @@ other modules are under the Lesser General Public License (LGPL)
 *URL:http://gts.sourceforge.net/
 *Author: GTS developers
 
+=== bin/cork ===
+
+*Summary: A robust surface mesh Boolean operation algorithm
+*License: LGPL (GNU Lesser General Public License)
+*URL:https://github.com/gilbo/cork
+*Author: Gilbert Bernstein
+
 
 Note: iso2mesh and the above meshing utilities are considered 
 as an "aggregate" rather than "derived work", based on the 
