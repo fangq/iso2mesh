@@ -78,6 +78,10 @@ if(strcmp(exename,'cork'))
 end
 
 exesuff=fallbackexeext(getexeext,exename);
+randseed=hex2dec('623F9A9E'); % "U+623F U+9A9E"
+if(~isempty(getvarfrom({'caller','base'},'ISO2MESH_RANDSEED')))
+    randseed=getvarfrom({'caller','base'},'ISO2MESH_RANDSEED');
+end
 
 for i=1:3:len
    op=varargin{i};
@@ -147,8 +151,8 @@ for i=1:3:len
        else
            saveoff(newnode(:,1:3),newelem(:,1:3),mwpath(['pre_surfbool1.' tempsuff]));
            saveoff(no(:,1:3),el(:,1:3),mwpath(['pre_surfbool2.' tempsuff]));
-           cmd=sprintf('cd "%s" && "%s%s" %s%s "%s" "%s" "%s"',mwpath,mcpath(exename),exesuff,'-',...
-               opstr,mwpath(['pre_surfbool1.' tempsuff]),mwpath(['pre_surfbool2.' tempsuff]),mwpath('post_surfbool.off'));       
+           cmd=sprintf('cd "%s" && "%s%s" %s%s "%s" "%s" "%s" -%d',mwpath,mcpath(exename),exesuff,'-',...
+               opstr,mwpath(['pre_surfbool1.' tempsuff]),mwpath(['pre_surfbool2.' tempsuff]),mwpath('post_surfbool.off'),randseed);
        end
    end
    [status outstr]=system(cmd);
