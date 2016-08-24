@@ -1,6 +1,6 @@
-function openedge=surfedge(f,varargin)
+function [openedge,elemid]=surfedge(f,varargin)
 %
-% openedge=surfedge(f)
+% [openedge,elemid]=surfedge(f)
 %
 % find the edge of an open surface or surface of a volume
 %
@@ -12,6 +12,9 @@ function openedge=surfedge(f,varargin)
 %
 % output:
 %      openedge: list of edges of the specified surface
+%      elemid (optional): the corresponding index of the 
+%                tetrahedron of an open-edge or triangle, 
+%                elemid has the same length as openedge.
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
@@ -56,4 +59,7 @@ else
         end
 end
 openedge=edges(ix(qx),:);
+if(nargout>=2)
+    [elemid, iy]=ind2sub(size(f),ix(qx));
+end
 % node4=node4(ix(qx));
