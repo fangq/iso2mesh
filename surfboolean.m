@@ -72,9 +72,9 @@ catch
         exename='gtsset';
     end
 end
-isgts=1;
-if(strcmp(exename,'cork'))
-    isgts=0;
+isgts=0;
+if(strcmp(exename,'gtsset'))
+    isgts=1;
 end
 
 exesuff=fallbackexeext(getexeext,exename);
