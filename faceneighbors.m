@@ -30,6 +30,7 @@ faces=[t(:,[1,2,3]);
        t(:,[1,2,4]);
        t(:,[1,3,4]);
        t(:,[2,3,4])];
+
 faces=sort(faces,2);
 [foo,ix,jx]=unique(faces,'rows');
 if(isoctavemesh)
@@ -86,6 +87,9 @@ if(nargin==2)
   if(strcmp(opt,'surface'))
 	facenb=faces(find(facenb==0),:);
   elseif(strcmp(opt,'rowmajor'))
+	index=[1:length(faces)];
+	index=(reshape(index,[],4))';
+	faces=faces(index(:),:);
 	facenb=faces(find(facenb'==0),:);
   else
         error(['supplied option "' opt '" is not supported.']);
