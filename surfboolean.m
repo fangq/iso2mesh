@@ -69,7 +69,7 @@ catch
     try
         exename=evalin('base','ISO2MESH_SURFBOOLEAN');
     catch
-        exename='gtsset';
+        exename='cork';
     end
 end
 isgts=0;
