@@ -1,4 +1,4 @@
-function varargout=s2v(node,face,div)
+function varargout=s2v(node,face,div,varargin)
 %
 % [img,v2smap]=s2v(node,face,div)
 %
@@ -48,4 +48,4 @@ if(dx<=eps)
   error('the input mesh is in a plane');
 end
 
-[varargout{1:2}]=surf2vol(node,face,p0(1)-dx:dx:p1(1)+dx,p0(2)-dx:dx:p1(2)+dx,p0(3)-dx:dx:p1(3)+dx);
+[varargout{1:2}]=surf2vol(node,face,p0(1)-dx:dx:p1(1)+dx,p0(2)-dx:dx:p1(2)+dx,p0(3)-dx:dx:p1(3)+dx,varargin{:});
