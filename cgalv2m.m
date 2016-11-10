@@ -102,3 +102,5 @@ fprintf(1,'surface and volume meshes complete\n');
 if(size(node,1)>0)
     [node,elem,face]=sortmesh(node(1,:),node,elem,1:4,face,1:3);
 end
+
+node=node+0.5;
