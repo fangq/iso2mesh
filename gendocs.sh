@@ -11,7 +11,7 @@ print_help()
    awk '/^%/ {dp=1} /-- this function is part of iso2mesh/ {exit} \
         /-- this function is part of JSONLab/ {exit} \
         /^function/ {dp=1} /./ {if(dp==1) print;}' $1 \
-     | grep -v 'Qianqian' | grep -v 'date:' | grep -v '^%\s*$'| \
+     | grep -v 'Qianqian' | grep -v 'date:' | #grep -v '^%\s*$'| \
      sed -e 's/^%//g' -e 's/^function\(.*$\)/\n==== function\1 ====/g'
 }
 print_group()
@@ -32,12 +32,13 @@ func_inquery="finddisconnsurf surfedge volface extractloops meshconn
                 meshcentroid nodevolume elemvolume neighborelem 
 		faceneighbors edgeneighbors maxsurf flatsegment orderloopedge  
 		mesheuler bbxflatsegment surfplane surfinterior surfpart
-                surfseeds meshquality meshedge surfacenorm uniqedges advancefront"
+                surfseeds meshquality meshedge surfacenorm uniqedges advancefront
+                innersurf outersurf surfvolume insurface"
 func_meshfix="meshcheckrepair meshreorient removedupelem 
                 removedupnodes removeisolatednode removeisolatedsurf
                 surfaceclean getintersecttri delendelem surfreorient"
 func_remesh="meshresample remeshsurf smoothsurf sortmesh mergemesh 
-                meshrefine mergesurf surfboolean"
+                meshrefine mergesurf surfboolean fillsurf"
 func_fileio="saveasc savedxf savestl savebinstl saveinr saveoff 
                 savesmf savesurfpoly savegts readgts
                 savevrml readasc readinr readmedit readoff readsmf

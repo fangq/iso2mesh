@@ -6,7 +6,7 @@
       Department of Bioengineering
       Northeastern University
       360 Huntington Ave, Boston, MA 02115
-*Version: 1.7.9 (Deviled Egg - beta)
+*Version: 1.8.0 (Deviled Egg)
 *License: GPL v2 or later (see COPYING) 
       (this license does not cover the binaries under the bin/ 
        directory, see Section III for more details)

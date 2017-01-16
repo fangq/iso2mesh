@@ -6,6 +6,25 @@
 
 Iso2mesh ChangeLog (key features marked by *):
 
+2017/01/16  (1.8.0, codename: Deviled Egg - final)
+        1.**robust surface boolean operator based on Cork
+        2. update tetgen 1.5 to 1.5.1
+        3. new function: insurface for point-in-surface test
+        4.*new function: fillsurf for tesselating a closed surface
+        5. new function: surfvolume for calculating the volume of an enclosed surface
+        6.*new function: innersurf/outersurf: interior and exterior parts of a surface
+        7. meshcylinders supports a series of segments, also returns PLC
+        8. surfedge/volface return tet element id for the face triangles
+        9. plotmesh supports element-based colormap
+       10. s2v outputs mesh-to-voxel transformation matrix
+       11.*JSONlab updates to 1.5 Nominus alpha
+       12. display binary utility download URL when missing
+       13. faceneighbor returns row- or column-major facelist
+       14. fix half-voxel offset bug in cgalmesher
+       15. surf2vol and s2v now rasterize labeled surfaces and tetrahedral mesh
+       16. disable binary compression for Mac OS to avoid crashes
+       17. fix uniqedges edgemap output bug
+
 2015/09/19  (1.7.9, codename: Deviled Egg - beta)
         1. make v2m(method=cgalmesh) output repeatable
         2.**JSONlab update to 1.1
