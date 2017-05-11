@@ -1,6 +1,6 @@
 function [node,face,elem]=meshabox(p0,p1,opt,nodesize)
 %
-% [node,face,elem]=meshabox(p0,p1,opt,maxvol)
+% [node,face,elem]=meshabox(p0,p1,opt,nodesize)
 %
 % create the surface and tetrahedral mesh of a box geometry
 %
