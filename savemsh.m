@@ -22,6 +22,10 @@ fid = fopen(fname,'wt');
 if(fid==-1)
     error('You do not have permission to save mesh files.');
 end
+
+% Check that all the elements are correctly oriented
+elem(:,1:4)=meshreorient(node,elem(:,1:4));
+
 nbNodes = size (node,1);
 reg = unique (elem(:,5));
 nbRegion = length (reg);
