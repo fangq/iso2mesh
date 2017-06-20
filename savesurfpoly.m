@@ -27,7 +27,7 @@ if(nargin>=8)
 	dobbx=~isempty(forcebox) & all(forcebox);
 end
 
-if(~iscell(f) & size(f,2)==4)
+if(~iscell(f) && size(f,2)==4)
     faceid=f(:,4);
     f=f(:,1:3);
 end
@@ -46,6 +46,8 @@ if(size(v,2)==4)
 end
 node=v;
 loopid=[];
+loopvert={};
+loopnum=1;
 if(~isempty(edges))
     loops=extractloops(edges);
     if(length(loops)<3)
@@ -55,7 +57,9 @@ if(~isempty(edges))
     segnum=length(seg)-1;
     newloops=[];
     for i=1:segnum
-       if(seg(i+1)-(seg(i)+1)==0) continue; end
+       if(seg(i+1)-(seg(i)+1)==0)
+           continue;
+       end
        oneloop=loops(seg(i)+1:seg(i+1)-1);
        if(oneloop(1)==oneloop(end)) oneloop(end)=[]; end
        newloops=[newloops nan bbxflatsegment(node,oneloop)];
@@ -69,7 +73,11 @@ if(~isempty(edges))
     loopid=zeros(segnum,1);
     for i=1:segnum     % walk through the edge loops
         subloop=loops(seg(i)+1:seg(i+1)-1);
-        if(isempty(subloop)) continue; end
+        if(isempty(subloop))
+            continue;
+        end
+        loopvert{loopnum}=subloop;
+        loopnum=loopnum+1;
         boxfacet=find(sum(abs(diff(v(subloop,:))))<1e-8); % find a flat loop
         if(length(boxfacet)==1)   % if the loop is flat along x/y/z dir
             bf=boxfacet(1);    % no degeneracy allowed
@@ -86,12 +94,12 @@ if(~isempty(edges))
     end
 end
 
-if(dobbx & isempty(edges))
+if(dobbx && isempty(edges))
     bbxnum=6;
     loopcount=zeros(bbxnum,1);	
 end
 
-if(dobbx|~isempty(edges))
+if(dobbx || ~isempty(edges))
     nn=size(v,1);
     boxnode=[p0;p1(1),p0(2:3);p1(1:2),p0(3);p0(1),p1(2),p0(3);
               p0(1:2),p1(3);p1(1),p0(2),p1(3);p1;p0(1),p1(2:3)];
@@ -113,13 +121,21 @@ fprintf(fp,'#node list\n%d 3 0 0\n',length(node));
 fprintf(fp,'%d %.16f %.16f %.16f\n',node');
 
 if(~iscell(f))
-    fprintf(fp,'#facet list\n%d 1\n',length(f)+bbxnum);
+    fprintf(fp,'#facet list\n%d 1\n',length(f)+bbxnum+length(loopvert));
     elem=[3*ones(length(f),1),f-1];
     if(~isempty(elem))
         if(exist('faceid','var') && length(faceid)==size(elem,1))
             fprintf(fp,'1 0 %d\n%d %d %d %d\n',[faceid(:) elem]');
         else
             fprintf(fp,'1 0\n%d %d %d %d\n',elem');
+        end
+    end
+    if(~isempty(loopvert))
+        for i=1:length(loopvert)     % walk through the edge loops
+            subloop=loopvert{i}-1;
+            fprintf(fp,'1 0 %d\n%d',i,length(subloop));
+            fprintf(fp,'\t%d',subloop);
+            fprintf(fp,'\n');
         end
     end
 else % if the surface is recorded as a cell array
@@ -170,23 +186,23 @@ else % if the surface is recorded as a cell array
                 end
             end
          else
-	    	if(faceid>0)
-                fprintf(fp,'1 0 %d\n%d',faceid,length(plc));
-            else
-                fprintf(fp,'1 0\n%d',length(plc));
-            end
-    		fprintf(fp,'\t%d',plc-1);
-            fprintf(fp,'\t1\n');
+             if(faceid>0)
+                 fprintf(fp,'1 0 %d\n%d',faceid,length(plc));
+             else
+                 fprintf(fp,'1 0\n%d',length(plc));
+             end
+    		 fprintf(fp,'\t%d',plc-1);
+             fprintf(fp,'\t1\n');
          end
         end
     end
 end
 
-if(dobbx|~isempty(edges))
+if(dobbx || ~isempty(edges))
     for i=1:bbxnum
         fprintf(fp,'%d %d 1\n',1+loopcount(i),loopcount(i));
         fprintf(fp,'%d %d %d %d %d\n',boxelem(i,:));
-        if(~isempty(edges) & loopcount(i) &~isempty(find(loopid==i)))
+        if(~isempty(edges) && loopcount(i) &&~isempty(find(loopid==i, 1)))
             endid=find(loopid==i);
             for k=1:length(endid)
                 j=endid(k);
@@ -214,15 +230,15 @@ else
 end
 
 if(size(regionlist,1))
-	fprintf(fp,'#region list\n%d\n',size(regionlist,1));
+    fprintf(fp,'#region list\n%d\n',size(regionlist,1));
     if(size(regionlist,2)==3)
-	  for i=1:size(regionlist,1)
-		fprintf(fp,'%d %.16f %.16f %.16f %d\n', i, regionlist(i,:),i);
-      end
+        for i=1:size(regionlist,1)
+            fprintf(fp,'%d %.16f %.16f %.16f %d\n', i, regionlist(i,:),i);
+        end
     elseif(size(regionlist,2)==4)
-	  for i=1:size(regionlist,1)
-		fprintf(fp,'%d %.16f %.16f %.16f %d %.16f\n', i, regionlist(i,1:3),i,regionlist(i,4));
-      end
+        for i=1:size(regionlist,1)
+            fprintf(fp,'%d %.16f %.16f %.16f %d %.16f\n', i, regionlist(i,1:3),i,regionlist(i,4));
+        end
     end
 end
 fclose(fp);
