@@ -23,4 +23,8 @@ if(nargin>=3 && tol~=0)
     node=round(node/tol)*tol;
 end
 [newnode,I,J]=unique(node,'rows');
-newelem=J(elem);
+if(iscell(elem))
+    newelem=cellfun(@(x) J(x)', elem,'UniformOutput',false);
+else
+    newelem=J(elem);
+end
