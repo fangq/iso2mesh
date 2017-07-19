@@ -8,7 +8,7 @@ function [no,el]=removeisolatednode(node,elem)
 %
 % input:
 %     node: list of node coordinates
-%     elem: list of elements of the mesh
+%     elem: list of elements of the mesh, can be a regular array or a cell array for PLCs
 %
 % output:
 %     no: node coordinates after removing the isolated nodes
@@ -18,12 +18,21 @@ function [no,el]=removeisolatednode(node,elem)
 %
 
 oid=1:size(node,1);       % old node index
-idx=setdiff(oid,elem(:)); % indices to the isolated nodes
+if(~iscell(elem))
+    idx=setdiff(oid,elem(:)); % indices to the isolated nodes
+else
+    el=cell2mat(elem);
+    idx=setdiff(oid,el(:)); % indices to the isolated nodes
+end
 idx=sort(idx);
 delta=zeros(size(oid));   
 delta(idx)=1;
 delta=-cumsum(delta);     % calculate the new node index after removing the isolated nodes
 oid=oid+delta;            % map to new index
-el=oid(elem);             % element list in the new index
+if(~iscell(elem))
+    el=oid(elem);             % element list in the new index
+else
+    el=cellfun(@(x) oid(x), elem,'UniformOutput',false);
+end
 no=node;                  
 no(idx,:)=[];             % remove the isolated nodes
