@@ -1,4 +1,4 @@
-function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox)
+function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox,method)
 %
 % [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox)
 %
@@ -31,7 +31,11 @@ function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,for
 fprintf(1,'generating tetrahedral mesh from closed surfaces ...\n');
 
 exesuff=getexeext;
-exesuff=fallbackexeext(exesuff,'tetgen');
+if(nargin>=10)
+   exesuff=fallbackexeext(exesuff,method);
+else
+   exesuff=fallbackexeext(exesuff,'tetgen');
+end
 
 if(keepratio>1 | keepratio<0)
    warn(['The "keepratio" parameter is required to be between 0 and 1. '...

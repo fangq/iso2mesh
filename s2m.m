@@ -30,5 +30,8 @@ end
 if(nargin<=6)
     holes=[];
 end
-[node,elem,face]=surf2mesh(v,f,[],[],keepratio,maxvol,regions,holes);
-
+if(nargin>=5)
+    [node,elem,face]=surf2mesh(v,f,[],[],keepratio,maxvol,regions,holes,0,method);
+else
+    [node,elem,face]=surf2mesh(v,f,[],[],keepratio,maxvol,regions,holes);
+end

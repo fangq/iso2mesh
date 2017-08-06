@@ -62,7 +62,6 @@ if(len>0 && mod(len,3)~=0)
    error('you must give operator, node and element in a triplet form');
 end
 
-
 try
     exename=evalin('caller','ISO2MESH_SURFBOOLEAN');
 catch
@@ -124,15 +123,8 @@ for i=1:3:len
           newnode(:,4)=1;
           newelem(:,4)=1;
        end
-       opstr=['-q --shells 2'];
+       opstr=[' --decouple-inin 1 --shells 2']; %-q
        saveoff(node1(:,1:3),elem1(:,1:3),mwpath('pre_decouple1.off'));
-       if(isstruct(el))
-           if(isfield(el,'MoreOptions'))
-               opstr=[opstr el.MoreOptions];
-           end
-       else
-           opstr=[opstr ' --decouple-inin 1'];
-       end
        if(size(no,2)~=3)
            opstr=['-q --shells ' num2str(no)];
            cmd=sprintf('cd "%s" && "%s%s" "%s" %s',mwpath,mcpath('meshfix'),exesuff,...
@@ -142,6 +134,42 @@ for i=1:3:len
            cmd=sprintf('cd "%s" && "%s%s" "%s" "%s" %s',mwpath,mcpath('meshfix'),exesuff,...
                mwpath('pre_decouple1.off'),mwpath('pre_decouple2.off'),opstr);
        end
+   elseif(strcmp(op,'decoupleout'))
+       if(exist('node1','var')==0)
+          node1=node;
+          elem1=elem;
+          newnode(:,4)=1;
+          newelem(:,4)=1;
+       end
+       opstr=[' --decouple-outout 1 --shells 2']; %-q
+       saveoff(node1(:,1:3),elem1(:,1:3),mwpath('pre_decouple1.off'));
+       if(size(no,2)~=3)
+           opstr=['-q --shells ' num2str(no)];
+           cmd=sprintf('cd "%s" && "%s%s" "%s" %s',mwpath,mcpath('meshfix'),exesuff,...
+               mwpath('pre_decouple1.off'),opstr);
+       else
+           saveoff(no(:,1:3),el(:,1:3),mwpath('pre_decouple2.off'));
+           cmd=sprintf('cd "%s" && "%s%s" "%s" "%s" %s',mwpath,mcpath('meshfix'),exesuff,...
+               mwpath('pre_decouple1.off'),mwpath('pre_decouple2.off'),opstr);
+       end
+   elseif(strcmp(op,'separate'))
+       if(exist('node1','var')==0)
+          node1=node;
+          elem1=elem;
+          newnode(:,4)=1;
+          newelem(:,4)=1;
+       end
+       opstr=[' --shells 2']; %-q
+       saveoff(node1(:,1:3),elem1(:,1:3),mwpath('pre_decouple1.off'));
+       if(size(no,2)~=3)
+           opstr=['-q --shells ' num2str(no)];
+           cmd=sprintf('cd "%s" && "%s%s" "%s" %s',mwpath,mcpath('meshfix'),exesuff,...
+               mwpath('pre_decouple1.off'),opstr);
+       else
+           saveoff(no(:,1:3),el(:,1:3),mwpath('pre_decouple2.off'));
+           cmd=sprintf('cd "%s" && "%s%s" "%s" "%s" %s',mwpath,mcpath('meshfix'),exesuff,...
+               mwpath('pre_decouple1.off'),mwpath('pre_decouple2.off'),opstr);
+       end       
    else
        if(isgts)
            savegts(newnode(:,1:3),newelem(:,1:3),mwpath(['pre_surfbool1.' tempsuff]));
@@ -195,9 +223,13 @@ for i=1:3:len
           end
       end
    elseif(strcmp(op,'decouple'))
-      [node1,elem1]=readoff(mwpath('pre_decouple1_fixed.off'));
-      newelem=[newelem;elem1+size(newnode,1) (i+1)*ones(size(elem1,1),1)];
-      newnode=[newnode;node1 (i+1)*ones(size(node1,1),1)];
+      [newnode,newelem]=readoff(mwpath('pre_decouple1_fixed.off')); %[node1,elem1]
+      %newelem=[newelem;elem1+size(newnode,1) (i+1)*ones(size(elem1,1),1)];
+      %newnode=[newnode;node1 (i+1)*ones(size(node1,1),1)];
+   elseif(strcmp(op,'separate'))
+       [newnode,newelem]=readoff(mwpath('pre_decouple1_fixed.off'));
+   elseif(strcmp(op,'decoupleout'))
+      [newnode,newelem]=readoff(mwpath('pre_decouple1_fixed.off')); %[node1,elem1]
    else
       [newnode,newelem]=readoff(mwpath('post_surfbool.off'));
       if(strcmp(op,'self'))
