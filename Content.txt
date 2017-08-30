@@ -187,7 +187,7 @@
 	 holes:   list of interior points for all holes, [x,y,z]
 
 
-==== function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox) ====
+==== function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox,method) ====
 
  [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox)
 
@@ -452,7 +452,7 @@
 
 ==== function [node,face,elem]=meshabox(p0,p1,opt,nodesize) ====
 
- [node,face,elem]=meshabox(p0,p1,opt,maxvol)
+ [node,face,elem]=meshabox(p0,p1,opt,nodesize)
 
  create the surface and tetrahedral mesh of a box geometry
 
@@ -668,6 +668,41 @@
     c0(:,4)=[0.01;0.001];
     [no,el]=surf2mesh(node,face,[],[],1,[],c0);
     figure; plotmesh(no,el)
+
+
+==== function [node,face,yz0,yz1]=extrudecurve(xy, yz, Nx, Nz, Nextrap, spacing, anchor, dotopbottom) ====
+
+ [node,face,yz0,yz1]=extrudecurve(xy, yz, Nx, Nz, Nextrap, spacing, anchor)
+ 
+ create a triangular surface mesh by swining a 2D spline along another 2D
+ spline curve
+
+
+ input:
+      xy: a 2D spline path, along which the surface is extruded, defined
+          on the x-y plane
+      yz: a 2D spline which will move along the path to form a surface,
+          defined on the y-z plane
+      Nx: the count of sample points along the extrusion path (xy), if
+          ignored, it is 40
+      Nz: the count of sample points along the curve to be extruded (yz),
+          if ignored, it is 40
+      Nextrap: number of points to extrapolate outside of the xy/yz
+          curves, 0 if ignored
+      spacing: define a spacing scaling factor for spline interpolations,
+          1 if ignored
+      anchor: the 3D point in the extruded curve plane (yz) that is aligned
+          at the nodes long the extrusion path. this point does not have
+          to be located on the yz curve; orig = [ox oy oz], if ignored, it
+          is set as the point on the interpolated yz with the largested
+          y-value
+      dotopbottom: a flag, if set to 1, tessellated top and bottom faces
+          will be added. default is 0.
+
+ output:
+      node: 3D node coordinates for the generated surface mesh
+      face: triangular face patches of the generated surface mesh, each
+           row represents a triangle denoted by the indices of the 3 nodes
 
 
 === # Mesh decomposition and query ===
@@ -1281,7 +1316,7 @@
 
  input:
      node: list of node coordinates
-     elem: list of elements of the mesh
+     elem: list of elements of the mesh, can be a regular array or a cell array for PLCs
 
  output:
      no: node coordinates after removing the isolated nodes
@@ -1655,6 +1690,30 @@
 
  output:
     vol:   total volume of the enclosed space
+
+
+==== function [newnode,newelem]=highordertet(node,elem,order) ====
+
+ [newnode,newelem]=highordertet(node,elem)
+
+ generate high-order straight-edge tetrahedral mesh from
+ the 1st order tetrahedral mesh
+
+
+ input:
+    node: list of nodes
+    elem: list of elements (each row are indices of nodes of each element)
+    order: optional, the order of the generated mesh; if missing, order=2
+
+ output:
+    newnode: all new edge-nodes on the output mesh
+    newelem: the indices of the edge nodes for each original tet element
+
+    currently, this function only supports order=2
+    to combine the newnode/newelem with the old mesh, one should use
+
+    elemfull=[elem(:,1:4) newelem+size(node,1)]; % 10-node element
+    nodefull=[node;newnode];
 
 
 === # File I/O ===
@@ -3029,7 +3088,7 @@ for i=1:length(fn)
     s=setfield(s,fn{i},getfield(s2,fn{i}));
 end
 
-==== function node=orthdisk(c0,c1,r,ndiv,v1) ====
+==== function node=orthdisk(c0,c1,r,ndiv,v1,angle0) ====
 
  node=orthdisk(c0,c1,r,ndiv)
 
@@ -3041,6 +3100,11 @@ end
      c1: a 1x3 vector to define a direction vector c1-c0
      r: the radius of the disk that is orthogonal to c1-c0, passing through c0
      ndiv: division count to approximate a circle by a polygon, if ignored, ndiv=20
+     v1: a 1x3 vector specifying the first point on the output 3D disk. if
+         v1 is not perpendicular to c1-c0, the disk rotation axis is
+         changed to cross(v1,cross(c1-c0,v1)); 
+     angle0: angle0 represents the angle (in radian) of the 1st point in 
+         the 3D disk if placed on the x-y plane.
 
  output:
      node: the 3D vertices of the disk

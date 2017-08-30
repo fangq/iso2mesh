@@ -1,4 +1,4 @@
-function [node,face,yz0,yz1]=extrudecurve(xy, yz, Nx, Nz, Nextrap, spacing, anchor)
+function [node,face,yz0,yz1]=extrudecurve(xy, yz, Nx, Nz, Nextrap, spacing, anchor, dotopbottom)
 %
 % [node,face,yz0,yz1]=extrudecurve(xy, yz, Nx, Nz, Nextrap, spacing, anchor)
 % 
@@ -25,6 +25,8 @@ function [node,face,yz0,yz1]=extrudecurve(xy, yz, Nx, Nz, Nextrap, spacing, anch
 %          to be located on the yz curve; orig = [ox oy oz], if ignored, it
 %          is set as the point on the interpolated yz with the largested
 %          y-value
+%      dotopbottom: a flag, if set to 1, tessellated top and bottom faces
+%          will be added. default is 0.
 %
 % output:
 %      node: 3D node coordinates for the generated surface mesh
@@ -66,7 +68,7 @@ pyz = spline(yz(:,2), yz(:,1));
 
 yyi = ppval(pyz,zi);
 
-if(~exist('anchor','var'))
+if(~exist('anchor','var') || isempty(anchor))
     [ymax, loc]=max(yyi);
     anchor=[0 yyi(loc) zi(loc)];
 end
@@ -93,4 +95,20 @@ for i=1:length(xi)
         yz1=newyz(Nextrap+1:end-Nextrap,:);
     end
 end
+
+% add two flat polygons on the top and bottom of the contours 
+% to ensure the enclosed surface is not truncated by meshfix
+
+if(nargin>=8 && dotopbottom==1)
+    nump = length(xi);
+    C = [(1:(nump-1))' (2:nump)'; nump 1];
+    dt = delaunayTriangulation(xi(:), yi(:), C);
+    io = dt.isInterior();
+    endface=dt(io,:);
+    endface=(endface-1)*size(newyz,1)+1;
+
+    % append the top/bottom faces to the extruded mesh
+    face=[face; endface; endface+size(newyz,1)-1];
+end
+
 [node,face]=meshcheckrepair(node,face,'dup');
