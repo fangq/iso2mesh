@@ -11,7 +11,8 @@ function [node,face,elem]=meshacylinder(c0,c1,r,tsize,maxvol,ndiv)
 %
 % input: 
 %   c0, c1:  cylinder axis end points
-%   r:   radius of the cylinder
+%   r:   radius of the cylinder; if r contains two elements, it outputs
+%        a cone trunk, with each r value specifying the radius on each end
 %   tsize: maximum surface triangle size on the sphere
 %   maxvol: maximu volume of the tetrahedral elements
 %
@@ -35,7 +36,11 @@ function [node,face,elem]=meshacylinder(c0,c1,r,tsize,maxvol,ndiv)
 if(nargin<3)
     error('you must at least provide c0, c1, and r');
 end
-if(r<=0 || all(c0==c1))
+
+if(length(r)==1)
+    r=[r,r];
+end
+if(any(r<=0) || all(c0==c1))
     error('invalid cylinder parameters');
 end
 c0=c0(:);
@@ -49,10 +54,12 @@ if(nargin<6) ndiv=20; end
 
 dt=2*pi/ndiv;
 theta=dt:dt:2*pi;
-cx=r*cos(theta);
-cy=r*sin(theta);
-p0=[cx(:) cy(:) zeros(ndiv,1)];
-p1=[cx(:) cy(:) len*ones(ndiv,1)];
+cx=r(:)*cos(theta);
+cy=r(:)*sin(theta);
+cx=cx';
+cy=cy';
+p0=[cx(:,1) cy(:,1) zeros(ndiv,1)];
+p1=[cx(:,2) cy(:,2) len*ones(ndiv,1)];
 pp=[p0;p1];
 no=rotatevec3d(pp,v0)+repmat(c0',size(pp,1),1);
 
