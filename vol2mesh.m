@@ -41,7 +41,7 @@ function [node,elem,face,regions]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,
 %
 
 if(nargin>=8)
-	if(strcmp(method,'cgalmesh'))
+	if(strfind(method,'cgalmesh'))
 		vol=img(ix,iy,iz);
 		if(length(unique(vol(:)))>64 & dofix==1)
 			error([ 'it appears that you are processing a ' ...
@@ -51,7 +51,7 @@ if(nargin>=8)
                                 'volume. If you are certain to run cgalmesher ' ...
                                 'on your data, please set dofix=0 and run this again.' ]);
 		end
-		[node elem,face]=cgalv2m(vol,opt,maxvol);
+		[node elem,face]=cgalv2m(vol,opt,maxvol,method);
 		return;
 	end
 end
@@ -66,8 +66,8 @@ else
 end
 %then, create volumetric mesh from the surface mesh
 if(nargin>=8)
-   if(strcmp(method,'cgalpoly'))
-	[node,elem,face]=cgals2m(no(:,1:3),el(:,1:3),opt,maxvol);
+   if(strfind(method,'cgalpoly'))
+	[node,elem,face]=cgals2m(no(:,1:3),el(:,1:3),opt,maxvol,method);
         return;
    end
 end

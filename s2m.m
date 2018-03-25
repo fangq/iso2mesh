@@ -20,8 +20,8 @@ function [node,elem,face]=s2m(v,f,keepratio,maxvol,method,regions,holes)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-if(nargin>=5 && strcmp(method,'cgalpoly'))
-    [node,elem,face]=cgals2m(v,f,keepratio,maxvol);
+if(nargin>=5 && strfind(method,'cgalpoly'))
+    [node,elem,face]=cgals2m(v,f,keepratio,maxvol,method);
     return;
 end
 if(nargin<=5)
