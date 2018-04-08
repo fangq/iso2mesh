@@ -8,7 +8,7 @@ function [newnode,newelem,newelem0]=surfboolean(node,elem,varargin)
 %
 % input:
 %      node: node coordinates, dimension (nn,3)
-%      elem: tetrahedral element or triangle surface (ne,3)
+%      elem: triangle surfaces (ne,3)
 %      op:  a string of a boolean operator, possible op values include
 %           'union' or 'or': the outter surface of the union of the enclosed space
 %           'inter' or 'and': the surface of the domain contained by both meshes
