@@ -34,6 +34,7 @@ for i=1:nn
     %conn{i}=sort(setdiff(unique(conn{i}),i));
     neig=unique(conn{i});
     neig(neig==i)=[];
+    conn{i}=neig;
     connnum(i)=length(conn{i});
     count=count+connnum(i);
 end
