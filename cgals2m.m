@@ -1,4 +1,4 @@
-function [node,elem,face]=cgals2m(v,f,opt,maxvol,varargin)
+function [node,elem,face]=cgals2m(v,f,opt,maxvol,method,varargin)
 %
 % [node,elem,face]=cgals2m(v,f,opt,maxvol)
 %
@@ -21,7 +21,9 @@ function [node,elem,face]=cgals2m(v,f,opt,maxvol,varargin)
 %	     opt.reratio:  maximum radius-edge ratio
 %	     if opt is a scalar, it only specifies radbound.
 %	 maxvol: target maximum tetrahedral elem volume
-%
+%    method: 'cgalpoly' for normal polyhedral meshing,
+%            'cgalpoly2' for polyhedral meshing with automatic feature
+%            recognition and preservation
 % output:
 %	 node: output, node coordinates of the tetrahedral mesh
 %	 elem: output, element list of the tetrahedral mesh, the last 
@@ -34,7 +36,7 @@ function [node,elem,face]=cgals2m(v,f,opt,maxvol,varargin)
 
 fprintf(1,'creating surface and tetrahedral mesh from a polyhedral surface ...\n');
 
-exesuff=fallbackexeext(getexeext,'cgalpoly');
+exesuff=fallbackexeext(getexeext,method);
 
 ang=30;
 ssize=6;
@@ -65,7 +67,7 @@ if(~isempty(getvarfrom({'caller','base'},'ISO2MESH_RANDSEED')))
         randseed=getvarfrom({'caller','base'},'ISO2MESH_RANDSEED');
 end
 
-cmd=sprintf('"%s%s" "%s" "%s" %.16f %.16f %.16f %.16f %.16f %d',mcpath('cgalpoly'),exesuff,...
+cmd=sprintf('"%s%s" "%s" "%s" %.16f %.16f %.16f %.16f %.16f %d',mcpath(method),exesuff,...
     mwpath('pre_cgalpoly.off'),mwpath('post_cgalpoly.mesh'),ang,ssize,...
     approx,reratio,maxvol,randseed);
 system(cmd);
