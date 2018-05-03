@@ -1,6 +1,6 @@
-function [no,fa,ff]=readoff(fname)
+function [no,fa,ff]=readinp(fname)
 %
-% [node,elem]=readoff(fname)
+% [node,elem]=readinp(fname)
 %
 % read Avizo AVS UCD file (INP)
 %
@@ -8,7 +8,7 @@ function [no,fa,ff]=readoff(fname)
 % date: 2016/05/03
 %
 % input:
-%    fname: name of the OFF data file
+%    fname: name of the INP data file
 %
 % output:
 %    node: node coordinates of the mesh
