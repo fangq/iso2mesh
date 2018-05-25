@@ -1,4 +1,4 @@
-function nodevol=nodevolume(node,elem)
+function nodevol=nodevolume(node,elem, evol)
 %
 % nodevol=nodevolume(node,elem)
 %
@@ -20,12 +20,14 @@ function nodevol=nodevolume(node,elem)
 dim=4;
 if(size(elem,2)==3) dim=3; end
 
-vol=elemvolume(node,elem(:,1:dim));
+if(nargin<3)
+    evol=elemvolume(node,elem(:,1:dim));
+end
 
 elemnum=size(elem,1);
 nodenum=size(node,1);
 nodevol=zeros(nodenum,1);
 for i=1:elemnum
-      nodevol(elem(i,1:dim))=nodevol(elem(i,1:dim))+vol(i);
+      nodevol(elem(i,1:dim))=nodevol(elem(i,1:dim))+evol(i);
 end
 nodevol=nodevol/dim;
