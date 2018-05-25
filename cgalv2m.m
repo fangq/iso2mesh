@@ -1,4 +1,4 @@
-function [node,elem,face]=cgalv2m(vol,opt,maxvol)
+function [node,elem,face]=cgalv2m(vol,opt,maxvol,method)
 %
 % [node,elem,face]=cgalv2m(vol,opt,maxvol)
 %
@@ -19,9 +19,12 @@ function [node,elem,face]=cgalv2m(vol,opt,maxvol)
 %		 center of the surface bounding circle and center of the 
 %		 element bounding sphere
 %	     opt.reratio:  maximum radius-edge ratio
+%        opt.esize: size of linear edge elements for border preservation
 %	     if opt is a scalar, it only specifies radbound.
 %	 maxvol: target maximum tetrahedral elem volume
-%
+%    method: 'cgalmesh' for normal meshing,
+%            'cgalmesh2' for polyhedral meshing with domain border
+%            preservation
 % output:
 %	 node: output, node coordinates of the tetrahedral mesh
 %	 elem: output, element list of the tetrahedral mesh, the last 
@@ -47,22 +50,24 @@ if(~any(vol))
 end
 
 exesuff=getexeext;
-exesuff=fallbackexeext(exesuff,'cgalmesh');
+exesuff=fallbackexeext(exesuff,method);
 
 ang=30;
 ssize=6;
 approx=0.5;
 reratio=3;
+esize=6;
 
 if(~isstruct(opt))
-	ssize=opt;
+	ssize=opt; esize=opt;
 end
 
 if(isstruct(opt) & length(opt)==1)  % does not support settings for multiple labels
-	if(isfield(opt,'radbound'))   ssize=opt.radbound; end
+	if(isfield(opt,'radbound'))   ssize=opt.radbound; esize=opt.radbound; end
 	if(isfield(opt,'angbound'))   ang=opt.angbound; end
 	if(isfield(opt,'distbound')) approx=opt.distbound; end
 	if(isfield(opt,'reratio'))    reratio=opt.reratio; end
+    if(isfield(opt,'esize'))    esize=opt.esize; end
 end
 
 saveinr(vol,mwpath('pre_cgalmesh.inr'));
@@ -79,9 +84,14 @@ if(ischar(maxvol))
 else
     format_maxvol='%f';
 end
-cmd=sprintf(['"%s%s" "%s" "%s" %f %f %f %f ' format_maxvol ' %d'],mcpath('cgalmesh'),exesuff,...
+if(strfind(method, '2'))
+    esize=sprintf('%f', esize);
+else
+    esize='';
+end
+cmd=sprintf(['"%s%s" "%s" "%s" %f %f %f %f %s ' format_maxvol ' %d'],mcpath(method),exesuff,...
     mwpath('pre_cgalmesh.inr'),mwpath('post_cgalmesh.mesh'),ang,ssize,...
-    approx,reratio,maxvol,randseed);
+    approx,reratio,esize,maxvol,randseed);
 system(cmd);
 if(~exist(mwpath('post_cgalmesh.mesh'),'file'))
     error(['output file was not found, failure was encountered when running command: \n',cmd]);
