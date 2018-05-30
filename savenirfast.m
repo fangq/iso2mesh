@@ -9,6 +9,8 @@ function savenirfast(v,f,filestub, nodeseg, nodeprop, proptype)
 % author: Qianqian Fang, <q.fang at neu.edu>
 %
 % input:
+%      nirfaststruct: a structure storing the NIRFAST mesh data, type 
+%         'help readnirfast' to read more; alternatively one can use:
 %      v: input, node list, the first 3 columns are the x/y/z positions,
 %         the remaining columns are combined with nodeprop as node-based
 %         (optical) parameters
@@ -26,6 +28,12 @@ function savenirfast(v,f,filestub, nodeseg, nodeprop, proptype)
 %      proptype: optional, the type of the node-property. by default it is 
 %         'stnd' - for standard properties; one can also define multi-row
 %         header using a cell-array.
+%
+% example:
+%    [node,face,elem]=meshabox([0 0 0],[10 10 10],0.3,1);
+%    savenirfast(node,elem,'test', [], ones(size(node)), 'user');
+%    mymesh=readnirfast('test')
+%    plotmesh([mymesh.nodes mymesh.bndvtx], mymesh.elements,'x>5')
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %

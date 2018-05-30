@@ -27,11 +27,17 @@ function nirfastmesh=readnirfast(filestub)
 %
 %   format definition see http://www.dartmouth.edu/~nir/nirfast/tutorials/NIRFAST-Intro.pdf
 %
+% example:
+%    [node,face,elem]=meshabox([0 0 0],[10 10 10],0.3,1);
+%    savenirfast(node,elem,'test', [], ones(size(node)), 'user');
+%    mymesh=readnirfast('test')
+%    plotmesh([mymesh.nodes mymesh.bndvtx], mymesh.elements,'x>5')
+%
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
 fname=[filestub,'.node'];
-if(~exist(fname,'file'))
+if(~exist(fullfile(pwd,fname),'file'))
     error([fname ' could not be found']);
 end
 nirfastmesh.nodes=load(fname);
@@ -40,20 +46,20 @@ nirfastmesh.bndvtx=nirfastmesh.nodes(:,1);
 nirfastmesh.nodes(:,1)=[];
 
 fname=[filestub,'.elem'];
-if(~exist(fname,'file'))
+if(~exist(fullfile(pwd,fname),'file'))
     error([fname ' could not be found']);
 end
 nirfastmesh.elements=load(fname);
 nirfastmesh.dimension=size(nirfastmesh.elements,2)-1;
 
 fname=[filestub,'.region'];
-if(exist(fname,'file'))
+if(exist(fullfile(pwd,fname),'file'))
     nirfastmesh.region=load(fname);
 end
 
 fname=[filestub,'.excoef'];
-if(exist(fname,'file'))
-    fid=fopen(fname,'rt');
+fid=fopen(fname,'rt');
+if(fid>=0)
     linenum=0;
     textheader={};
     while(~feof(fid))
@@ -72,11 +78,12 @@ if(exist(fname,'file'))
             textheader{end+1}=oneline;
         end
     end
+    fclose(fid);
 end
 
 fname=[filestub,'.param'];
-if(exist(fname,'file'))
-    fid=fopen(fname,'rt');
+fid=fopen(fname,'rt');
+if(fid>=0)
     linenum=0;
     params=[];
     while(~feof(fid))
@@ -95,4 +102,5 @@ if(exist(fname,'file'))
             break;
         end
     end
+    fclose(fid);
 end
