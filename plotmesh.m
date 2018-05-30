@@ -201,6 +201,9 @@ if(~isempty(elem))
       else
           error('plotmesh can only plot 3D tetrahedral meshes');
       end
+      if(~isreal(cutvalue))
+          cutvalue=abs(cutvalue);
+      end
       h=patch('Vertices',cutpos,'Faces',facedata,'FaceVertexCData',cutvalue,'facecolor','interp',opt{:});
    else
       idx=eval(['find(' selector ')']);
