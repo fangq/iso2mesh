@@ -38,7 +38,8 @@ func_meshfix="meshcheckrepair meshreorient removedupelem
                 removedupnodes removeisolatednode removeisolatedsurf
                 surfaceclean getintersecttri delendelem surfreorient"
 func_remesh="meshresample remeshsurf smoothsurf sortmesh mergemesh 
-                meshrefine mergesurf surfboolean fillsurf highordertet"
+                meshrefine mergesurf surfboolean fillsurf highordertet
+		meshinterp meshremap"
 func_fileio="saveasc savedxf savestl savebinstl saveinr saveoff 
                 savesmf savesurfpoly savegts readgts
                 savevrml readasc readinr readmedit readoff readsmf
