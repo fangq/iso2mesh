@@ -52,6 +52,8 @@ end
 newval=zeros(nodeto,size(fromval,2));
 
 idx=~isnan(elemid);
+fromval=fromval(idx,:);
+elembary=elembary(idx,:);
 idx=elemid(idx);
 
 nodeval=repmat(fromval,1,1,size(elembary,2)).*repmat(permute(elembary,[1,3,2]),1,size(fromval,2),1);

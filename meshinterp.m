@@ -48,5 +48,6 @@ idx=find(~isnan(elemid));
 
 allval=reshape(fromval(fromelem(elemid(idx),:),:),length(idx),size(elembary,2),size(fromval,2));
 tmp=cellfun(@(x) sum(elembary(idx,:).*x,2), num2cell(allval,[1 2]),'UniformOutput',false);
-newval=squeeze(cat(3,tmp{:}));
+newval=size(length(elemid),size(fromval,2));
+newval(idx,:)=squeeze(cat(3,tmp{:}));
 
