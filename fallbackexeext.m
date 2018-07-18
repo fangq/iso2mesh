@@ -31,7 +31,7 @@ if(exist([mcpath(exename) exesuff],'file')==0) % fall back to OS native package
 end
 
 if(exist([mcpath(exename) exesuff],'file')==0)
-        if(strcmp(mcpath(exename),'tetgen'))
+        if(strcmp(exename,'tetgen'))
                return;
         end  
         error([ 'The following executable:\n' ...
