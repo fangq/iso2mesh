@@ -64,7 +64,7 @@ endif
 all: $(SUBDIRS) makedirs copybin
 
 $(SUBDIRS):
-	@[ -f $@/CMakeLists.txt ] && $(CMAKE) $@ || true
+	if test -f $@/CMakeLists.txt; then cd $@ && $(CMAKE) . && cd ..; fi
 	$(MAKE) -C $@ --no-print-directory
 
 copybin:
