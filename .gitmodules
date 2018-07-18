@@ -1,0 +1,6 @@
+[submodule "tools/cork"]
+	path = tools/cork
+	url = https://github.com/fangq/cork.git
+[submodule "tools/meshfix"]
+	path = tools/meshfix
+	url = https://github.com/alecjacobson/meshfix.git
