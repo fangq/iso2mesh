@@ -27,7 +27,7 @@ func_shortcut="v2m v2s s2m s2v m2v sms"
 func_mainfun="vol2mesh vol2surf surf2mesh surf2vol mesh2vol"
 func_backend="binsurface cgalv2m cgals2m vol2restrictedtri surf2volz mesh2mask"
 func_primitive="meshabox meshasphere meshanellip meshunitsphere meshacylinder 
-                meshgrid5 meshgrid6 latticegrid extrudecurve"
+                meshgrid5 meshgrid6 latticegrid extrudecurve meshcylinders"
 func_inquery="finddisconnsurf surfedge volface extractloops meshconn  
                 meshcentroid nodevolume elemvolume neighborelem 
 		faceneighbors edgeneighbors maxsurf flatsegment orderloopedge  
@@ -39,9 +39,9 @@ func_meshfix="meshcheckrepair meshreorient removedupelem
                 surfaceclean getintersecttri delendelem surfreorient"
 func_remesh="meshresample remeshsurf smoothsurf sortmesh mergemesh 
                 meshrefine mergesurf surfboolean fillsurf highordertet
-		meshinterp meshremap"
+		meshinterp meshremap extrudesurf"
 func_fileio="saveasc savedxf savestl savebinstl saveinr saveoff 
-                savesmf savesurfpoly savegts readgts
+                savesmf savesurfpoly savegts readgts savemsh
                 savevrml readasc readinr readmedit readoff readsmf
 	        readtetgen deletemeshfile mcpath mwpath savemedit
 		savejson loadjson saveubjson loadubjson savejmesh

@@ -706,6 +706,27 @@
            row represents a triangle denoted by the indices of the 3 nodes
 
 
+==== function [node,face,elem]=meshcylinders(c0, v, len, varargin) ====
+
+ [node,face]=meshcylinders(c0, v, len, r,tsize,maxvol,ndiv)
+    or
+ [node,face,elem]=meshacylinder(c0, v, len, r, tsize,maxvol,ndiv)
+ [nplc,fplc]=meshacylinder(c0, v, len,r,0,0,ndiv);
+
+ create the surface and (optionally) tetrahedral mesh of a 3D cylinder
+
+
+ input: 
+   c0, cylinder list axis's starting point
+   v: directional vector of the cylinder
+   len: a scalar or a vector denoting the length of each 
+        cylinder segment along the direction of v
+   tsize, maxvol, ndiv: please see the help for meshacylinder for details
+
+ output:
+   node, face, elem: please see the help for meshacylinder for details
+
+
 === # Mesh decomposition and query ===
 
 ==== function facecell=finddisconnsurf(f) ====
@@ -1799,6 +1820,21 @@
     newval=meshremap(value_src,id,ww,e2,size(n2,1)); % map to target
 
 
+==== function [node,face]=extrudesurf(no,fc,vec) ====
+
+ [node,face]=extrudesurf(no,fc,vec)
+ 
+ create a enclosed surface mesh by extruding an open surface
+
+
+ input:
+
+ output:
+      node: 3D node coordinates for the generated surface mesh
+      face: triangular face patches of the generated surface mesh, each
+           row represents a triangle denoted by the indices of the 3 nodes
+
+
 === # File I/O ===
 
 ==== function saveasc(v,f,fname) ====
@@ -1948,6 +1984,21 @@
     edges: the edge list section in the GTS file (optional)
     edgemap: the face section (in terms of edge indices) in the GTS file
              (optional)
+
+
+==== function savemsh(node,elem,fname,rname) ====
+
+ savemsh(node,elem,fname,rname)
+
+ save a tetrahedral mesh to GMSH mesh format
+
+ author: Riccardo Scorretti (riccardo.scorretti<at> univ-lyon1.fr)
+
+ input:
+      node: input, node list, dimension (nn,3)
+      elem: input, tetrahedral mesh element list, dimension (ne,4) or (ne,5) for multi-region meshes
+      fname: output file name
+      rname: name of the regions, cell-array of strings (optional)
 
 
 ==== function savevrml(node,face,elem,fname) ====
