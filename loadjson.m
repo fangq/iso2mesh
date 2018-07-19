@@ -215,6 +215,9 @@ function object = parse_array(inStr, esc, varargin) % JSON array is written in r
            if(isoct && regexp(arraystr,'"','once'))
                 error('Octave eval can produce empty cells for JSON-like input');
            end
+           if(regexp(arraystr,':','once'))
+                error('One can not use MATLAB-like ":" construct inside a JSON array');
+           end
            object=eval(arraystr);
            pos=endpos;
         catch
@@ -485,15 +488,13 @@ while(pos<=len)
             endpos=bpos(pos);
             return
         end
-    end
-    if(c=='[')
+    elseif(c=='[')
         if(isempty(e1l))
             e1l=bpos(pos);
         end
         level=level+1;
         maxlevel=max(maxlevel,level);
-    end
-    if(c=='"')
+    elseif(c=='"')
         pos=matching_quote(tokens,pos+1);
     end
     pos=pos+1;

@@ -345,9 +345,8 @@ txt=[txt,'}'];
 
 %%-------------------------------------------------------------------------
 function txt=matlabobject2ubjson(name,item,level,varargin)
-if numel(item) == 0 %empty object
-    st = struct();
-else
+st = struct();
+if numel(item) > 0 %non-empty object
     % "st = struct(item);" would produce an inmutable warning, because it
     % make the protected and private properties visible. Instead we get the
     % visible properties
@@ -559,4 +558,4 @@ end
 %%-------------------------------------------------------------------------
 function bytes=data2byte(varargin)
 bytes=typecast(varargin{:});
-bytes=bytes(:)';
+bytes=char(bytes(:)');

@@ -171,8 +171,14 @@ elseif(isstruct(item))
     txt=struct2json(name,item,level,varargin{:});
 elseif(ischar(item))
     txt=str2json(name,item,level,varargin{:});
-elseif(isobject(item)) 
-    txt=matlabobject2json(name,item,level,varargin{:});
+elseif(isa(item,'string'))
+    txt=str2json(name,item{:},level,varargin{:});
+elseif(isobject(item))
+    if(~exist('OCTAVE_VERSION','builtin') && istable(item))
+        txt=matlabtable2json(name,item,level,varargin{:});
+    else
+        txt=matlabobject2json(name,item,level,varargin{:});
+    end
 else
     txt=mat2json(name,item,level,varargin{:});
 end
@@ -434,6 +440,10 @@ txt=sprintf('%s%s%s',txt,padding1,'}');
 function txt=matlabobject2json(name,item,level,varargin)
 if numel(item) == 0 %empty object
     st = struct();
+elseif numel(item) == 1 %
+    st = struct();
+    txt = str2json(name, char(item), level, varargin(:));
+    return
 else
     % "st = struct(item);" would produce an inmutable warning, because it
     % make the protected and private properties visible. Instead we get the
@@ -442,6 +452,33 @@ else
     for p = 1:numel(propertynames)
         for o = numel(item):-1:1 % aray of objects
             st(o).(propertynames{p}) = item(o).(propertynames{p});
+        end
+    end
+end
+txt=struct2json(name,st,level,varargin{:});
+
+%%-------------------------------------------------------------------------
+function txt=matlabtable2json(name,item,level,varargin)
+if numel(item) == 0 %empty object
+    st = struct();
+else
+    % "st = struct(item);" would produce an inmutable warning, because it
+    % make the protected and private properties visible. Instead we get the
+    % visible properties
+    st = struct();
+    propertynames = properties(item);
+    if(isfield(item.Properties,'RowNames') && ~isempty(item.Properties.RowNames))
+        rownames=item.Properties.RowNames;
+        for p = 1:(numel(propertynames)-1)
+            for j = 1:size(item(:,p),1)
+                st.(rownames{j}).(propertynames{p}) = item{j,p};
+            end
+        end
+    else
+        for p = 1:(numel(propertynames)-1)
+            for j = 1:size(item(:,p),1)
+                st(j).(propertynames{p}) = item{j,p};
+            end
         end
     end
 end
@@ -468,7 +505,11 @@ if(isempty(mat))
     txt='null';
     return;
 end
-floatformat=jsonopt('FloatFormat','%.10g',varargin{:});
+if(isinteger(mat))
+  floatformat=jsonopt('FloatFormat','%d',varargin{:});
+else
+  floatformat=jsonopt('FloatFormat','%.10g',varargin{:});
+end
 %if(numel(mat)>1)
     formatstr=['[' repmat([floatformat ','],1,size(mat,2)-1) [floatformat sprintf('],%s',nl)]];
 %else
