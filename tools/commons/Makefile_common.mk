@@ -74,6 +74,8 @@ copybin:
 	@$(COPY) cgalsimp2/edge_collapse_enriched_polyhedron  ../bin/cgalsimp2
 	@$(COPY) cork/bin/cork  ../bin/cork
 	@$(COPY) meshfix/meshfix  ../bin/meshfix
+	@$(COPY) meshfix/contrib/JMeshLib/test/jmeshlib  ../bin/jmeshlib
+	@$(COPY) tetgen/tetgen  ../bin/tetgen1.5
 
 makedirs:
 	@if test ! -d $(BINDIR); then $(MKDIR) $(BINDIR); fi

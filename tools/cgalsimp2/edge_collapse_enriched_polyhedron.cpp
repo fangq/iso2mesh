@@ -166,9 +166,9 @@ int main( int argc, char** argv )
   float maxface=0.1;
   int defaultpolicy=0;
 
-  printf("= Surface Mesh Simplification Utility (Based on CGAL 4.5.1) =\n(modified for iso2mesh by Qianqian Fang, Fernando Cacciola and Andreas Fabri)\nhttp://iso2mesh.sf.net\n\n");
+  printf("= Surface Mesh Simplification Utility (Based on CGAL %s) =\n(modified for iso2mesh by Qianqian Fang, Fernando Cacciola and Andreas Fabri)\nhttp://iso2mesh.sf.net\n\n",CGAL_VERSION_STR);
   if(argc<2){
-  	printf("command options\n\tcgalsimp2.mexmac input.off keepratio\nFor example:\n\t./cgalsimp2.mexmac input.off 0.1\n");
+  	printf("command options\n\t%s input.off keepratio\nFor example:\n\t%s input.off 0.1\n",argv[0],argv[0]);
 	exit(0);
   }
   std::ifstream is(argv[1]) ; is >> surface ;

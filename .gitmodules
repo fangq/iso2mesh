@@ -4,3 +4,6 @@
 [submodule "tools/meshfix"]
 	path = tools/meshfix
 	url = https://github.com/fangq/meshfix.git
+[submodule "tools/tetgen"]
+	path = tools/tetgen
+	url = https://github.com/ufz/tetgen
