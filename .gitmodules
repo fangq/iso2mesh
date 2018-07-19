@@ -3,4 +3,4 @@
 	url = https://github.com/fangq/cork.git
 [submodule "tools/meshfix"]
 	path = tools/meshfix
-	url = https://github.com/alecjacobson/meshfix.git
+	url = https://github.com/fangq/meshfix.git
