@@ -49,6 +49,14 @@ len=sqrt(sum((c0-c1).*(c0-c1)));
 % define the axial vector v0 and a perpendicular vector t
 v0=c1-c0;
 
+if(nargin<4)
+    tsize=min([r,len])/10;
+end
+
+if(nargin<5)
+    maxvol=tsize^3/5;
+end
+
 % calculate the cylinder end face nodes
 if(nargin<6) ndiv=20; end
 
