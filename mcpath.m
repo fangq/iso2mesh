@@ -1,4 +1,4 @@
-function binname=mcpath(fname)
+function binname=mcpath(fname, ext)
 %
 % binname=mcpath(fname)
 %
@@ -27,8 +27,16 @@ binname=[];
 if(isempty(p))
 	% the bin folder under iso2mesh is searched first
 	tempname=[fileparts(which(mfilename)) filesep 'bin' filesep fname];
-	if(exist(tempname,'file'))
-		binname=tempname;
+	if(exist([fileparts(which(mfilename)) filesep 'bin'])==7)
+        if(nargin>=2)
+            if(exist([tempname ext],'file'))
+                binname=[tempname ext];
+            else
+                binname=fname; % use binary without suffix on system PATH
+            end
+        else
+		    binname=tempname;
+        end
 	else
 		binname=fname;
 	end
