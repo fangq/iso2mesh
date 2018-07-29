@@ -4,7 +4,7 @@ function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
 %
 % converting a 3D volumetric image to surfaces
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
 %	 img: a volumetric binary image; if img is empty, vol2surf will

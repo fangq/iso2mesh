@@ -7,7 +7,7 @@ function [node,elem]=meshgrid6(varargin)
 %
 % author: John D'Errico
 % URL: http://www.mathworks.com/matlabcentral/newsreader/view_thread/107191
-% modified by Qianqian Fang (fangq<at> nmr.mgh.harvard.edu)
+% modified by Qianqian Fang (q.fang at neu.edu)
 %
 % input:
 %    v1,v2,v3,... - numeric vectors defining the lattice in

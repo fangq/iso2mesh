@@ -20,7 +20,8 @@ function varargout = img2mesh(varargin)
 %
 %   Please find more information at http://iso2mesh.sf.net/
 %  
-%   this function is part of "Iso2Mesh" toobox, see LICENSE for license
+% -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
+%
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;

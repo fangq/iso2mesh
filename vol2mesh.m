@@ -4,7 +4,7 @@ function [node,elem,face,regions]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,
 %
 % convert a binary (or multi-valued) volume to tetrahedral mesh
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
 %	 img: a volumetric binary image

@@ -4,7 +4,7 @@ function cleanimg=deislands2d(img,sizelim)
 %
 % remove isolated islands on a 2D image below speicified size limit
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
 % 	img: a 2D binary image

@@ -4,7 +4,7 @@ function node=orthdisk(c0,c1,r,ndiv,v1,angle0)
 %
 % Defining a 3D disk that is orthogonal to the vector c1-c0 
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
 %     c0: a 1x3 vector for the origin

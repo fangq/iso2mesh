@@ -4,7 +4,7 @@ function [newnode,newelem]=mergemesh(node,elem,varargin)
 %
 % concatenate two or more tetrahedral meshes or triangular surfaces
 % 
-% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <q.fang at neu.edu>
 %
 % input: 
 %      node: node coordinates, dimension (nn,3)

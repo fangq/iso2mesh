@@ -7,7 +7,7 @@ function [node,elem,face]=cgals2m(v,f,opt,maxvol,varargin)
 %
 % http://www.cgal.org/Manual/3.5/doc_html/cgal_manual/Mesh_3/Chapter_main.html
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
 %	 v: the node coordinate list of a surface mesh (nn x 3)

@@ -6,7 +6,7 @@ function hh=plotedges(node,edges,varargin)
 %
 % plot a 3D polyline or close loop (1d manifold)
 % 
-% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <q.fang at neu.edu>
 %
 % input: 
 %      node: node coordinates, dimension (nn,3); if node has a 

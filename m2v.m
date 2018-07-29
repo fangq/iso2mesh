@@ -6,7 +6,7 @@ function varargout=m2v(varargin)
 %
 % shortcut for mesh2vol, rasterizing a teterahedral mesh to a volume using graphics
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % input/output: please see details in the help for mesh2vol
 %

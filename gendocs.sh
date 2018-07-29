@@ -3,7 +3,7 @@
 #============================================================
 #  iso2mesh inline documentation to wiki convertor
 #
-#  Author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+#  Author: Qianqian Fang <q.fang at neu.edu>
 #============================================================
 
 print_help()

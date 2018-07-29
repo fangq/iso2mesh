@@ -4,7 +4,7 @@ function [newnode,newelem]=removedupnodes(node,elem,tol)
 %
 % removing the duplicated nodes from a mesh
 %
-% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <q.fang at neu.edu>
 %
 % input:
 %   elem: integer array with dimensions of NE x 4, each row contains

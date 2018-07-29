@@ -4,7 +4,7 @@ function hm=plottetra(node,elem,varargin)
 %
 % plot 3D surface meshes
 % 
-% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <q.fang at neu.edu>
 %
 % input: 
 %      node: a node coordinate list, 3 columns for x/y/z; if node has a 

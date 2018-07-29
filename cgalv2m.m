@@ -7,7 +7,7 @@ function [node,elem,face]=cgalv2m(vol,opt,maxvol)
 %
 % http://www.cgal.org/Manual/3.5/doc_html/cgal_manual/Mesh_3/Chapter_main.html
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
 %	 vol: a volumetric binary image

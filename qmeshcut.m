@@ -4,7 +4,7 @@ function [cutpos,cutvalue,facedata,elemid]=qmeshcut(elem,node,value,cutat,vararg
 %
 % fast tetrahedral mesh slicer
 %
-% author:Qianqian Fang, <fangq at nmr.mgh.harvard.edu>
+% author:Qianqian Fang, <q.fang at neu.edu>
 %
 % input: 
 %   elem: integer array with dimensions of NE x 4, each row contains

@@ -4,7 +4,7 @@ function tempname=mwpath(fname)
 %
 % get full temp-file name by prepend working-directory and current session name
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
 %    fname: input, a file name string

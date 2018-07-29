@@ -8,7 +8,7 @@ function [mask weight]=mesh2vol(node,elem,xi,yi,zi)
 %
 % fast rasterization of a 3D mesh to a volume with tetrahedron index labels
 % 
-% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <q.fang at neu.edu>
 % date for initial version: Feb 10,2014
 %
 % input:

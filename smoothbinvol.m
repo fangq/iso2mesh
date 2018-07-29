@@ -4,7 +4,7 @@ function vol=smoothbinvol(vol,layer)
 %
 % perform a memory-limited 3D image smoothing
 %
-% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <q.fang at neu.edu>
 %
 % input:
 %     vol: a 3D volumetric image to be smoothed

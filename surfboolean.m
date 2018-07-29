@@ -4,7 +4,7 @@ function [newnode,newelem,newelem0]=surfboolean(node,elem,varargin)
 %
 % merge two or more triangular meshes and resolve intersecting elements
 % 
-% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <q.fang at neu.edu>
 %
 % input:
 %      node: node coordinates, dimension (nn,3)
