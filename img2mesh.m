@@ -57,11 +57,18 @@ mis2v = uimenu(cm,'Label','Surface to volume','CallBack',{@processdata,handles})
 micln = uimenu(cm,'Label','Clean surface','CallBack',{@processdata,handles});
 mifix = uimenu(cm,'Label','Repair surface','CallBack',{@processdata,handles});
 misms = uimenu(cm,'Label','Smooth surface','CallBack',{@processdata,handles});
+mibool = uimenu(cm,'Label','Surface boolean','CallBack',{@processdata,handles});
+mibool1 = uimenu(mibool,'Label','Or','CallBack',{@processdata,handles});
+mibool2 = uimenu(mibool,'Label','And','CallBack',{@processdata,handles});
+mibool3 = uimenu(mibool,'Label','Diff','CallBack',{@processdata,handles});
+mibool4 = uimenu(mibool,'Label','First','CallBack',{@processdata,handles});
+mibool5 = uimenu(mibool,'Label','Second','CallBack',{@processdata,handles});
 
 miv2s.Separator='on';
 
 set(handles.fgI2M,'userdata',struct('graph',digraph,'menu',cm));
 axis(handles.axFlow,'off');
+axis(handles.axPreview,'off');
 
 % Choose default command line output for i2m
 handles.output = hObject;
@@ -79,11 +86,7 @@ if(strcmp(class(obj),'matlab.graphics.chart.primitive.GraphPlot')==0)
 end
 root=get(handles.fgI2M,'userdata');
 pos=get(handles.axFlow,'currentpoint');
-nodedist=[obj.XData(:)-pos(1,1) obj.YData(:)-pos(1,2)];
-nodedist=sum(nodedist.*nodedist,2);
-[mindist, nodeid]=min(nodedist);
-nodedata=root.graph.Nodes.Data{nodeid};
-nodetype=root.graph.Nodes.Type{nodeid};
+[nodedata,nodetype,nodeid]=getnodeat(root,obj,pos);
 
 prefix='x';
 switch source.Label
@@ -141,13 +144,33 @@ switch source.Label
         end
     case 'Plot'
         if(isstruct(nodetype) && isfield(nodetype,'hasnode'))
-            if(nodetype.haselem)
+            if(isfield(nodetype,'haselem') && nodetype.haselem)
                 figure;plotmesh(nodedata.node,[],nodedata.elem);
             else
                 figure;plotmesh(nodedata.node,nodedata.face);
             end
         else
             mcxplotvol(nodedata.vol);
+        end
+    case {'Or','And','Diff','All','First','Second'}
+        if(isstruct(nodetype) && isfield(nodetype,'hasnode'))
+            if(nodetype.haselem && nodetype.hasnode)
+                pt=ginput(1);
+                [nodedata2,nodetype2,nodeid2]=getnodeat(root,obj,pt);
+                if(~nodetype2.hasnode || ~nodetype2.haselem)
+                    throw('Second operand does not contain a surface');
+                end
+                op=source.Label;
+                if(strcmp(op,'Intersect'))
+                    op='inter';
+                end
+                [newdata.node,newdata.face]=surfboolean(nodedata.node,nodedata.face,lower(op),nodedata2.node,nodedata2.face(:,[1 3 2]));
+                newtype.hasnode=1;
+                newtype.hasface=1;
+                prefix=source.Label;
+            else
+                warndlg('Selected node does not contain a surface mesh');
+            end
         end
     case 'Delete'
         root.graph=rmnode(root.graph,root.graph.Nodes.Name{nodeid});
@@ -168,10 +191,22 @@ switch source.Label
         end
 end
 if(exist('newdata','var') && exist('newtype','var'))
+    newdata.preview=getpreview(handles,newdata,newtype,[100,100]);
     [newkey,root.graph]=addnodewithdata(handles,newdata,newtype,prefix);
     root.graph=addedge(root.graph,{root.graph.Nodes.Name{nodeid}},{newkey});
+    if(strcmp(source.Parent.Type, 'uimenu') && strcmp(source.Parent.Label,'Surface boolean'))
+        root.graph=addedge(root.graph,{root.graph.Nodes.Name{nodeid2}},{newkey});
+    end
     updategraph(root,handles);
+    imagesc(newdata.preview,'parent',handles.axFlow);
 end
+
+function [nodedata,nodetype,nodeid]=getnodeat(root,obj,pos)
+nodedist=[obj.XData(:)-pos(1,1) obj.YData(:)-pos(1,2)];
+nodedist=sum(nodedist.*nodedist,2);
+[mindist, nodeid]=min(nodedist);
+nodedata=root.graph.Nodes.Data{nodeid};
+nodetype=root.graph.Nodes.Type{nodeid};
 
 %----------------------------------------------------------------
 function [newdata, newtype]=v2sgui(data)
@@ -216,6 +251,25 @@ opt=struct('radbound',str2num(res{2}),'distbound',str2num(res{3}));
 newtype.hasnode=1;
 newtype.hasface=1;
 newtype.haselem=1;
+
+%----------------------------------------------------------------
+function img=getpreview(handles,nodedata,nodetype,imsize)
+set(handles.axPreview, 'Units','pixels','position',[1, 1, imsize(1), imsize(2)]);
+if(isfield(nodetype,'haselem') && nodetype.haselem)
+    plotmesh(nodedata.node,[],nodedata.elem,'linestyle','none','parent',handles.axPreview);
+elseif(isfield(nodetype,'hasface') && nodetype.hasface)
+    plotmesh(nodedata.node,nodedata.face,'linestyle','none','parent',handles.axPreview);
+elseif(isfield(nodetype,'hasvol') && nodetype.hasvol)
+    imagesc(nodedata.vol(:,:,ceil(size(nodedata.vol,3)/2)),'parent',handles.axPreview);
+end
+axis(handles.axPreview,'equal');
+axis(handles.axPreview,'off');
+img=getframe(gca);
+if(any(size(img.cdata)<[imsize([2 1]) 3]))
+    error('the requested rasterization grid is larger than the screen resolution');
+end
+img=img.cdata(1:imsize(2),1:imsize(1),:);
+cla(handles.axPreview);
 
 %----------------------------------------------------------------
 function [newdata, newtype]=s2mgui(data)
@@ -524,12 +578,17 @@ if(~isempty(root.graph.Nodes))
 end
 key=sprintf('%s%d',name,id);
 
+nodedata.preview=getpreview(handles,nodedata,nodetype,[100,100]);
+
 nodeprop=table({key},{nodedata},{nodetype},'VariableNames',{'Name','Data','Type'});
 root.graph=addnode(root.graph,nodeprop);
 if(nargout>1)
     newgraph=root.graph;
 end
 updategraph(root, handles);
+% hold(handles.axFlow,'on');
+% imagesc(nodedata.preview,'parent',handles.axFlow);
+% hold(handles.axFlow,'off');
 
 function updategraph(root, handles)
 set(handles.fgI2M,'userdata',root);
