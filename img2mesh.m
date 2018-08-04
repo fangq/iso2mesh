@@ -50,13 +50,15 @@ cm = uicontextmenu;
 miplot= uimenu(cm,'Label','Plot','CallBack',{@processdata,handles});
 midel = uimenu(cm,'Label','Delete','CallBack',{@processdata,handles});
 mijmesh = uimenu(cm,'Label','Export to JMesh','CallBack',{@processdata,handles});
-miv2s = uimenu(cm,'Label','Volume to surface','CallBack',{@processdata,handles});
-miv2m = uimenu(cm,'Label','Volume to mesh','CallBack',{@processdata,handles});
-mis2m = uimenu(cm,'Label','Surface to mesh','CallBack',{@processdata,handles});
-mis2v = uimenu(cm,'Label','Surface to volume','CallBack',{@processdata,handles});
-micln = uimenu(cm,'Label','Clean surface','CallBack',{@processdata,handles});
-mifix = uimenu(cm,'Label','Repair surface','CallBack',{@processdata,handles});
-misms = uimenu(cm,'Label','Smooth surface','CallBack',{@processdata,handles});
+mimeshing = uimenu(cm,'Label','Meshing','CallBack',{@processdata,handles});
+miv2s = uimenu(mimeshing,'Label','Volume to surface','CallBack',{@processdata,handles});
+miv2m = uimenu(mimeshing,'Label','Volume to mesh','CallBack',{@processdata,handles});
+mis2m = uimenu(mimeshing,'Label','Surface to mesh','CallBack',{@processdata,handles});
+mis2v = uimenu(mimeshing,'Label','Surface to volume','CallBack',{@processdata,handles});
+mirepair = uimenu(cm,'Label','Surface repair','CallBack',{@processdata,handles});
+micln = uimenu(mirepair,'Label','Clean surface','CallBack',{@processdata,handles});
+mifix = uimenu(mirepair,'Label','Repair surface','CallBack',{@processdata,handles});
+misms = uimenu(mirepair,'Label','Smooth surface','CallBack',{@processdata,handles});
 mibool = uimenu(cm,'Label','Surface boolean','CallBack',{@processdata,handles});
 mibool1 = uimenu(mibool,'Label','Or','CallBack',{@processdata,handles});
 mibool2 = uimenu(mibool,'Label','And','CallBack',{@processdata,handles});
@@ -67,6 +69,12 @@ mibool5 = uimenu(mibool,'Label','Second','CallBack',{@processdata,handles});
 miv2s.Separator='on';
 
 set(handles.fgI2M,'userdata',struct('graph',digraph,'menu',cm));
+set(handles.axFlow,'position',[0 0 1 1]);
+set(handles.axPreview,'position',[0 0 1 1]);
+
+set(handles.fgI2M,'UIContextMenu',handles.meCreate);
+
+
 axis(handles.axFlow,'off');
 axis(handles.axPreview,'off');
 
@@ -82,12 +90,17 @@ guidata(hObject, handles);
 function processdata(source,callbackdata,handles)
 obj=get(handles.fgI2M,'currentobject');
 if(strcmp(class(obj),'matlab.graphics.chart.primitive.GraphPlot')==0)
-    return
+    if(~isempty(obj.UserData) && strcmp(class(obj.UserData),'matlab.graphics.chart.primitive.GraphPlot'))
+        obj=obj.UserData;
+    else
+        return
+    end
 end
 root=get(handles.fgI2M,'userdata');
 pos=get(handles.axFlow,'currentpoint');
 [nodedata,nodetype,nodeid]=getnodeat(root,obj,pos);
 
+newtype=dummytype;
 prefix='x';
 switch source.Label
     case 'Volume to surface'
@@ -154,15 +167,22 @@ switch source.Label
         end
     case {'Or','And','Diff','All','First','Second'}
         if(isstruct(nodetype) && isfield(nodetype,'hasnode'))
-            if(nodetype.haselem && nodetype.hasnode)
+            if((nodetype.hasface || nodetype.haselem) && nodetype.hasnode)
                 pt=ginput(1);
                 [nodedata2,nodetype2,nodeid2]=getnodeat(root,obj,pt);
-                if(~nodetype2.hasnode || ~nodetype2.haselem)
-                    throw('Second operand does not contain a surface');
+                if(~nodetype2.hasnode || ~nodetype2.hasface)
+                    if(nodetype2.hasnode && nodetype2.haselem)
+                        nodedata2.face=volface(nodedata2.elem);
+                    else
+                        error('Second operand does not contain a surface');
+                    end
                 end
                 op=source.Label;
                 if(strcmp(op,'Intersect'))
                     op='inter';
+                end
+                if(~nodedata.hasface)
+                    nodedata.face=volface(nodedata.elem);
                 end
                 [newdata.node,newdata.face]=surfboolean(nodedata.node,nodedata.face,lower(op),nodedata2.node,nodedata2.face(:,[1 3 2]));
                 newtype.hasnode=1;
@@ -177,7 +197,7 @@ switch source.Label
         updategraph(root,handles);
     case 'Export to JMesh'
         if(~nodetype.haselem && ~nodetype.hasnode)
-            warndlg('selected data does not have a mesh');
+            throw('selected data does not have a mesh');
             return;
         end
         filter = {'*.jmesh';'*.*'};
@@ -186,20 +206,24 @@ switch source.Label
             if(nodetype.haselem)
                 savejmesh(nodedata.node,nodedata.face,nodedata.elem,fullfile(path,file));
             else
-                savejmesh(nodedata.node,nodedata.elem,fullfile(path,file));
+                savejmesh(nodedata.node,nodedata.face,fullfile(path,file));
             end
         end
 end
 if(exist('newdata','var') && exist('newtype','var'))
-    newdata.preview=getpreview(handles,newdata,newtype,[100,100]);
+    cla(handles.axPreview);
+    cla(handles.axFlow);
+    newdata.preview=getpreview(newdata,newtype,[100,100]);
     [newkey,root.graph]=addnodewithdata(handles,newdata,newtype,prefix);
     root.graph=addedge(root.graph,{root.graph.Nodes.Name{nodeid}},{newkey});
     if(strcmp(source.Parent.Type, 'uimenu') && strcmp(source.Parent.Label,'Surface boolean'))
         root.graph=addedge(root.graph,{root.graph.Nodes.Name{nodeid2}},{newkey});
     end
     updategraph(root,handles);
-    imagesc(newdata.preview,'parent',handles.axFlow);
+%     imagesc(newdata.preview,'parent',handles.axPreview);
 end
+
+%----------------------------------------------------------------
 
 function [nodedata,nodetype,nodeid]=getnodeat(root,obj,pos)
 nodedist=[obj.XData(:)-pos(1,1) obj.YData(:)-pos(1,2)];
@@ -207,6 +231,13 @@ nodedist=sum(nodedist.*nodedist,2);
 [mindist, nodeid]=min(nodedist);
 nodedata=root.graph.Nodes.Data{nodeid};
 nodetype=root.graph.Nodes.Type{nodeid};
+
+%----------------------------------------------------------------
+function mytype=dummytype
+mytype.hasnode=0;
+mytype.hasface=0;
+mytype.haselem=0;
+mytype.hasvol=0;
 
 %----------------------------------------------------------------
 function [newdata, newtype]=v2sgui(data)
@@ -218,7 +249,7 @@ dims = [1 1 1 1];
 definput = {'0.5','5','1','cgalsurf'};
 res = inputdlg(prompt,title,dims,definput);
 newdata=[]; 
-newtype=[];
+newtype=dummytype;
 if(isempty(res))
     return;
 end
@@ -240,7 +271,7 @@ dims = [1 1 1 1 1];
 definput = {'[]','5','1','30','cgalmesh'};
 res = inputdlg(prompt,title,dims,definput);
 newdata=[]; 
-newtype=[];
+newtype=dummytype;
 if(isempty(res))
     return;
 end
@@ -253,23 +284,20 @@ newtype.hasface=1;
 newtype.haselem=1;
 
 %----------------------------------------------------------------
-function img=getpreview(handles,nodedata,nodetype,imsize)
-set(handles.axPreview, 'Units','pixels','position',[1, 1, imsize(1), imsize(2)]);
+function img=getpreview(nodedata,nodetype,imsize)
+ax=axes('Units','pixels','position',[1, 1, imsize(1), imsize(2)]);
 if(isfield(nodetype,'haselem') && nodetype.haselem)
-    plotmesh(nodedata.node,[],nodedata.elem,'linestyle','none','parent',handles.axPreview);
+    plotmesh(nodedata.node,[],nodedata.elem,'linestyle','none','parent',ax);
 elseif(isfield(nodetype,'hasface') && nodetype.hasface)
-    plotmesh(nodedata.node,nodedata.face,'linestyle','none','parent',handles.axPreview);
+    plotmesh(nodedata.node,nodedata.face,'linestyle','none','parent',ax);
 elseif(isfield(nodetype,'hasvol') && nodetype.hasvol)
-    imagesc(nodedata.vol(:,:,ceil(size(nodedata.vol,3)/2)),'parent',handles.axPreview);
+    imagesc(nodedata.vol(:,:,ceil(size(nodedata.vol,3)/2)),'parent',ax);
 end
-axis(handles.axPreview,'equal');
-axis(handles.axPreview,'off');
+axis(ax,'equal');
+axis(ax,'off');
 img=getframe(gca);
-if(any(size(img.cdata)<[imsize([2 1]) 3]))
-    error('the requested rasterization grid is larger than the screen resolution');
-end
-img=img.cdata(1:imsize(2),1:imsize(1),:);
-cla(handles.axPreview);
+img=flipud(img.cdata);
+delete(ax);
 
 %----------------------------------------------------------------
 function [newdata, newtype]=s2mgui(data)
@@ -283,7 +311,7 @@ dims = [1 1 1 1 1];
 definput = {'1','30','tetgen','[]','[]'};
 res = inputdlg(prompt,title,dims,definput);
 newdata=[]; 
-newtype=[];
+newtype=dummytype;
 if(isempty(res))
     return;
 end
@@ -303,6 +331,7 @@ function varargout = i2m_OutputFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Get default command line output from handles structure
+handles.output=get(handles.fgI2M,'userdata');
 varargout{1} = handles.output;
 
 
@@ -322,30 +351,38 @@ function miCreate_Callback(hObject, eventdata, handles)
 
 % --------------------------------------------------------------------
 function miHelp_Callback(hObject, eventdata, handles)
-% hObject    handle to miHelp (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 
 % --------------------------------------------------------------------
 function miWeb_Callback(hObject, eventdata, handles)
-% hObject    handle to miWeb (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+web('http://iso2mesh.sourceforge.net');
 
 
 % --------------------------------------------------------------------
 function miDoc_Callback(hObject, eventdata, handles)
-% hObject    handle to miDoc (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+web('http://iso2mesh.sourceforge.net/cgi-bin/index.cgi?Doc');
 
 
 % --------------------------------------------------------------------
 function miAbout_Callback(hObject, eventdata, handles)
-% hObject    handle to miAbout (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+helpmsg={
+'\bf\fontsize{12}I2M: An Integrated GUI for Iso2Mesh Meshing Toolbox\rm\fontsize{10}',
+'',
+'Copyright (c) 2018 Qianqian Fang <q.fang at neu.edu>',
+''
+'COTI Lab (http://fanglab.org)',
+'Department of Bioengineering',
+'Northeastern University',
+'360 Huntington Ave, Boston, MA 02115, USA',
+'',
+'URL:    http://iso2mesh.sourceforge.net',
+''};
+
+opt.Interpreter = 'tex';
+opt.WindowStyle = 'modal';
+
+msgbox(helpmsg,'About','help',opt);
+
 
 % --------------------------------------------------------------------
 function miSphere_Callback(hObject, eventdata, handles)
@@ -359,6 +396,7 @@ res = inputdlg(prompt,title,dims,definput);
 if(isempty(res))
     return;
 end
+newtype=dummytype;
 opt=str2num(res{3});
 if(str2num(res{4})==0)
    [newdata.node,newdata.face]=meshasphere(eval(res{1}),...
@@ -387,6 +425,7 @@ res = inputdlg(prompt,title,dims,definput);
 if(isempty(res))
     return;
 end
+newtype=dummytype;
 opt=str2num(res{3});
 if(str2num(res{4})==0)
    [newdata.node,newdata.face]=meshabox(eval(res{1}),eval(res{2}),opt);
@@ -415,6 +454,7 @@ res = inputdlg(prompt,title,dims,definput);
 if(isempty(res))
     return;
 end
+newtype=dummytype;
 opt=str2num(res{4});
 maxvol=str2num(res{5});
 
@@ -437,7 +477,7 @@ end
 function miLoadMesh_Callback(hObject, eventdata, handles)
 
 nodedata=struct;
-nodetype=struct;
+nodetype=dummytype;
 filters={'*.jmesh;*.off;*.medit;*.smf;*.json','3D Mesh files (*.jmesh;*.off;*.medit;*.smf;*.json)',...
     '*.jmesh','JSON mesh (*.jmesh)',...
     '*.off','OFF file (*.off)',...
@@ -509,7 +549,7 @@ function fgI2M_CreateFcn(hObject, eventdata, handles)
 function miLoadVol_Callback(hObject, eventdata, handles)
 
 nodedata=struct;
-nodetype=struct;
+nodetype=dummytype;
 [file,path] = uigetfile('*.mat');
 if isequal(file,0)
    return;
@@ -532,15 +572,11 @@ addnodewithdata(handles,nodedata,nodetype,'Vol');
 
 %--------------------------------------------------------------------
 function nodetype=getnodetype(nodedata)
-nodetype=struct;
+nodetype=dummytype;
 if(~isstruct(nodedata))
     return;
 end
 names=fieldnames(nodedata);
-nodetype.hasvol=0;
-nodetype.hasnode=0;
-nodetype.hasface=0;
-nodetype.haselem=0;
 for i=1:length(names)
       switch names{i}
            case 'node'
@@ -578,7 +614,9 @@ if(~isempty(root.graph.Nodes))
 end
 key=sprintf('%s%d',name,id);
 
-nodedata.preview=getpreview(handles,nodedata,nodetype,[100,100]);
+cla(handles.axPreview);
+cla(handles.axFlow);
+nodedata.preview=getpreview(nodedata,nodetype,[100,100]);
 
 nodeprop=table({key},{nodedata},{nodetype},'VariableNames',{'Name','Data','Type'});
 root.graph=addnode(root.graph,nodeprop);
@@ -586,49 +624,57 @@ if(nargout>1)
     newgraph=root.graph;
 end
 updategraph(root, handles);
-% hold(handles.axFlow,'on');
-% imagesc(nodedata.preview,'parent',handles.axFlow);
-% hold(handles.axFlow,'off');
 
-function updategraph(root, handles)
+% --------------------------------------------------------------------
+
+function hobj=updatepreview(root,obj,handles)
+cla(handles.axPreview);
+view(handles.axPreview,2)
+nx=obj.XData(:);
+ny=obj.YData(:);
+nn=length(nx);
+hold(handles.axPreview,'on');
+dx=get(handles.axFlow,'xlim');
+dy=get(handles.axFlow,'ylim');
+wd=min([diff(dx) diff(dy)])/15;
+hobj=zeros(1,nn);
+set(handles.axPreview,'xlim',dx);
+set(handles.axPreview,'ylim',dy);
+dim=get(handles.axPreview,'dataaspectratio');
+[wfig, hfig]=getwindowsize(handles.fgI2M);
+wfig=wfig*dim(2);
+hfig=hfig*dim(1);
+
+for i=1:nn
+    if(isfield(root.graph.Nodes.Data{i},'preview'))
+        hobj(i)=imagesc(nx(i)+[-2*wd 0], ny(i)+[-wd wd]*(wfig/hfig), root.graph.Nodes.Data{i}.preview, ...
+            'parent',handles.axPreview);
+    end
+end
+set(hobj,'userdata',obj);
+set(hobj,'UIContextMenu',root.menu);
+set(handles.axPreview,'xlim',dx);
+set(handles.axPreview,'ylim',dy);
+axis(handles.axPreview,'off');
+hold(handles.axPreview,'off');
+% --------------------------------------------------------------------
+
+function [width, height]=getwindowsize(fig)
+oldunits = get(fig, 'Units');
+set(fig, 'Units', 'pixels');
+figpos = get(fig, 'Position');
+set(fig, 'Units', oldunits);
+width=figpos(3);
+height=figpos(4);
+
+function [hg,hobj]=updategraph(root, handles)
 set(handles.fgI2M,'userdata',root);
-hg=plot(root.graph,'parent',handles.axFlow);
+hg=plot(root.graph,'parent',handles.axFlow,'ArrowSize',15);
+hobj=updatepreview(root,hg,handles);
 % set(hg,'Selected','on');
 axis(handles.axFlow,'off');
+set(handles.axFlow,'XColor','none')
 set(hg,'UIContextMenu',root.menu);
-
-% --------------------------------------------------------------------
-function miDelete_Callback(hObject, eventdata, handles)
-% hObject    handle to miDelete (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function miPlot_Callback(hObject, eventdata, handles)
-% hObject    handle to miPlot (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% --------------------------------------------------------------------
-function mePlot_Callback(hObject, eventdata, handles)
-% hObject    handle to mePlot (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function meEdit_Callback(hObject, eventdata, handles)
-% hObject    handle to meEdit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on mouse press over axes background.
-function axFlow_ButtonDownFcn(hObject, eventdata, handles)
-% hObject    handle to axFlow (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 
 % --------------------------------------------------------------------
@@ -644,8 +690,9 @@ res = inputdlg(prompt,title,dims,definput);
 if(isempty(res))
     return;
 end
-opt=str2num(res{4});
-maxvol=str2num(res{5});
+newtype=dummytype;
+opt=str2num(res{3});
+maxvol=str2num(res{4});
 
 if(maxvol==0)
    [newdata.node,newdata.face]=meshanellip(eval(res{1}),eval(res{2}),opt);
@@ -674,6 +721,7 @@ res = inputdlg(prompt,title,dims,definput);
 if(isempty(res))
     return;
 end
+newtype=dummytype;
 maxvol=str2num(res{4});
 if(maxvol==0)
    [newdata.node,newdata.face]=latticegrid(eval(res{1}),eval(res{2}),eval(res{3}));
@@ -691,16 +739,53 @@ end
 
 % --------------------------------------------------------------------
 function miMeshgrid5_Callback(hObject, eventdata, handles)
-% hObject    handle to miMeshgrid5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+prompt = {'X-lattice range (a vector):',...
+    'Y-lattice range (a vector):',...
+    'Z-lattice range (a vector):'};
+title = 'Create Meshgrid (5 tet/cell) Mesh';
+dims = [1 1 1];
+definput = {'1:10','1:8','1:5'};
+res = inputdlg(prompt,title,dims,definput);
+if(isempty(res))
+    return;
+end
+newtype=dummytype;
+
+[newdata.node,newdata.elem]=meshgrid5(eval(res{1}),eval(res{2}),eval(res{3}));
+newdata.face=volface(newdata.elem);
+newtype.hasnode=1;
+newtype.hasface=1;
+newtype.haselem=1;
+
+if(exist('newdata','var') && exist('newtype','var'))
+    newkey=addnodewithdata(handles,newdata,newtype,'Meshgrid5_');
+end
 
 
 % --------------------------------------------------------------------
 function miMeshgrid6_Callback(hObject, eventdata, handles)
-% hObject    handle to miMeshgrid6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+prompt = {'X-lattice range (a vector):',...
+    'Y-lattice range (a vector):',...
+    'Z-lattice range (a vector):'};
+title = 'Create Meshgrid (6 tet/cell) Mesh';
+dims = [1 1 1];
+definput = {'1:10','1:8','1:5'};
+res = inputdlg(prompt,title,dims,definput);
+if(isempty(res))
+    return;
+end
+newtype=dummytype;
+
+[newdata.node,newdata.elem]=meshgrid5(eval(res{1}),eval(res{2}),eval(res{3}));
+newdata.face=volface(newdata.elem);
+newtype.hasnode=1;
+newtype.hasface=1;
+newtype.haselem=1;
+
+if(exist('newdata','var') && exist('newtype','var'))
+    newkey=addnodewithdata(handles,newdata,newtype,'Meshgrid6_');
+end
+
 
 
 % --------------------------------------------------------------------
@@ -724,7 +809,7 @@ end
 % --------------------------------------------------------------------
 function miSaveAll_Callback(hObject, eventdata, handles)
 root=get(handles.fgI2M,'userdata');
-graph=root.graph;
+i2mworkspace=root.graph;
 filter = {'*.mat';'*.*'};
 [file, path] = uiputfile(filter,'Save workspace');
 if ~isequal(file,0) && ~isequal(path,0)
@@ -736,7 +821,6 @@ end
 function miLoadVar_Callback(hObject, eventdata, handles)
 
 nodedata=struct;
-nodetype=struct;
 [file,path] = uigetfile({'*.mat','MATLAB data (*.mat)'});
 if isequal(file,0)
    return;
@@ -768,3 +852,51 @@ elseif(nodetype.hasnode)
 elseif(nodetype.hasvol)
     addnodewithdata(handles,nodedata,nodetype,'Vol');
 end
+
+
+% --------------------------------------------------------------------
+function miClose_Callback(hObject, eventdata, handles)
+
+close(handles.fgI2M);
+
+
+% --------------------------------------------------------------------
+function meShapes_Callback(hObject, eventdata, handles)
+% hObject    handle to meShapes (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Untitled_9_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function miLoadnii_Callback(hObject, eventdata, handles)
+% hObject    handle to miLoadnii (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function miLoadmat_Callback(hObject, eventdata, handles)
+% hObject    handle to miLoadmat (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function miLoadAnalyze_Callback(hObject, eventdata, handles)
+% hObject    handle to miLoadAnalyze (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function miLoadinr_Callback(hObject, eventdata, handles)
+% hObject    handle to miLoadinr (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
