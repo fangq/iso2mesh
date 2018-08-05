@@ -3,7 +3,7 @@ function varargout = img2mesh(varargin)
 %  Format: 
 %      newworkspace = img2mesh or imgmesh(workspace)
 %
-%      A GUI for Iso2Mesh for streamlined mesh data processing
+%  A GUI for Iso2Mesh for streamlined mesh data processing
 %  
 %  Author: Qianqian Fang <q.fang at neu.edu>
 %  
@@ -50,16 +50,16 @@ cm = uicontextmenu;
 miplot= uimenu(cm,'Label','Plot','CallBack',{@processdata,handles});
 midel = uimenu(cm,'Label','Delete','CallBack',{@processdata,handles});
 mijmesh = uimenu(cm,'Label','Export to JMesh','CallBack',{@processdata,handles});
-mimeshing = uimenu(cm,'Label','Meshing','CallBack',{@processdata,handles});
+mimeshing = uimenu(cm,'Label','Meshing');
 miv2s = uimenu(mimeshing,'Label','Volume to surface','CallBack',{@processdata,handles});
 miv2m = uimenu(mimeshing,'Label','Volume to mesh','CallBack',{@processdata,handles});
 mis2m = uimenu(mimeshing,'Label','Surface to mesh','CallBack',{@processdata,handles});
 mis2v = uimenu(mimeshing,'Label','Surface to volume','CallBack',{@processdata,handles});
-mirepair = uimenu(cm,'Label','Surface repair','CallBack',{@processdata,handles});
+mirepair = uimenu(cm,'Label','Surface repair');
 micln = uimenu(mirepair,'Label','Clean surface','CallBack',{@processdata,handles});
 mifix = uimenu(mirepair,'Label','Repair surface','CallBack',{@processdata,handles});
 misms = uimenu(mirepair,'Label','Smooth surface','CallBack',{@processdata,handles});
-mibool = uimenu(cm,'Label','Surface boolean','CallBack',{@processdata,handles});
+mibool = uimenu(cm,'Label','Surface boolean');
 mibool1 = uimenu(mibool,'Label','Or','CallBack',{@processdata,handles});
 mibool2 = uimenu(mibool,'Label','And','CallBack',{@processdata,handles});
 mibool3 = uimenu(mibool,'Label','Diff','CallBack',{@processdata,handles});
@@ -67,6 +67,7 @@ mibool4 = uimenu(mibool,'Label','First','CallBack',{@processdata,handles});
 mibool5 = uimenu(mibool,'Label','Second','CallBack',{@processdata,handles});
 
 miv2s.Separator='on';
+mimeshing.Separator='on';
 
 set(handles.fgI2M,'userdata',struct('graph',digraph,'menu',cm));
 set(handles.axFlow,'position',[0 0 1 1]);
@@ -220,11 +221,9 @@ if(exist('newdata','var') && exist('newtype','var'))
         root.graph=addedge(root.graph,{root.graph.Nodes.Name{nodeid2}},{newkey});
     end
     updategraph(root,handles);
-%     imagesc(newdata.preview,'parent',handles.axPreview);
 end
 
 %----------------------------------------------------------------
-
 function [nodedata,nodetype,nodeid]=getnodeat(root,obj,pos)
 nodedist=[obj.XData(:)-pos(1,1) obj.YData(:)-pos(1,2)];
 nodedist=sum(nodedist.*nodedist,2);
@@ -255,8 +254,7 @@ if(isempty(res))
 end
 
 opt=struct('radbound',str2num(res{2}),'distbound',str2num(res{3}));
-[newdata.node,newdata.face]=vol2surf(data.vol,eval(res{1}),...
-   opt, res{4});
+[newdata.node,newdata.face]=v2s(data.vol,eval(res{1}),opt, res{4});
 newtype.hasnode=1;
 newtype.hasface=1;
 %----------------------------------------------------------------
@@ -287,12 +285,17 @@ newtype.haselem=1;
 function img=getpreview(nodedata,nodetype,imsize)
 ax=axes('Units','pixels','position',[1, 1, imsize(1), imsize(2)]);
 if(isfield(nodetype,'haselem') && nodetype.haselem)
-    plotmesh(nodedata.node,[],nodedata.elem,'linestyle','none','parent',ax);
+    plotmesh(nodedata.node,[],nodedata.elem,'linestyle',':','parent',ax);
 elseif(isfield(nodetype,'hasface') && nodetype.hasface)
     plotmesh(nodedata.node,nodedata.face,'linestyle','none','parent',ax);
 elseif(isfield(nodetype,'hasvol') && nodetype.hasvol)
-    imagesc(nodedata.vol(:,:,ceil(size(nodedata.vol,3)/2)),'parent',ax);
+%     imagesc(nodedata.vol(:,:,ceil(size(nodedata.vol,3)*0.5)),'parent',ax);
+    hs=slice(double(nodedata.vol),[],[ceil(size(nodedata.vol,2)*0.5)],ceil(size(nodedata.vol,3)*0.5),'parent',ax);
+    set(hs,'linestyle','none');
+elseif(isfield(nodetype,'hasnode') && nodetype.hasnode)
+    plotmesh(nodedata.node,'.','parent',ax);
 end
+set(ax,'color','none')
 axis(ax,'equal');
 axis(ax,'off');
 img=getframe(gca);
@@ -334,29 +337,9 @@ function varargout = i2m_OutputFcn(hObject, eventdata, handles)
 handles.output=get(handles.fgI2M,'userdata');
 varargout{1} = handles.output;
 
-
-% --------------------------------------------------------------------
-function mFile_Callback(hObject, eventdata, handles)
-% hObject    handle to mFile (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function miCreate_Callback(hObject, eventdata, handles)
-% hObject    handle to miCreate (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function miHelp_Callback(hObject, eventdata, handles)
-
-
 % --------------------------------------------------------------------
 function miWeb_Callback(hObject, eventdata, handles)
 web('http://iso2mesh.sourceforge.net');
-
 
 % --------------------------------------------------------------------
 function miDoc_Callback(hObject, eventdata, handles)
@@ -370,7 +353,7 @@ helpmsg={
 '',
 'Copyright (c) 2018 Qianqian Fang <q.fang at neu.edu>',
 ''
-'COTI Lab (http://fanglab.org)',
+'Computational Optics&Translational Imaging Lab (http://fanglab.org)',
 'Department of Bioengineering',
 'Northeastern University',
 '360 Huntington Ave, Boston, MA 02115, USA',
@@ -382,7 +365,6 @@ opt.Interpreter = 'tex';
 opt.WindowStyle = 'modal';
 
 msgbox(helpmsg,'About','help',opt);
-
 
 % --------------------------------------------------------------------
 function miSphere_Callback(hObject, eventdata, handles)
@@ -474,88 +456,17 @@ if(exist('newdata','var') && exist('newtype','var'))
 end
 
 % --------------------------------------------------------------------
-function miLoadMesh_Callback(hObject, eventdata, handles)
-
-nodedata=struct;
-nodetype=dummytype;
-filters={'*.jmesh;*.off;*.medit;*.smf;*.json','3D Mesh files (*.jmesh;*.off;*.medit;*.smf;*.json)',...
-    '*.jmesh','JSON mesh (*.jmesh)',...
-    '*.off','OFF file (*.off)',...
-    '*.medit','Medit file (*.medit)',...
-    '*.smf','Simple Model Format (*.smf)',...
-    '*.json','JSON file (*.json)','*.*','All (*.*)'};
-[file,path,idx] = uigetfile(filters);
-if isequal(file,0)
-   return;
-else
-   if(regexp(file,'\.[Oo][Oo][Ff]$'))
-       [nodedata.node, nodedata.face]=readoff(fullfile(path,file));
-   elseif(regexp(file,'\.[Mm][Ee][Dd][Ii][Tt]$'))
-       [nodedata.node, nodedata.elem]=readmedit(fullfile(path,file));
-   elseif(regexp(file,'\.[Ss][Mm][Ff]$'))
-       [nodedata.node, nodedata.elem]=readsmf(fullfile(path,file));
-   elseif(regexp(file,'\.[Jj][Mm][Ee][Ss][Hh]$'))
-       data=loadjson(fullfile(path,file));
-       if(isfield(data,'MeshNode'))
-           nodedata.node=data.MeshNode;
-       end
-       if(isfield(data,'MeshElem'))
-           nodedata.elem=data.MeshElem;
-       end
-       if(isfield(data,'MeshSurf'))
-           nodedata.face=data.MeshSurf;
-       end
-       if(isfield(data,'MeshNodeVal'))
-           nodedata.node(:,end+1:end+size(data.MeshNodeVal,2))=data.MeshNodeVal;
-       end
-       if(isfield(data,'MeshTetraVal'))
-           nodedata.elem(:,end+1:end+size(data.MeshTetraVal,2))=data.MeshTetraVal;
-       end
-   elseif(regexp(file,'\.[Jj][Ss][Oo][Nn]$'))
-       nodedata=loadjson(fullfile(path,file));
-   end
-end
-if(exist('nodedata','var'))
-    nodetype=getnodetype(nodedata);
-    if(nodetype.haselem)
-        addnodewithdata(handles,nodedata,nodetype,'Tet');
-    elseif(nodetype.hasface)
-        addnodewithdata(handles,nodedata,nodetype,'Surf');
-    elseif(nodetype.hasnode)
-        addnodewithdata(handles,nodedata,nodetype,'Point');
-    elseif(nodetype.hasvol)
-        addnodewithdata(handles,nodedata,nodetype,'Vol');
-    end
-else
-    warndlg('no valid mesh data found','Warning');
-end
-
-% --- Executes during object creation, after setting all properties.
-function axFlow_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to axFlow (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: place code in OpeningFcn to populate axFlow
-
-
-% --- Executes during object creation, after setting all properties.
-function fgI2M_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to fgI2M (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% --------------------------------------------------------------------
 function miLoadVol_Callback(hObject, eventdata, handles)
 
 nodedata=struct;
 nodetype=dummytype;
-filters={'*.nii;*.hdr;*.inr;*.bin;*.ubj','3D volume file (*.nii;*.hdr;*.inr;*.bin;*.ubj)',...
-    '*.nii','Nifti file (*.nii)',...
-    '*.hdr','Analyze 7.5 file (*.hdr)',...
-    '*.inr','INR image (*.inr)',...
-    '*.bin','Binary file (*.bin)',...
-    '*.ubj','Universal JSON (*.ubj)',...
+filters={'*.nii;*.hdr;*.img;*.tif;*.tiff;*.inr;*.bin;*.ubj','3D volume file (*.nii;*.hdr;*.img;*.tif;*.tiff;*.inr;*.bin;*.ubj)';...
+    '*.nii','Nifti file (*.nii)';...
+    '*.hdr;*.img','Analyze 7.5 file (*.hdr;*.img)';...
+    '*.tif;*.tiff','Multipage TIFF file (*.tif)';...
+    '*.inr','INR image (*.inr)';...
+    '*.bin','Binary file (*.bin)';...
+    '*.ubj','Universal JSON (*.ubj)';...
     '*.*','All (*.*)'};
 [file,path,idx] = uigetfile(filters);
 if isequal(file,0)
@@ -565,15 +476,27 @@ else
        im=readnifti(fullfile(path,file));
        nodedata.vol=im.img;
        nodetype.hasvol=1;
-   elseif(regexp(file,'\.[Hh][Dd][Rr]$'))
-       im=readanalyze(fullfile(path,file));
+   elseif(regexp(file,'(\.[Hh][Dd][Rr]$|\.[Ii][Mm][Gg]$)'))
+       im=readnifti(fullfile(path,file));
        nodedata.vol=im.img;
+       nodetype.hasvol=1;
+   elseif(regexp(file,'\.[Tt][Ii][Ff][Ff]*$'))
+       nodedata.vol=readmptiff(fullfile(path,file));
        nodetype.hasvol=1;
    elseif(regexp(file,'\.[Ii][Nn][Rr]$'))
        nodedata.vol=readinr(fullfile(path,file));
        nodetype.hasvol=1;
    elseif(regexp(file,'\.[Bb][Ii][Nn]$'))
-       nodedata.vol=loadmc2(fullfile(path,file));
+       prompt = {'Dimension (1x3 vector):',...
+            'Datatype (short,float,double,integer,...):'};
+       title = 'Load generic binary file';
+       dims = [1 1];
+       definput = {'[]','short'};
+       [res,isok] = inputdlg(prompt,title,dims,definput);
+       if(isok==0)
+           return;
+       end
+       nodedata.vol=loadmc2(fullfile(path,file),eval(res{1}),res{2});
        nodetype.hasvol=1;
    elseif(regexp(file,'\.[Uu][Bb][Jj]$'))
        nodedata=loadubjson(fullfile(path,file));
@@ -591,6 +514,123 @@ if(exist('nodedata','var'))
 else
     warndlg('no valid mesh data found','Warning');
 end
+
+% --------------------------------------------------------------------
+function miLoadMesh_Callback(hObject, eventdata, handles)
+
+nodedata=struct;
+nodetype=dummytype;
+filters={'*.jmesh;*.off;*.medit;*.smf;*.json','3D Mesh files (*.jmesh;*.off;*.medit;*.smf;*.json)';...
+    '*.jmesh','JSON mesh (*.jmesh)';...
+    '*.off','OFF file (*.off)';...
+    '*.medit','Medit file (*.medit)';...
+    '*.ele','Tetgen element mesh file (*.ele)';...
+    '*.json','JSON file (*.json)';'*.*','All (*.*)'};
+[file,path,idx] = uigetfile(filters);
+if isequal(file,0)
+   return;
+else
+   if(regexp(file,'\.[Oo][Ff][Ff]$'))
+       [nodedata.node, nodedata.face]=readoff(fullfile(path,file));
+   elseif(regexp(file,'\.[Mm][Ee][Dd][Ii][Tt]$'))
+       [nodedata.node, nodedata.elem]=readmedit(fullfile(path,file));
+   elseif(regexp(file,'\.[Ee][Ll][Ee]$'))
+       [pathstr,name,ext] = fileparts(fullfile(path,file));
+       [nodedata.node, nodedata.elem]=readtetgen(fullfile(pathstr,name));
+   elseif(regexp(file,'\.[Jj][Mm][Ee][Ss][Hh]$'))
+       nodedata=importjmesh(fullfile(path,file));
+   elseif(regexp(file,'\.[Jj][Ss][Oo][Nn]$'))
+       nodedata=loadjson(fullfile(path,file));
+   end
+end
+if(exist('nodedata','var'))
+    adddatatograph(handles,nodedata);
+else
+    warndlg('no valid mesh data found','Warning');
+end
+
+% --------------------------------------------------------------------
+function miLoadSurf_Callback(hObject, eventdata, handles)
+nodedata=struct;
+nodetype=dummytype;
+filters={'*.jmesh;*.off;*.asc;*.smf;*.smf;*.json','3D Mesh files (*.jmesh;*.off;*.asc;*.smf;*.smf;*.json)';...
+    '*.jmesh','JSON mesh (*.jmesh)';...
+    '*.off','OFF file (*.off)';...
+    '*.asc','ASC file (*.asc)';...
+    '*.gts','GNU Trangulated Surface file (*.gts)';...
+    '*.smf','Simple Model Format (*.smf)';...
+    '*.json','JSON file (*.json)';'*.*','All (*.*)'};
+[file,path,idx] = uigetfile(filters);
+if isequal(file,0)
+   return;
+else
+   if(regexp(file,'\.[Oo][Ff][Ff]$'))
+       [nodedata.node, nodedata.face]=readoff(fullfile(path,file));
+   elseif(regexp(file,'\.[Aa][Ss][Cc]$'))
+       [nodedata.node, nodedata.face]=readasc(fullfile(path,file));
+   elseif(regexp(file,'\.[Gg][Tt][Ss]$'))
+       [nodedata.node, nodedata.face]=readgts(fullfile(path,file));
+   elseif(regexp(file,'\.[Ss][Mm][Ff]$'))
+       [nodedata.node, nodedata.face]=readsmf(fullfile(path,file));
+   elseif(regexp(file,'\.[Jj][Mm][Ee][Ss][Hh]$'))
+       nodedata=importjmesh(fullfile(path,file));
+   elseif(regexp(file,'\.[Jj][Ss][Oo][Nn]$'))
+       nodedata=loadjson(fullfile(path,file));
+   end
+end
+if(exist('nodedata','var'))
+    adddatatograph(handles,nodedata);
+else
+    warndlg('no valid mesh data found','Warning');
+end
+
+% --------------------------------------------------------------------
+function nodedata=importjmesh(filename)
+data=loadjson(filename);
+nodedata=struct;
+if(isfield(data,'MeshNode'))
+   nodedata.node=data.MeshNode;
+end
+if(isfield(data,'MeshElem'))
+   nodedata.elem=data.MeshElem;
+end
+if(isfield(data,'MeshSurf'))
+   nodedata.face=data.MeshSurf;
+end
+if(isfield(data,'MeshNodeVal'))
+   nodedata.node(:,end+1:end+size(data.MeshNodeVal,2))=data.MeshNodeVal;
+end
+if(isfield(data,'MeshTetraVal'))
+   nodedata.elem(:,end+1:end+size(data.MeshTetraVal,2))=data.MeshTetraVal;
+end
+
+% --------------------------------------------------------------------
+function adddatatograph(handles,nodedata)
+nodetype=getnodetype(nodedata);
+if(nodetype.haselem)
+    addnodewithdata(handles,nodedata,nodetype,'Tet');
+elseif(nodetype.hasface)
+    addnodewithdata(handles,nodedata,nodetype,'Surf');
+elseif(nodetype.hasnode)
+    addnodewithdata(handles,nodedata,nodetype,'Point');
+elseif(nodetype.hasvol)
+    addnodewithdata(handles,nodedata,nodetype,'Vol');
+end
+
+% --- Executes during object creation, after setting all properties.
+function axFlow_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axFlow (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axFlow
+
+
+% --- Executes during object creation, after setting all properties.
+function fgI2M_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to fgI2M (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
 %--------------------------------------------------------------------
 function nodetype=getnodetype(nodedata)
@@ -648,7 +688,6 @@ end
 updategraph(root, handles);
 
 % --------------------------------------------------------------------
-
 function hobj=updatepreview(root,obj,handles)
 cla(handles.axPreview);
 view(handles.axPreview,2)
@@ -697,7 +736,6 @@ hobj=updatepreview(root,hg,handles);
 axis(handles.axFlow,'off');
 set(handles.axFlow,'XColor','none')
 set(hg,'UIContextMenu',root.menu);
-
 
 % --------------------------------------------------------------------
 function miEllipsoid_Callback(hObject, eventdata, handles)
@@ -783,7 +821,6 @@ if(exist('newdata','var') && exist('newtype','var'))
     newkey=addnodewithdata(handles,newdata,newtype,'Meshgrid5_');
 end
 
-
 % --------------------------------------------------------------------
 function miMeshgrid6_Callback(hObject, eventdata, handles)
 prompt = {'X-lattice range (a vector):',...
@@ -807,8 +844,6 @@ newtype.haselem=1;
 if(exist('newdata','var') && exist('newtype','var'))
     newkey=addnodewithdata(handles,newdata,newtype,'Meshgrid6_');
 end
-
-
 
 % --------------------------------------------------------------------
 function miOpen_Callback(hObject, eventdata, handles)
@@ -838,7 +873,6 @@ if ~isequal(file,0) && ~isequal(path,0)
    save(fullfile(path,file),'i2mworkspace');
 end
 
-
 % --------------------------------------------------------------------
 function miLoadVar_Callback(hObject, eventdata, handles)
 
@@ -863,20 +897,8 @@ else
        end
    end
 end
-
-nodetype=getnodetype(nodedata);
-if(nodetype.haselem)
-    addnodewithdata(handles,nodedata,nodetype,'Tet');
-elseif(nodetype.hasface)
-    addnodewithdata(handles,nodedata,nodetype,'Surf');
-elseif(nodetype.hasnode)
-    addnodewithdata(handles,nodedata,nodetype,'Point');
-elseif(nodetype.hasvol)
-    addnodewithdata(handles,nodedata,nodetype,'Vol');
-end
-
+adddatatograph(handles,nodedata);
 
 % --------------------------------------------------------------------
-function miClose_Callback(hObject, eventdata, handles)
-
+function miExit_Callback(hObject, eventdata, handles)
 close(handles.fgI2M);
