@@ -489,7 +489,7 @@ if isequal(file,0)
    return;
 else
    if(regexp(file,'\.[Oo][Oo][Ff]$'))
-       [nodedata.node, nodedata.elem]=readoff(fullfile(path,file));
+       [nodedata.node, nodedata.face]=readoff(fullfile(path,file));
    elseif(regexp(file,'\.[Mm][Ee][Dd][Ii][Tt]$'))
        [nodedata.node, nodedata.elem]=readmedit(fullfile(path,file));
    elseif(regexp(file,'\.[Ss][Mm][Ff]$'))
@@ -550,25 +550,47 @@ function miLoadVol_Callback(hObject, eventdata, handles)
 
 nodedata=struct;
 nodetype=dummytype;
-[file,path] = uigetfile('*.mat');
+filters={'*.nii;*.hdr;*.inr;*.bin;*.ubj','3D volume file (*.nii;*.hdr;*.inr;*.bin;*.ubj)',...
+    '*.nii','Nifti file (*.nii)',...
+    '*.hdr','Analyze 7.5 file (*.hdr)',...
+    '*.inr','INR image (*.inr)',...
+    '*.bin','Binary file (*.bin)',...
+    '*.ubj','Universal JSON (*.ubj)',...
+    '*.*','All (*.*)'};
+[file,path,idx] = uigetfile(filters);
 if isequal(file,0)
    return;
 else
-   data=load(fullfile(path,file));
-   vars=fieldnames(data);
-   [idx, isok]=listdlg('ListString',vars,...
-       'PromptString','Select a 3D array:');
-   if(~isok)
-       return;
-   end
-   for i=1:length(idx)
-       dat=data.(vars{idx(i)});
-       nodedata.(vars{idx(i)})=dat;
+   if(regexp(file,'\.[Nn][Ii][Ii]$'))
+       im=readnifti(fullfile(path,file));
+       nodedata.vol=im.img;
+       nodetype.hasvol=1;
+   elseif(regexp(file,'\.[Hh][Dd][Rr]$'))
+       im=readanalyze(fullfile(path,file));
+       nodedata.vol=im.img;
+       nodetype.hasvol=1;
+   elseif(regexp(file,'\.[Ii][Nn][Rr]$'))
+       nodedata.vol=readinr(fullfile(path,file));
+       nodetype.hasvol=1;
+   elseif(regexp(file,'\.[Bb][Ii][Nn]$'))
+       nodedata.vol=loadmc2(fullfile(path,file));
+       nodetype.hasvol=1;
+   elseif(regexp(file,'\.[Uu][Bb][Jj]$'))
+       nodedata=loadubjson(fullfile(path,file));
+       if(isstruct(nodedata) && isfield(nodedata,'vol'))
+           nodetype.hasvol=1;
+       end
    end
 end
 
-nodetype=getnodetype(nodedata);
-addnodewithdata(handles,nodedata,nodetype,'Vol');
+if(exist('nodedata','var'))
+    nodetype=getnodetype(nodedata);
+    if(nodetype.hasvol)
+        addnodewithdata(handles,nodedata,nodetype,'Vol');
+    end
+else
+    warndlg('no valid mesh data found','Warning');
+end
 
 %--------------------------------------------------------------------
 function nodetype=getnodetype(nodedata)
@@ -858,45 +880,3 @@ end
 function miClose_Callback(hObject, eventdata, handles)
 
 close(handles.fgI2M);
-
-
-% --------------------------------------------------------------------
-function meShapes_Callback(hObject, eventdata, handles)
-% hObject    handle to meShapes (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function Untitled_9_Callback(hObject, eventdata, handles)
-% hObject    handle to Untitled_9 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function miLoadnii_Callback(hObject, eventdata, handles)
-% hObject    handle to miLoadnii (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function miLoadmat_Callback(hObject, eventdata, handles)
-% hObject    handle to miLoadmat (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function miLoadAnalyze_Callback(hObject, eventdata, handles)
-% hObject    handle to miLoadAnalyze (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function miLoadinr_Callback(hObject, eventdata, handles)
-% hObject    handle to miLoadinr (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
