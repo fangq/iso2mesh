@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration file="/drives/taote1/users/fangq/git/Project/github/iso2mesh/i2m.prj" location="/drives/taote1/users/fangq/git/Project/github/iso2mesh" name="i2m" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="3172910529" file="/drives/taote1/users/fangq/git/Project/github/iso2mesh/i2m.prj" location="/drives/taote1/users/fangq/git/Project/github/iso2mesh" name="i2m" preferred-package-location="/drives/taote1/users/fangq/git/Project/github/iso2mesh/i2m/for_redistribution" preferred-package-type="package.type.install" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>i2m</param.appname>
     <param.icon />
     <param.icons />

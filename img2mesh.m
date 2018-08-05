@@ -47,29 +47,51 @@ end
 function i2m_OpeningFcn(hObject, eventdata, handles, varargin)
 
 cm = uicontextmenu;
-miplot= uimenu(cm,'Label','Plot','CallBack',{@processdata,handles});
-midel = uimenu(cm,'Label','Delete','CallBack',{@processdata,handles});
-mijmesh = uimenu(cm,'Label','Export to JMesh','CallBack',{@processdata,handles});
+uimenu(cm,'Label','Plot','CallBack',{@processdata,handles});
+uimenu(cm,'Label','Refresh all','CallBack',{@miRefresh_Callback,handles});
+uimenu(cm,'Label','Delete','CallBack',{@processdata,handles});
+uimenu(cm,'Label','Export to JMesh','CallBack',{@processdata,handles});
+
 mimeshing = uimenu(cm,'Label','Meshing');
 miv2s = uimenu(mimeshing,'Label','Volume to surface','CallBack',{@processdata,handles});
-miv2m = uimenu(mimeshing,'Label','Volume to mesh','CallBack',{@processdata,handles});
-mis2m = uimenu(mimeshing,'Label','Surface to mesh','CallBack',{@processdata,handles});
-mis2v = uimenu(mimeshing,'Label','Surface to volume','CallBack',{@processdata,handles});
+uimenu(mimeshing,'Label','Volume to mesh','CallBack',{@processdata,handles});
+uimenu(mimeshing,'Label','Surface to mesh','CallBack',{@processdata,handles});
+uimenu(mimeshing,'Label','Surface to volume','CallBack',{@processdata,handles});
+uimenu(mimeshing,'Label','Close and fill volume','CallBack',{@processdata,handles});
+uimenu(mimeshing,'Label','Extract surface','CallBack',{@processdata,handles});
+uimenu(mimeshing,'Label','Tessellate surface','CallBack',{@processdata,handles});
+
 mirepair = uimenu(cm,'Label','Surface repair');
-micln = uimenu(mirepair,'Label','Clean surface','CallBack',{@processdata,handles});
-mifix = uimenu(mirepair,'Label','Repair surface','CallBack',{@processdata,handles});
-misms = uimenu(mirepair,'Label','Smooth surface','CallBack',{@processdata,handles});
+uimenu(mirepair,'Label','Clean surface','CallBack',{@processdata,handles});
+uimenu(mirepair,'Label','Repair surface','CallBack',{@processdata,handles});
+uimenu(mirepair,'Label','Smooth surface','CallBack',{@processdata,handles});
+uimenu(mirepair,'Label','Simplify surface','CallBack',{@processdata,handles});
+uimenu(mirepair,'Label','Remesh surface','CallBack',{@processdata,handles});
+uimenu(mirepair,'Label','Simplify surface','CallBack',{@processdata,handles});
+uimenu(mirepair,'Label','Reorient mesh elements','CallBack',{@processdata,handles});
+
 mibool = uimenu(cm,'Label','Surface boolean');
-mibool1 = uimenu(mibool,'Label','Or','CallBack',{@processdata,handles});
-mibool2 = uimenu(mibool,'Label','And','CallBack',{@processdata,handles});
-mibool3 = uimenu(mibool,'Label','Diff','CallBack',{@processdata,handles});
-mibool4 = uimenu(mibool,'Label','First','CallBack',{@processdata,handles});
-mibool5 = uimenu(mibool,'Label','Second','CallBack',{@processdata,handles});
+uimenu(mibool,'Label','Or','CallBack',{@processdata,handles});
+uimenu(mibool,'Label','And','CallBack',{@processdata,handles});
+uimenu(mibool,'Label','Diff','CallBack',{@processdata,handles});
+uimenu(mibool,'Label','First','CallBack',{@processdata,handles});
+uimenu(mibool,'Label','Second','CallBack',{@processdata,handles});
+
+mireport = uimenu(cm,'Label','Report');
+uimenu(mireport,'Label','Containing data','CallBack',{@processdata,handles});
+uimenu(mireport,'Label','Mesh quality histogram','CallBack',{@processdata,handles});
+uimenu(mireport,'Label','Element volume histogram','CallBack',{@processdata,handles});
+uimenu(mireport,'Label','Total volume','CallBack',{@processdata,handles});
 
 miv2s.Separator='on';
 mimeshing.Separator='on';
 
-set(handles.fgI2M,'userdata',struct('graph',digraph,'menu',cm));
+root=get(handles.fgI2M,'userdata');
+
+if(isempty(root))
+    root=struct('graph',digraph,'menu',cm);
+end
+set(handles.fgI2M,'userdata',root);
 set(handles.axFlow,'position',[0 0 1 1]);
 set(handles.axPreview,'position',[0 0 1 1]);
 
@@ -89,6 +111,8 @@ guidata(hObject, handles);
 % uiwait(handles.fgI2M);
 
 function processdata(source,callbackdata,handles)
+
+try
 obj=get(handles.fgI2M,'currentobject');
 if(strcmp(class(obj),'matlab.graphics.chart.primitive.GraphPlot')==0)
     if(~isempty(obj.UserData) && strcmp(class(obj.UserData),'matlab.graphics.chart.primitive.GraphPlot'))
@@ -132,6 +156,28 @@ switch source.Label
             newtype.hasvol=1;
             prefix='Surf2Vol';
         end
+    case 'Close and fill volume'
+        if(nodetype.hasvol)
+            rad=inputdlg('maximum gap length in voxel (scalar)','Close and fill a volume',1,{'1'});
+            newdata.vol=fillholes3d(nodedata.vol,str2num(rad{1}));
+            newtype=nodetype;
+            prefix='FillVol';
+        end
+    case 'Extract surface'
+        if(isstruct(nodetype) && isfield(nodetype,'hasvol') && nodetype.hasvol)
+            [newdata.node,newdata.face]=binsurface(nodedata.vol);
+            prefix='BinSurf';
+        elseif(nodetype.hasnode && nodetype.haselem)
+            newdata.node=nodedata.node;
+            newdata.face=volface(nodedata.elem(:,1:min(4,size(nodedata.elem,2))));
+            [newdata.node,newdata.face]=removeisolatednode(newdata.node,newdata.face);
+            prefix='VolSurf';
+        elseif(nodetype.hasnode && nodetype.hasface)
+            [newdata.node,newdata.face]=deal(nodedata.node,nodedata.face);
+            prefix='CopySurf';
+        end
+        newtype.hasnode=1;
+        newtype.hasface=1;
     case 'Clean surface'
         if(nodetype.hasnode && nodetype.hasface)
             [newdata.node,newdata.face]=meshcheckrepair(nodedata.node,nodedata.face,'deep');
@@ -156,6 +202,99 @@ switch source.Label
             newdata.node=sms(nodedata.node,nodedata.face,str2num(res{2}),str2num(res{3}),res{1});
             prefix='SmoothSurf';
         end
+    case 'Simplify surface'
+        if(nodetype.hasnode && nodetype.hasface)
+            res = inputdlg('Percentage of edges to keep (0-1):',...
+                'Simplify mesh',[1],{'1'});
+            if(isempty(res))
+                return;
+            end
+            [newdata.node,newdata.face]=meshresample(nodedata.node,nodedata.face,str2num(res{1}));
+            newtype=nodetype;
+            prefix='SimplifySurf';
+        end
+    case 'Remesh surface'
+        if(nodetype.hasnode && nodetype.hasface)
+            res = inputdlg({'Rasterization voxel size (scalar):','Max gap to close (scalar):','Max surface element radis (scalar):'},...
+                'Remesh surface',[1,1,1],{'1','20','3'});
+            if(isempty(res))
+                return;
+            end
+            opt.gridsize=str2num(res{1});
+            opt.closesize=str2num(res{2});
+            opt.elemsize=str2num(res{3});
+            [newdata.node, newdata.face]=remeshsurf(nodedata.node,nodedata.face,opt);
+            newtype.hasnode=1;
+            newtype.hasface=1;
+            prefix='RemeshSurf';
+        end
+    case 'Tessellate surface'
+        if(nodetype.hasnode && nodetype.hasface)
+            [newdata.node,newdata.elem]=fillsurf(nodedata.node,nodedata.face);
+            newdata.face=volface(newdata.elem(:,1:min(4,size(newdata.elem,2))));
+            newtype=nodetype;
+            newtype.haselem=1;
+            prefix='TessMesh';
+        end
+    case 'Reorient mesh elements'
+        if(nodetype.hasnode && nodetype.haselem)
+            [newdata.node,newdata.elem]=meshreorient(nodedata.node,nodedata.elem);
+            newtype=nodetype;
+            prefix='ReorientMesh';
+        elseif(nodetype.hasnode && nodetype.hasface)
+            [newdata.node,newdata.face]=surfreorient(nodedata.node,nodedata.face);
+            newtype=nodetype;
+            prefix='ReorientSurf';
+        end
+    case 'Mesh quality histogram'
+        if(nodetype.hasnode && nodetype.haselem)
+            quality=meshquality(nodedata.node,nodedata.elem);
+        elseif(nodetype.hasnode && nodetype.hasface)
+            quality=meshquality(nodedata.node,nodedata.face);
+        end
+        if(exist('quality','var'))
+            figure;
+            hist(quality,50);
+        end
+        return;
+    case 'Element volume histogram'
+        if(nodetype.hasnode && nodetype.haselem)
+            evol=elemvolume(nodedata.node,nodedata.elem);
+        elseif(nodetype.hasnode && nodetype.hasface)
+            evol=elemvolume(nodedata.node,nodedata.face);
+        end
+        if(exist('evol','var'))
+            figure;
+            hist(evol,50);
+        end
+        return;
+    case 'Total volume'
+        if(nodetype.hasnode && nodetype.haselem)
+            evol=elemvolume(nodedata.node,nodedata.elem);
+        elseif(nodetype.hasnode && nodetype.hasface)
+            [no,el]=fillsurf(nodedata.node,nodedata.face);
+            evol=elemvolume(no,el);
+        end
+        if(exist('evol','var'))
+            msgbox(sprintf('Total volume is %f cubic voxel',sum(evol)),'Total volume');
+        end
+        return;
+    case 'Containing data'
+        msg='';
+        if(nodetype.hasnode)
+            msg=[msg sprintf('\nContaining %d nodes (%d columns)',size(nodedata.node,1),size(nodedata.node,2))];
+        end
+        if(nodetype.hasface)
+            msg=[msg sprintf('\nContaining %d triangles (%d columns)',size(nodedata.face,1),size(nodedata.face,2))];
+        end
+        if(nodetype.haselem)
+            msg=[msg sprintf('\nContaining %d tetrehedra (%d columns)',size(nodedata.face,1),size(nodedata.face,2))];
+        end
+        if(nodetype.hasvol)
+            msg=[msg sprintf('\nContaining [%d x %d x %d ] volume',size(nodedata.vol,1),size(nodedata.vol,2),size(nodedata.vol,3))];
+        end
+        msgbox(msg,'Mesh data report');
+        return;
     case 'Plot'
         if(isstruct(nodetype) && isfield(nodetype,'hasnode'))
             if(isfield(nodetype,'haselem') && nodetype.haselem)
@@ -182,7 +321,7 @@ switch source.Label
                 if(strcmp(op,'Intersect'))
                     op='inter';
                 end
-                if(~nodedata.hasface)
+                if(~nodetype.hasface)
                     nodedata.face=volface(nodedata.elem);
                 end
                 [newdata.node,newdata.face]=surfboolean(nodedata.node,nodedata.face,lower(op),nodedata2.node,nodedata2.face(:,[1 3 2]));
@@ -194,11 +333,15 @@ switch source.Label
             end
         end
     case 'Delete'
+        button = questdlg('Are you sure to delete the selected node?', 'Confirm','No');
+        if strcmpi(button, 'No') ||  strcmpi(button, 'Cancel')
+	        return;
+        end
         root.graph=rmnode(root.graph,root.graph.Nodes.Name{nodeid});
         updategraph(root,handles);
     case 'Export to JMesh'
         if(~nodetype.haselem && ~nodetype.hasnode)
-            throw('selected data does not have a mesh');
+            error('selected data does not have a mesh');
             return;
         end
         filter = {'*.jmesh';'*.*'};
@@ -211,6 +354,7 @@ switch source.Label
             end
         end
 end
+
 if(exist('newdata','var') && exist('newtype','var'))
     cla(handles.axPreview);
     cla(handles.axFlow);
@@ -223,6 +367,12 @@ if(exist('newdata','var') && exist('newtype','var'))
     updategraph(root,handles);
 end
 
+catch ME
+    msg=sprintf('Error: \n%s\n\nFile: %s\nFunction: %s\nLine: %d',...
+     ME.message,ME.stack.file,ME.stack.name,ME.stack.line);
+	uiwait(warndlg(msg,'I2M ERROR'));
+    updategraph(root,handles);
+end
 %----------------------------------------------------------------
 function [nodedata,nodetype,nodeid]=getnodeat(root,obj,pos)
 nodedist=[obj.XData(:)-pos(1,1) obj.YData(:)-pos(1,2)];
@@ -285,11 +435,10 @@ newtype.haselem=1;
 function img=getpreview(nodedata,nodetype,imsize)
 ax=axes('Units','pixels','position',[1, 1, imsize(1), imsize(2)]);
 if(isfield(nodetype,'haselem') && nodetype.haselem)
-    plotmesh(nodedata.node,[],nodedata.elem,'linestyle',':','parent',ax);
+    plotmesh(nodedata.node,[],nodedata.elem,'linestyle',':','edgealpha',0.3,'parent',ax);
 elseif(isfield(nodetype,'hasface') && nodetype.hasface)
     plotmesh(nodedata.node,nodedata.face,'linestyle','none','parent',ax);
 elseif(isfield(nodetype,'hasvol') && nodetype.hasvol)
-%     imagesc(nodedata.vol(:,:,ceil(size(nodedata.vol,3)*0.5)),'parent',ax);
     hs=slice(double(nodedata.vol),[],[ceil(size(nodedata.vol,2)*0.5)],ceil(size(nodedata.vol,3)*0.5),'parent',ax);
     set(hs,'linestyle','none');
 elseif(isfield(nodetype,'hasnode') && nodetype.hasnode)
@@ -902,3 +1051,9 @@ adddatatograph(handles,nodedata);
 % --------------------------------------------------------------------
 function miExit_Callback(hObject, eventdata, handles)
 close(handles.fgI2M);
+
+
+% --------------------------------------------------------------------
+function miRefresh_Callback(hObject, eventdata, handles)
+root=get(handles.fgI2M,'userdata');
+updategraph(root, handles);

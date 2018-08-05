@@ -46,7 +46,7 @@ func_fileio="saveasc savedxf savestl savebinstl saveinr saveoff
 	        readtetgen deletemeshfile mcpath mwpath savemedit
 		savejson loadjson saveubjson loadubjson savejmesh
                 savemphtxt savetetgenele savetetgennode saveabaqus
-		savenirfast readnirfast"
+		savenirfast readnirfast readnifti readmptiff"
 func_binimage="bwislands fillholes3d deislands2d deislands3d 
                 imedge3d internalpoint smoothbinvol 
 		thickenbinvol thinbinvol"
