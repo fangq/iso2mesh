@@ -105,9 +105,13 @@ catch
     end
 end
 if(isempty(cmdopt))
-  system([' "' mcpath(method,exesuff) '" -A -q1.414a' num2str(maxvol) ' ' moreopt ' "' mwpath('post_vmesh.poly') '"']);
+  [status, cmdout]=system([' "' mcpath(method,exesuff) '" -A -q1.414a' num2str(maxvol) ' ' moreopt ' "' mwpath('post_vmesh.poly') '"']);
 else
-  system([' "' mcpath(method,exesuff) '" ' cmdopt ' "' mwpath('post_vmesh.poly') '"']);
+  [status, cmdout]=system([' "' mcpath(method,exesuff) '" ' cmdopt ' "' mwpath('post_vmesh.poly') '"']);
+end
+
+if(status~=0)
+       error(sprintf('Tetgen command failed'));
 end
 
 % read in the generated mesh

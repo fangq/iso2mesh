@@ -48,9 +48,8 @@ function i2m_OpeningFcn(hObject, eventdata, handles, varargin)
 
 cm = uicontextmenu;
 uimenu(cm,'Label','Plot','CallBack',{@processdata,handles});
-uimenu(cm,'Label','Refresh all','CallBack',{@miRefresh_Callback,handles});
+uimenu(cm,'Label','Rename','CallBack',{@processdata,handles});
 uimenu(cm,'Label','Delete','CallBack',{@processdata,handles});
-uimenu(cm,'Label','Export to JMesh','CallBack',{@processdata,handles});
 
 mimeshing = uimenu(cm,'Label','Meshing');
 miv2s = uimenu(mimeshing,'Label','Volume to surface','CallBack',{@processdata,handles});
@@ -83,8 +82,12 @@ uimenu(mireport,'Label','Mesh quality histogram','CallBack',{@processdata,handle
 uimenu(mireport,'Label','Element volume histogram','CallBack',{@processdata,handles});
 uimenu(mireport,'Label','Total volume','CallBack',{@processdata,handles});
 
+mirefresh=uimenu(cm,'Label','Refresh','CallBack',{@miRefresh_Callback,handles});
+uimenu(cm,'Label','Save as','CallBack',{@processdata,handles});
+
 miv2s.Separator='on';
 mimeshing.Separator='on';
+mirefresh.Separator='on';
 
 root=get(handles.fgI2M,'userdata');
 
@@ -133,17 +136,21 @@ switch source.Label
             [newdata,newtype]=v2sgui(nodedata);
             prefix='Vol2Surf';
         else
-            warndlg('no volume data found');
+            error('no volume data found');
         end
     case 'Volume to mesh'
         if(nodetype.hasvol)
             [newdata,newtype]=v2mgui(nodedata);
             prefix='Vol2Mesh';
+        else
+            error('no volume data found');
         end
     case 'Surface to mesh'
         if(nodetype.hasnode && nodetype.hasface)
             [newdata,newtype]=s2mgui(nodedata);
             prefix='Surf2Mesh';
+        else
+            error('no surface data found');
         end
     case 'Surface to volume'
         if(nodetype.hasnode && nodetype.hasface)
@@ -155,6 +162,8 @@ switch source.Label
             newdata.vol=s2v(nodedata.node,nodedata.face,str2num(ndiv{1}));
             newtype.hasvol=1;
             prefix='Surf2Vol';
+        else
+            error('no surface data found');
         end
     case 'Close and fill volume'
         if(nodetype.hasvol)
@@ -162,6 +171,8 @@ switch source.Label
             newdata.vol=fillholes3d(nodedata.vol,str2num(rad{1}));
             newtype=nodetype;
             prefix='FillVol';
+        else
+            error('no volume data found');
         end
     case 'Extract surface'
         if(isstruct(nodetype) && isfield(nodetype,'hasvol') && nodetype.hasvol)
@@ -183,12 +194,16 @@ switch source.Label
             [newdata.node,newdata.face]=meshcheckrepair(nodedata.node,nodedata.face,'deep');
             newtype=nodetype;
             prefix='CleanSurf';
+        else
+            error('no surface data found');
         end
     case 'Repair surface'
         if(nodetype.hasnode && nodetype.hasface)
             [newdata.node,newdata.face]=meshcheckrepair(nodedata.node,nodedata.face,'meshfix');
             newtype=nodetype;
             prefix='RepairSurf';
+        else
+            error('no surface data found');
         end
     case 'Smooth surface'
         if(nodetype.hasnode && nodetype.hasface)
@@ -201,6 +216,8 @@ switch source.Label
             newtype=nodetype;
             newdata.node=sms(nodedata.node,nodedata.face,str2num(res{2}),str2num(res{3}),res{1});
             prefix='SmoothSurf';
+        else
+            error('no surface data found');
         end
     case 'Simplify surface'
         if(nodetype.hasnode && nodetype.hasface)
@@ -212,6 +229,8 @@ switch source.Label
             [newdata.node,newdata.face]=meshresample(nodedata.node,nodedata.face,str2num(res{1}));
             newtype=nodetype;
             prefix='SimplifySurf';
+        else
+            error('no surface data found');
         end
     case 'Remesh surface'
         if(nodetype.hasnode && nodetype.hasface)
@@ -227,6 +246,8 @@ switch source.Label
             newtype.hasnode=1;
             newtype.hasface=1;
             prefix='RemeshSurf';
+        else
+            error('no surface data found');
         end
     case 'Tessellate surface'
         if(nodetype.hasnode && nodetype.hasface)
@@ -235,6 +256,8 @@ switch source.Label
             newtype=nodetype;
             newtype.haselem=1;
             prefix='TessMesh';
+        else
+            error('no surface data found');
         end
     case 'Reorient mesh elements'
         if(nodetype.hasnode && nodetype.haselem)
@@ -245,6 +268,8 @@ switch source.Label
             [newdata.node,newdata.face]=surfreorient(nodedata.node,nodedata.face);
             newtype=nodetype;
             prefix='ReorientSurf';
+        else
+            error('no surface or tetrahedral mesh data found');
         end
     case 'Mesh quality histogram'
         if(nodetype.hasnode && nodetype.haselem)
@@ -296,14 +321,16 @@ switch source.Label
         msgbox(msg,'Mesh data report');
         return;
     case 'Plot'
-        if(isstruct(nodetype) && isfield(nodetype,'hasnode'))
+        if(isstruct(nodetype) && isfield(nodetype,'hasnode') && nodetype.hasnode)
             if(isfield(nodetype,'haselem') && nodetype.haselem)
                 figure;plotmesh(nodedata.node,[],nodedata.elem);
             else
                 figure;plotmesh(nodedata.node,nodedata.face);
             end
         else
-            hs=slice(double(nodedata.vol),[],[ceil(size(nodedata.vol,2)*0.5)],ceil(size(nodedata.vol,3)*0.5),'parent',ax);
+            figure;
+            hs=slice(double(nodedata.vol),[],[ceil(size(nodedata.vol,2)*0.5)],ceil(size(nodedata.vol,3)*0.5));
+            set(hs,'linestyle','none');
         end
     case {'Or','And','Diff','All','First','Second'}
         if(isstruct(nodetype) && isfield(nodetype,'hasnode'))
@@ -339,7 +366,18 @@ switch source.Label
         end
         root.graph=rmnode(root.graph,root.graph.Nodes.Name{nodeid});
         updategraph(root,handles);
-    case 'Export to JMesh'
+    case 'Rename'
+        newname = inputdlg('Define a new name:',...
+                'Rename',1,{root.graph.Nodes.Name{nodeid}});
+        if(isempty(newname))
+            return;
+        end
+        if(isempty(newname{1}) || ~isempty(cell2mat(regexp( root.graph.Nodes.Name, ['^' newname{1} '$']))))
+            error('empty or duplicated node name');
+        end
+        root.graph.Nodes.Name{nodeid}=newname{1};
+        updategraph(root,handles);
+    case 'Save as'
         if(~nodetype.haselem && ~nodetype.hasnode)
             error('selected data does not have a mesh');
             return;
@@ -368,8 +406,10 @@ if(exist('newdata','var') && exist('newtype','var'))
 end
 
 catch ME
-    msg=sprintf('Error: \n%s\n\nFile: %s\nFunction: %s\nLine: %d',...
-     ME.message,ME.stack.file,ME.stack.name,ME.stack.line);
+    msg=sprintf('Error: \n%s\n',ME.message);
+    for e=1:length(ME.stack)
+       msg=sprintf('%s\nFile: %s\nFunction: %s\nLine: %d\n\n',msg,ME.stack(e).file,ME.stack(e).name,ME.stack(e).line);
+    end
 	uiwait(warndlg(msg,'I2M ERROR'));
     updategraph(root,handles);
 end

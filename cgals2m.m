@@ -68,7 +68,10 @@ end
 cmd=sprintf('"%s%s" "%s" "%s" %.16f %.16f %.16f %.16f %.16f %d',mcpath('cgalpoly'),exesuff,...
     mwpath('pre_cgalpoly.off'),mwpath('post_cgalpoly.mesh'),ang,ssize,...
     approx,reratio,maxvol,randseed);
-system(cmd);
+status=system(cmd);
+if(status)
+    error('cgalpoly command failed');
+end
 if(~exist(mwpath('post_cgalpoly.mesh'),'file'))
     error(sprintf('output file was not found, failure was encountered when running command: \n%s\n',cmd));
 end

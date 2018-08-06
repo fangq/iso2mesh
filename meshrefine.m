@@ -185,15 +185,24 @@ if(isstruct(opt) && isfield(opt,'moreopt'))
 end
 
 if(size(elem,2)==3 && setquality==0)
-    system([' "' mcpath('gtsrefine') exesuff '" ' moreopt ' < "' ...
+    status=system([' "' mcpath('gtsrefine') exesuff '" ' moreopt ' < "' ...
           mwpath('pre_refine.gts') '" > "' mwpath('post_refine.gts') '"']);
+    if(status)
+        error('gtsrefine command failed');
+    end
     [newnode,newelem]=readgts(mwpath('post_refine.gts'));
     newface=newelem;
 elseif(size(elem,2)==3)
-    system([' "' mcpath('tetgen') exesuff '" ' moreopt ' -p -A "' mwpath('pre_refine.poly') '"']);
+    status=system([' "' mcpath('tetgen') exesuff '" ' moreopt ' -p -A "' mwpath('pre_refine.poly') '"']);
+    if(status)
+        error('tetgen command failed');
+    end
     [newnode,newelem,newface]=readtetgen(mwpath('pre_refine.1'));
 elseif(~isempty(moreopt))
-    system([' "' mcpath('tetgen') exesuff '" ' moreopt ' -r "' mwpath('pre_refine.1') '"']);
+    status=system([' "' mcpath('tetgen') exesuff '" ' moreopt ' -r "' mwpath('pre_refine.1') '"']);
+    if(status)
+        error('tetgen command failed');
+    end
     [newnode,newelem,newface]=readtetgen(mwpath('pre_refine.2'));
 else
     newnode=node;
