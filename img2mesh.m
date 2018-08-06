@@ -303,7 +303,7 @@ switch source.Label
                 figure;plotmesh(nodedata.node,nodedata.face);
             end
         else
-            mcxplotvol(nodedata.vol);
+            hs=slice(double(nodedata.vol),[],[ceil(size(nodedata.vol,2)*0.5)],ceil(size(nodedata.vol,3)*0.5),'parent',ax);
         end
     case {'Or','And','Diff','All','First','Second'}
         if(isstruct(nodetype) && isfield(nodetype,'hasnode'))

@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="3172910529" file="/drives/taote1/users/fangq/git/Project/github/iso2mesh/i2m.prj" location="/drives/taote1/users/fangq/git/Project/github/iso2mesh" name="i2m" preferred-package-location="/drives/taote1/users/fangq/git/Project/github/iso2mesh/i2m/for_redistribution" preferred-package-type="package.type.install" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="3172910529" file="${PROJECT_ROOT}/i2m.prj" location="${PROJECT_ROOT}" name="i2m" preferred-package-location="${PROJECT_ROOT}/i2m/for_redistribution" preferred-package-type="package.type.install" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>i2m</param.appname>
     <param.icon />
     <param.icons />
@@ -13,7 +13,7 @@
     <param.guid />
     <param.installpath.string>/local/i2m/</param.installpath.string>
     <param.installpath.combo>option.installpath.user</param.installpath.combo>
-    <param.logo>/home/users/fangq/space/git/Artworks/iso2mesh/i2mlogo.png</param.logo>
+    <param.logo>${PROJECT_ROOT}/i2m.png</param.logo>
     <param.install.notes>In the following directions, replace MCR_ROOT by the directory where the MATLAB Runtime is installed on the target machine.
 
 (1) Set the environment variable XAPPLRESDIR to this value:
@@ -178,20 +178,12 @@
       <file>${PROJECT_ROOT}/vol2restrictedtri.m</file>
       <file>${PROJECT_ROOT}/vol2surf.m</file>
       <file>${PROJECT_ROOT}/volface.m</file>
-      <file>/home/users/fangq/space/git/Project/github/mcx/utils/image3i.m</file>
-      <file>/home/users/fangq/space/git/Project/github/mcx/utils/islicer.m</file>
-      <file>/home/users/fangq/space/git/Project/github/mcx/utils/loadmc2.m</file>
-      <file>/home/users/fangq/space/git/Project/github/mcx/utils/mcxloadfile.m</file>
-      <file>/home/users/fangq/space/git/Project/github/mcx/utils/mcxloadnii.m</file>
-      <file>/home/users/fangq/space/git/Project/github/mcx/utils/mcxplotvol.m</file>
-      <file>/home/users/fangq/space/git/Project/github/mcx/utils/slice3i.m</file>
-      <file>/home/users/fangq/space/git/Project/mmc/matlab/loadmch.m</file>
     </fileset.depfun>
     <build-deliverables>
-      <file location="${PROJECT_ROOT}/i2m/for_testing" name="readme.txt" optional="true">/drives/taote1/users/fangq/git/Project/github/iso2mesh/i2m/for_testing/readme.txt</file>
-      <file location="${PROJECT_ROOT}/i2m/for_testing" name="i2m" optional="false">/drives/taote1/users/fangq/git/Project/github/iso2mesh/i2m/for_testing/i2m</file>
-      <file location="${PROJECT_ROOT}/i2m/for_testing" name="splash.png" optional="false">/drives/taote1/users/fangq/git/Project/github/iso2mesh/i2m/for_testing/splash.png</file>
-      <file location="${PROJECT_ROOT}/i2m/for_testing" name="run_i2m.sh" optional="false">/drives/taote1/users/fangq/git/Project/github/iso2mesh/i2m/for_testing/run_i2m.sh</file>
+      <file location="${PROJECT_ROOT}/i2m/for_testing" name="readme.txt" optional="true">${PROJECT_ROOT}/i2m/for_testing/readme.txt</file>
+      <file location="${PROJECT_ROOT}/i2m/for_testing" name="i2m" optional="false">${PROJECT_ROOT}/i2m/for_testing/i2m</file>
+      <file location="${PROJECT_ROOT}/i2m/for_testing" name="splash.png" optional="false">${PROJECT_ROOT}/i2m/for_testing/splash.png</file>
+      <file location="${PROJECT_ROOT}/i2m/for_testing" name="run_i2m.sh" optional="false">${PROJECT_ROOT}/i2m/for_testing/run_i2m.sh</file>
     </build-deliverables>
     <workflow />
     <matlab>
