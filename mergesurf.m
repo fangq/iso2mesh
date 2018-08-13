@@ -30,7 +30,7 @@ function [newnode,newelem]=mergesurf(node,elem,varargin)
 len=length(varargin);
 newnode=node;
 newelem=elem;
-if(len>0 & mod(len,2)~=0)
+if(len>0 && mod(len,2)~=0)
    error('you must give node and element in pairs');
 end
 for i=1:2:len

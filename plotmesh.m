@@ -73,7 +73,7 @@ if(nargin>1)
 		if(i==1)
 			face=[];elem=[];
 		elseif(i==2)
-			if(iscell(varargin{1}) | size(varargin{1},2)<4)
+			if(iscell(varargin{1}) || size(varargin{1},2)<4)
 				face=varargin{1}; elem=[];
 			elseif(size(varargin{1},2)==4)
                 faceid=unique(varargin{1}(:,4));
@@ -100,7 +100,7 @@ if(nargin>1)
 		face=varargin{1};
 		elem=varargin{2};
 		if(length(varargin)>2) opt=varargin(3:end); end
-	elseif(iscell(varargin{1}) | size(varargin{1},2)<4)
+	elseif(iscell(varargin{1}) || size(varargin{1},2)<4)
 		face=varargin{1}; elem=[];
 	elseif(size(varargin{1},2)==4)
 	    faceid=unique(varargin{1}(:,4));
@@ -220,7 +220,7 @@ if(~isempty(elem))
    end
 end
 
-if(exist('h','var') & ~holdstate)
+if(exist('h','var') && ~holdstate)
   hold off;
 end
 if(exist('h','var'))
@@ -229,6 +229,6 @@ if(exist('h','var'))
   end
   axis equal;
 end
-if(exist('h','var') & nargout>=1)
+if(exist('h','var') && nargout>=1)
   hm=h;
 end

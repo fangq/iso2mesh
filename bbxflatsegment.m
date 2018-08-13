@@ -48,9 +48,9 @@ nn=length(loop);
 
 % if the original is a flat polygon, return
 
-if(unique(length(idx0))==nn | unique(length(idx1))==nn ...
-  |unique(length(idy0))==nn | unique(length(idy1))==nn ...
-  |unique(length(idz0))==nn | unique(length(idz1))==nn) 
+if(unique(length(idx0))==nn || unique(length(idx1))==nn ...
+  |unique(length(idy0))==nn || unique(length(idy1))==nn ...
+  |unique(length(idz0))==nn || unique(length(idz1))==nn) 
     seg=loop(:)';
     return;
 end
@@ -79,7 +79,7 @@ end
 
 % remove pattern [ ... nan nan ...] in the result
 
-if(length(seg) & any(isnan(seg)))
+if(length(seg) && any(isnan(seg)))
     id=regexp(sprintf('%d',isnan(seg)),'11');
     if(length(id))
         seg(id+1)=[];

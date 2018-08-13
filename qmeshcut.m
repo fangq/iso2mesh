@@ -162,7 +162,7 @@ facelen=length(faceid);
 % cross-cuts can only be triangles or quadrilaterals for tetrahedral mesh
 % (co-plannar mesh needs to be considered)
 
-etag=sum(emap>0,2); % emap & etag are of length size(elem,1)
+etag=sum(emap>0,2); % emap && etag are of length size(elem,1)
 
 if(esize==3)  % surface mesh cut by a plane
 	linecut=find(etag==2);

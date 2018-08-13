@@ -30,7 +30,7 @@ function varargout=s2v(node,face,div,varargin)
 p0=min(node);
 p1=max(node);
 
-if(size(node,1)==0 | size(face,1)==0)
+if(size(node,1)==0 || size(face,1)==0)
   error('node and face can not be empty');
 end
 

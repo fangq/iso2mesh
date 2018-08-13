@@ -43,7 +43,7 @@ img=surf2vol(node,face,p0(1)-dx:dx:p1(1)+dx,p0(2)-dx:dx:p1(2)+dx,p0(3)-dx:dx:p1(
 eg=surfedge(face);
 closesize=0;
 
-if(~isempty(eg) & isstruct(opt))
+if(~isempty(eg) && isstruct(opt))
    if(isfield(opt,'closesize'))
      closesize=opt.closesize;
    end

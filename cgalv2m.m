@@ -38,7 +38,7 @@ function [node,elem,face]=cgalv2m(vol,opt,maxvol)
 fprintf(1,'creating surface and tetrahedral mesh from a multi-domain volume ...\n');
 
 dtype=class(vol);
-if(~(islogical(vol) | strcmp(dtype,'uint8')))
+if(~(islogical(vol) || strcmp(dtype,'uint8')))
 	error('cgalmesher can only handle uint8 volumes, you have to convert your image to unit8 first.');
 end
 
@@ -58,7 +58,7 @@ if(~isstruct(opt))
 	ssize=opt;
 end
 
-if(isstruct(opt) & length(opt)==1)  % does not support settings for multiple labels
+if(isstruct(opt) && length(opt)==1)  % does not support settings for multiple labels
 	if(isfield(opt,'radbound'))   ssize=opt.radbound; end
 	if(isfield(opt,'angbound'))   ang=opt.angbound; end
 	if(isfield(opt,'distbound')) approx=opt.distbound; end
@@ -89,8 +89,8 @@ end
 [node,elem,face]=readmedit(mwpath('post_cgalmesh.mesh'));
 
 % if a transformation matrix/offset vector supplied, apply them
-if (isstruct(opt) & length(opt)==1)
-    if(isfield(opt,'A') & isfield(opt,'B'))
+if (isstruct(opt) && length(opt)==1)
+    if(isfield(opt,'A') && isfield(opt,'B'))
         node(:,1:3)=(opt.A*node(:,1:3)'+repmat(opt.B(:),1,size(node,1)))';
     end
 end

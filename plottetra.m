@@ -70,7 +70,7 @@ end
 if(~isempty(h)) 
   axis equal;
 end
-if(~isempty(h) & nargout>=1)
+if(~isempty(h) && nargout>=1)
   hm=h;
 end
 
