@@ -296,7 +296,7 @@
   Format: 
       newworkspace = img2mesh or imgmesh(workspace)
 
-      A GUI for Iso2Mesh for streamlined mesh data processing
+  A GUI for Iso2Mesh for streamlined mesh data processing
   
   
   Input:
@@ -2636,6 +2636,52 @@
     plotmesh([mymesh.nodes mymesh.bndvtx], mymesh.elements,'x>5')
 
 
+==== function nii=readnifti(filename) ====
+
+    nii=readnifti(filename)
+
+    Read a Nifti (*.nii) or Analyze 7.5 (*.hdr/*.img) image file
+
+
+    input:
+        fname: the file name to a .nii file, or an Analyze 7.5 file (*.hdr,*.img)
+
+    output:
+        nii.img: the data volume read from the nii file
+        nii.datatype: the data type of the voxel, in matlab data type string
+        nii.datalen: data count per voxel - for example RGB data has 3x
+                    uint8 per voxel, so datatype='uint8', datalen=3
+        nii.voxelbyte: total number of bytes per voxel: for RGB data,
+                    voxelbyte=3; also voxelbyte=header.bitpix/8
+        nii.hdr: file header info, a structure has the full nii header
+                    key subfileds include
+
+              sizeof_hdr: must be 348 if the input is nifti
+              dim: short array, dim(2: dim(1)+1) defines the array size
+              datatype: the type of data stored in each voxel
+              bitpix: total bits per voxel
+              magic: must be 'ni1\0' or 'n+1\0'
+
+              For the detailed nii header, please see
+              https://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1.h
+
+   this file was ported from mcxloadnii.m from the MCX Project (http://mcx.space)
+
+
+==== function dat=readmptiff(fname) ====
+
+ vol=readmptiff(fname)
+
+ load a volume from a multi-page TIFF file
+
+
+ input:
+      fname: input file name
+
+ output:
+      dat: output, data read from the TIFF file
+
+
 === # Volumetric image pre-processing ===
 
 ==== function islands=bwislands(img) ====
@@ -2788,6 +2834,32 @@
 
  output:
      vol: the volume image after the thinning operations
+
+
+==== function dist=maskdist(vol) ====
+
+ dist=maskdist(vol)
+
+ return the distance in each voxel towards the nearest label boundaries
+
+
+ input:
+	 img: a 3D array
+
+ output:
+	 dist: an integer array, storing the distance, in voxel unit, towards
+	       the nearest boundary between two distinct non-zero voxels, the
+	       space outside of the array space is also treated as a unique
+	       non-zero label. If the goal is the get the minimum distance
+	       measured from the center of the voxel, one should use (dist-0.5)
+
+ example:
+
+    a=ones(60,60,60);
+    a(:,:,1:10)=2;
+    a(:,:,11:20)=3;
+    im=maskdist(a);
+    imagesc(squeeze(im(:,30,:)))
 
 
 === # Mesh plotting ===

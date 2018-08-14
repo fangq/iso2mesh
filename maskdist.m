@@ -10,10 +10,11 @@ function dist=maskdist(vol)
 %	 img: a 3D array
 %
 % output:
-%	 dist: a integer array, storing the distance, in voxel unit, towards
+%	 dist: an integer array, storing the distance, in voxel unit, towards
 %	       the nearest boundary between two distinct non-zero voxels, the
 %	       space outside of the array space is also treated as a unique
-%	       non-zero label.
+%	       non-zero label. If the goal is the get the minimum distance
+%	       measured from the center of the voxel, one should use (dist-0.5)
 %
 % example:
 %
