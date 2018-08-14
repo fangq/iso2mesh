@@ -49,7 +49,7 @@ func_fileio="saveasc savedxf savestl savebinstl saveinr saveoff
 		savenirfast readnirfast readnifti readmptiff"
 func_binimage="bwislands fillholes3d deislands2d deislands3d 
                 imedge3d internalpoint smoothbinvol 
-		thickenbinvol thinbinvol"
+		thickenbinvol thinbinvol maskdist"
 func_plotting="plotmesh plotsurf plottetra plotedges qmeshcut"
 func_misc="surfdiffuse volmap2mesh isoctavemesh getvarfrom raytrace
 		getplanefrom3pt getexeext fallbackexeext iso2meshver
