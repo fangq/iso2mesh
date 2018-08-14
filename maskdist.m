@@ -7,14 +7,15 @@ function dist=maskdist(vol)
 % author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
-%	 img: a 3D array
+%	 vol: a 2D or 3D array
 %
 % output:
 %	 dist: an integer array, storing the distance, in voxel unit, towards
 %	       the nearest boundary between two distinct non-zero voxels, the
-%	       space outside of the array space is also treated as a unique
-%	       non-zero label. If the goal is the get the minimum distance
-%	       measured from the center of the voxel, one should use (dist-0.5)
+%	       zero voxels in the domain and space outside of the array 
+%          are also treated as a unique non-zero label. If the goal is to 
+%	       get the minimum distance measured from the center of the voxel,
+%	       one should use (dist-0.5).
 %
 % example:
 %
@@ -37,10 +38,15 @@ if(length(vals)>256)
 end
 
 newvol=ones(size(vol)+2)*max(vals)+1;
-newvol(2:end-1,2:end-1,2:end-1)=vol;
+if(ndims(vol)==2)
+    newvol(2:end-1,2:end-1)=vol;
+elseif(ndims(vol)==3)
+    newvol(2:end-1,2:end-1,2:end-1)=vol;
+end
 
 vals(end+1)=newvol(1,1,1);
 vals(vals==0)=[];
+newvol(newvol==0)=newvol(1,1,1);
 
 dist=ones(size(newvol))*inf;
 
@@ -51,4 +57,8 @@ for i=1:length(vals(:))
     dist=min(dist,vdist);
 end
 
-dist=dist(2:end-1,2:end-1,2:end-1);
+if(ndims(vol)==2)
+    dist=dist(2:end-1,2:end-1);
+elseif(ndims(vol)==3)
+    dist=dist(2:end-1,2:end-1,2:end-1);
+end

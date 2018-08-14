@@ -2844,14 +2844,15 @@
 
 
  input:
-	 img: a 3D array
+	 vol: a 2D or 3D array
 
  output:
 	 dist: an integer array, storing the distance, in voxel unit, towards
 	       the nearest boundary between two distinct non-zero voxels, the
-	       space outside of the array space is also treated as a unique
-	       non-zero label. If the goal is the get the minimum distance
-	       measured from the center of the voxel, one should use (dist-0.5)
+	       zero voxels in the domain and space outside of the array 
+          are also treated as a unique non-zero label. If the goal is to 
+	       get the minimum distance measured from the center of the voxel,
+	       one should use (dist-0.5).
 
  example:
 
