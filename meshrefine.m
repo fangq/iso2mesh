@@ -229,7 +229,7 @@ if(~isempty(externalpt)) % user request to insert nodes that are outside of the 
     bothsides=removedupelem([outface;inface]);
 
     % define a seed point to avoid meshing the interior space
-    holelist=surfseeds(node,face(:,1:3));
+    holelist=surfseeds(newnode,face(:,1:3));
 
     % mesh the extended space
     ISO2MESH_TETGENOPT=jsonopt('extcmdopt','-Y',opt);
