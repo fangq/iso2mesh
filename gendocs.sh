@@ -32,14 +32,14 @@ func_inquery="finddisconnsurf surfedge volface extractloops meshconn
                 meshcentroid nodevolume elemvolume neighborelem 
 		faceneighbors edgeneighbors maxsurf flatsegment orderloopedge  
 		mesheuler bbxflatsegment surfplane surfinterior surfpart
-                surfseeds meshquality meshedge surfacenorm uniqedges advancefront
-                innersurf outersurf surfvolume insurface"
+                surfseeds meshquality meshedge meshface surfacenorm uniqedges uniqfaces
+                advancefront innersurf outersurf surfvolume insurface"
 func_meshfix="meshcheckrepair meshreorient removedupelem 
                 removedupnodes removeisolatednode removeisolatedsurf
                 surfaceclean getintersecttri delendelem surfreorient"
 func_remesh="meshresample remeshsurf smoothsurf sortmesh mergemesh 
                 meshrefine mergesurf surfboolean fillsurf highordertet
-		meshinterp meshremap extrudesurf"
+		elemfacecenter barydualmesh meshinterp meshremap extrudesurf"
 func_fileio="saveasc savedxf savestl savebinstl saveinr saveoff 
                 savesmf savesurfpoly savegts readgts savemsh
                 savevrml readasc readinr readmedit readoff readsmf
