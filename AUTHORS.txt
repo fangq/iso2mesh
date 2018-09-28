@@ -1,4 +1,4 @@
-The author of "Iso2mesh" toolbox is Qianqian Fang. 
+The author of "Iso2Mesh" toolbox is Qianqian Fang. 
 Qianqian is currently an Assistant Professor at the
 Department of Bioengineering of Northeastern University.
 

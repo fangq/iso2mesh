@@ -5,7 +5,7 @@ function islands=bwislands(img)
 % return the indices of non-zero elements in a 2D or 3D image
 % grouped by connected regions in a cell array
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
 %	 img: a 2D or 3D array

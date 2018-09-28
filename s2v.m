@@ -4,7 +4,7 @@ function varargout=s2v(node,face,div,varargin)
 %
 % shortcut for surf2vol, coverting a surface to a volumetric image
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
 %	 node: node list of the triangular surface, 3 columns for x/y/z
@@ -30,7 +30,7 @@ function varargout=s2v(node,face,div,varargin)
 p0=min(node);
 p1=max(node);
 
-if(size(node,1)==0 | size(face,1)==0)
+if(size(node,1)==0 || size(face,1)==0)
   error('node and face can not be empty');
 end
 

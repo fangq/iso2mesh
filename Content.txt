@@ -98,6 +98,18 @@
     newnode: output, the smoothed node coordinates
 
 
+==== function varargout=i2m(varargin) ====
+
+ newworkspace=i2m;
+  or
+ newworkspace=i2m(workspace)
+
+ Shortcut for img2mesh, a GUI for iso2mesh
+
+
+ input/output: please see details in the help for img2mesh
+
+
 === # Streamlined mesh generation ===
 
 ==== function [node,elem,face,regions]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,isovalues) ====
@@ -278,6 +290,28 @@
    mask=mesh2vol(no,el(:,1:4),0:0.1:5,0:0.1:5,0:0.1:4);
    imagesc(mask(:,:,3))
 
+
+==== function varargout = img2mesh(varargin) ====
+ 
+  Format: 
+      newworkspace = img2mesh or imgmesh(workspace)
+
+  A GUI for Iso2Mesh for streamlined mesh data processing
+  
+  
+  Input:
+        workspace (optional): a struct containing the below fields
+           .graph: a digraph object containing the i2m workspace data
+  Output:
+        newworkspace (optional): the updated workspace, with the same
+        subfields as the input.
+
+   If a user supplys an output variable, the GUI will not return until 
+   the user closes the window; if a user does not provide any output,
+   the call will return immediately.
+
+   Please find more information at http://iso2mesh.sf.net/
+  
 
 === # iso2mesh main function backend ===
 
@@ -564,7 +598,8 @@
 
  input: 
    c0, c1:  cylinder axis end points
-   r:   radius of the cylinder
+   r:   radius of the cylinder; if r contains two elements, it outputs
+        a cone trunk, with each r value specifying the radius on each end
    tsize: maximum surface triangle size on the sphere
    maxvol: maximu volume of the tetrahedral elements
 
@@ -705,6 +740,27 @@
            row represents a triangle denoted by the indices of the 3 nodes
 
 
+==== function [node,face,elem]=meshcylinders(c0, v, len, varargin) ====
+
+ [node,face]=meshcylinders(c0, v, len, r,tsize,maxvol,ndiv)
+    or
+ [node,face,elem]=meshacylinder(c0, v, len, r, tsize,maxvol,ndiv)
+ [nplc,fplc]=meshacylinder(c0, v, len,r,0,0,ndiv);
+
+ create the surface and (optionally) tetrahedral mesh of a 3D cylinder
+
+
+ input: 
+   c0, cylinder list axis's starting point
+   v: directional vector of the cylinder
+   len: a scalar or a vector denoting the length of each 
+        cylinder segment along the direction of v
+   tsize, maxvol, ndiv: please see the help for meshacylinder for details
+
+ output:
+   node, face, elem: please see the help for meshacylinder for details
+
+
 === # Mesh decomposition and query ===
 
 ==== function facecell=finddisconnsurf(f) ====
@@ -811,11 +867,13 @@
       centroid: centroid positions, one row for each element
 
 
-==== function nodevol=nodevolume(node,elem) ====
+==== function nodevol=nodevolume(node,elem, evol) ====
 
  nodevol=nodevolume(node,elem)
 
- calculate the Voronoi volume of each node in a simplex mesh
+ calculate the volumes of the cells in the barycentric dual-mesh
+ (this is different from the Voronoi cells, which blong to the 
+ circumcentric dual mesh)
 
 
  input:
@@ -1114,6 +1172,28 @@
            by looping through each element first. 
 
 
+==== function faces=meshface(elem,varargin) ====
+
+ faces=meshface(elem,opt)
+
+ return all faces in a surface or volumetric mesh
+
+
+ input:
+    elem:  element table of a mesh (support N-d space element)
+    opt: optional input, giving the additional options. If opt
+         is a struct, it can have the following field:
+       opt.nodeorder: if 1, assuming the elem node indices is in CCW 
+                      orientation; 0 use nchoosek() output to order faces
+         you can replace opt by a series of ('param', value) pairs.
+
+ output:
+    face:  face list; each row is an face, specified by the starting and
+           ending node indices, the total face number is
+           size(elem,1) x nchoosek(size(elem,2),2). All faces are ordered
+           by looping through each element first. 
+
+
 ==== function snorm=surfacenorm(node,face,varargin) ====
 
  snorm=surfacenorm(node,face)
@@ -1149,6 +1229,23 @@
      edge: unique edges in the mesh, denoted by a pair of node indices
      idx:  index of the output in the raw edge list (returned by meshedge)
      edgemap: index of the raw edges in the output list (for triangular mesh)
+
+
+==== function [faces,idx,facemap]=uniqfaces(elem) ====
+
+ [faces,idx,facemap]=uniqfaces(elem)
+
+ return the unique face list from a or tetrahedral mesh
+
+
+ input:
+     elem: a list of elements, each row is a list of nodes for an element.
+           elem can have 2, 3 or 4 columns
+
+ output:
+     face: unique faces in the mesh, denoted by a triplet of node indices
+     idx:  index of the output in the raw face list (returned by meshface)
+     facemap: index of the raw faces in the output list (for triangular mesh)
 
 
 ==== function [elist,nextfront]=advancefront(edges,loop,elen) ====
@@ -1259,9 +1356,9 @@
             'intersect': test a surface for self-intersecting elements
 
 
-==== function newelem=meshreorient(node,elem) ====
+==== function [newelem, evol]=meshreorient(node,elem) ====
 
- newelem=meshreorient(node,elem)
+ [newelem, evol]=meshreorient(node,elem)
 
  reorder nodes in a surface or tetrahedral mesh to ensure all
  elements are oriented consistently
@@ -1273,6 +1370,7 @@
 
  output:
     newelem: the element list with consistent ordering
+    evol: the signed element volume before reorientation
 
 
 ==== function elem=removedupelem(elem) ====
@@ -1638,7 +1736,7 @@
 
  input:
       node: node coordinates, dimension (nn,3)
-      elem: tetrahedral element or triangle surface (ne,3)
+      elem: triangle surfaces (ne,3)
       op:  a string of a boolean operator, possible op values include
            'union' or 'or': the outter surface of the union of the enclosed space
            'inter' or 'and': the surface of the domain contained by both meshes
@@ -1714,6 +1812,146 @@
 
     elemfull=[elem(:,1:4) newelem+size(node,1)]; % 10-node element
     nodefull=[node;newnode];
+
+
+==== function [newnode,newelem]=elemfacecenter(node,elem) ====
+
+ [newnode,newelem]=elemfacecenter(node,elem)
+
+ generate barycentric dual-mesh face center nodes and indices per element
+ very similar to highordertet which finds edge-centers instead of
+ face-centers
+
+
+ input:
+    node: list of nodes
+    elem: list of elements (each row are indices of nodes of each element)
+
+ output:
+    newnode: all new face-nodes on the output mesh
+    newelem: the indices of the face nodes for each original tet element
+
+    to combine the newnode/newelem with the old mesh, one should use
+
+    elemfull=[elem(:,1:4) newelem+size(node,1)];
+    nodefull=[node;newnode];
+
+
+==== function [newnode,newelem]=barydualmesh(node,elem,flag) ====
+
+ [newnode,newelem]=barydualmesh(node,elem)
+
+ generate barycentric dual-mesh by connecting edge, face and elem centers
+
+
+ input:
+    node: list of input mesh nodes
+    elem: list of input mesh elements (each row are indices of nodes of each element)
+    flag: if is 'cell', output newelem as cell arrays (each has 1x4 nodes)
+
+ output:
+    newnode: all new nodes in the barycentric dual-mesh (made of edge/face/elem centers)
+    newelem: the indices of the face nodes for each original tet element
+
+ example:
+    [node,elem]=meshgrid6([0 60],[0 60],[0 60]);
+    [newnode,newelem]=barydualmesh(node,elem,'cell');
+    plotmesh(newnode,newelem);
+    hold on; plotmesh(node,[],elem,'facecolor','none','edgecolor','b')
+
+
+==== function newval=meshinterp(fromval,elemid,elembary,fromelem) ====
+
+ newval=meshinterp(fromval,elemid,elembary,fromelem)
+
+ Interpolate nodal values from the source mesh to the target mesh based on
+ a linear interpolation
+
+
+ input:
+	 fromval: values defined at the source mesh nodes, the row or column
+	          number must be the same as the source mesh node number, which
+	          is the same as the elemid length
+	 elemid: the IDs of the source mesh element that encloses the nodes of
+            the target mesh nodes; a vector of length of target mesh node
+            count; elemid and elembary can be generated by calling
+
+           [elemid,elembary]=tsearchn(node_src, elem_src, node_target);
+
+           note that the mapping here is inverse to that in meshremap()
+
+	 elembary: the bary-centric coordinates of each target mesh nodes
+	         within the source mesh elements, sum of each row is 1, expect
+	         3 or 4 columns (or can be N-D)
+    fromelem: the element list of the source mesh
+
+
+ output:
+	 newval: a 2D array with rows equal to the target mesh nodes (nodeto), 
+            and columns equals to the value numbers defined at each source
+            mesh node
+ example:
+
+    [n1,f1,e1]=meshabox([0 0 0],[10 20 5],1); % target mesh
+    [n2,f2,e2]=meshabox([0 0 0],[10 20 5],2); % src mesh
+    [id, ww]=tsearchn(n2,e2,n1);              % project target to src mesh
+    value_src=n2(:,[2 1 3]);             % create dummy values at src mesh
+    newval=meshinterp(value_src,id, ww, e2);
+
+
+==== function newval=meshremap(fromval,elemid,elembary,toelem,nodeto) ====
+
+ newval=meshremap(fromval,elemid,elembary,toelem,nodeto)
+
+ Redistribute nodal values from the source mesh to the target mesh so that 
+ the sum of each property on each mesh is the same
+
+
+ input:
+	 fromval: values defined at the source mesh nodes, the row or column
+	          number must be the same as the source mesh node number, which
+	          is the same as the elemid length
+	 elemid: the IDs of the target mesh element that encloses the nodes of
+            the source mesh nodes; a vector of length of src mesh node
+            count; elemid and elembary can be generated by calling
+
+           [elemid,elembary]=tsearchn(node_target, elem_target, node_src);
+
+           note that the mapping here is inverse to that in meshinterp()
+
+	 elembary: the bary-centric coordinates of each source mesh nodes
+	         within the target mesh elements, sum of each row is 1, expect
+	         3 or 4 columns (or can be N-D)
+    toelem: the element list of the target mesh
+    nodeto: the total number of target mesh nodes
+
+
+ output:
+	 newval: a 2D array with rows equal to the target mesh nodes (nodeto), 
+            and columns equals to the value numbers defined at each source
+            mesh node
+ example:
+
+    [n1,f1,e1]=meshabox([0 0 0],[10 20 5],1); % src mesh
+    [n2,f2,e2]=meshabox([0 0 0],[10 20 5],2); % target mesh
+    [id, ww]=tsearchn(n2,e2,n1);              % project src to target mesh
+    value_src=n1(:,[2 3 1]);             % create dummy values at src mesh
+    newval=meshremap(value_src,id,ww,e2,size(n2,1)); % map to target
+
+
+==== function [node,face]=extrudesurf(no,fc,vec) ====
+
+ [node,face]=extrudesurf(no,fc,vec)
+ 
+ create a enclosed surface mesh by extruding an open surface
+
+
+ input:
+
+ output:
+      node: 3D node coordinates for the generated surface mesh
+      face: triangular face patches of the generated surface mesh, each
+           row represents a triangle denoted by the indices of the 3 nodes
 
 
 === # File I/O ===
@@ -1867,6 +2105,21 @@
              (optional)
 
 
+==== function savemsh(node,elem,fname,rname) ====
+
+ savemsh(node,elem,fname,rname)
+
+ save a tetrahedral mesh to GMSH mesh format
+
+ author: Riccardo Scorretti (riccardo.scorretti<at> univ-lyon1.fr)
+
+ input:
+      node: input, node list, dimension (nn,3)
+      elem: input, tetrahedral mesh element list, dimension (ne,4) or (ne,5) for multi-region meshes
+      fname: output file name
+      rname: name of the regions, cell-array of strings (optional)
+
+
 ==== function savevrml(node,face,elem,fname) ====
 
  savevrml(node,face,elem,fname)
@@ -1986,7 +2239,7 @@
      flag: not used
 
 
-==== function binname=mcpath(fname) ====
+==== function binname=mcpath(fname, ext) ====
 
  binname=mcpath(fname)
 
@@ -2396,6 +2649,124 @@
       heading: optional, a descriptive string for the mesh
 
 
+==== function savenirfast(v,f,filestub, nodeseg, nodeprop, proptype) ====
+
+ savenirfast(nirfaststruct,filestub)
+    or
+ savenirfast(v,f,filestub, nodeseg, proptype, proptype)
+
+ save a tetrahedral or surface mesh and associated properties to NIRFAST format
+
+
+ input:
+      nirfaststruct: a structure storing the NIRFAST mesh data, type 
+         'help readnirfast' to read more; alternatively one can use:
+      v: input, node list, the first 3 columns are the x/y/z positions,
+         the remaining columns are combined with nodeprop as node-based
+         (optical) parameters
+      f: input, tetrahedral or surface element list, dimension (ne,3)
+      filestub: output file stub, output will include multiple files
+          filestub.node: node file
+          filestub.elem: element file to store the surface or tet mesh
+          filestub.param: parameter file
+          filestub.region: node label file
+      nodeseg: optional, an integer label field to group nodes into
+         segmentations, same length as v, number starting from 0; or empty
+      nodeprop: optional, additional nodal parameters, typically defined
+         as mua (1/mm), musp (1/mm) and refractive index (n)l; row number
+         equals to that of v, column number is user-defined
+      proptype: optional, the type of the node-property. by default it is 
+         'stnd' - for standard properties; one can also define multi-row
+         header using a cell-array.
+
+ example:
+    [node,face,elem]=meshabox([0 0 0],[10 10 10],0.3,1);
+    savenirfast(node,elem,'test', [], ones(size(node)), 'user');
+    mymesh=readnirfast('test')
+    plotmesh([mymesh.nodes mymesh.bndvtx], mymesh.elements,'x>5')
+
+
+==== function nirfastmesh=readnirfast(filestub) ====
+
+ nirfastmesh=readnirfast(v,f,filestub)
+
+ load a group of mesh files saved in the NIRFAST format
+
+
+ input:
+      filestub: output file stub, output will include multiple files
+          filestub.node: node file
+          filestub.elem: element file to store the surface or tet mesh
+          filestub.param: parameter file
+          filestub.region: node label file
+          filestub.excoef: extinction coeff list
+
+ output:
+      nirfastmesh.nodes: node list, 3 columns
+      nirfastmesh.elements: element list, 3 or 4 columns integers
+      nirfastmesh.bndvtx: boundary flag for each node, 1: on the boundary
+      nirfastmesh.region: node segmentation labels
+      nirfastmesh.dimension: dimension of the mesh
+      nirfastmesh.excoef: extinction coeff list
+      nirfastmesh.excoefheader: extinction coeff list field names
+      nirfastmesh.type: the header of the .param file
+      nirfastmesh.prop: optical property list (non-standard, need further processing)
+
+   format definition see http://www.dartmouth.edu/~nir/nirfast/tutorials/NIRFAST-Intro.pdf
+
+ example:
+    [node,face,elem]=meshabox([0 0 0],[10 10 10],0.3,1);
+    savenirfast(node,elem,'test', [], ones(size(node)), 'user');
+    mymesh=readnirfast('test')
+    plotmesh([mymesh.nodes mymesh.bndvtx], mymesh.elements,'x>5')
+
+
+==== function nii=readnifti(filename) ====
+
+    nii=readnifti(filename)
+
+    Read a Nifti (*.nii) or Analyze 7.5 (*.hdr/*.img) image file
+
+
+    input:
+        fname: the file name to a .nii file, or an Analyze 7.5 file (*.hdr,*.img)
+
+    output:
+        nii.img: the data volume read from the nii file
+        nii.datatype: the data type of the voxel, in matlab data type string
+        nii.datalen: data count per voxel - for example RGB data has 3x
+                    uint8 per voxel, so datatype='uint8', datalen=3
+        nii.voxelbyte: total number of bytes per voxel: for RGB data,
+                    voxelbyte=3; also voxelbyte=header.bitpix/8
+        nii.hdr: file header info, a structure has the full nii header
+                    key subfileds include
+
+              sizeof_hdr: must be 348 if the input is nifti
+              dim: short array, dim(2: dim(1)+1) defines the array size
+              datatype: the type of data stored in each voxel
+              bitpix: total bits per voxel
+              magic: must be 'ni1\0' or 'n+1\0'
+
+              For the detailed nii header, please see
+              https://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1.h
+
+   this file was ported from mcxloadnii.m from the MCX Project (http://mcx.space)
+
+
+==== function dat=readmptiff(fname) ====
+
+ vol=readmptiff(fname)
+
+ load a volume from a multi-page TIFF file
+
+
+ input:
+      fname: input file name
+
+ output:
+      dat: output, data read from the TIFF file
+
+
 === # Volumetric image pre-processing ===
 
 ==== function islands=bwislands(img) ====
@@ -2548,6 +2919,33 @@
 
  output:
      vol: the volume image after the thinning operations
+
+
+==== function dist=maskdist(vol) ====
+
+ dist=maskdist(vol)
+
+ return the distance in each voxel towards the nearest label boundaries
+
+
+ input:
+	 vol: a 2D or 3D array
+
+ output:
+	 dist: an integer array, storing the distance, in voxel unit, towards
+	       the nearest boundary between two distinct non-zero voxels, the
+	       zero voxels in the domain and space outside of the array 
+          are also treated as a unique non-zero label. If the goal is to 
+	       get the minimum distance measured from the center of the voxel,
+	       one should use (dist-0.5).
+
+ example:
+
+    a=ones(60,60,60);
+    a(:,:,1:10)=2;
+    a(:,:,11:20)=3;
+    im=maskdist(a);
+    imagesc(squeeze(im(:,30,:)))
 
 
 === # Mesh plotting ===

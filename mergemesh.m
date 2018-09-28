@@ -4,7 +4,7 @@ function [newnode,newelem]=mergemesh(node,elem,varargin)
 %
 % concatenate two or more tetrahedral meshes or triangular surfaces
 % 
-% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <q.fang at neu.edu>
 %
 % input: 
 %      node: node coordinates, dimension (nn,3)
@@ -35,7 +35,7 @@ function [newnode,newelem]=mergemesh(node,elem,varargin)
 len=length(varargin);
 newnode=node;
 newelem=elem;
-if(len>0 & mod(len,2)~=0)
+if(len>0 && mod(len,2)~=0)
    error('you must give node and element in pairs');
 end
 
@@ -56,14 +56,14 @@ for i=1:2:len
    if(size(no,2)~=size(newnode,2))
         error('input node arrays have inconsistent columns');
    end
-   if(size(el,2)==5 | size(el,2)==4)
+   if(size(el,2)==5 || size(el,2)==4)
         el(:,1:4)=el(:,1:4)+baseno;
-	if(size(el,2)==4 & X>=0)
+	if(size(el,2)==4 && X>=0)
 	   el(:,5)=1+(i+1)/2;
 	end
    	newnode=[newnode;no];
 	newelem=[newelem;el];
-   elseif(size(el,2)==3 & size(newelem,2)==4)
+   elseif(size(el,2)==3 && size(newelem,2)==4)
         el(:,1:3)=el(:,1:3)+baseno;
 	if(size(el,2)==3)
 	   el(:,4)=1+(i+1)/2;

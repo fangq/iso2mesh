@@ -4,7 +4,7 @@ function [newnode,newelem]=mergesurf(node,elem,varargin)
 %
 % merge two or more triangular meshes and split intersecting elements
 % 
-% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <q.fang at neu.edu>
 %
 % input:
 %      node: node coordinates, dimension (nn,3)
@@ -30,7 +30,7 @@ function [newnode,newelem]=mergesurf(node,elem,varargin)
 len=length(varargin);
 newnode=node;
 newelem=elem;
-if(len>0 & mod(len,2)~=0)
+if(len>0 && mod(len,2)~=0)
    error('you must give node and element in pairs');
 end
 for i=1:2:len

@@ -3,7 +3,7 @@
 #============================================================
 #  iso2mesh inline documentation to wiki convertor
 #
-#  Author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+#  Author: Qianqian Fang <q.fang at neu.edu>
 #============================================================
 
 print_help()
@@ -23,31 +23,33 @@ print_group()
    echo ''
 }
 
-func_shortcut="v2m v2s s2m s2v m2v sms"
-func_mainfun="vol2mesh vol2surf surf2mesh surf2vol mesh2vol"
+func_shortcut="v2m v2s s2m s2v m2v sms i2m"
+func_mainfun="vol2mesh vol2surf surf2mesh surf2vol mesh2vol img2mesh"
 func_backend="binsurface cgalv2m cgals2m vol2restrictedtri surf2volz mesh2mask"
 func_primitive="meshabox meshasphere meshanellip meshunitsphere meshacylinder 
-                meshgrid5 meshgrid6 latticegrid extrudecurve"
+                meshgrid5 meshgrid6 latticegrid extrudecurve meshcylinders"
 func_inquery="finddisconnsurf surfedge volface extractloops meshconn  
                 meshcentroid nodevolume elemvolume neighborelem 
 		faceneighbors edgeneighbors maxsurf flatsegment orderloopedge  
 		mesheuler bbxflatsegment surfplane surfinterior surfpart
-                surfseeds meshquality meshedge surfacenorm uniqedges advancefront
-                innersurf outersurf surfvolume insurface"
+                surfseeds meshquality meshedge meshface surfacenorm uniqedges uniqfaces
+                advancefront innersurf outersurf surfvolume insurface"
 func_meshfix="meshcheckrepair meshreorient removedupelem 
                 removedupnodes removeisolatednode removeisolatedsurf
                 surfaceclean getintersecttri delendelem surfreorient"
 func_remesh="meshresample remeshsurf smoothsurf sortmesh mergemesh 
-                meshrefine mergesurf surfboolean fillsurf highordertet"
+                meshrefine mergesurf surfboolean fillsurf highordertet
+		elemfacecenter barydualmesh meshinterp meshremap extrudesurf"
 func_fileio="saveasc savedxf savestl savebinstl saveinr saveoff 
-                savesmf savesurfpoly savegts readgts
+                savesmf savesurfpoly savegts readgts savemsh
                 savevrml readasc readinr readmedit readoff readsmf
 	        readtetgen deletemeshfile mcpath mwpath savemedit
 		savejson loadjson saveubjson loadubjson savejmesh
-                savemphtxt savetetgenele savetetgennode saveabaqus"
+                savemphtxt savetetgenele savetetgennode saveabaqus
+		savenirfast readnirfast readnifti readmptiff"
 func_binimage="bwislands fillholes3d deislands2d deislands3d 
                 imedge3d internalpoint smoothbinvol 
-		thickenbinvol thinbinvol"
+		thickenbinvol thinbinvol maskdist"
 func_plotting="plotmesh plotsurf plottetra plotedges qmeshcut"
 func_misc="surfdiffuse volmap2mesh isoctavemesh getvarfrom raytrace
 		getplanefrom3pt getexeext fallbackexeext iso2meshver

@@ -7,7 +7,7 @@ function [node,elem,face]=cgals2m(v,f,opt,maxvol,method,varargin)
 %
 % http://www.cgal.org/Manual/3.5/doc_html/cgal_manual/Mesh_3/Chapter_main.html
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
 %	 v: the node coordinate list of a surface mesh (nn x 3)
@@ -70,7 +70,10 @@ end
 cmd=sprintf('"%s%s" "%s" "%s" %.16f %.16f %.16f %.16f %.16f %d',mcpath(method),exesuff,...
     mwpath('pre_cgalpoly.off'),mwpath('post_cgalpoly.mesh'),ang,ssize,...
     approx,reratio,maxvol,randseed);
-system(cmd);
+status=system(cmd);
+if(status)
+    error('cgalpoly command failed');
+end
 if(~exist(mwpath('post_cgalpoly.mesh'),'file'))
     error(sprintf('output file was not found, failure was encountered when running command: \n%s\n',cmd));
 end

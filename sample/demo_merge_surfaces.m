@@ -29,7 +29,7 @@ plotmesh(no,el)
 % the mesh after boolean operation can have self-intersecting elements, one
 % has to fix those defects before passing to s2m
 
-[no1,el1]=meshcheckrepair(no(:,1:3),el(:,1:3));
+[no1,el1]=meshcheckrepair(no(:,1:3),el(:,1:3),'meshfix');
 
 %ISO2MESH_TETGENOPT=' -A -q 0.8 -a 10 ';
 [node,elem,face]=s2m(no1,el1,1,10);

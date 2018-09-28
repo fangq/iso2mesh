@@ -6,7 +6,7 @@ function [newno,newfc]=remeshsurf(node,face,opt)
 % free of self-intersecting element. This function is similar to 
 % meshresample, but it can both downsample or upsample a mesh
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
 %	 node: list of nodes on the input suface mesh, 3 columns for x,y,z
@@ -43,7 +43,7 @@ img=surf2vol(node,face,p0(1)-dx:dx:p1(1)+dx,p0(2)-dx:dx:p1(2)+dx,p0(3)-dx:dx:p1(
 eg=surfedge(face);
 closesize=0;
 
-if(~isempty(eg) & isstruct(opt))
+if(~isempty(eg) && isstruct(opt))
    if(isfield(opt,'closesize'))
      closesize=opt.closesize;
    end

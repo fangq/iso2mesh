@@ -45,7 +45,7 @@ if(size(face,2)<3)
    error('face must contain at least 3 columns');
 end
 
-if(size(v0,1)==1 | size(v0,2)==1 & len>1)
+if(size(v0,1)==1 || size(v0,2)==1 && len>1)
    v0=repmat(v0(:)',len,1);
 end
 

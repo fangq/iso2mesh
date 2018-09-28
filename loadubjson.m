@@ -154,11 +154,7 @@ function [data, adv]=parse_block(type,count,varargin)
 global pos inStr isoct fileendian systemendian
 [cid,len]=elem_info(type);
 datastr=inStr(pos:pos+len*count-1);
-if(isoct)
-    newdata=int8(datastr);
-else
-    newdata=uint8(datastr);
-end
+newdata=uint8(datastr);
 id=strfind('iUIlLdD',type);
 if(fileendian~=systemendian)
     newdata=swapbytes(typecast(newdata,cid));
@@ -309,11 +305,7 @@ function num = parse_number(varargin)
     type={'int8','uint8','int16','int32','int64','single','double'};
     bytelen=[1,1,2,4,8,4,8];
     datastr=inStr(pos+1:pos+bytelen(id));
-    if(isoct)
-        newdata=int8(datastr);
-    else
-        newdata=uint8(datastr);
-    end
+    newdata=uint8(datastr);
     if(fileendian~=systemendian)
         newdata=swapbytes(typecast(newdata,type{id}));
     end
@@ -400,7 +392,7 @@ global isoct
             str=[str str0(pos0(end-1)+1:pos0(end))];
         end
     end
-    %str(~isletter(str) & ~('0' <= str & str <= '9')) = '_';
+    %str(~isletter(str) && ~('0' <= str && str <= '9')) = '_';
 
 %%-------------------------------------------------------------------------
 function endpos = matching_quote(str,pos)

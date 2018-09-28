@@ -2,7 +2,9 @@ function nodevol=nodevolume(node,elem, evol)
 %
 % nodevol=nodevolume(node,elem)
 %
-% calculate the Voronoi volume of each node in a simplex mesh
+% calculate the volumes of the cells in the barycentric dual-mesh
+% (this is different from the Voronoi cells, which blong to the 
+% circumcentric dual mesh)
 %
 % author: Qianqian Fang, <q.fang at neu.edu>
 % date: 2009/12/31

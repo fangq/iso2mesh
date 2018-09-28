@@ -43,6 +43,9 @@ function [node,elem]=domeshsimplify(v,f,keepratio)
 
   saveoff(v,f,mwpath('pre_remesh.off'));
   deletemeshfile(mwpath('post_remesh.off'));
-  system([' "' mcpath('cgalsimp2') exesuff '" "' mwpath('pre_remesh.off') '" ' num2str(keepratio) ' "' mwpath('post_remesh.off') '"']);
+  [status, cmdout]=system([' "' mcpath('cgalsimp2') exesuff '" "' mwpath('pre_remesh.off') '" ' num2str(keepratio) ' "' mwpath('post_remesh.off') '"']);
+  if(status~=0)
+       error(sprintf('cgalsimp2 command failed'));
+  end
   [node,elem]=readoff(mwpath('post_remesh.off'));
 end

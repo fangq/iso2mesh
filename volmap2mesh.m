@@ -4,7 +4,7 @@ function [node,elem,face]=volmap2mesh(img,ix,iy,iz,elemnum,maxvol,thickness,Amat
 %
 % convert a binary volume to tetrahedral mesh followed by an Affine transform
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 % date:   2008/01/12
 %
 % input: 

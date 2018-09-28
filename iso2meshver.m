@@ -21,7 +21,7 @@ function [major,minor,patchnum,extra]=iso2meshver
 %
 
 major=1;
-minor=5;
+minor=9;
 patchnum=0;
 extra='$Rev::     $';
 extra=regexprep(extra,'[\s$:]', '');

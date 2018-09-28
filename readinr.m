@@ -70,13 +70,13 @@ end
 %header=sprintf(['#INRIMAGE-4#{\nXDIM=%d\nYDIM=%d\nZDIM=%d\nVDIM=1\nTYPE=%s\n' ...
 %  'PIXSIZE=%d bits\nCPU=decm\nVX=1\nVY=1\nVZ=1\n'],size(vol),btype,bitlen);
 
-if(strcmp(type,'unsigned fixed') & pixel==8)
+if(strcmp(type,'unsigned fixed') && pixel==8)
    dtype='uint8';
-elseif(strcmp(type,'unsigned fixed') & pixel==16)
+elseif(strcmp(type,'unsigned fixed') && pixel==16)
    dtype='uint16';
-elseif(strcmp(type,'float') & pixel==32)
+elseif(strcmp(type,'float') && pixel==32)
    dtype='float';
-elseif(strcmp(type,'float') & pixel==64)
+elseif(strcmp(type,'float') && pixel==64)
    dtype='double';
 else
    error('volume format not supported');

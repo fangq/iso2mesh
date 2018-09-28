@@ -8,7 +8,7 @@ function [mask, weight]=mesh2mask(node,face,xi,yi,hf)
 %
 % fast rasterization of a 2D mesh to an image with triangle index labels
 % 
-% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <q.fang at neu.edu>
 % date for initial version: July 18,2013
 %
 % input:

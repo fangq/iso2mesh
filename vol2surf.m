@@ -4,7 +4,7 @@ function [no,el,regions,holes]=vol2surf(img,ix,iy,iz,opt,dofix,method,isovalues)
 %
 % converting a 3D volumetric image to surfaces
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
 %	 img: a volumetric binary image; if img is empty, vol2surf will
@@ -54,12 +54,12 @@ fprintf(1,'extracting surfaces from a volume ...\n');
 el=[];
 no=[];
 
-if(isstruct(opt) & isfield(opt,'holes')) 
+if(isstruct(opt) && isfield(opt,'holes')) 
     holes=opt.holes;
 else
     holes=[];
 end
-if(isstruct(opt) & isfield(opt,'regions')) 
+if(isstruct(opt) && isfield(opt,'regions')) 
     regions=opt.regions;
 else
     regions=[];
@@ -84,13 +84,13 @@ if(~isempty(img))
 
     for i=1:maxlevel
       if(i<maxlevel)
-          levelmask=int8(newimg>=isovalues(i) & newimg<isovalues(i+1));
+          levelmask=int8(newimg>=isovalues(i) && newimg<isovalues(i+1));
       else
           levelmask=int8(newimg>=isovalues(i));
       end
       [levelno,levelel]=binsurface(levelmask);
       if(~isempty(levelel))
-          if(isstruct(opt) & isfield(opt,'autoregion'))
+          if(isstruct(opt) && isfield(opt,'autoregion'))
               if(opt.autoregion)
                   seeds=surfseeds(levelno,levelel);
               else
@@ -113,15 +113,15 @@ if(~isempty(img))
     for i=1:maxlevel
         fprintf(1,'processing threshold level %d...\n',i);
 
-        if(nargin>=7 & strcmp(method,'simplify'))
+        if(nargin>=7 && strcmp(method,'simplify'))
 
           [v0,f0]=binsurface(newimg>=isovalues(i)); % not sure if binsurface works for multi-value arrays
           % with binsurface, I think the following line is not needed anymore
           %  v0(:,[1 2])=v0(:,[2 1]); % isosurface(V,th) assumes x/y transposed
           if(dofix)  [v0,f0]=meshcheckrepair(v0,f0);  end  
 
-          if(isstruct(opt) & length(opt)==maxlevel) keepratio=opt(i).keepratio;
-          elseif (isstruct(opt) & length(opt)==1) keepratio=opt.keepratio;
+          if(isstruct(opt) && length(opt)==maxlevel) keepratio=opt(i).keepratio;
+          elseif (isstruct(opt) && length(opt)==1) keepratio=opt.keepratio;
           else keepratio=opt;  end;
 
           % first, resample the surface mesh with cgal
@@ -133,30 +133,30 @@ if(~isempty(img))
 
           if(dofix) [v0,f0]=meshcheckrepair(v0,f0); end
 
-        elseif(nargin<7 | strcmp(method,'cgalsurf') | strcmp(method,'cgalpoly'))
-          if(isstruct(opt) & length(opt)==maxlevel) radbound=opt(i).radbound;
-          elseif (isstruct(opt) & length(opt)==1) radbound=opt.radbound;
+        elseif(nargin<7 || strcmp(method,'cgalsurf') || strcmp(method,'cgalpoly'))
+          if(isstruct(opt) && length(opt)==maxlevel) radbound=opt(i).radbound;
+          elseif (isstruct(opt) && length(opt)==1) radbound=opt.radbound;
           else radbound=opt;  end;
 
           maxsurfnode=40000;  % maximum node numbers for each level
-          if(isstruct(opt) & length(opt)==maxlevel) 
+          if(isstruct(opt) && length(opt)==maxlevel) 
               if(isfield(opt(i),'maxnode')) maxsurfnode=opt(i).maxnode; end
-          elseif (isstruct(opt) & length(opt)==1 )
+          elseif (isstruct(opt) && length(opt)==1 )
               if(isfield(opt(1),'maxnode')) 
                  maxsurfnode=opt.maxnode; 
               end
           end
 
 	  distbound=radbound;
-          if(isstruct(opt) & length(opt)==maxlevel)
+          if(isstruct(opt) && length(opt)==maxlevel)
               if(isfield(opt(i),'distbound')) distbound=opt(i).distbound; end
-          elseif (isstruct(opt) & length(opt)==1 )
+          elseif (isstruct(opt) && length(opt)==1 )
               if(isfield(opt(1),'distbound')) distbound=opt.distbound; end
           end
 	  surfside='';
-          if(isstruct(opt) & length(opt)==maxlevel)
+          if(isstruct(opt) && length(opt)==maxlevel)
               if(isfield(opt(i),'side')) surfside=opt(i).side; end
-          elseif (isstruct(opt) & length(opt)==1)
+          elseif (isstruct(opt) && length(opt)==1)
               if(isfield(opt(1),'side')) surfside=opt(1).side; end
           end
 	  if(~isempty(surfside))
@@ -182,7 +182,7 @@ if(~isempty(img))
 
         % if use defines maxsurf=1, take only the largest closed surface
         if(isstruct(opt))
-            if( (isfield(opt,'maxsurf') && length(opt)==1 && opt.maxsurf==1) | ...
+            if( (isfield(opt,'maxsurf') && length(opt)==1 && opt.maxsurf==1) || ...
                     (length(opt)==maxlevel && isfield(opt(i),'maxsurf') && opt(i).maxsurf==1))
                     f0=maxsurf(finddisconnsurf(f0));
             end
@@ -190,18 +190,18 @@ if(~isempty(img))
 
         % if a transformation matrix/offset vector supplied, apply them
 
-        if(isstruct(opt) & length(opt)==maxlevel) 
-          if(isfield(opt(i),'A') & isfield(opt(i),'B'))
+        if(isstruct(opt) && length(opt)==maxlevel) 
+          if(isfield(opt(i),'A') && isfield(opt(i),'B'))
             v0=(opt(i).A*v0'+repmat(opt(i).B(:),1,size(v0,1)))';
           end
-        elseif (isstruct(opt) & length(opt)==1) 
-          if(isfield(opt,'A') & isfield(opt,'B'))
+        elseif (isstruct(opt) && length(opt)==1) 
+          if(isfield(opt,'A') && isfield(opt,'B'))
             v0=(opt.A*v0'+repmat(opt.B(:),1,size(v0,1)))';
           end
         end
 
         % if user specified holelist and regionlist, append them
-        if(isstruct(opt)  & length(opt)==maxlevel)
+        if(isstruct(opt)  && length(opt)==maxlevel)
         if(isfield(opt(i),'hole'))
                 holes=[holes;opt(i).hole]
         end
@@ -228,7 +228,7 @@ if(~isempty(img))
 
 end  % if not isempty(img)
 
-if(isstruct(opt) & isfield(opt,'surf'))
+if(isstruct(opt) && isfield(opt,'surf'))
    for i=1:length(opt.surf)
 	opt.surf(i).elem(:,4)=maxlevel+i;
         el=[el;opt.surf(i).elem+length(no)];

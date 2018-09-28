@@ -4,7 +4,7 @@ function [img, v2smap]=surf2vol(node,face,xi,yi,zi,varargin)
 %
 % convert a triangular surface to a shell of voxels in a 3D image
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
 %	 node: node list of the triangular surface, 3 columns for x/y/z

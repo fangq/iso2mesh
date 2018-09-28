@@ -4,7 +4,7 @@ function [node,elem]=readasc(fname)
 %
 % read FreeSurfer ASC mesh format
 %
-% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <q.fang at neu.edu>
 % date: 2009/04/02
 % 
 % input:

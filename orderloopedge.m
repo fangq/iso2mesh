@@ -4,7 +4,7 @@ function newedge=orderloopedge(edge)
 %
 % order the node list of a simple loop based on connection sequence
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 % date:   2008/05
 %
 % input: 

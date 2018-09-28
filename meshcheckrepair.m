@@ -59,7 +59,10 @@ if(nargin<3 || strcmp(opt,'deep'))
     exesuff=fallbackexeext(exesuff,'jmeshlib');
     deletemeshfile(mwpath('post_sclean.off'));
     saveoff(node(:,1:3),elem(:,1:3),mwpath('pre_sclean.off'));
-    system([' "' mcpath('jmeshlib') exesuff '" "' mwpath('pre_sclean.off') '" "' mwpath('post_sclean.off') '"']);
+    status=system([' "' mcpath('jmeshlib') exesuff '" "' mwpath('pre_sclean.off') '" "' mwpath('post_sclean.off') '"']);
+    if(status)
+        error('jmeshlib command failed');
+    end
     [node,elem]=readoff(mwpath('post_sclean.off'));
 end
 
@@ -73,8 +76,11 @@ if(nargin>=3 && strcmp(opt,'meshfix'))
     deletemeshfile(mwpath('pre_sclean.off'));
     deletemeshfile(mwpath('pre_sclean_fixed.off'));
     saveoff(node,elem,mwpath('pre_sclean.off'));
-    system([' "' mcpath('meshfix') exesuff '" "' mwpath('pre_sclean.off') ...
+    status=system([' "' mcpath('meshfix') exesuff '" "' mwpath('pre_sclean.off') ...
         '" ' moreopt]);
+    if(status)
+        error('meshfix command failed');
+    end
     [node,elem]=readoff(mwpath('pre_sclean_fixed.off'));
 end
 

@@ -24,7 +24,7 @@ function savesurfpoly(v,f,holelist,regionlist,p0,p1,fname,forcebox)
 %
 dobbx=0;
 if(nargin>=8)
-	dobbx=~isempty(forcebox) & all(forcebox);
+	dobbx=~isempty(forcebox) && all(forcebox);
 end
 
 if(~iscell(f) && size(f,2)==4)

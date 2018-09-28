@@ -5,7 +5,7 @@ function [no,el,regions,holes]=v2s(img,isovalues,opt,method)
 % surface mesh generation from binary or gray-scale volumetric images
 % shortcut for vol2surf
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % inputs and outputs are similar to those defined in vol2surf; In v2s, 
 % method can be set to 'cgalmesh' in addition to those allowed by vol2surf.

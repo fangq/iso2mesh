@@ -4,7 +4,7 @@ function hm=plotmesh(node,varargin)
 %
 % plot surface and volumetric meshes
 % 
-% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <q.fang at neu.edu>
 %
 % input: 
 %      node: a node coordinate list, 3 columns for x/y/z; if node has a 
@@ -73,7 +73,7 @@ if(nargin>1)
 		if(i==1)
 			face=[];elem=[];
 		elseif(i==2)
-			if(iscell(varargin{1}) | size(varargin{1},2)<4)
+			if(iscell(varargin{1}) || size(varargin{1},2)<4)
 				face=varargin{1}; elem=[];
 			elseif(size(varargin{1},2)==4)
                 faceid=unique(varargin{1}(:,4));
@@ -100,7 +100,7 @@ if(nargin>1)
 		face=varargin{1};
 		elem=varargin{2};
 		if(length(varargin)>2) opt=varargin(3:end); end
-	elseif(iscell(varargin{1}) | size(varargin{1},2)<4)
+	elseif(iscell(varargin{1}) || size(varargin{1},2)<4)
 		face=varargin{1}; elem=[];
 	elseif(size(varargin{1},2)==4)
 	    faceid=unique(varargin{1}(:,4));
@@ -201,6 +201,9 @@ if(~isempty(elem))
       else
           error('plotmesh can only plot 3D tetrahedral meshes');
       end
+      if(~isreal(cutvalue))
+          cutvalue=abs(cutvalue);
+      end
       h=patch('Vertices',cutpos,'Faces',facedata,'FaceVertexCData',cutvalue,'facecolor','interp',opt{:});
    else
       idx=eval(['find(' selector ')']);
@@ -217,7 +220,7 @@ if(~isempty(elem))
    end
 end
 
-if(exist('h','var') & ~holdstate)
+if(exist('h','var') && ~holdstate)
   hold off;
 end
 if(exist('h','var'))
@@ -226,6 +229,6 @@ if(exist('h','var'))
   end
   axis equal;
 end
-if(exist('h','var') & nargout>=1)
+if(exist('h','var') && nargout>=1)
   hm=h;
 end

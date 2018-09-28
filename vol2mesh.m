@@ -4,7 +4,7 @@ function [node,elem,face,regions]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,
 %
 % convert a binary (or multi-valued) volume to tetrahedral mesh
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
 %	 img: a volumetric binary image
@@ -43,7 +43,7 @@ function [node,elem,face,regions]=vol2mesh(img,ix,iy,iz,opt,maxvol,dofix,method,
 if(nargin>=8)
 	if(strfind(method,'cgalmesh'))
 		vol=img(ix,iy,iz);
-		if(length(unique(vol(:)))>64 & dofix==1)
+		if(length(unique(vol(:)))>64 && dofix==1)
 			error([ 'it appears that you are processing a ' ...
                                 'grayscale image. Currently cgalmesher ' ...
                                 'does not support grayscale images. ' ...

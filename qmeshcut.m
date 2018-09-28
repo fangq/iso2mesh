@@ -4,7 +4,7 @@ function [cutpos,cutvalue,facedata,elemid]=qmeshcut(elem,node,value,cutat,vararg
 %
 % fast tetrahedral mesh slicer
 %
-% author:Qianqian Fang, <fangq at nmr.mgh.harvard.edu>
+% author:Qianqian Fang, <q.fang at neu.edu>
 %
 % input: 
 %   elem: integer array with dimensions of NE x 4, each row contains
@@ -162,7 +162,7 @@ facelen=length(faceid);
 % cross-cuts can only be triangles or quadrilaterals for tetrahedral mesh
 % (co-plannar mesh needs to be considered)
 
-etag=sum(emap>0,2); % emap & etag are of length size(elem,1)
+etag=sum(emap>0,2); % emap && etag are of length size(elem,1)
 
 if(esize==3)  % surface mesh cut by a plane
 	linecut=find(etag==2);

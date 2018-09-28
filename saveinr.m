@@ -19,7 +19,7 @@ if(fid==-1)
     error('You do not have permission to save mesh files.');
 end
 dtype=class(vol);
-if(islogical(vol) | strcmp(dtype,'uint8'))
+if(islogical(vol) || strcmp(dtype,'uint8'))
    btype='unsigned fixed';
    dtype='uint8';
    bitlen=8;

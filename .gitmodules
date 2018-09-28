@@ -1,0 +1,9 @@
+[submodule "tools/cork"]
+	path = tools/cork
+	url = https://github.com/fangq/cork.git
+[submodule "tools/meshfix"]
+	path = tools/meshfix
+	url = https://github.com/fangq/meshfix.git
+[submodule "tools/tetgen"]
+	path = tools/tetgen
+	url = https://github.com/ufz/tetgen

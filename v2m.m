@@ -5,7 +5,7 @@ function [node,elem,face]=v2m(img,isovalues,opt,maxvol,method)
 % volumetric mesh generation from binary or gray-scale volumetric images
 % shortcut for vol2mesh
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % inputs and outputs are similar to those defined in vol2mesh
 %

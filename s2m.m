@@ -5,7 +5,7 @@ function [node,elem,face]=s2m(v,f,keepratio,maxvol,method,regions,holes)
 %
 % volumetric mesh generation from a closed surface, shortcut for surf2mesh
 %
-% author: Qianqian Fang (fangq <at> nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 %
 % inputs and outputs are similar to those defined in surf2mesh
 %

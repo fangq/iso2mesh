@@ -4,7 +4,7 @@ function hm=plotsurf(node,face,varargin)
 %
 % plot 3D surface meshes (2d manifold) or polylines (1d manifold)
 % 
-% author: Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+% author: Qianqian Fang <q.fang at neu.edu>
 %
 % input: 
 %      node: node coordinates, dimension (nn,3); if node has a 
