@@ -219,7 +219,11 @@ if(~isempty(externalpt)) % user request to insert nodes that are outside of the 
     try
         outface=convhull(allnode,'simplify',false);
     catch
-        outface=convhulln(allnode);
+        if(isoctavemesh)
+            outface=volface(delaunayn(allnode));
+        else
+            outface=convhulln(allnode);
+        end
     end
     outface=sort(outface,2);
     face=volface(newelem(:,1:4));
