@@ -1,4 +1,4 @@
-function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox,method)
+function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox,method,cmdopt)
 %
 % [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox)
 %
@@ -95,15 +95,18 @@ end
 deletemeshfile(mwpath('post_vmesh.1.*'));
 fprintf(1,'creating volumetric mesh from a surface mesh ...\n');
 
-try
+if(nargin<11)
+  try
     cmdopt=evalin('caller','ISO2MESH_TETGENOPT');
-catch
+  catch
     try
         cmdopt=evalin('base','ISO2MESH_TETGENOPT');
     catch
         cmdopt='';
     end
+  end
 end
+
 if(isempty(cmdopt))
   [status, cmdout]=system([' "' mcpath(method,exesuff) '" -A -q1.414a' num2str(maxvol) ' ' moreopt ' "' mwpath('post_vmesh.poly') '"']);
 else

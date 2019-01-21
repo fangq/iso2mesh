@@ -1,4 +1,4 @@
-function [node,elem,face]=s2m(v,f,keepratio,maxvol,method,regions,holes)
+function [node,elem,face]=s2m(v,f,keepratio,maxvol,method,regions,holes,varargin)
 %
 % [node,elem,face]=s2m(v,f,keepratio,maxvol,method)
 % [node,elem,face]=s2m(v,f,keepratio,maxvol,'tetgen',regions,holes)
@@ -31,7 +31,11 @@ if(nargin<=6)
     holes=[];
 end
 if(nargin>=5)
-    [node,elem,face]=surf2mesh(v,f,[],[],keepratio,maxvol,regions,holes,0,method);
+    if(nargin>=8)
+        [node,elem,face]=surf2mesh(v,f,[],[],keepratio,maxvol,regions,holes,0,method,varargin{:});
+    else
+        [node,elem,face]=surf2mesh(v,f,[],[],keepratio,maxvol,regions,holes,0,method);
+    end
 else
     [node,elem,face]=surf2mesh(v,f,[],[],keepratio,maxvol,regions,holes);
 end
