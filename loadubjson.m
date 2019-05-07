@@ -133,7 +133,7 @@ function object = parse_object(varargin)
         parse_char('}');
     end
     if(isstruct(object))
-        object=struct2jdata(object);
+        object=struct2jdata(object,struct('Base64',0));
     end
 
 %%-------------------------------------------------------------------------
@@ -392,7 +392,7 @@ global isoct
             str=[str str0(pos0(end-1)+1:pos0(end))];
         end
     end
-    %str(~isletter(str) && ~('0' <= str && str <= '9')) = '_';
+    %str(~isletter(str) & ~('0' <= str & str <= '9')) = '_';
 
 %%-------------------------------------------------------------------------
 function endpos = matching_quote(str,pos)

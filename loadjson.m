@@ -45,6 +45,9 @@ function data = loadjson(fname,varargin)
 %                         array of 1D vectors; setting to 4 will return a
 %                         3D cell array.
 %           opt.ShowProgress [0|1]: if set to 1, loadjson displays a progress bar.
+%           opt.ParseStringArray [0|1]: if set to 0, loadjson converts "string arrays" 
+%                         (introduced in MATLAB R2016b) to char arrays; if set to 1,
+%                         loadjson skips this conversion.
 %
 % output:
 %      dat: a cell array, where {...} blocks are converted into cell arrays,
@@ -218,7 +221,13 @@ function object = parse_array(inStr, esc, varargin) % JSON array is written in r
            if(regexp(arraystr,':','once'))
                 error('One can not use MATLAB-like ":" construct inside a JSON array');
            end
+           if(jsonopt('ParseStringArray',0,varargin{:})==0)
+               arraystr=regexprep(arraystr,'\"','''');
+           end
            object=eval(arraystr);
+           if(iscell(object))
+               object=cellfun(@unescapejsonstring,object,'UniformOutput',false);
+           end
            pos=endpos;
         catch
          while 1
@@ -341,6 +350,7 @@ function str = parseStr(inStr, esc, varargin)
                 pos = pos + 1;
         end
     end
+    str=unescapejsonstring(str);
     error_pos('End of file while expecting end of inStr',inStr);
 
 %%-------------------------------------------------------------------------
@@ -450,7 +460,7 @@ global isoct
             str=[str str0(pos0(end-1)+1:pos0(end))];
         end
     end
-    %str(~isletter(str) && ~('0' <= str && str <= '9')) = '_';
+    %str(~isletter(str) & ~('0' <= str & str <= '9')) = '_';
 
 %%-------------------------------------------------------------------------
 function endpos = matching_quote(str,pos)
@@ -502,3 +512,14 @@ end
 if(endpos==0) 
     error('unmatched "]"');
 end
+
+function newstr=unescapejsonstring(str)
+newstr=str;
+if(~ischar(str))
+    return;
+end
+escapechars={'\\','\"','\/','\a','\b','\f','\n','\r','\t','\v'};
+for i=1:length(escapechars);
+    newstr=regexprep(newstr,regexprep(escapechars{i},'\\','\\\\'), escapechars{i});
+end
+newstr=regexprep(newstr,'\\u([0-9A-Fa-f]{4})', '${char(base2dec($1,16))}');
