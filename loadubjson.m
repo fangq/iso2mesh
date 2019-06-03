@@ -49,8 +49,6 @@ function data = loadubjson(fname,varargin)
 % -- this function is part of JSONLab toolbox (http://iso2mesh.sf.net/cgi-bin/index.cgi?jsonlab)
 %
 
-global pos inStr len  esc index_esc len_esc isoct arraytoken fileendian systemendian
-
 if(regexp(fname,'[\{\}\]\[]','once'))
    string=fname;
 elseif(exist(fname,'file'))
@@ -61,30 +59,29 @@ else
    error('input file does not exist');
 end
 
-pos = 1; len = length(string); inStr = string;
-isoct=exist('OCTAVE_VERSION','builtin');
-arraytoken=find(inStr=='[' | inStr==']' | inStr=='"');
-jstr=regexprep(inStr,'\\\\','  ');
+pos = 1; inputlen = length(string); inputstr = string;
+arraytoken=find(inputstr=='[' | inputstr==']' | inputstr=='"');
+jstr=regexprep(inputstr,'\\\\','  ');
 escquote=regexp(jstr,'\\"');
 arraytoken=sort([arraytoken escquote]);
 
-% String delimiters and escape chars identified to improve speed:
-esc = find(inStr=='"' | inStr=='\' ); % comparable to: regexp(inStr, '["\\]');
-index_esc = 1; len_esc = length(esc);
+isoct=exist('OCTAVE_VERSION','builtin');
 
 opt=varargin2struct(varargin{:});
-fileendian=upper(jsonopt('IntEndian','B',opt));
+opt.arraytoken_=arraytoken;
+
 [os,maxelem,systemendian]=computer;
+opt.flipendian_=(systemendian ~= upper(jsonopt('IntEndian','B',opt)));
 
 jsoncount=1;
-while pos <= len
-    switch(next_char)
+while pos <= inputlen
+    switch(next_char(inputstr))
         case '{'
-            data{jsoncount} = parse_object(opt);
+            data{jsoncount} = parse_object(inputstr, opt);
         case '['
-            data{jsoncount} = parse_array(opt);
+            data{jsoncount} = parse_array(inputstr, opt);
         otherwise
-            error_pos('Outer level structure must be an object or an array');
+            error_pos(inputstr, 'Outer level structure must be an object or an array');
     end
     jsoncount=jsoncount+1;
 end % while
@@ -95,355 +92,299 @@ if(jsoncount==1 && iscell(data))
 end
 
 %%-------------------------------------------------------------------------
-function object = parse_object(varargin)
-    parse_char('{');
-    object = [];
-    type='';
-    count=-1;
-    if(next_char == '$')
-        type=inStr(pos+1); % TODO
-        pos=pos+2;
+%% subfunctions
+%%-------------------------------------------------------------------------
+
+    function [data, adv]=parse_block(inputstr, type,count,varargin)
+        [cid,len]=elem_info(inputstr, type);
+        datastr=inputstr(pos:pos+len*count-1);
+        newdata=uint8(datastr);
+        id=strfind('iUIlLdD',type);
+        if(jsonopt('flipendian_',1,varargin{:}))
+            newdata=swapbytes(typecast(newdata,cid));
+        end
+        data=typecast(newdata,cid);
+        adv=double(len*count);
     end
-    if(next_char == '#')
-        pos=pos+1;
-        count=double(parse_number());
-    end
-    if next_char ~= '}'
-        num=0;
-        while 1
-            if(jsonopt('NameIsString',0,varargin{:}))
-                str = parseStr(varargin{:});
+    %%-------------------------------------------------------------------------
+
+    function object = parse_array(inputstr, varargin) % JSON array is written in row-major order
+        parse_char(inputstr, '[');
+        object = cell(0, 1);
+        dim=[];
+        type='';
+        count=-1;
+        if(next_char(inputstr) == '$')
+            type=inputstr(pos+1);
+            pos=pos+2;
+        end
+        if(next_char(inputstr) == '#')
+            pos=pos+1;
+            if(next_char(inputstr)=='[')
+                dim=parse_array(inputstr, varargin{:});
+                count=prod(double(dim));
             else
-                str = parse_name(varargin{:});
+                count=double(parse_number(inputstr,varargin{:}));
             end
-            if isempty(str)
-                error_pos('Name of value at position %d cannot be empty');
+        end
+        if(~isempty(type))
+            if(count>=0)
+                [object, adv]=parse_block(inputstr, type,count,varargin{:});
+                if(~isempty(dim))
+                    object=reshape(object,dim);
+                end
+                pos=pos+adv;
+                return;
+            else
+                endpos=match_bracket(inputstr,pos);
+                [cid,len]=elem_info(inputstr, type);
+                count=(endpos-pos)/len;
+                [object, adv]=parse_block(inputstr, type,count,varargin{:});
+                pos=pos+adv;
+                parse_char(inputstr, ']');
+                return;
             end
-            %parse_char(':');
-            val = parse_value(varargin{:});
-            num=num+1;
-            object.(valid_field(str))=val;
-            if next_char == '}' || (count>=0 && num>=count)
-                break;
+        end
+        if next_char(inputstr) ~= ']'
+             while 1
+                val = parse_value(inputstr, varargin{:});
+                object{end+1} = val;
+                if next_char(inputstr) == ']'
+                    break;
+                end
+             end
+        end
+        if(jsonopt('SimplifyCell',0,varargin{:})==1)
+          try
+            oldobj=object;
+            object=cell2mat(object')';
+            if(iscell(oldobj) && isstruct(object) && numel(object)>1 && jsonopt('SimplifyCellArray',1,varargin{:})==0)
+                object=oldobj;
+            elseif(size(object,1)>1 && ismatrix(object))
+                object=object';
             end
-            %parse_char(',');
+          catch
+          end
+        end
+        if(count==-1)
+            parse_char(inputstr, ']');
         end
     end
-    if(count==-1)
-        parse_char('}');
-    end
-    if(isstruct(object))
-        object=struct2jdata(object,struct('Base64',0));
-    end
 
-%%-------------------------------------------------------------------------
-function [cid,len]=elem_info(type)
-id=strfind('iUIlLdD',type);
-dataclass={'int8','uint8','int16','int32','int64','single','double'};
-bytelen=[1,1,2,4,8,4,8];
-if(id>0)
-    cid=dataclass{id};
-    len=bytelen(id);
-else
-    error_pos('unsupported type at position %d');
-end
-%%-------------------------------------------------------------------------
+    %%-------------------------------------------------------------------------
 
-
-function [data, adv]=parse_block(type,count,varargin)
-global pos inStr isoct fileendian systemendian
-[cid,len]=elem_info(type);
-datastr=inStr(pos:pos+len*count-1);
-newdata=uint8(datastr);
-id=strfind('iUIlLdD',type);
-if(fileendian~=systemendian)
-    newdata=swapbytes(typecast(newdata,cid));
-end
-data=typecast(newdata,cid);
-adv=double(len*count);
-
-%%-------------------------------------------------------------------------
-
-
-function object = parse_array(varargin) % JSON array is written in row-major order
-global pos inStr
-    parse_char('[');
-    object = cell(0, 1);
-    dim=[];
-    type='';
-    count=-1;
-    if(next_char == '$')
-        type=inStr(pos+1);
-        pos=pos+2;
-    end
-    if(next_char == '#')
-        pos=pos+1;
-        if(next_char=='[')
-            dim=parse_array(varargin{:});
-            count=prod(double(dim));
+    function parse_char(inputstr, c)
+        skip_whitespace(inputstr);
+        if pos > length(inputstr) || inputstr(pos) ~= c
+            error_pos(inputstr, sprintf('Expected %c at position %%d', c));
         else
-            count=double(parse_number());
+            pos = pos + 1;
+            skip_whitespace(inputstr);
         end
     end
-    if(~isempty(type))
-        if(count>=0)
-            [object, adv]=parse_block(type,count,varargin{:});
-            if(~isempty(dim))
-                object=reshape(object,dim);
-            end
-            pos=pos+adv;
-            return;
+
+    %%-------------------------------------------------------------------------
+
+    function c = next_char(inputstr)
+        skip_whitespace(inputstr);
+        if pos > length(inputstr)
+            c = [];
         else
-            endpos=matching_bracket(inStr,pos);
-            [cid,len]=elem_info(type);
-            count=(endpos-pos)/len;
-            [object, adv]=parse_block(type,count,varargin{:});
-            pos=pos+adv;
-            parse_char(']');
-            return;
+            c = inputstr(pos);
         end
     end
-    if next_char ~= ']'
-         while 1
-            val = parse_value(varargin{:});
-            object{end+1} = val;
-            if next_char == ']'
-                break;
+
+    %%-------------------------------------------------------------------------
+
+    function skip_whitespace(inputstr)
+        while pos <= length(inputstr) && isspace(inputstr(pos))
+            pos = pos + 1;
+        end
+    end
+
+    %%-------------------------------------------------------------------------
+    function str = parse_name(inputstr, varargin)
+        bytelen=double(parse_number(inputstr,varargin{:}));
+        if(length(inputstr)>=pos+bytelen-1)
+            str=inputstr(pos:pos+bytelen-1);
+            pos=pos+bytelen;
+        else
+            error_pos(inputstr, 'End of file while expecting end of name');
+        end
+    end
+
+    %%-------------------------------------------------------------------------
+
+    function str = parseStr(inputstr, varargin)
+        type=inputstr(pos);
+        if type ~= 'S' && type ~= 'C' && type ~= 'H'
+            error_pos('String starting with S expected at position %d');
+        else
+            pos = pos + 1;
+        end
+        if(type == 'C')
+            str=inputstr(pos);
+            pos=pos+1;
+            return;
+        end
+        bytelen=double(parse_number(inputstr,varargin{:}));
+        if(length(inputstr)>=pos+bytelen-1)
+            str=inputstr(pos:pos+bytelen-1);
+            pos=pos+bytelen;
+        else
+            error_pos(inputstr, 'End of file while expecting end of inputstr');
+        end
+    end
+
+    %%-------------------------------------------------------------------------
+
+    function num = parse_number(inputstr, varargin)
+        id=strfind('iUIlLdD',inputstr(pos));
+        if(isempty(id))
+            error_pos(inputstr, 'expecting a number at position %d');
+        end
+        type={'int8','uint8','int16','int32','int64','single','double'};
+        bytelen=[1,1,2,4,8,4,8];
+        datastr=inputstr(pos+1:pos+bytelen(id));
+        newdata=uint8(datastr);
+        if(jsonopt('flipendian_',1,varargin{:}))
+            newdata=swapbytes(typecast(newdata,type{id}));
+        end
+        num=typecast(newdata,type{id});
+        pos = pos + bytelen(id)+1;
+    end
+
+    %%-------------------------------------------------------------------------
+
+    function val = parse_value(inputstr, varargin)
+        switch(inputstr(pos))
+            case {'S','C','H'}
+                val = parseStr(inputstr, varargin{:});
+                return;
+            case '['
+                val = parse_array(inputstr, varargin{:});
+                return;
+            case '{'
+                val = parse_object(inputstr, varargin{:});
+                return;
+            case {'i','U','I','l','L','d','D'}
+                val = parse_number(inputstr, varargin{:});
+                return;
+            case 'T'
+                val = true;
+                pos = pos + 1;
+                return;
+            case 'F'
+                val = false;
+                pos = pos + 1;
+                return;
+            case {'Z','N'}
+                val = [];
+                pos = pos + 1;
+                return;
+        end
+        error_pos(inputstr, 'Value expected at position %d');
+    end
+    %%-------------------------------------------------------------------------
+
+    function error_pos(inputstr, msg)
+        poShow = max(min([pos-15 pos-1 pos pos+20],length(inputstr)),1);
+        if poShow(3) == poShow(2)
+            poShow(3:4) = poShow(2)+[0 -1];  % display nothing after
+        end
+        msg = [sprintf(msg, pos) ': ' ...
+        inputstr(poShow(1):poShow(2)) '<error>' inputstr(poShow(3):poShow(4)) ];
+        error( ['JSONparser:invalidFormat: ' msg] );
+    end
+
+    %%-------------------------------------------------------------------------
+    function object = parse_object(inputstr, varargin)
+        parse_char(inputstr,'{');
+        object = [];
+        type='';
+        count=-1;
+        if(next_char(inputstr) == '$')
+            type=inputstr(pos+1); % TODO
+            pos=pos+2;
+        end
+        if(next_char(inputstr) == '#')
+            pos=pos+1;
+            count=double(parse_number(inputstr,varargin{:}));
+        end
+        if next_char(inputstr) ~= '}'
+            num=0;
+            while 1
+                if(jsonopt('NameIsString',0,varargin{:}))
+                    str = parseStr(inputstr, varargin{:});
+                else
+                    str = parse_name(inputstr, varargin{:});
+                end
+                if isempty(str)
+                    error_pos(inputstr, 'Name of value at position %d cannot be empty');
+                end
+                val = parse_value(inputstr, varargin{:});
+                num=num+1;
+                object.(valid_field(str,varargin{:}))=val;
+                if next_char(inputstr) == '}' || (count>=0 && num>=count)
+                    break;
+                end
             end
-            %parse_char(',');
-         end
-    end
-    if(jsonopt('SimplifyCell',0,varargin{:})==1)
-      try
-        oldobj=object;
-        object=cell2mat(object')';
-        if(iscell(oldobj) && isstruct(object) && numel(object)>1 && jsonopt('SimplifyCellArray',1,varargin{:})==0)
-            object=oldobj;
-        elseif(size(object,1)>1 && ismatrix(object))
-            object=object';
         end
-      catch
-      end
-    end
-    if(count==-1)
-        parse_char(']');
-    end
-
-%%-------------------------------------------------------------------------
-
-function parse_char(c)
-    global pos inStr len
-    skip_whitespace;
-    if pos > len || inStr(pos) ~= c
-        error_pos(sprintf('Expected %c at position %%d', c));
-    else
-        pos = pos + 1;
-        skip_whitespace;
+        if(count==-1)
+            parse_char(inputstr, '}');
+        end
+        if(isstruct(object))
+            object=struct2jdata(object,struct('Recursive',0, 'Base64',0));
+        end
     end
 
-%%-------------------------------------------------------------------------
-
-function c = next_char
-    global pos inStr len
-    skip_whitespace;
-    if pos > len
-        c = [];
-    else
-        c = inStr(pos);
+    %%-------------------------------------------------------------------------
+    function [cid,len]=elem_info(inputstr, type)
+        id=strfind('iUIlLdD',type);
+        dataclass={'int8','uint8','int16','int32','int64','single','double'};
+        bytelen=[1,1,2,4,8,4,8];
+        if(id>0)
+            cid=dataclass{id};
+            len=bytelen(id);
+        else
+            error_pos(inputstr, 'unsupported type at position %d');
+        end
     end
+    %%-------------------------------------------------------------------------
 
-%%-------------------------------------------------------------------------
-
-function skip_whitespace
-    global pos inStr len
-    while pos <= len && isspace(inStr(pos))
-        pos = pos + 1;
-    end
-
-%%-------------------------------------------------------------------------
-function str = parse_name(varargin)
-    global pos inStr
-    bytelen=double(parse_number());
-    if(length(inStr)>=pos+bytelen-1)
-        str=inStr(pos:pos+bytelen-1);
-        pos=pos+bytelen;
-    else
-        error_pos('End of file while expecting end of name');
-    end
-%%-------------------------------------------------------------------------
-
-function str = parseStr(varargin)
-    global pos inStr
- % len, ns = length(inStr), keyboard
-    type=inStr(pos);
-    if type ~= 'S' && type ~= 'C' && type ~= 'H'
-        error_pos('String starting with S expected at position %d');
-    else
-        pos = pos + 1;
-    end
-    if(type == 'C')
-        str=inStr(pos);
-        pos=pos+1;
-        return;
-    end
-    bytelen=double(parse_number());
-    if(length(inStr)>=pos+bytelen-1)
-        str=inStr(pos:pos+bytelen-1);
-        pos=pos+bytelen;
-    else
-        error_pos('End of file while expecting end of inStr');
-    end
-
-%%-------------------------------------------------------------------------
-
-function num = parse_number(varargin)
-    global pos inStr isoct fileendian systemendian
-    id=strfind('iUIlLdD',inStr(pos));
-    if(isempty(id))
-        error_pos('expecting a number at position %d');
-    end
-    type={'int8','uint8','int16','int32','int64','single','double'};
-    bytelen=[1,1,2,4,8,4,8];
-    datastr=inStr(pos+1:pos+bytelen(id));
-    newdata=uint8(datastr);
-    if(fileendian~=systemendian)
-        newdata=swapbytes(typecast(newdata,type{id}));
-    end
-    num=typecast(newdata,type{id});
-    pos = pos + bytelen(id)+1;
-
-%%-------------------------------------------------------------------------
-
-function val = parse_value(varargin)
-    global pos inStr
-
-    switch(inStr(pos))
-        case {'S','C','H'}
-            val = parseStr(varargin{:});
+    function str = valid_field(str,varargin)
+    % From MATLAB doc: field names must begin with a letter, which may be
+    % followed by any combination of letters, digits, and underscores.
+    % Invalid characters will be converted to underscores, and the prefix
+    % "x0x[Hex code]_" will be added if the first character is not a letter.
+        cpos=regexp(str,'^[^A-Za-z]','once');
+        if(~isempty(cpos))
+            if(~isoct)
+                str=regexprep(str,'^([^A-Za-z])','x0x${sprintf(''%X'',unicode2native($1))}_','once');
+            else
+                str=sprintf('x0x%X_%s',char(str(1)),str(2:end));
+            end
+        end
+        if(isempty(regexp(str,'[^0-9A-Za-z_]', 'once' )))
             return;
-        case '['
-            val = parse_array(varargin{:});
-            return;
-        case '{'
-            val = parse_object(varargin{:});
-            return;
-        case {'i','U','I','l','L','d','D'}
-            val = parse_number(varargin{:});
-            return;
-        case 'T'
-            val = true;
-            pos = pos + 1;
-            return;
-        case 'F'
-            val = false;
-            pos = pos + 1;
-            return;
-        case {'Z','N'}
-            val = [];
-            pos = pos + 1;
-            return;
-    end
-    error_pos('Value expected at position %d');
-%%-------------------------------------------------------------------------
-
-function error_pos(msg)
-    global pos inStr len
-    poShow = max(min([pos-15 pos-1 pos pos+20],len),1);
-    if poShow(3) == poShow(2)
-        poShow(3:4) = poShow(2)+[0 -1];  % display nothing after
-    end
-    msg = [sprintf(msg, pos) ': ' ...
-    inStr(poShow(1):poShow(2)) '<error>' inStr(poShow(3):poShow(4)) ];
-    error( ['JSONparser:invalidFormat: ' msg] );
-
-%%-------------------------------------------------------------------------
-
-function str = valid_field(str)
-global isoct
-% From MATLAB doc: field names must begin with a letter, which may be
-% followed by any combination of letters, digits, and underscores.
-% Invalid characters will be converted to underscores, and the prefix
-% "x0x[Hex code]_" will be added if the first character is not a letter.
-    pos=regexp(str,'^[^A-Za-z]','once');
-    if(~isempty(pos))
+        end
         if(~isoct)
-            str=regexprep(str,'^([^A-Za-z])','x0x${sprintf(''%X'',unicode2native($1))}_','once');
+            str=regexprep(str,'([^0-9A-Za-z_])','_0x${sprintf(''%X'',unicode2native($1))}_');
         else
-            str=sprintf('x0x%X_%s',char(str(1)),str(2:end));
+            cpos=regexp(str,'[^0-9A-Za-z_]');
+            if(isempty(cpos))
+                return;
+            end
+            str0=str;
+            pos0=[0 cpos(:)' length(str)];
+            str='';
+            for i=1:length(cpos)
+                str=[str str0(pos0(i)+1:cpos(i)-1) sprintf('_0x%X_',str0(cpos(i)))];
+            end
+            if(cpos(end)~=length(str))
+                str=[str str0(pos0(end-1)+1:pos0(end))];
+            end
         end
     end
-    if(isempty(regexp(str,'[^0-9A-Za-z_]', 'once' )))
-        return;
-    end
-    if(~isoct)
-        str=regexprep(str,'([^0-9A-Za-z_])','_0x${sprintf(''%X'',unicode2native($1))}_');
-    else
-        pos=regexp(str,'[^0-9A-Za-z_]');
-        if(isempty(pos))
-            return;
-        end
-        str0=str;
-        pos0=[0 pos(:)' length(str)];
-        str='';
-        for i=1:length(pos)
-            str=[str str0(pos0(i)+1:pos(i)-1) sprintf('_0x%X_',str0(pos(i)))];
-        end
-        if(pos(end)~=length(str))
-            str=[str str0(pos0(end-1)+1:pos0(end))];
-        end
-    end
-    %str(~isletter(str) & ~('0' <= str & str <= '9')) = '_';
-
-%%-------------------------------------------------------------------------
-function endpos = matching_quote(str,pos)
-len=length(str);
-while(pos<len)
-    if(str(pos)=='"')
-        if(~(pos>1 && str(pos-1)=='\'))
-            endpos=pos;
-            return;
-        end        
-    end
-    pos=pos+1;
-end
-error('unmatched quotation mark');
-%%-------------------------------------------------------------------------
-function [endpos, e1l, e1r, maxlevel] = matching_bracket(str,pos)
-global arraytoken
-level=1;
-maxlevel=level;
-endpos=0;
-bpos=arraytoken(arraytoken>=pos);
-tokens=str(bpos);
-len=length(tokens);
-pos=1;
-e1l=[];
-e1r=[];
-while(pos<=len)
-    c=tokens(pos);
-    if(c==']')
-        level=level-1;
-        if(isempty(e1r))
-            e1r=bpos(pos);
-        end
-        if(level==0)
-            endpos=bpos(pos);
-            return
-        end
-    end
-    if(c=='[')
-        if(isempty(e1l))
-            e1l=bpos(pos);
-        end
-        level=level+1;
-        maxlevel=max(maxlevel,level);
-    end
-    if(c=='"')
-        pos=matching_quote(tokens,pos+1);
-    end
-    pos=pos+1;
-end
-if(endpos==0) 
-    error('unmatched "]"');
 end
 

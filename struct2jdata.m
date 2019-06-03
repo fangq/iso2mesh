@@ -39,15 +39,23 @@ function newdata=struct2jdata(data,varargin)
 % -- this function is part of JSONLab toolbox (http://iso2mesh.sf.net/cgi-bin/index.cgi?jsonlab)
 %
 
-fn=fieldnames(data);
 newdata=data;
+if(~isstruct(data))
+    if(iscell(data))
+        newdata=cellfun(@(x) struct2jdata(x),data,'UniformOutput',false);
+    end
+    return;
+end
+fn=fieldnames(data);
 len=length(data);
 needbase64=jsonopt('Base64',1,varargin{:});
-if(jsonopt('Recursive',0,varargin{:})==1)
+if(jsonopt('Recursive',1,varargin{:})==1)
   for i=1:length(fn) % depth-first
     for j=1:len
-        if(isstruct(getfield(data(j),fn{i})))
-            newdata(j)=setfield(newdata(j),fn{i},jstruct2array(getfield(data(j),fn{i})));
+        if(isstruct(data(j).(fn{i})))
+            newdata(j).(fn{i})=struct2jdata(data(j).(fn{i}));
+        elseif(iscell(data(j).(fn{i})))
+            newdata(j).(fn{i})=cellfun(@(x) struct2jdata(x),newdata(j).(fn{i}),'UniformOutput',false);
         end
     end
   end
@@ -60,32 +68,37 @@ if(~isempty(strmatch('x0x5F_ArrayType_',fn)) && (~isempty(strmatch('x0x5F_ArrayD
         if(~isempty(strmatch('x0x5F_ArrayCompressionMethod_',fn)))
             zipmethod=data(j).x0x5F_ArrayCompressionMethod_;
         end
-        if(strcmpi(zipmethod,'gzip'))
+        if(~isempty(strmatch(zipmethod,{'zlib','gzip','lzma','lzip'})))
+            decompfun=str2func([zipmethod 'decode']);
             if(needbase64)
-                ndata=reshape(typecast(gzipdecode(base64decode(data(j).x0x5F_ArrayCompressedData_)),data(j).x0x5F_ArrayType_),data(j).x0x5F_ArrayCompressionSize_);
+                ndata=reshape(typecast(decompfun(base64decode(data(j).x0x5F_ArrayCompressedData_)),data(j).x0x5F_ArrayType_),data(j).x0x5F_ArrayCompressionSize_);
             else
-                ndata=reshape(typecast(gzipdecode(data(j).x0x5F_ArrayCompressedData_),data(j).x0x5F_ArrayType_),data(j).x0x5F_ArrayCompressionSize_);
-            end
-        elseif(strcmpi(zipmethod,'zlib'))
-            if(needbase64)
-                ndata=reshape(typecast(zlibdecode(base64decode(data(j).x0x5F_ArrayCompressedData_)),data(j).x0x5F_ArrayType_),data(j).x0x5F_ArrayCompressionSize_);
-            else
-                ndata=reshape(typecast(zlibdecode(data(j).x0x5F_ArrayCompressedData_),data(j).x0x5F_ArrayType_),data(j).x0x5F_ArrayCompressionSize_);
+                ndata=reshape(typecast(decompfun(data(j).x0x5F_ArrayCompressedData_),data(j).x0x5F_ArrayType_),data(j).x0x5F_ArrayCompressionSize_);
             end
         else
             error('compression method is not supported');
         end
     else
+        if(iscell(data(j).x0x5F_ArrayData_))
+            data(j).x0x5F_ArrayData_=cell2mat(data(j).x0x5F_ArrayData_);
+        end
         ndata=cast(data(j).x0x5F_ArrayData_,data(j).x0x5F_ArrayType_);
     end
     iscpx=0;
+    needtranspose=0;
     if(~isempty(strmatch('x0x5F_ArrayIsComplex_',fn)))
         if(data(j).x0x5F_ArrayIsComplex_)
            iscpx=1;
+           needtranspose=islogical(data(j).x0x5F_ArrayIsComplex_);
         end
     end
-    if(~isempty(strmatch('x0x5F_ArrayIsSparse_',fn)))
-        if(data(j).x0x5F_ArrayIsSparse_)
+    if(~isempty(strmatch('x0x5F_ArrayIsSparse_',fn)) && data(j).x0x5F_ArrayIsSparse_)
+            if(islogical(data(j).x0x5F_ArrayIsSparse_))
+                needtranspose=1;
+            end
+            if(needtranspose)
+                ndata=ndata';
+            end
             if(~isempty(strmatch('x0x5F_ArraySize_',fn)))
                 dim=double(data(j).x0x5F_ArraySize_);
                 if(iscpx && size(ndata,2)==4-any(dim==1))
@@ -96,12 +109,21 @@ if(~isempty(strmatch('x0x5F_ArrayType_',fn)) && (~isempty(strmatch('x0x5F_ArrayD
                     ndata=sparse(dim(1),prod(dim(2:end)));
                 elseif dim(1)==1
                     % Sparse row vector
+                    if(size(ndata,2)~=2 && size(ndata,1)==2) 
+                        ndata=ndata';
+                    end
                     ndata=sparse(1,ndata(:,1),ndata(:,2),dim(1),prod(dim(2:end)));
                 elseif dim(2)==1
                     % Sparse column vector
+                    if(size(ndata,2)~=2 && size(ndata,1)==2) 
+                        ndata=ndata';
+                    end
                     ndata=sparse(ndata(:,1),1,ndata(:,2),dim(1),prod(dim(2:end)));
                 else
                     % Generic sparse array.
+                    if(size(ndata,2)~=3 && size(ndata,1)==3) 
+                        ndata=ndata';
+                    end
                     ndata=sparse(ndata(:,1),ndata(:,2),ndata(:,3),dim(1),prod(dim(2:end)));
                 end
             else
@@ -110,10 +132,15 @@ if(~isempty(strmatch('x0x5F_ArrayType_',fn)) && (~isempty(strmatch('x0x5F_ArrayD
                 end
                 ndata=sparse(ndata(:,1),ndata(:,2),ndata(:,3));
             end
-        end
     elseif(~isempty(strmatch('x0x5F_ArraySize_',fn)))
-        if(iscpx && size(ndata,2)==2)
-             ndata=complex(ndata(:,1),ndata(:,2));
+        if(needtranspose)
+            ndata=ndata';
+        end
+        if(iscpx)
+            if(size(ndata,2)~=2 && size(ndata,1)==2)
+                ndata=ndata';
+            end
+            ndata=complex(ndata(:,1),ndata(:,2));
         end
         ndata=reshape(ndata(:),data(j).x0x5F_ArraySize_);
     end

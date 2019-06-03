@@ -67,8 +67,8 @@ function json=savejson(rootname,obj,varargin)
 %                         back to the string form
 %        opt.SaveBinary [0|1]: 1 - save the JSON file in binary mode; 0 - text mode.
 %        opt.Compact [0|1]: 1- out compact JSON format (remove all newlines and tabs)
-%        opt.Compression  'zlib' or 'gzip': specify array compression
-%                         method; currently only supports 'gzip' or 'zlib'. The
+%        opt.Compression  'zlib', 'gzip', 'lzma' or 'lzip': specify array compression
+%                         method; currently only supports 4 methods. The
 %                         data compression only applicable to numerical arrays 
 %                         in 3D or higher dimensions, or when ArrayToStruct
 %                         is 1 for 1D or 2D arrays. If one wants to
@@ -123,7 +123,7 @@ opt.IsOctave=exist('OCTAVE_VERSION','builtin');
 
 dozip=jsonopt('Compression','',opt);
 if(~isempty(dozip))
-    if(~(strcmpi(dozip,'gzip') || strcmpi(dozip,'zlib')))
+    if(isempty(strmatch(dozip,{'zlib','gzip','lzma','lzip'})))
         error('compression method "%s" is not supported',dozip);
     end
     if(exist('zmat')~=3)
@@ -207,14 +207,18 @@ elseif(isstruct(item))
     txt=struct2json(name,item,level,varargin{:});
 elseif(ischar(item))
     txt=str2json(name,item,level,varargin{:});
+elseif(isa(item,'function_handle'))
+    txt=struct2json(name,functions(item),level,varargin{:});
+elseif(isa(item,'containers.Map'))
+    txt=map2json(name,item,level,varargin{:});
+elseif(isa(item,'categorical'))
+    txt=cell2json(name,cellstr(item),level,varargin{:});
 elseif(isobject(item))
-    if(~exist('OCTAVE_VERSION','builtin') && exist('istable','builtin') && istable(item))
+    if(~exist('OCTAVE_VERSION','builtin') && exist('istable') && istable(item))
         txt=matlabtable2json(name,item,level,varargin{:});
     else
         txt=matlabobject2json(name,item,level,varargin{:});
     end
-elseif(isa(item,'function_handle'))
-    txt=struct2json(name,functions(item),level,varargin{:});
 else
     txt=mat2json(name,item,level,varargin{:});
 end
@@ -302,7 +306,7 @@ if(isempty(item))
     txt = sprintf('%s',txt{:});
     return;
 end
-if(~isempty(name)) 
+if(~isempty(name))
     if(forcearray)
         txt={padding0, '"', checkname(name,varargin{:}),'": [', nl};
     end
@@ -346,6 +350,59 @@ for j=1:dim(2)
 end
 if(forcearray)
     txt(end+1:end+3)={nl,padding0,']'};
+end
+txt = sprintf('%s',txt{:});
+
+%%-------------------------------------------------------------------------
+function txt=map2json(name,item,level,varargin)
+txt={};
+if(~isa(item,'containers.Map'))
+	error('input is not a containers.Map class');
+end
+dim=size(item);
+names = keys(item);
+val= values(item);
+
+len=prod(dim);
+forcearray= (len>1 || (jsonopt('SingletArray',0,varargin{:})==1 && level>0));
+ws=struct('tab',sprintf('\t'),'newline',sprintf('\n'));
+ws=jsonopt('whitespaces_',ws,varargin{:});
+padding0=repmat(ws.tab,1,level);
+nl=ws.newline;
+
+if(isempty(item)) 
+    if(~isempty(name)) 
+        txt={padding0, '"', checkname(name,varargin{:}),'": []'};
+    else
+        txt={padding0, '[]'};
+    end
+    txt = sprintf('%s',txt{:});
+    return;
+end
+if(~isempty(name)) 
+    if(forcearray)
+        txt={padding0, '"', checkname(name,varargin{:}),'": {', nl};
+    end
+else
+    if(forcearray)
+        txt={padding0, '{', nl};
+    end
+end
+
+for i=1:dim(1)
+    if(~isempty(names{i}))
+	    txt{end+1}=obj2json(names{i},val{i},...
+             level+(dim(1)>1),varargin{:});
+        if(i<length(names))
+            txt{end+1}=',';
+        end
+        if(i<dim(1))
+            txt{end+1}=nl;
+        end
+    end
+end
+if(forcearray)
+    txt(end+1:end+3)={nl,padding0,'}'};
 end
 txt = sprintf('%s',txt{:});
 
@@ -409,7 +466,7 @@ sep=ws.sep;
 dozip=jsonopt('Compression','',varargin{:});
 zipsize=jsonopt('CompressArraySize',100,varargin{:});
 
-if(length(size(item))>2 || issparse(item) || ~isreal(item) || ...
+if(((jsonopt('NestArray',0,varargin{:})==0) && length(size(item))>2) || issparse(item) || ~isreal(item) || ...
    (isempty(item) && any(size(item))) ||jsonopt('ArrayToStruct',0,varargin{:}) || (~isempty(dozip) && numel(item)>zipsize))
     if(isempty(name))
     	txt=sprintf('%s{%s%s"_ArrayType_": "%s",%s%s"_ArraySize_": %s,%s',...
@@ -447,9 +504,9 @@ if(issparse(item))
            % (Necessary for complex row vector handling below.)
            data=data';
        end
-       txt=sprintf(dataformat,txt,padding0,'"_ArrayIsComplex_": ','1', sep);
+       txt=sprintf(dataformat,txt,padding0,'"_ArrayIsComplex_": ','true', sep);
     end
-    txt=sprintf(dataformat,txt,padding0,'"_ArrayIsSparse_": ','1', sep);
+    txt=sprintf(dataformat,txt,padding0,'"_ArrayIsSparse_": ','true', sep);
     if(~isempty(dozip) && numel(data*2)>zipsize)
         if(size(item,1)==1)
             % Row vector, store only column indices.
@@ -463,27 +520,21 @@ if(issparse(item))
         end
         txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressionSize_": ',regexprep(mat2str(size(fulldata)),'\s+',','), sep);
         txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressionMethod_": "',dozip, ['"' sep]);
-        if(strcmpi(dozip,'gzip'))
-            txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressedData_": "',base64encode(gzipencode(typecast(fulldata(:),'uint8'))),['"' nl]);
-        elseif(strcmpi(dozip,'zlib'))
-            txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressedData_": "',base64encode(zlibencode(typecast(fulldata(:),'uint8'))),['"' nl]);
-        else
-            error('compression method not supported');
-        end
+	compfun=str2func([dozip 'encode']);
+        txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressedData_": "',base64encode(compfun(typecast(fulldata(:),'uint8'))),['"' nl]);
     else
         if(size(item,1)==1)
             % Row vector, store only column indices.
-            txt=sprintf(dataformat,txt,padding0,'"_ArrayData_": ',...
-               matdata2json([iy(:),data'],level+2,varargin{:}), nl);
+            fulldata=[iy(:),data'];
         elseif(size(item,2)==1)
             % Column vector, store only row indices.
-            txt=sprintf(dataformat,txt,padding0,'"_ArrayData_": ',...
-               matdata2json([ix,data],level+2,varargin{:}), nl);
+            fulldata=[ix,data];
         else
             % General case, store row and column indices.
-            txt=sprintf(dataformat,txt,padding0,'"_ArrayData_": ',...
-               matdata2json([ix,iy,data],level+2,varargin{:}), nl);
+            fulldata=[ix,iy,data];
         end
+        txt=sprintf(dataformat,txt,padding0,'"_ArrayData_": ',...
+               matdata2json(fulldata',level+2,varargin{:}), nl);    
     end
 else
     if(~isempty(dozip) && numel(item)>zipsize)
@@ -493,26 +544,21 @@ else
                 fulldata=uint8(fulldata);
             end
         else
-            txt=sprintf(dataformat,txt,padding0,'"_ArrayIsComplex_": ','1', sep);
-            fulldata=[real(item(:)) imag(item(:))];
+            txt=sprintf(dataformat,txt,padding0,'"_ArrayIsComplex_": ','true', sep);
+            fulldata=[real(item(:)) imag(item(:))]';
         end
         txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressionSize_": ',regexprep(mat2str(size(fulldata)),'\s+',','), sep);
         txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressionMethod_": "',dozip, ['"' sep]);
-        if(strcmpi(dozip,'gzip'))
-            txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressedData_": "',base64encode(gzipencode(typecast(fulldata(:),'uint8'))),['"' nl]);
-        elseif(strcmpi(dozip,'zlib'))
-            txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressedData_": "',base64encode(zlibencode(typecast(fulldata(:),'uint8'))),['"' nl]);
-        else
-            error('compression method not supported');
-        end
+	compfun=str2func([dozip 'encode']);
+        txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressedData_": "',base64encode(compfun(typecast(fulldata(:),'uint8'))),['"' nl]);
     else
         if(isreal(item))
             txt=sprintf(dataformat,txt,padding0,'"_ArrayData_": ',...
             matdata2json(item(:)',level+2,varargin{:}), nl);
         else
-            txt=sprintf(dataformat,txt,padding0,'"_ArrayIsComplex_": ','1', sep);
+            txt=sprintf(dataformat,txt,padding0,'"_ArrayIsComplex_": ','true', sep);
             txt=sprintf(dataformat,txt,padding0,'"_ArrayData_": ',...
-            matdata2json([real(item(:)) imag(item(:))],level+2,varargin{:}), nl);
+            matdata2json([real(item(:)) imag(item(:))]',level+2,varargin{:}), nl);
         end
     end
 end
@@ -527,9 +573,6 @@ elseif numel(item) == 1 %
     txt = str2json(name, char(item), level, varargin(:));
     return
 else
-    % "st = struct(item);" would produce an inmutable warning, because it
-    % make the protected and private properties visible. Instead we get the
-    % visible properties
     propertynames = properties(item);
     for p = 1:numel(propertynames)
         for o = numel(item):-1:1 % aray of objects
@@ -544,11 +587,8 @@ function txt=matlabtable2json(name,item,level,varargin)
 if numel(item) == 0 %empty object
     st = struct();
 else
-    % "st = struct(item);" would produce an inmutable warning, because it
-    % make the protected and private properties visible. Instead we get the
-    % visible properties
     st = struct();
-    propertynames = properties(item);
+    propertynames = item.Properties.VariableNames;
     if(isfield(item.Properties,'RowNames') && ~isempty(item.Properties.RowNames))
         rownames=item.Properties.RowNames;
         for p = 1:(numel(propertynames)-1)
@@ -557,7 +597,7 @@ else
             end
         end
     else
-        for p = 1:(numel(propertynames)-1)
+        for p = 1:numel(propertynames)
             for j = 1:size(item(:,p),1)
                 st(j).(propertynames{p}) = item{j,p};
             end
@@ -573,7 +613,12 @@ ws=struct('tab',sprintf('\t'),'newline',sprintf('\n'),'sep',sprintf(',\n'));
 ws=jsonopt('whitespaces_',ws,varargin{:});
 tab=ws.tab;
 nl=ws.newline;
+isnest=jsonopt('NestArray',0,varargin{:});
 
+if(~isvector(mat) && isnest==1)
+   txt=cell2json('',squeeze(num2cell(mat,1)),level-1,varargin{:});
+   return;
+end
 if(size(mat,1)==1)
     pre='';
     post='';
@@ -584,7 +629,7 @@ else
 end
 
 if(isempty(mat))
-    txt='null';
+    txt='[]';
     return;
 end
 if(isinteger(mat))
