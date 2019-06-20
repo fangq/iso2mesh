@@ -18,7 +18,6 @@ function savejmesh(node,face,elem,fname,varargin)
 %           'Author': a string to set the author of the mesh
 %           'MeshTitle': a string to set the title of the mesh
 %           'MeshTag': a value as the tag of the mesh data
-%           'MeshGroup': a value to group this mesh with other mesh data
 %           'Comment': a string as the additional note for the mesh data
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
@@ -43,14 +42,11 @@ end
 
 meshdim=jsonopt('Dimension',0,opt);
 
-fid=fopen(fname,'wt');
-if(fid==-1)
-    error('You do not have permission to save mesh files.');
-end
+mesh.x0x5F_DataInfo_=struct();
 
-mesh.MeshVersion=0.5;
-mesh.CreationTime=datestr(now);
-mesh.Comment=['Created by iso2mesh ' iso2meshver '(http://iso2mesh.sf.net)'];
+metadata.JMeshVersion=0.4;
+metadata.CreationTime=datestr(now);
+metadata.Comment=['Created by iso2mesh ' iso2meshver '(http://iso2mesh.sf.net)'];
 
 if(meshdim==0) % a user-defined mesh
     mesh.MeshNode=node;
@@ -63,39 +59,39 @@ if(meshdim==0) % a user-defined mesh
 elseif(meshdim==3) % a 3D mesh
     nd=size(node);
     if(nd(2)<3) error('expecting 3 or more columns in node'); end
-    mesh.MeshPoint3D=node(:,1:3);
+    mesh.MeshVertex3=node(:,1:3);
     if(nd(2)>3)
-        mesh.MeshNodeVal=node(:,4:end);
+        mesh.MeshVertex3=struct('Data',mesh.MeshVertex3,'Properties',struct('Value',node(:,4:end)));
     end
     if(~isempty(face))
         nd=size(face);
         if(nd(2)<3) error('expecting 3 or more columns in face'); end
-        mesh.MeshTri=face(:,1:3);
+        mesh.MeshTri3=face(:,1:3);
         if(nd(2)>3)
-            mesh.MeshTriVal=face(:,4:end);
+            mesh.MeshTri3=struct('Data',mesh.MeshTri3,'Properties',struct('Value',face(:,4:end)));
         end
     end
     if(~isempty(elem))
         nd=size(elem);
         if(nd(2)<4) error('expecting 4 or more columns in elem'); end
-        mesh.MeshTetra=elem(:,1:4);
+        mesh.MeshTet4=elem(:,1:4);
         if(nd(2)>4)
-            mesh.MeshTetraVal=elem(:,5:end);
+            mesh.MeshTet4=struct('Data',mesh.MeshTet4,'Properties',struct('Value',elem(:,5:end))); 
         end
     end
 elseif(meshdim==2) % a 2D mesh
     nd=size(node);
     if(nd(2)<2) error('expecting 2 or more columns in node'); end
-    mesh.MeshPoint2D=node(:,1:2);
+    mesh.MeshVertex2=node(:,1:2);
     if(nd(2)>2)
-        mesh.MeshNodeVal=node(:,3:end);
+        mesh.MeshVertex2=struct('Data',mesh.MeshVertex2,'Properties',struct('Value',node(:,3:end)));
     end
     if(~isempty(face))
         nd=size(face);
         if(nd(2)<3) error('expecting 3 or more columns in face'); end
-        mesh.MeshTri=face(:,1:3);
+        mesh.MeshTri3=face(:,1:3);
         if(nd(2)>3)
-            mesh.MeshTriVal=face(:,4:end);
+            mesh.MeshTri3=struct('Data',mesh.MeshTri3,'Properties',struct('Value',face(:,4:end)));
         end
     end
     if(~isempty(elem))
@@ -107,29 +103,28 @@ end
 
 author=jsonopt('Author','',opt);
 if(~isempty(author))
-    mesh.Author=author;
+    metadata.Author=author;
 end
 
 title=jsonopt('MeshTitle','',opt);
 if(~isempty(title))
-    mesh.MeshTitle=title;
+    metadata.MeshTitle=title;
 end
 
 tag=jsonopt('MeshTag',[],opt);
 if(~isempty(tag))
-    mesh.MeshTag=tag;
-end
-
-group=jsonopt('MeshGroup',[],opt);
-if(~isempty(group))
-    mesh.MeshTag=group;
+    metadata.MeshTag=tag;
 end
 
 comm=jsonopt('Comment','',opt);
 if(~isempty(comm))
-    mesh.Comment=comm;
+    metadata.Comment=comm;
 end
 
-fprintf(fid,'%s\n',savejson('',mesh,varargin{:}));
+mesh.x0x5F_DataInfo_=metadata;
 
-fclose(fid);
+if(~isempty(regexp(fname,'\.bmesh$', 'once')) || ~isempty(regexp(fname,'\.bmsh$', 'once')))
+   saveubjson('',mesh,'FileName',fname,varargin{:});
+else
+   savejson('',mesh,'FileName',fname,varargin{:});
+end
