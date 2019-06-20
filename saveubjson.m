@@ -69,17 +69,23 @@ function json=saveubjson(rootname,obj,varargin)
 %                         compress a long string, one must convert
 %                         it to uint8 or int8 array first. The compressed
 %                         array uses three extra fields
-%                         "_ArrayCompressionMethod_": the opt.Compression value. 
-%                         "_ArrayCompressionSize_": a 1D interger array to
+%                         "_ArrayZipType_": the opt.Compression value. 
+%                         "_ArrayZipSize_": a 1D interger array to
 %                            store the pre-compressed (but post-processed)
 %                            array dimensions, and 
-%                         "_ArrayCompressedData_": the binary stream of
+%                         "_ArrayZipData_": the binary stream of
 %                            the compressed binary array data WITHOUT
 %                            'base64' encoding
 %        opt.CompressArraySize [100|int]: only to compress an array if the total 
 %                         element count is larger than this number.
 %        opt.MessagePack [0|1]: output MessagePack (https://msgpack.org/)
 %                         binary stream instead of UBJSON
+%        opt.FormatVersion [2|float]: set the JSONLab output version; since
+%                         v2.0, JSONLab uses JData specification Draft 1
+%                         for output format, it is incompatible with all
+%                         previous releases; if old output is desired,
+%                         please set FormatVersion to 1.9 or earlier.
+%        opt.Debug [0|1]: output binary numbers in <%g> format for debugging
 %
 %        opt can be replaced by a list of ('param',value) pairs. The param 
 %        string is equivallent to a field in opt and is case sensitive.
@@ -119,7 +125,7 @@ if(length(varargin)==1 && ischar(varargin{1}))
 else
    opt=varargin2struct(varargin{:});
 end
-opt.IsOctave=exist('OCTAVE_VERSION','builtin');
+opt.IsOctave=isoctave;
 
 dozip=jsonopt('Compression','',opt);
 if(~isempty(dozip))
@@ -140,8 +146,8 @@ if(~isempty(dozip))
     end    
     opt.Compression=dozip;
 end
-ismsgpack=jsonopt('MessagePack',0,opt);
-if(~ismsgpack)
+ismsgpack=jsonopt('MessagePack',0,opt) + bitshift(jsonopt('Debug',0,opt),1);
+if(~bitget(ismsgpack, 1))
     opt.IM_='UiIlL';
     opt.FM_='dD';
     opt.FTM_='FT';
@@ -181,7 +187,7 @@ if((isstruct(obj) || iscell(obj))&& isempty(rootname) && forceroot)
 end
 json=obj2ubjson(rootname,obj,rootlevel,opt);
 if(~rootisarray)
-    if(ismsgpack)
+    if(bitget(ismsgpack, 1))
         json=[char(129) json opt.OM_{2}];
     else
         json=[opt.OM_{1} json opt.OM_{2}];
@@ -231,6 +237,15 @@ function txt=cell2ubjson(name,item,level,varargin)
 txt='';
 if(~iscell(item))
         error('input is not a cell');
+end
+isnum2cell=jsonopt('num2cell_',0,varargin{:});
+if(isnum2cell)
+    item=squeeze(item);
+else
+    format=jsonopt('FormatVersion',2,varargin{:});
+    if(format>1.9 && ~isvector(item))
+        item=permute(item,ndims(item):-1:1);
+    end
 end
 
 dim=size(item);
@@ -433,6 +448,7 @@ end
 
 dozip=jsonopt('Compression','',varargin{:});
 zipsize=jsonopt('CompressArraySize',100,varargin{:});
+format=jsonopt('FormatVersion',2,varargin{:});
 
 Zmarker=jsonopt('ZM_','Z',varargin{:});
 FTmarker=jsonopt('FTM_','FT',varargin{:});
@@ -444,16 +460,16 @@ if(ismsgpack)
     isnest=1;
 end
 if((length(size(item))>2 && isnest==0)  || issparse(item) || ~isreal(item) || ...
-   (isempty(item) && any(size(item))) ||jsonopt('ArrayToStruct',0,varargin{:}) || (~isempty(dozip) && numel(item)>zipsize))
-      cid=I_(uint32(max(size(item))),Imarker);
+   jsonopt('ArrayToStruct',0,varargin{:}) || (~isempty(dozip) && numel(item)>zipsize))
+      cid=I_(uint32(max(size(item))),Imarker,varargin{:});
       if(isempty(name))
-    	txt=[Omarker{1} N_('_ArrayType_'),S_(class(item)),N_('_ArraySize_'),I_a(size(item),cid(1),Imarker) ];
+    	txt=[Omarker{1} N_('_ArrayType_'),S_(class(item)),N_('_ArraySize_'),I_a(size(item),cid(1),Imarker,varargin{:}) ];
       else
           if(isempty(item))
               txt=[N_(checkname(name,varargin{:})),Zmarker];
               return;
           else
-    	      txt=[N_(checkname(name,varargin{:})),Omarker{1},N_('_ArrayType_'),S_(class(item)),N_('_ArraySize_'),I_a(size(item),cid(1),Imarker)];
+    	      txt=[N_(checkname(name,varargin{:})),Omarker{1},N_('_ArrayType_'),S_(class(item)),N_('_ArraySize_'),I_a(size(item),cid(1),Imarker,varargin{:})];
           end
       end
       childcount=2;
@@ -496,11 +512,11 @@ if(issparse(item))
             % General case, store row and column indices.
             fulldata=[ix,iy,data];
         end
-        cid=I_(uint32(max(size(fulldata))));
-        txt=[txt, N_('_ArrayCompressionSize_'),I_a(size(fulldata),cid(1),Imarker)];
-        txt=[txt, N_('_ArrayCompressionMethod_'),S_(dozip)];
-	compfun=str2func([dozip 'encode']);
-	txt=[txt,N_('_ArrayCompressedData_'), I_a(compfun(typecast(fulldata(:),'uint8')),Imarker(1),Imarker)];
+        cid=I_(uint32(max(size(fulldata))),Imarker,varargin{:});
+        txt=[txt, N_('_ArrayZipSize_'),I_a(size(fulldata),cid(1),Imarker,varargin{:})];
+        txt=[txt, N_('_ArrayZipType_'),S_(dozip)];
+	    compfun=str2func([dozip 'encode']);
+	    txt=[txt,N_('_ArrayZipData_'), I_a(compfun(typecast(fulldata(:),'uint8')),Imarker(1),Imarker,varargin{:})];
         childcount=childcount+3;
     else
         if(size(item,1)==1)
@@ -513,11 +529,15 @@ if(issparse(item))
             % General case, store row and column indices.
             fulldata=[ix,iy,data];
         end
+        varargin{:}.ArrayToStruct=0;
         txt=[txt,N_('_ArrayData_'),...
-               matdata2ubjson(fulldata',level+2,varargin{:})];
+               cell2ubjson('',num2cell(fulldata',2)',level+2,varargin{:})];
         childcount=childcount+1;
     end
 else
+    if(format>1.9)
+        item=permute(item,ndims(item):-1:1);
+    end
     if(~isempty(dozip) && numel(item)>zipsize)
         if(isreal(item))
             fulldata=item(:)';
@@ -529,11 +549,11 @@ else
             childcount=childcount+1;
             fulldata=[real(item(:)) imag(item(:))];
         end
-        cid=I_(uint32(max(size(fulldata))));
-        txt=[txt, N_('_ArrayCompressionSize_'),I_a(size(fulldata),cid(1),Imarker)];
-        txt=[txt, N_('_ArrayCompressionMethod_'),S_(dozip)];
-	compfun=str2func([dozip 'encode']);
-	txt=[txt,N_('_ArrayCompressedData_'), I_a(compfun(typecast(fulldata(:),'uint8')),Imarker(1),Imarker)];
+        cid=I_(uint32(max(size(fulldata))),Imarker,varargin{:});
+        txt=[txt, N_('_ArrayZipSize_'),I_a(size(fulldata),cid(1),Imarker,varargin{:})];
+        txt=[txt, N_('_ArrayZipType_'),S_(dozip)];
+	    compfun=str2func([dozip 'encode']);
+	    txt=[txt,N_('_ArrayZipData_'), I_a(compfun(typecast(fulldata(:),'uint8')),Imarker(1),Imarker,varargin{:})];
         childcount=childcount+3;
     else
         if(isreal(item))
@@ -609,12 +629,24 @@ Fmarker=jsonopt('FM_','dD',varargin{:});
 Amarker=jsonopt('AM_',{'[',']'},varargin{:});
 isnest=jsonopt('NestArray',0,varargin{:});
 ismsgpack=jsonopt('MessagePack',0,varargin{:});
+format=jsonopt('FormatVersion',2,varargin{:});
+isnum2cell=jsonopt('num2cell_',0,varargin{:});
+
 if(ismsgpack)
     isnest=1;
 end
 
+if(~isvector(mat) && isnest==1)
+   if(format>1.9 && isnum2cell==0)
+        mat=permute(mat,ndims(mat):-1:1);
+   end
+   varargin{:}.num2cell_=1;
+end
+
 type='';
 hasnegtive=(mat<0);
+
+varargin{:}.num2cell_=1;
 if(isa(mat,'integer') || isinteger(mat) || (isfloat(mat) && all(mod(mat(:),1) == 0)))
     if(isempty(hasnegtive))
        if(max(mat(:))<=2^8)
@@ -633,7 +665,7 @@ if(isa(mat,'integer') || isinteger(mat) || (isfloat(mat) && all(mod(mat(:),1) ==
     if(~isvector(mat) && isnest==1)
         txt=cell2ubjson('',num2cell(mat,1),level,varargin{:});
     else
-        txt=I_a(mat(:),type,Imarker,size(mat),isnest);
+        txt=I_a(mat(:),type,Imarker,size(mat),varargin{:});
     end
 elseif(islogical(mat))
     logicalval=FTmarker;
@@ -643,7 +675,7 @@ elseif(islogical(mat))
         if(~isvector(mat) && isnest==1)
             txt=cell2ubjson('',num2cell(uint8(mat,1),level,varargin{:}));
         else
-            txt=I_a(uint8(mat(:)),Imarker(1),Imarker,size(mat),isnest);
+            txt=I_a(uint8(mat(:)),Imarker(1),Imarker,size(mat),varargin{:});
         end
     end
 else
@@ -652,12 +684,12 @@ else
         am0=char(145);
     end
     if(numel(mat)==1)
-        txt=[am0 D_(mat,Fmarker) Amarker{2}];
+        txt=[am0 D_(mat,Fmarker,varargin{:}) Amarker{2}];
     else
         if(~isvector(mat) && isnest==1)
             txt=cell2ubjson('',num2cell(mat,1),level,varargin{:});
         else
-            txt=D_a(mat(:),Fmarker(2),Fmarker,size(mat),isnest);
+            txt=D_a(mat(:),Fmarker(2),Fmarker,size(mat),varargin{:});
         end
     end
 end
@@ -693,15 +725,15 @@ end
 %%-------------------------------------------------------------------------
 function val=N_(str)
 global ismsgpack
-if(~ismsgpack)
-    val=[I_(int32(length(str))) str];
+if(~bitget(ismsgpack, 1))
+    val=[I_(int32(length(str)),'UiIlL',struct('Debug',bitget(ismsgpack,2))) str];
 else
     val=S_(str);
 end
 %%-------------------------------------------------------------------------
 function val=S_(str)
 global ismsgpack
-if(ismsgpack)
+if(bitget(ismsgpack, 1))
     Smarker=char([161,219]);
     Imarker=char([204,208:211]);
 else
@@ -711,10 +743,10 @@ end
 if(length(str)==1)
   val=[Smarker(1) str];
 else
-    if(ismsgpack)
+    if(bitget(ismsgpack, 1))
         val=[Imsgpk_(length(str),Imarker,218,160) str];
     else
-        val=['S' I_(int32(length(str))) str];
+        val=['S' I_(int32(length(str)),Imarker,struct('Debug',bitget(ismsgpack,2))) str];
     end
 end
 
@@ -735,7 +767,7 @@ end
 val(1)=char(val(1)-209+base1);
 
 %%-------------------------------------------------------------------------
-function val=I_(num, markers)
+function val=I_(num, markers, varargin)
 if(~isinteger(num))
     error('input is not an integer');
 end
@@ -743,6 +775,8 @@ Imarker='UiIlL';
 if(nargin>=2)
     Imarker=markers;
 end
+isdebug=jsonopt('Debug',0,varargin{:});
+
 if(Imarker(1)~='U')
     if(num>=0 && num<127)
        val=uint8(num);
@@ -758,35 +792,49 @@ if(Imarker(1)~='U' && num<0 && num<127)
    return;
 end
 if(num>=0 && num<255)
-   val=[Imarker(1) data2byte(swapbytes(cast(num,'uint8')),'uint8')];
+   if(isdebug)
+       val=[Imarker(1) sprintf('<%d>',num)];
+   else
+       val=[Imarker(1) data2byte(swapbytes(cast(num,'uint8')),'uint8')];
+   end
    return;
 end
 key=Imarker(2:end);
 cid={'int8','int16','int32','int64'};
 for i=1:4
   if((num>0 && num<2^(i*8-1)) || (num<0 && num>=-2^(i*8-1)))
-    val=[key(i) data2byte(swapbytes(cast(num,cid{i})),'uint8')];
+    if(isdebug)
+        val=[key(i) sprintf('<%d>',num)];
+    else
+        val=[key(i) data2byte(swapbytes(cast(num,cid{i})),'uint8')];
+    end
     return;
   end
 end
 error('unsupported integer');
 
 %%-------------------------------------------------------------------------
-function val=D_(num, markers)
+function val=D_(num, markers, varargin)
 if(~isfloat(num))
     error('input is not a float');
+end
+isdebug=jsonopt('Debug',0,varargin{:});
+if(isdebug)
+    output=sprintf('<%g>',num);
+else
+    output=data2byte(swapbytes(num),'uint8');
 end
 Fmarker='dD';
 if(nargin>=2)
     Fmarker=markers;
 end
 if(isa(num,'single'))
-  val=[Fmarker(1) data2byte(swapbytes(num),'uint8')];
+  val=[Fmarker(1) output(:)'];
 else
-  val=[Fmarker(2) data2byte(swapbytes(num),'uint8')];
+  val=[Fmarker(2) output(:)'];
 end
 %%-------------------------------------------------------------------------
-function data=I_a(num,type,markers,dim,isnest)
+function data=I_a(num,type,markers,dim,varargin)
 Imarker='UiIlL';
 Amarker={'[',']'};
 if(nargin>=3)
@@ -819,17 +867,24 @@ elseif(id==5)
   data=data2byte(swapbytes(int64(num)),'uint8');
   blen=8;
 end
+if(isstruct(dim))
+    varargin={dim};
+end
 
-if(nargin<5)
-  isnest=0;
+isnest=jsonopt('NestArray',0,varargin{:});
+isdebug=jsonopt('Debug',0,varargin{:});
+if(isdebug)
+    output=sprintf('<%g>',num);
+else
+    output=data(:);
 end
 
 if(isnest==0 && numel(num)>1 && Imarker(1)=='U')
-  if(nargin>=4 && (length(dim)==1 || (length(dim)>=2 && prod(dim)~=dim(2))))
+  if(nargin>=4 && ~isstruct(dim) && (length(dim)==1 || (length(dim)>=2 && prod(dim)~=dim(2))))
       cid=I_(uint32(max(dim)));
-      data=['$' type '#' I_a(dim,cid(1),Imarker) data(:)'];
+      data=['$' type '#' I_a(dim,cid(1),Imarker,varargin{:}) output(:)'];
   else
-      data=['$' type '#' I_(int32(numel(data)/blen)) data(:)'];
+      data=['$' type '#' I_(int32(numel(data)/blen),Imarker,varargin{:}) output(:)'];
   end
   data=['[' data(:)'];
 else
@@ -838,13 +893,17 @@ else
       Amarker={char(hex2dec('dd')),''};
       am0=Imsgpk_(numel(num),Imarker,220,144);
   end  
-  data=reshape(data,blen,numel(data)/blen);
-  data(2:blen+1,:)=data;
-  data(1,:)=type;
+  if(isdebug)
+      data=sprintf([type '<%g>'],num);
+  else
+      data=reshape(data,blen,numel(data)/blen);
+      data(2:blen+1,:)=data;
+      data(1,:)=type;
+  end
   data=[am0 data(:)' Amarker{2}];
 end
 %%-------------------------------------------------------------------------
-function data=D_a(num,type,markers,dim,isnest)
+function data=D_a(num,type,markers,dim,varargin)
 Fmarker='dD';
 Amarker={'[',']'};
 if(nargin>=3)
@@ -862,16 +921,20 @@ elseif(id==2)
   data=data2byte(swapbytes(double(num)),'uint8');
 end
 
-if(nargin<5)
-  isnest=0;
+isnest=jsonopt('NestArray',0,varargin{:});
+isdebug=jsonopt('Debug',0,varargin{:});
+if(isdebug)
+    output=sprintf('<%g>',num);
+else
+    output=data(:);
 end
 
 if(isnest==0 && numel(num)>1 && Fmarker(1)=='d')
   if(nargin>=4 && (length(dim)==1 || (length(dim)>=2 && prod(dim)~=dim(2))))
       cid=I_(uint32(max(dim)));
-      data=['$' type '#' I_a(dim,cid(1)) data(:)'];
+      data=['$' type '#' I_a(dim,cid(1),markers,varargin{:}) output(:)'];
   else
-      data=['$' type '#' I_(int32(numel(data)/(id*4))) data(:)'];
+      data=['$' type '#' I_(int32(numel(data)/(id*4)),varargin{:}.IM_,varargin{:}) output(:)'];
   end
   data=['[' data];
 else
@@ -880,9 +943,13 @@ else
       Amarker={char(hex2dec('dd')),''};
       am0=Imsgpk_(numel(num),char([204,208:211]),220,144);
   end
-  data=reshape(data,(id*4),length(data)/(id*4));
-  data(2:(id*4+1),:)=data;
-  data(1,:)=type;
+  if(isdebug)
+      data=sprintf([type '<%g>'],num);
+  else
+      data=reshape(data,(id*4),length(data)/(id*4));
+      data(2:(id*4+1),:)=data;
+      data(1,:)=type;
+  end
   data=[am0 data(:)' Amarker{2}];
 end
 %%-------------------------------------------------------------------------

@@ -75,14 +75,20 @@ function json=savejson(rootname,obj,varargin)
 %                         compress a long string, one must convert
 %                         it to uint8 or int8 array first. The compressed
 %                         array uses three extra fields
-%                         "_ArrayCompressionMethod_": the opt.Compression value. 
-%                         "_ArrayCompressionSize_": a 1D interger array to
+%                         "_ArrayZipType_": the opt.Compression value. 
+%                         "_ArrayZipSize_": a 1D interger array to
 %                            store the pre-compressed (but post-processed)
 %                            array dimensions, and 
-%                         "_ArrayCompressedData_": the "base64" encoded
+%                         "_ArrayZipData_": the "base64" encoded
 %                             compressed binary array data. 
 %        opt.CompressArraySize [100|int]: only to compress an array if the total 
 %                         element count is larger than this number.
+%        opt.FormatVersion [2|float]: set the JSONLab output version; since
+%                         v2.0, JSONLab uses JData specification Draft 1
+%                         for output format, it is incompatible with all
+%                         previous releases; if old output is desired,
+%                         please set FormatVersion to 1.9 or earlier.
+%
 %        opt can be replaced by a list of ('param',value) pairs. The param 
 %        string is equivallent to a field in opt and is case sensitive.
 % output:
@@ -119,7 +125,7 @@ if(length(varargin)==1 && ischar(varargin{1}))
 else
    opt=varargin2struct(varargin{:});
 end
-opt.IsOctave=exist('OCTAVE_VERSION','builtin');
+opt.IsOctave=isoctave;
 
 dozip=jsonopt('Compression','',opt);
 if(~isempty(dozip))
@@ -214,7 +220,7 @@ elseif(isa(item,'containers.Map'))
 elseif(isa(item,'categorical'))
     txt=cell2json(name,cellstr(item),level,varargin{:});
 elseif(isobject(item))
-    if(~exist('OCTAVE_VERSION','builtin') && exist('istable') && istable(item))
+    if(~jsonopt('IsOctave',0,varargin{:}) && exist('istable') && istable(item))
         txt=matlabtable2json(name,item,level,varargin{:});
     else
         txt=matlabobject2json(name,item,level,varargin{:});
@@ -228,6 +234,15 @@ function txt=cell2json(name,item,level,varargin)
 txt={};
 if(~iscell(item) && ~isa(item,'string'))
         error('input is not a cell or string array');
+end
+isnum2cell=jsonopt('num2cell_',0,varargin{:});
+if(isnum2cell)
+    item=squeeze(item);
+else
+    format=jsonopt('FormatVersion',2,varargin{:});
+    if(format>1.9 && ~isvector(item))
+        item=permute(item,ndims(item):-1:1);
+    end
 end
 
 dim=size(item);
@@ -254,20 +269,20 @@ elseif(len==0)
         txt={padding0, '[]'};
     end
 end
-for i=1:dim(1)
+for j=1:dim(2)
     if(dim(1)>1)
         txt(end+1:end+3)={padding2,'[',nl};
     end
-    for j=1:dim(2)
+    for i=1:dim(1)
        txt{end+1}=obj2json(name,item{i,j},level+(dim(1)>1)+(len>bracketlevel),varargin{:});
-       if(j<dim(2))
+       if(i<dim(1))
            txt(end+1:end+2)={',' nl};
        end
     end
     if(dim(1)>1)
         txt(end+1:end+3)={nl,padding2,']'};
     end
-    if(i<dim(1))
+    if(j<dim(2))
         txt(end+1:end+2)={',' nl};
     end
     %if(j==dim(2)) txt=sprintf('%s%s',txt,sprintf(',%s',nl)); end
@@ -465,6 +480,7 @@ sep=ws.sep;
 
 dozip=jsonopt('Compression','',varargin{:});
 zipsize=jsonopt('CompressArraySize',100,varargin{:});
+format=jsonopt('FormatVersion',2,varargin{:});
 
 if(((jsonopt('NestArray',0,varargin{:})==0) && length(size(item))>2) || issparse(item) || ~isreal(item) || ...
    (isempty(item) && any(size(item))) ||jsonopt('ArrayToStruct',0,varargin{:}) || (~isempty(dozip) && numel(item)>zipsize))
@@ -518,10 +534,10 @@ if(issparse(item))
             % General case, store row and column indices.
             fulldata=[ix,iy,data];
         end
-        txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressionSize_": ',regexprep(mat2str(size(fulldata)),'\s+',','), sep);
-        txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressionMethod_": "',dozip, ['"' sep]);
-	compfun=str2func([dozip 'encode']);
-        txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressedData_": "',base64encode(compfun(typecast(fulldata(:),'uint8'))),['"' nl]);
+        txt=sprintf(dataformat,txt,padding0,'"_ArrayZipSize_": ',regexprep(mat2str(size(fulldata)),'\s+',','), sep);
+        txt=sprintf(dataformat,txt,padding0,'"_ArrayZipType_": "',dozip, ['"' sep]);
+	    compfun=str2func([dozip 'encode']);
+        txt=sprintf(dataformat,txt,padding0,'"_ArrayZipData_": "',base64encode(compfun(typecast(fulldata(:),'uint8'))),['"' nl]);
     else
         if(size(item,1)==1)
             % Row vector, store only column indices.
@@ -537,6 +553,9 @@ if(issparse(item))
                matdata2json(fulldata',level+2,varargin{:}), nl);    
     end
 else
+    if(format>1.9)
+        item=permute(item,ndims(item):-1:1);
+    end
     if(~isempty(dozip) && numel(item)>zipsize)
         if(isreal(item))
             fulldata=item(:)';
@@ -547,10 +566,10 @@ else
             txt=sprintf(dataformat,txt,padding0,'"_ArrayIsComplex_": ','true', sep);
             fulldata=[real(item(:)) imag(item(:))]';
         end
-        txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressionSize_": ',regexprep(mat2str(size(fulldata)),'\s+',','), sep);
-        txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressionMethod_": "',dozip, ['"' sep]);
-	compfun=str2func([dozip 'encode']);
-        txt=sprintf(dataformat,txt,padding0,'"_ArrayCompressedData_": "',base64encode(compfun(typecast(fulldata(:),'uint8'))),['"' nl]);
+        txt=sprintf(dataformat,txt,padding0,'"_ArrayZipSize_": ',regexprep(mat2str(size(fulldata)),'\s+',','), sep);
+        txt=sprintf(dataformat,txt,padding0,'"_ArrayZipType_": "',dozip, ['"' sep]);
+	    compfun=str2func([dozip 'encode']);
+        txt=sprintf(dataformat,txt,padding0,'"_ArrayZipData_": "',base64encode(compfun(typecast(fulldata(:),'uint8'))),['"' nl]);
     else
         if(isreal(item))
             txt=sprintf(dataformat,txt,padding0,'"_ArrayData_": ',...
@@ -614,11 +633,24 @@ ws=jsonopt('whitespaces_',ws,varargin{:});
 tab=ws.tab;
 nl=ws.newline;
 isnest=jsonopt('NestArray',0,varargin{:});
+format=jsonopt('FormatVersion',2,varargin{:});
+isnum2cell=jsonopt('num2cell_',0,varargin{:});
 
 if(~isvector(mat) && isnest==1)
-   txt=cell2json('',squeeze(num2cell(mat,1)),level-1,varargin{:});
+   if(format>1.9 && isnum2cell==0)
+        mat=permute(mat,ndims(mat):-1:1);
+   end
+   varargin{:}.num2cell_=1;
+   txt=cell2json('',num2cell(mat,1),level-1,varargin{:});
    return;
+else
+    if(isnest)
+        if(isnum2cell)
+             mat=mat(:).';
+        end
+    end
 end
+
 if(size(mat,1)==1)
     pre='';
     post='';
@@ -637,11 +669,7 @@ if(isinteger(mat))
 else
   floatformat=jsonopt('FloatFormat','%.10g',varargin{:});
 end
-%if(numel(mat)>1)
-    formatstr=['[' repmat([floatformat ','],1,size(mat,2)-1) [floatformat sprintf('],%s',nl)]];
-%else
-%    formatstr=[repmat([floatformat ','],1,size(mat,2)-1) [floatformat sprintf(',\n')]];
-%end
+formatstr=['[' repmat([floatformat ','],1,size(mat,2)-1) [floatformat sprintf('],%s',nl)]];
 
 if(nargin>=2 && size(mat,1)>1 && jsonopt('ArrayIndent',1,varargin{:})==1)
     formatstr=[repmat(tab,1,level) formatstr];
@@ -653,11 +681,7 @@ if(islogical(mat) && jsonopt('ParseLogical',0,varargin{:})==1)
    txt=regexprep(txt,'1','true');
    txt=regexprep(txt,'0','false');
 end
-%txt=regexprep(mat2str(mat),'\s+',',');
-%txt=regexprep(txt,';',sprintf('],\n['));
-% if(nargin>=2 && size(mat,1)>1)
-%     txt=regexprep(txt,'\[',[repmat(sprintf('\t'),1,level) '[']);
-% end
+
 txt=[pre txt post];
 if(any(isinf(mat(:))))
     txt=regexprep(txt,'([-+]*)Inf',jsonopt('Inf','"$1_Inf_"',varargin{:}));
@@ -698,7 +722,7 @@ end
 %%-------------------------------------------------------------------------
 function newstr=escapejsonstring(str)
 newstr=str;
-isoct=exist('OCTAVE_VERSION','builtin');
+isoct=isoctave;
 if(isoct)
    vv=sscanf(OCTAVE_VERSION,'%f');
    if(vv(1)>=3.8)
