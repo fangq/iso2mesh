@@ -2,7 +2,7 @@ function savejmesh(node,face,elem,fname,varargin)
 %
 % savejmesh(node,face,elem,fname,opt)
 %
-% export a mesh to the JMesh format
+% export a mesh to the JMesh format defined in http://github.com/fangq/jmesh
 %
 % author: Qianqian Fang, <q.fang at neu.edu>
 % date: 2011/10/06
@@ -11,7 +11,10 @@ function savejmesh(node,face,elem,fname,varargin)
 %      node: input, node list, dimension (nn,3)
 %      face: input, optional, surface face element list, dimension (be,3)
 %      elem: input, tetrahedral element list, dimension (ne,4)
-%      fname: output file name
+%      fname: output file name; if file name has a suffix .bmsh or .bmesh, 
+%           the mesh data will be saved in the binary jmesh format; otherwise,
+%           the file will be saved as a text-based jmesh (which is a plain 
+%           JSON file)
 %      opt: additional parameters in the form of 'parameter',value pairs
 %           valid parameters include:
 %           'Dimension': 0 - a user defined mesh, 2- a 2D mesh, 3- a 3D mesh
@@ -20,9 +23,14 @@ function savejmesh(node,face,elem,fname,varargin)
 %           'MeshTag': a value as the tag of the mesh data
 %           'Comment': a string as the additional note for the mesh data
 %
+%           please type 'help savejson' and 'help saveubjson' to see additional 
+%           supported options    
+%
 % examples:
+%
 %    [no,fc,el]=meshabox([0 0 0],[60,30,40],3,10);
-%    savejmesh(no,fc,el,'box.jmsh');
+%    savejmesh(no,fc,[],'box_surf.jmsh','dimension',3);
+%    savejmesh(no,fc,el,'box_zlib.jmsh','compression','zlib');
 %    savejmesh(no,fc,el,'box.bmsh','dimension',3);
 %    savejmesh(no,fc,el,'box_zlib.bmsh','dimension',3,'compression','zlib');
 %    mesh=loadubjson('box.bmsh')
