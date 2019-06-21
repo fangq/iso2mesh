@@ -20,6 +20,13 @@ function savejmesh(node,face,elem,fname,varargin)
 %           'MeshTag': a value as the tag of the mesh data
 %           'Comment': a string as the additional note for the mesh data
 %
+% examples:
+%    [no,fc,el]=meshabox([0 0 0],[60,30,40],3,10);
+%    savejmesh(no,fc,el,'box.jmsh');
+%    savejmesh(no,fc,el,'box.bmsh','dimension',3);
+%    savejmesh(no,fc,el,'box_zlib.bmsh','dimension',3,'compression','zlib');
+%    mesh=loadubjson('box.bmsh')
+%
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
