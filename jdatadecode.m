@@ -80,6 +80,7 @@ function newdata=jdatadecode(data,varargin)
       end
     end
 
+    %% handle array data
     if(~isempty(strmatch(N_('_ArrayType_'),fn)) && (~isempty(strmatch(N_('_ArrayData_'),fn)) || ~isempty(strmatch(N_('_ArrayZipData_'),fn))))
       newdata=cell(len,1);
       for j=1:len
@@ -91,9 +92,9 @@ function newdata=jdatadecode(data,varargin)
             if(~isempty(strmatch(zipmethod,{'zlib','gzip','lzma','lzip'})))
                 decompfun=str2func([zipmethod 'decode']);
                 if(needbase64)
-                    ndata=reshape(typecast(decompfun(base64decode(data(j).(N_('_ArrayZipData_')))),data(j).(N_('_ArrayType_'))),data(j).(N_('_ArrayZipSize_')));
+                    ndata=reshape(typecast(decompfun(base64decode(data(j).(N_('_ArrayZipData_')))),data(j).(N_('_ArrayType_'))),data(j).(N_('_ArrayZipSize_'))(:)');
                 else
-                    ndata=reshape(typecast(decompfun(data(j).(N_('_ArrayZipData_'))),data(j).(N_('_ArrayType_'))),data(j).(N_('_ArrayZipSize_')));
+                    ndata=reshape(typecast(decompfun(data(j).(N_('_ArrayZipData_'))),data(j).(N_('_ArrayType_'))),data(j).(N_('_ArrayZipSize_'))(:)');
                 end
             else
                 error('compression method is not supported');
@@ -117,7 +118,7 @@ function newdata=jdatadecode(data,varargin)
                     needtranspose=1;
                 end
                 if(~isempty(strmatch(N_('_ArraySize_'),fn)))
-                    dim=double(data(j).(N_('_ArraySize_')));
+                    dim=double(data(j).(N_('_ArraySize_'))(:)');
                     if(iscpx && size(ndata,2)==4-any(dim==1))
                         ndata(:,end-1)=complex(ndata(:,end-1),ndata(:,end));
                     end
@@ -162,7 +163,7 @@ function newdata=jdatadecode(data,varargin)
             if(format>1.9)
                 data(j).(N_('_ArraySize_'))=data(j).(N_('_ArraySize_'))(end:-1:1);
             end
-            dims=data(j).(N_('_ArraySize_'));
+            dims=data(j).(N_('_ArraySize_'))(:)';
             ndata=reshape(ndata(:),dims(:)');
             if(format>1.9)
                 ndata=permute(ndata,ndims(ndata):-1:1);
@@ -174,6 +175,38 @@ function newdata=jdatadecode(data,varargin)
           newdata=newdata{1};
       end
     end
+
+    %% handle table data
+    if(~isempty(strmatch(N_('_TableRecords_'),fn)))
+        newdata=cell(len,1);
+        for j=1:len
+            ndata=data(j).(N_('_TableRecords_'));
+            if(iscell(ndata))
+                rownum=length(ndata);
+                colnum=length(ndata{1});
+                nd=cell(rownum, colnum);
+                for i1=1:rownum;
+                    for i2=1:colnum
+                        nd{i1,i2}=ndata{i1}{i2};
+                    end
+                end
+                newdata{j}=cell2table(nd);
+            else
+                newdata{j}=array2table(ndata');
+            end
+            if(isfield(data(j),N_('_TableRows_'))&& ~isempty(data(j).(N_('_TableRows_'))))
+                newdata{j}.Properties.RowNames=data(j).(N_('_TableRows_'))(:);
+            end
+            if(isfield(data(j),N_('_TableCols_')) && ~isempty(data(j).(N_('_TableCols_'))))
+                newdata{j}.Properties.VariableNames=data(j).(N_('_TableCols_'));
+            end
+        end
+        if(len==1)
+            newdata=newdata{1};
+        end
+    end
+
+    %% handle map data
     if(~isempty(strmatch(N_('_MapData_'),fn)))
         newdata=cell(len,1);
         for j=1:len
