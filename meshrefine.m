@@ -237,12 +237,22 @@ if(~isempty(externalpt)) % user request to insert nodes that are outside of the 
 
     % mesh the extended space
     ISO2MESH_TETGENOPT=jsonopt('extcmdopt','-Y',opt);
-    if(size(bothsides,1)>=size(inface,1))
-        [no,el]=surf2mesh(allnode,bothsides,[],[],1,10,[],holelist);
-    else
-        [no,el]=surf2mesh(allnode,bothsides,[],[],1,10);
-    end
-
+%     try
+        if(size(bothsides,1)>=size(inface,1))
+            [no,el]=surf2mesh(allnode,bothsides,[],[],1,10,[],holelist);
+        else
+            [no,el]=surf2mesh(allnode,bothsides,[],[],1,10);
+        end
+%     catch
+%         outface=convhulln(allnode,{'QJ'});
+%         outface=sort(outface,2);
+%         bothsides=removedupelem([outface;inface]);
+%         if(size(bothsides,1)>=size(inface,1))
+%             [no,el]=surf2mesh(allnode,bothsides,[],[],1,10,[],holelist);
+%         else
+%             [no,el]=surf2mesh(allnode,bothsides,[],[],1,10);
+%         end
+%     end
     [isinside,map]=ismember(round(no*1e10)*1e-10,round(allnode*1e10)*1e-10,'rows');
     snid=[length(newnode)+1:length(allnode)];
 
