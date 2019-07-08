@@ -20,10 +20,17 @@ n_node = size(node,1);
 n_face = size(face,1);
 n_elem = size(elem,1);
 
-if(min(face(:,4))==0)
+elem(:,1:4)=meshreorient(node(:,1:3),elem(:,1:4));
+
+if(size(face,2)<4)
+    face(:,4)=1;
+elseif(min(face(:,4))==0)
     face(:,4)=face(:,4)+1;
 end
-if(min(elem(:,5))==0)
+
+if(size(elem,2)<5)
+    elem(:,5)=1;
+elseif(min(elem(:,5))==0)
     elem(:,5)=elem(:,5)+1;
 end
 
