@@ -72,6 +72,7 @@ uimenu(mirepair,'Label','Reorient mesh elements','CallBack',{@processdata,handle
 mibool = uimenu(cm,'Label','Surface boolean');
 uimenu(mibool,'Label','Or','CallBack',{@processdata,handles});
 uimenu(mibool,'Label','And','CallBack',{@processdata,handles});
+uimenu(mibool,'Label','All','CallBack',{@processdata,handles});
 uimenu(mibool,'Label','Diff','CallBack',{@processdata,handles});
 uimenu(mibool,'Label','First','CallBack',{@processdata,handles});
 uimenu(mibool,'Label','Second','CallBack',{@processdata,handles});
@@ -313,7 +314,7 @@ switch source.Label
             msg=[msg sprintf('\nContaining %d triangles (%d columns)',size(nodedata.face,1),size(nodedata.face,2))];
         end
         if(nodetype.haselem)
-            msg=[msg sprintf('\nContaining %d tetrehedra (%d columns)',size(nodedata.face,1),size(nodedata.face,2))];
+            msg=[msg sprintf('\nContaining %d tetrehedra (%d columns)',size(nodedata.elem,1),size(nodedata.elem,2))];
         end
         if(nodetype.hasvol)
             msg=[msg sprintf('\nContaining [%d x %d x %d ] volume',size(nodedata.vol,1),size(nodedata.vol,2),size(nodedata.vol,3))];
@@ -323,12 +324,14 @@ switch source.Label
     case 'Plot'
         if(isstruct(nodetype) && isfield(nodetype,'hasnode') && nodetype.hasnode)
             if(isfield(nodetype,'haselem') && nodetype.haselem)
-                figure;plotmesh(nodedata.node,[],nodedata.elem);
+                figure('keypressfcn',@plotfigevent,'userdata',struct('node',nodedata.node,'face',[],'elem',nodedata.elem));
+                plotmesh(nodedata.node,[],nodedata.elem);
             else
-                figure;plotmesh(nodedata.node,nodedata.face);
+                figure('keypressfcn',@plotfigevent,'userdata',struct('node',nodedata.node,'elem',[],'face',nodedata.face));
+                plotmesh(nodedata.node,nodedata.face);
             end
         else
-            figure;
+            figure('keypressfcn',@plotfigevent,'userdata',struct('vol',nodedata.vol));
             hs=slice(double(nodedata.vol),[],[ceil(size(nodedata.vol,2)*0.5)],ceil(size(nodedata.vol,3)*0.5));
             set(hs,'linestyle','none');
         end
@@ -396,7 +399,7 @@ end
 if(exist('newdata','var') && exist('newtype','var'))
     cla(handles.axPreview);
     cla(handles.axFlow);
-    newdata.preview=getpreview(newdata,newtype,[100,100]);
+    newdata.preview=getpreview(newdata,newtype,[400,400]);
     [newkey,root.graph]=addnodewithdata(handles,newdata,newtype,prefix);
     root.graph=addedge(root.graph,{root.graph.Nodes.Name{nodeid}},{newkey});
     if(strcmp(source.Parent.Type, 'uimenu') && strcmp(source.Parent.Label,'Surface boolean'))
@@ -413,6 +416,44 @@ catch ME
 	uiwait(warndlg(msg,'I2M ERROR'));
     updategraph(root,handles);
 end
+
+function plotfigevent(hobject,event)
+data=get(hobject,'userdata');
+plotpos=[];
+if(isfield(data,'plotpos'))
+    plotpos=data.plotpos;
+end
+if(isempty(plotpos))
+    switch event.Key
+        case {'rightarrow','uparrow'}
+            plotpos=0;
+        case {'leftarrow','downarrow'}
+            plotpos=9;
+        otherwise  
+    end
+end
+if(isfield(data,'node'))
+    pmax=max(data.node);
+    pmin=min(data.node);
+    cla;
+    switch event.Key
+        case 'rightarrow'
+            plotpos=min(plotpos+1,9);
+            plotmesh(data.node,data.face,data.elem,sprintf('x>%f',(pmax(1)-pmin(1))*plotpos*0.1+pmin(1)))
+        case 'leftarrow'
+            plotpos=max(plotpos-1,0);
+            plotmesh(data.node,data.face,data.elem,sprintf('x>%f',(pmax(1)-pmin(1))*plotpos*0.1+pmin(1)))
+        case 'uparrow'
+            plotpos=min(plotpos+1,9);
+            plotmesh(data.node,data.face,data.elem,sprintf('y>%f',(pmax(2)-pmin(2))*plotpos*0.1+pmin(2)))
+        case 'downarrow'
+            plotpos=max(plotpos-1,0);
+            plotmesh(data.node,data.face,data.elem,sprintf('y>%f',(pmax(2)-pmin(2))*plotpos*0.1+pmin(2)))
+        otherwise  
+    end
+end
+data.plotpos=plotpos;
+set(hobject,'userdata',data);
 %----------------------------------------------------------------
 function [nodedata,nodetype,nodeid]=getnodeat(root,obj,pos)
 nodedist=[obj.XData(:)-pos(1,1) obj.YData(:)-pos(1,2)];
@@ -473,11 +514,12 @@ newtype.haselem=1;
 
 %----------------------------------------------------------------
 function img=getpreview(nodedata,nodetype,imsize)
-ax=axes('Units','pixels','position',[1, 1, imsize(1), imsize(2)]);
+hfpreview=figure('visible', 'off');
+ax=axes('parent',hfpreview,'Units','pixels','position',[1, 1, imsize(1), imsize(2)]);
 if(isfield(nodetype,'haselem') && nodetype.haselem)
     plotmesh(nodedata.node,[],nodedata.elem,'linestyle',':','edgealpha',0.3,'parent',ax);
 elseif(isfield(nodetype,'hasface') && nodetype.hasface)
-    plotmesh(nodedata.node,nodedata.face,'linestyle','none','parent',ax);
+    plotmesh(nodedata.node,nodedata.face,'linestyle','-','parent',ax);
 elseif(isfield(nodetype,'hasvol') && nodetype.hasvol)
     hs=slice(double(nodedata.vol),[],[ceil(size(nodedata.vol,2)*0.5)],ceil(size(nodedata.vol,3)*0.5),'parent',ax);
     set(hs,'linestyle','none');
@@ -490,6 +532,7 @@ axis(ax,'off');
 img=getframe(gca);
 img=flipud(img.cdata);
 delete(ax);
+close(hfpreview);
 
 %----------------------------------------------------------------
 function [newdata, newtype]=s2mgui(data)
@@ -867,7 +910,7 @@ key=sprintf('%s%d',name,id);
 
 cla(handles.axPreview);
 cla(handles.axFlow);
-nodedata.preview=getpreview(nodedata,nodetype,[100,100]);
+nodedata.preview=getpreview(nodedata,nodetype,[400,400]);
 
 nodeprop=table({key},{nodedata},{nodetype},'VariableNames',{'Name','Data','Type'});
 root.graph=addnode(root.graph,nodeprop);
@@ -897,7 +940,7 @@ hfig=hfig*dim(1);
 
 for i=1:nn
     if(isfield(root.graph.Nodes.Data{i},'preview'))
-        hobj(i)=imagesc(nx(i)+[-2*wd 0], ny(i)+[-wd wd]*(wfig/hfig), root.graph.Nodes.Data{i}.preview, ...
+        hobj(i)=imagesc(nx(i)+[-2*wd 0], ny(i)+[-wd wd]*(wfig/hfig), imresize(root.graph.Nodes.Data{i}.preview,0.25), ...
             'parent',handles.axPreview);
     end
 end
