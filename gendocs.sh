@@ -54,7 +54,7 @@ func_plotting="plotmesh plotsurf plottetra plotedges qmeshcut"
 func_misc="surfdiffuse volmap2mesh isoctavemesh getvarfrom raytrace
 		getplanefrom3pt getexeext fallbackexeext iso2meshver
                 raysurf getoptkey rotatevec3d rotmat2vec varargin2struct
-                jsonopt mergestruct orthdisk struct2jdata"
+                jsonopt mergestruct orthdisk jdatadecode jdataencode"
 
 echo === "#" Streamlined mesh generation - shortcuts ===
 print_group $func_shortcut
