@@ -67,8 +67,8 @@ function json=savejson(rootname,obj,varargin)
 %                         back to the string form
 %        opt.SaveBinary [0|1]: 1 - save the JSON file in binary mode; 0 - text mode.
 %        opt.Compact [0|1]: 1- out compact JSON format (remove all newlines and tabs)
-%        opt.Compression  'zlib', 'gzip', 'lzma' or 'lzip': specify array compression
-%                         method; currently only supports 4 methods. The
+%        opt.Compression  'zlib', 'gzip', 'lzma', 'lzip', 'lz4' or 'lz4hc': specify array 
+%                         compression method; currently only supports 6 methods. The
 %                         data compression only applicable to numerical arrays 
 %                         in 3D or higher dimensions, or when ArrayToStruct
 %                         is 1 for 1D or 2D arrays. If one wants to
@@ -88,6 +88,8 @@ function json=savejson(rootname,obj,varargin)
 %                         for output format, it is incompatible with all
 %                         previous releases; if old output is desired,
 %                         please set FormatVersion to 1.9 or earlier.
+%        opt.Encoding ['']: json file encoding. Support all encodings of
+%                         fopen() function
 %
 %        opt can be replaced by a list of ('param',value) pairs. The param 
 %        string is equivallent to a field in opt and is case sensitive.
@@ -129,7 +131,7 @@ opt.IsOctave=isoctavemesh;
 
 dozip=jsonopt('Compression','',opt);
 if(~isempty(dozip))
-    if(isempty(strmatch(dozip,{'zlib','gzip','lzma','lzip'})))
+    if(isempty(strmatch(dozip,{'zlib','gzip','lzma','lzip','lz4','lz4hc'})))
         error('compression method "%s" is not supported',dozip);
     end
     if(exist('zmat','file')~=2 && exist('zmat','file')~=3)
@@ -198,11 +200,16 @@ end
 filename=jsonopt('FileName','',opt);
 if(~isempty(filename))
     if(jsonopt('SaveBinary',0,opt)==1)
-	    fid = fopen(filename, 'wb');
-	    fwrite(fid,json);
+        fid = fopen(filename, 'wb');
+        fwrite(fid,json);
     else
-	    fid = fopen(filename, 'wt');
-	    fwrite(fid,json,'char');
+        encoding = jsonopt('Encoding','',opt);
+        if(isempty(encoding))
+            fid = fopen(filename,'wt');
+        else
+            fid = fopen(filename,'wt','n',encoding);
+        end
+        fwrite(fid,json,'char');
     end
     fclose(fid);
 end

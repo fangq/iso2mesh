@@ -37,6 +37,11 @@ function newval=niicodemap(name, value)
 
 % code to name look-up-table
 
+if(~exist('containers.Map'))
+    newval=value;
+    return;
+end
+
 lut.intent_code=containers.Map([0,2:24 1001:1011 2001:2005], ...
     {'', 'corr', 'ttest', 'ftest', 'zscore', 'chi2', 'beta', ...
     'binomial', 'gamma', 'poisson', 'normal', 'ncftest', ...
