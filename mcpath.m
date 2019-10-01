@@ -43,3 +43,7 @@ if(isempty(p))
 else
 	binname=[p filesep fname];
 end
+
+if(nargin>=2 && ~exist(binname,'file'))
+    binname=fname;
+end
