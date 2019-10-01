@@ -1,4 +1,11 @@
-#include <CGAL/AABB_intersections.h>
+#include <CGAL/version.h>
+
+#if !defined(CGAL_VERSION_NR) || CGAL_VERSION_NR <=  1040700000
+	#include <CGAL/AABB_intersections.h>
+#else
+	#include <CGAL/intersections.h>
+#endif
+
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 
 #include <CGAL/Mesh_triangulation_3.h>
