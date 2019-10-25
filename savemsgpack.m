@@ -1,7 +1,8 @@
 function msgpk=savemsgpack(rootname,obj,varargin)
 %
-% msgpk=savemsgpack(rootname,obj,filename)
+% msgpk=savemsgpack(obj)
 %    or
+% msgpk=savemsgpack(rootname,obj,filename)
 % msgpk=savemsgpack(rootname,obj,opt)
 % msgpk=savemsgpack(rootname,obj,'param1',value1,'param2',value2,...)
 %
@@ -9,7 +10,7 @@ function msgpk=savemsgpack(rootname,obj,varargin)
 % into a MessagePack binary stream
 %
 % author: Qianqian Fang (q.fang <at> neu.edu)
-% created on 2019/05/20
+% initially created on 2019/05/20
 %
 % This function is the same as calling saveubjson(...,'MessagePack',1)
 %
@@ -21,7 +22,9 @@ function msgpk=savemsgpack(rootname,obj,varargin)
 % -- this function is part of JSONLab toolbox (http://iso2mesh.sf.net/cgi-bin/index.cgi?jsonlab)
 %
 
-if(length(varargin)==1 && ischar(varargin{1}))
+if(nargin==1)
+    msgpk=saveubjson('',rootname,'MessagePack',1);
+elseif(length(varargin)==1 && ischar(varargin{1}))
     msgpk=saveubjson(rootname,obj,'FileName',varargin{1},'MessagePack',1);
 else
     msgpk=saveubjson(rootname,obj,varargin{:},'MessagePack',1);

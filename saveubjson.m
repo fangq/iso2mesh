@@ -1,7 +1,8 @@
 function json=saveubjson(rootname,obj,varargin)
 %
-% json=saveubjson(rootname,obj,filename)
+% json=saveubjson(obj)
 %    or
+% json=saveubjson(rootname,obj,filename)
 % json=saveubjson(rootname,obj,opt)
 % json=saveubjson(rootname,obj,'param1',value1,'param2',value2,...)
 %
@@ -9,59 +10,57 @@ function json=saveubjson(rootname,obj,varargin)
 % into a Universal Binary JSON (UBJSON) or a MessagePack binary stream
 %
 % author: Qianqian Fang (q.fang <at> neu.edu)
-% created on 2013/08/17
-%
-% $Id$
+% initially created on 2013/08/17
 %
 % input:
 %      rootname: the name of the root-object, when set to '', the root name
-%        is ignored, however, when opt.ForceRootName is set to 1 (see below),
-%        the MATLAB variable name will be used as the root name.
+%           is ignored, however, when opt.ForceRootName is set to 1 (see below),
+%           the MATLAB variable name will be used as the root name.
 %      obj: a MATLAB object (array, cell, cell array, struct, struct array,
-%        class instance)
+%           class instance)
 %      filename: a string for the file name to save the output UBJSON data
 %      opt: a struct for additional options, ignore to use default values.
-%        opt can have the following fields (first in [.|.] is the default)
+%           opt can have the following fields (first in [.|.] is the default)
 %
-%        opt.FileName [''|string]: a file name to save the output JSON data
-%        opt.ArrayToStruct[0|1]: when set to 0, saveubjson outputs 1D/2D
+%           FileName [''|string]: a file name to save the output JSON data
+%           ArrayToStruct[0|1]: when set to 0, saveubjson outputs 1D/2D
 %                         array in JSON array format; if sets to 1, an
 %                         array will be shown as a struct with fields
 %                         "_ArrayType_", "_ArraySize_" and "_ArrayData_"; for
 %                         sparse arrays, the non-zero elements will be
-%                         saved to _ArrayData_ field in triplet-format i.e.
-%                         (ix,iy,val) and "_ArrayIsSparse_" will be added
+%                         saved to "_ArrayData_" field in triplet-format i.e.
+%                         (ix,iy,val) and "_ArrayIsSparse_":true will be added
 %                         with a value of 1; for a complex array, the 
-%                         _ArrayData_ array will include two columns 
+%                         "_ArrayData_" array will include two rows 
 %                         (4 for sparse) to record the real and imaginary 
-%                         parts, and also "_ArrayIsComplex_":1 is added. 
-%        opt.NestArray    [0|1]: If set to 1, use nested array constructs
+%                         parts, and also "_ArrayIsComplex_":true is added. 
+%          NestArray    [0|1]: If set to 1, use nested array constructs
 %                         to store N-dimensional arrays (compatible with 
 %                         UBJSON specification Draft 12); if set to 0,
 %                         use the JData (v0.5) optimized N-D array header;
 %                         NestArray is automatically set to 1 when
 %                         MessagePack is set to 1
-%        opt.ParseLogical [1|0]: if this is set to 1, logical array elem
+%          ParseLogical [1|0]: if this is set to 1, logical array elem
 %                         will use true/false rather than 1/0.
-%        opt.SingletArray [0|1]: if this is set to 1, arrays with a single
+%          SingletArray [0|1]: if this is set to 1, arrays with a single
 %                         numerical element will be shown without a square
 %                         bracket, unless it is the root object; if 0, square
 %                         brackets are forced for any numerical arrays.
-%        opt.SingletCell  [1|0]: if 1, always enclose a cell with "[]" 
+%          SingletCell  [1|0]: if 1, always enclose a cell with "[]" 
 %                         even it has only one element; if 0, brackets
 %                         are ignored when a cell has only 1 element.
-%        opt.ForceRootName [0|1]: when set to 1 and rootname is empty, saveubjson
+%          ForceRootName [0|1]: when set to 1 and rootname is empty, saveubjson
 %                         will use the name of the passed obj variable as the 
 %                         root object name; if obj is an expression and 
 %                         does not have a name, 'root' will be used; if this 
 %                         is set to 0 and rootname is empty, the root level 
 %                         will be merged down to the lower level.
-%        opt.JSONP [''|string]: to generate a JSONP output (JSON with padding),
+%          JSONP [''|string]: to generate a JSONP output (JSON with padding),
 %                         for example, if opt.JSON='foo', the JSON data is
 %                         wrapped inside a function call as 'foo(...);'
-%        opt.UnpackHex [1|0]: conver the 0x[hex code] output by loadjson 
+%          UnpackHex [1|0]: conver the 0x[hex code] output by loadjson 
 %                         back to the string form
-%        opt.Compression  'zlib', 'gzip', 'lzma', 'lzip', 'lz4' or 'lz4hc': specify array 
+%          Compression  'zlib', 'gzip', 'lzma', 'lzip', 'lz4' or 'lz4hc': specify array 
 %                         compression method; currently only supports 6 methods. The
 %                         data compression only applicable to numerical arrays 
 %                         in 3D or higher dimensions, or when ArrayToStruct
@@ -76,16 +75,18 @@ function json=saveubjson(rootname,obj,varargin)
 %                         "_ArrayZipData_": the binary stream of
 %                            the compressed binary array data WITHOUT
 %                            'base64' encoding
-%        opt.CompressArraySize [100|int]: only to compress an array if the total 
+%          CompressArraySize [100|int]: only to compress an array if the total 
 %                         element count is larger than this number.
-%        opt.MessagePack [0|1]: output MessagePack (https://msgpack.org/)
+%          MessagePack [0|1]: output MessagePack (https://msgpack.org/)
 %                         binary stream instead of UBJSON
-%        opt.FormatVersion [2|float]: set the JSONLab output version; since
-%                         v2.0, JSONLab uses JData specification Draft 1
+%          FormatVersion [2|float]: set the JSONLab output version; since
+%                         v2.0, JSONLab uses JData specification Draft 2
 %                         for output format, it is incompatible with all
 %                         previous releases; if old output is desired,
 %                         please set FormatVersion to 1.9 or earlier.
-%        opt.Debug [0|1]: output binary numbers in <%g> format for debugging
+%          Debug [0|1]: output binary numbers in <%g> format for debugging
+%          PreEncode [1|0]: if set to 1, call jdataencode first to preprocess
+%                         the input data before saving
 %
 %        opt can be replaced by a list of ('param',value) pairs. The param 
 %        string is equivallent to a field in opt and is case sensitive.
@@ -93,15 +94,15 @@ function json=saveubjson(rootname,obj,varargin)
 %      json: a binary string in the UBJSON format (see http://ubjson.org)
 %
 % examples:
-%      jsonmesh=struct('MeshNode',[0 0 0;1 0 0;0 1 0;1 1 0;0 0 1;1 0 1;0 1 1;1 1 1],... 
-%               'MeshTetra',[1 2 4 8;1 3 4 8;1 2 6 8;1 5 6 8;1 5 7 8;1 3 7 8],...
-%               'MeshTri',[1 2 4;1 2 6;1 3 4;1 3 7;1 5 6;1 5 7;...
+%      jsonmesh=struct('MeshVertex3',[0 0 0;1 0 0;0 1 0;1 1 0;0 0 1;1 0 1;0 1 1;1 1 1],... 
+%               'MeshTet4',[1 2 4 8;1 3 4 8;1 2 6 8;1 5 6 8;1 5 7 8;1 3 7 8],...
+%               'MeshTri3',[1 2 4;1 2 6;1 3 4;1 3 7;1 5 6;1 5 7;...
 %                          2 8 4;2 8 6;3 8 4;3 8 7;5 8 6;5 8 7],...
 %               'MeshCreator','FangQ','MeshTitle','T6 Cube',...
 %               'SpecialData',[nan, inf, -inf]);
-%      saveubjson('jsonmesh',jsonmesh)
-%      saveubjson('jsonmesh',jsonmesh,'meshdata.ubj')
-%      saveubjson('jsonmesh',jsonmesh,'FileName','meshdata.msgpk','MessagePack',1)
+%      saveubjson(jsonmesh)
+%      saveubjson('',jsonmesh,'meshdata.ubj')
+%      saveubjson('mesh1',jsonmesh,'FileName','meshdata.msgpk','MessagePack',1)
 %
 % license:
 %     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details
@@ -127,7 +128,22 @@ else
 end
 opt.IsOctave=isoctavemesh;
 
-dozip=jsonopt('Compression','',opt);
+opt.compression=jsonopt('Compression','',opt);
+opt.nestarray=jsonopt('NestArray',0,opt);
+opt.formatversion=jsonopt('FormatVersion',2,opt);
+opt.compressarraysize=jsonopt('CompressArraySize',100,opt);
+opt.singletcell=jsonopt('SingletCell',1,opt);
+opt.singletarray=jsonopt('SingletArray',0,opt);
+opt.arraytostruct=jsonopt('ArrayToStruct',0,opt);
+opt.debug=jsonopt('Debug',0,opt);
+opt.messagepack=jsonopt('MessagePack',0,opt);
+opt.num2cell_=0;
+
+if(jsonopt('PreEncode',1,opt))
+    obj=jdataencode(obj,'Base64',0,'UseArrayZipSize',opt.messagepack,opt);
+end
+
+dozip=opt.compression;
 if(~isempty(dozip))
     if(isempty(strmatch(dozip,{'zlib','gzip','lzma','lzip','lz4','lz4hc'})))
         error('compression method "%s" is not supported',dozip);
@@ -144,9 +160,11 @@ if(~isempty(dozip))
             error('java-based compression is not supported');
         end
     end    
-    opt.Compression=dozip;
 end
-ismsgpack=jsonopt('MessagePack',0,opt) + bitshift(jsonopt('Debug',0,opt),1);
+
+ismsgpack=opt.messagepack + bitshift(opt.debug,1);
+opt.messagepack=ismsgpack;
+
 if(~bitget(ismsgpack, 1))
     opt.IM_='UiIlL';
     opt.FM_='dD';
@@ -164,15 +182,11 @@ else
     opt.OM_={char(hex2dec('df')),''};
     opt.AM_={char(hex2dec('dd')),''};
 end
-if(isfield(opt,'norowbracket'))
-    warning('Option ''NoRowBracket'' is depreciated, please use ''SingletArray'' and set its value to not(NoRowBracket)');
-    if(~isfield(opt,'singletarray'))
-        opt.singletarray=not(opt.norowbracket);
-    end
-end
+
 rootisarray=0;
 rootlevel=1;
 forceroot=jsonopt('ForceRootName',0,opt);
+
 if((isnumeric(obj) || islogical(obj) || ischar(obj) || isstruct(obj) || ...
         iscell(obj) || isobject(obj)) && isempty(rootname) && forceroot==0)
     rootisarray=1;
@@ -182,10 +196,13 @@ else
         rootname=varname;
     end
 end
+
 if((isstruct(obj) || iscell(obj))&& isempty(rootname) && forceroot)
     rootname='root';
 end
+
 json=obj2ubjson(rootname,obj,rootlevel,opt);
+
 if(~rootisarray)
     if(bitget(ismsgpack, 1))
         json=[char(129) json opt.OM_{2}];
@@ -210,10 +227,12 @@ end
 %%-------------------------------------------------------------------------
 function txt=obj2ubjson(name,item,level,varargin)
 
-if(iscell(item))
+if(iscell(item) || isa(item,'string'))
     txt=cell2ubjson(name,item,level,varargin{:});
 elseif(isstruct(item))
     txt=struct2ubjson(name,item,level,varargin{:});
+elseif(isnumeric(item) || islogical(item))
+    txt=mat2ubjson(name,item,level,varargin{:});
 elseif(ischar(item))
     txt=str2ubjson(name,item,level,varargin{:});
 elseif(isa(item,'function_handle'))
@@ -222,14 +241,14 @@ elseif(isa(item,'containers.Map'))
     txt=map2ubjson(name,item,level,varargin{:});
 elseif(isa(item,'categorical'))
     txt=cell2ubjson(name,cellstr(item),level,varargin{:});
-elseif(isobject(item)) 
-    if(~exist('OCTAVE_VERSION','builtin') && exist('istable') && istable(item))
-        txt=matlabtable2ubjson(name,item,level,varargin{:});
-    else
-        txt=matlabobject2ubjson(name,item,level,varargin{:});
-    end
+elseif(isa(item,'table'))
+    txt=matlabtable2ubjson(name,item,level,varargin{:});
+elseif(isa(item,'graph') || isa(item,'digraph'))
+    txt=struct2ubjson(name,jdataencode(item),level,varargin{:});
+elseif(isobject(item))
+    txt=matlabobject2ubjson(name,item,level,varargin{:});
 else
-    txt=mat2ubjson(name,item,level,varargin{:});
+    txt=any2ubjson(name,item,level,varargin{:});
 end
 
 %%-------------------------------------------------------------------------
@@ -238,11 +257,11 @@ txt='';
 if(~iscell(item))
         error('input is not a cell');
 end
-isnum2cell=jsonopt('num2cell_',0,varargin{:});
+isnum2cell=varargin{1}.num2cell_;
 if(isnum2cell)
     item=squeeze(item);
 else
-    format=jsonopt('FormatVersion',2,varargin{:});
+    format=varargin{1}.formatversion;
     if(format>1.9 && ~isvector(item))
         item=permute(item,ndims(item):-1:1);
     end
@@ -253,10 +272,11 @@ if(ndims(squeeze(item))>2) % for 3D or higher dimensions, flatten to 2D for now
     item=reshape(item,dim(1),numel(item)/dim(1));
     dim=size(item);
 end
-bracketlevel=~jsonopt('singletcell',1,varargin{:});
-Zmarker=jsonopt('ZM_','Z',varargin{:});
-Imarker=jsonopt('IM_','UiIlL',varargin{:});
-Amarker=jsonopt('AM_',{'[',']'},varargin{:});
+bracketlevel=~varargin{1}.singletcell;
+Zmarker=varargin{1}.ZM_;
+Imarker=varargin{1}.IM_;
+Amarker=varargin{1}.AM_;
+
 if(~strcmp(Amarker{1},'['))
     am0=Imsgpk_(dim(2),Imarker,220,144);
 else
@@ -265,13 +285,13 @@ end
 len=numel(item); % let's handle 1D cell first
 if(len>bracketlevel) 
     if(~isempty(name))
-        txt=[N_(checkname(name,varargin{:})) am0]; name=''; 
+        txt=[N_(decodevarname(name,varargin{:})) am0]; name=''; 
     else
         txt=am0; 
     end
 elseif(len==0)
     if(~isempty(name))
-        txt=[N_(checkname(name,varargin{:})) Zmarker]; name=''; 
+        txt=[N_(decodevarname(name,varargin{:})) Zmarker]; name=''; 
     else
         txt=Zmarker; 
     end
@@ -306,10 +326,10 @@ if(ndims(squeeze(item))>2) % for 3D or higher dimensions, flatten to 2D for now
     dim=size(item);
 end
 len=numel(item);
-forcearray= (len>1 || (jsonopt('SingletArray',0,varargin{:})==1 && level>0));
-Imarker=jsonopt('IM_','UiIlL',varargin{:});
-Amarker=jsonopt('AM_',{'[',']'},varargin{:});
-Omarker=jsonopt('OM_',{'{','}'},varargin{:});
+forcearray= (len>1 || (varargin{1}.singletarray==1 && level>0));
+Imarker=varargin{1}.IM_;
+Amarker=varargin{1}.AM_;
+Omarker=varargin{1}.OM_;
 
 if(~strcmp(Amarker{1},'['))
     am0=Imsgpk_(dim(2),Imarker,220,144);
@@ -319,7 +339,7 @@ end
 
 if(~isempty(name)) 
     if(forcearray)
-        txt=[N_(checkname(name,varargin{:})) am0];
+        txt=[N_(decodevarname(name,varargin{:})) am0];
     end
 else
     if(forcearray)
@@ -341,7 +361,7 @@ for j=1:dim(2)
         om0=Omarker{1};
      end
      if(~isempty(name) && len==1 && ~forcearray)
-        txt=[txt N_(checkname(name,varargin{:})) om0]; 
+        txt=[txt N_(decodevarname(name,varargin{:})) om0]; 
      else
         txt=[txt om0]; 
      end
@@ -370,19 +390,20 @@ end
 dim=size(item);
 names = keys(item);
 val= values(item);
-Omarker=jsonopt('OM_',{'{','}'},varargin{:});
-Imarker=jsonopt('IM_','UiIlL',varargin{:});
+Omarker=varargin{1}.OM_;
+Imarker=varargin{1}.IM_;
+
 if(~strcmp(Omarker{1},'{'))
     om0=Imsgpk_(length(names),Imarker,222,128);
 else
     om0=Omarker{1};
 end
 len=prod(dim);
-forcearray= (len>1 || (jsonopt('SingletArray',0,varargin{:})==1 && level>0));
+forcearray= (len>1 || (varargin{1}.singletarray==1 && level>0));
 
 if(~isempty(name)) 
     if(forcearray)
-        txt=[N_(checkname(name,varargin{:})) om0];
+        txt=[N_(decodevarname(name,varargin{:})) om0];
     end
 else
     if(forcearray)
@@ -407,8 +428,8 @@ if(~ischar(item))
 end
 item=reshape(item, max(size(item),[1 0]));
 len=size(item,1);
-Amarker=jsonopt('AM_',{'[',']'},varargin{:});
-Imarker=jsonopt('IM_','UiIlL',varargin{:});
+Amarker=varargin{1}.AM_;
+Imarker=varargin{1}.IM_;
 
 if(~strcmp(Amarker{1},'['))
     am0=Imsgpk_(len,Imarker,220,144);
@@ -417,7 +438,7 @@ else
 end
 if(~isempty(name)) 
     if(len>1)
-        txt=[N_(checkname(name,varargin{:})) am0];
+        txt=[N_(decodevarname(name,varargin{:})) am0];
     end
 else
     if(len>1)
@@ -427,7 +448,7 @@ end
 for e=1:len
     val=item(e,:);
     if(len==1)
-        obj=[N_(checkname(name,varargin{:})) '' '',S_(val),''];
+        obj=[N_(decodevarname(name,varargin{:})) '' '',S_(val),''];
         if(isempty(name))
             obj=['',S_(val),''];
         end
@@ -446,30 +467,32 @@ if(~isnumeric(item) && ~islogical(item))
         error('input is not an array');
 end
 
-dozip=jsonopt('Compression','',varargin{:});
-zipsize=jsonopt('CompressArraySize',100,varargin{:});
-format=jsonopt('FormatVersion',2,varargin{:});
+dozip=varargin{1}.compression;
+zipsize=varargin{1}.compressarraysize;
+format=varargin{1}.formatversion;
 
-Zmarker=jsonopt('ZM_','Z',varargin{:});
-FTmarker=jsonopt('FTM_','FT',varargin{:});
-Imarker=jsonopt('IM_','UiIlL',varargin{:});
-Omarker=jsonopt('OM_',{'{','}'},varargin{:});
-isnest=jsonopt('NestArray',0,varargin{:});
-ismsgpack=jsonopt('MessagePack',0,varargin{:});
+Zmarker=varargin{1}.ZM_;
+FTmarker=varargin{1}.FTM_;
+Imarker=varargin{1}.IM_;
+Omarker=varargin{1}.OM_;
+isnest=varargin{1}.nestarray;
+ismsgpack=varargin{1}.messagepack;
+
 if(ismsgpack)
     isnest=1;
 end
 if((length(size(item))>2 && isnest==0)  || issparse(item) || ~isreal(item) || ...
-   jsonopt('ArrayToStruct',0,varargin{:}) || (~isempty(dozip) && numel(item)>zipsize))
+       varargin{1}.arraytostruct || (~isempty(dozip) && numel(item)>zipsize ...
+       && strcmp('_ArrayZipData_',decodevarname(name,varargin{:}))==0))
       cid=I_(uint32(max(size(item))),Imarker,varargin{:});
       if(isempty(name))
     	txt=[Omarker{1} N_('_ArrayType_'),S_(class(item)),N_('_ArraySize_'),I_a(size(item),cid(1),Imarker,varargin{:}) ];
       else
           if(isempty(item))
-              txt=[N_(checkname(name,varargin{:})),Zmarker];
+              txt=[N_(decodevarname(name,varargin{:})),Zmarker];
               return;
           else
-    	      txt=[N_(checkname(name,varargin{:})),Omarker{1},N_('_ArrayType_'),S_(class(item)),N_('_ArraySize_'),I_a(size(item),cid(1),Imarker,varargin{:})];
+    	      txt=[N_(decodevarname(name,varargin{:})),Omarker{1},N_('_ArrayType_'),S_(class(item)),N_('_ArraySize_'),I_a(size(item),cid(1),Imarker,varargin{:})];
           end
       end
       childcount=2;
@@ -477,11 +500,11 @@ else
     if(isempty(name))
     	txt=matdata2ubjson(item,level+1,varargin{:});
     else
-        if(numel(item)==1 && jsonopt('SingletArray',0,varargin{:})==0)
+        if(numel(item)==1 && varargin{1}.singletarray==0)
             numtxt=regexprep(regexprep(matdata2ubjson(item,level+1,varargin{:}),'^\[',''),']$','');
-           	txt=[N_(checkname(name,varargin{:})) numtxt];
+           	txt=[N_(decodevarname(name,varargin{:})) numtxt];
         else
-    	    txt=[N_(checkname(name,varargin{:})),matdata2ubjson(item,level+1,varargin{:})];
+    	    txt=[N_(decodevarname(name,varargin{:})),matdata2ubjson(item,level+1,varargin{:})];
         end
     end
     return;
@@ -529,6 +552,11 @@ if(issparse(item))
             % General case, store row and column indices.
             fulldata=[ix,iy,data];
         end
+        if(ismsgpack)
+            cid=I_(uint32(max(size(fulldata))),Imarker,varargin{:});
+            txt=[txt,N_('_ArrayZipSize_'),I_a(size(fulldata),cid(1),Imarker,varargin{:})];
+            childcount=childcount+1;
+        end
         varargin{:}.ArrayToStruct=0;
         txt=[txt,N_('_ArrayData_'),...
                cell2ubjson('',num2cell(fulldata',2)',level+2,varargin{:})];
@@ -556,6 +584,11 @@ else
 	    txt=[txt,N_('_ArrayZipData_'), I_a(compfun(typecast(fulldata(:),'uint8')),Imarker(1),Imarker,varargin{:})];
         childcount=childcount+3;
     else
+        if(ismsgpack)
+            cid=I_(uint32(length(item(:))),Imarker,varargin{:});
+            txt=[txt,N_('_ArrayZipSize_'),I_a([~isreal(item)+1 length(item(:))],cid(1),Imarker,varargin{:})];
+            childcount=childcount+1;
+        end
         if(isreal(item))
             txt=[txt,N_('_ArrayData_'),...
                 matdata2ubjson(item(:)',level+2,varargin{:})];
@@ -592,35 +625,45 @@ end
 
 %%-------------------------------------------------------------------------
 function txt=matlabobject2ubjson(name,item,level,varargin)
-st = struct();
-if numel(item) > 0 %non-empty object
-    % "st = struct(item);" would produce an inmutable warning, because it
-    % make the protected and private properties visible. Instead we get the
-    % visible properties
-    propertynames = properties(item);
-    for p = 1:numel(propertynames)
-        for o = numel(item):-1:1 % aray of objects
-            st(o).(propertynames{p}) = item(o).(propertynames{p});
-        end
+try
+    if numel(item) == 0 %empty object
+        st = struct();
+    elseif numel(item) == 1 %
+        txt = str2ubjson(name, char(item), level, varargin(:));
+        return
+    else
+            propertynames = properties(item);
+            for p = 1:numel(propertynames)
+                for o = numel(item):-1:1 % aray of objects
+                    st(o).(propertynames{p}) = item(o).(propertynames{p});
+                end
+            end
     end
+    txt = struct2ubjson(name,st,level,varargin{:});
+catch
+    txt = any2ubjson(name,item, level, varargin(:));
 end
-txt=struct2ubjson(name,st,level,varargin{:});
 
 %%-------------------------------------------------------------------------
 function txt=matdata2ubjson(mat,level,varargin)
-Zmarker=jsonopt('ZM_','Z',varargin{:});
+Zmarker=varargin{1}.ZM_;
 if(isempty(mat))
     txt=Zmarker;
     return;
 end
-FTmarker=jsonopt('FTM_','FT',varargin{:});
-Imarker=jsonopt('IM_','UiIlL',varargin{:});
-Fmarker=jsonopt('FM_','dD',varargin{:});
-Amarker=jsonopt('AM_',{'[',']'},varargin{:});
-isnest=jsonopt('NestArray',0,varargin{:});
-ismsgpack=jsonopt('MessagePack',0,varargin{:});
-format=jsonopt('FormatVersion',2,varargin{:});
-isnum2cell=jsonopt('num2cell_',0,varargin{:});
+dozip=varargin{1}.compression;
+zipsize=varargin{1}.compressarraysize;
+
+FTmarker=varargin{1}.FTM_;
+Imarker=varargin{1}.IM_;
+Omarker=varargin{1}.OM_;
+Fmarker=varargin{1}.FM_;
+Amarker=varargin{1}.AM_;
+
+isnest=varargin{:}.nestarray;
+ismsgpack=varargin{1}.messagepack;
+format=varargin{1}.formatversion;
+isnum2cell=varargin{1}.num2cell_;
 
 if(ismsgpack)
     isnest=1;
@@ -630,15 +673,13 @@ if(~isvector(mat) && isnest==1)
    if(format>1.9 && isnum2cell==0)
         mat=permute(mat,ndims(mat):-1:1);
    end
-   varargin{:}.num2cell_=1;
+   varargin{1}.num2cell_=1;
 end
 
 type='';
-hasnegtive=(mat<0);
 
-varargin{:}.num2cell_=1;
 if(isa(mat,'integer') || isinteger(mat) || (isfloat(mat) && all(mod(mat(:),1) == 0)))
-    if(isempty(hasnegtive))
+    if(~any(mat<0))
        if(max(mat(:))<=2^8)
            type=Imarker(1);
        end
@@ -659,8 +700,10 @@ if(isa(mat,'integer') || isinteger(mat) || (isfloat(mat) && all(mod(mat(:),1) ==
     end
     if(~isvector(mat) && isnest==1)
         txt=cell2ubjson('',num2cell(mat,1),level,varargin{:});
-    else
+    elseif(~ismsgpack || size(mat,1)==1)
         txt=I_a(mat(:),type,Imarker,size(mat),varargin{:});
+    else
+        txt=cell2ubjson('',num2cell(mat,2),level,varargin{:});
     end
 elseif(islogical(mat))
     logicalval=FTmarker;
@@ -690,38 +733,10 @@ else
 end
 
 %%-------------------------------------------------------------------------
-function newname=checkname(name,varargin)
-isunpack=jsonopt('UnpackHex',1,varargin{:});
-newname=name;
-if(isempty(regexp(name,'0x([0-9a-fA-F]+)_','once')))
-    return
-end
-if(isunpack)
-    isoct=jsonopt('IsOctave',0,varargin{:});
-    if(~isoct)
-        newname=regexprep(name,'(^x|_){1}0x([0-9a-fA-F]+)_','${native2unicode(hex2dec($2))}');
-    else
-        pos=regexp(name,'(^x|_){1}0x([0-9a-fA-F]+)_','start');
-        pend=regexp(name,'(^x|_){1}0x([0-9a-fA-F]+)_','end');
-        if(isempty(pos))
-            return;
-        end
-        str0=name;
-        pos0=[0 pend(:)' length(name)];
-        newname='';
-        for i=1:length(pos)
-            newname=[newname str0(pos0(i)+1:pos(i)-1) char(hex2dec(str0(pos(i)+3:pend(i)-1)))];
-        end
-        if(pos(end)~=length(name))
-            newname=[newname str0(pos0(end-1)+1:pos0(end))];
-        end
-    end
-end
-%%-------------------------------------------------------------------------
 function val=N_(str)
 global ismsgpack
 if(~bitget(ismsgpack, 1))
-    val=[I_(int32(length(str)),'UiIlL',struct('Debug',bitget(ismsgpack,2))) str];
+    val=[I_(int32(length(str)),'UiIlL',struct('debug',bitget(ismsgpack,2))) str];
 else
     val=S_(str);
 end
@@ -741,7 +756,7 @@ else
     if(bitget(ismsgpack, 1))
         val=[Imsgpk_(length(str),Imarker,218,160) str];
     else
-        val=['S' I_(int32(length(str)),Imarker,struct('Debug',bitget(ismsgpack,2))) str];
+        val=['S' I_(int32(length(str)),Imarker,struct('debug',bitget(ismsgpack,2))) str];
     end
 end
 
@@ -770,7 +785,10 @@ Imarker='UiIlL';
 if(nargin>=2)
     Imarker=markers;
 end
-isdebug=jsonopt('Debug',0,varargin{:});
+isdebug=0;
+if(nargin>=3)
+    isdebug=varargin{1}.debug;
+end
 
 if(Imarker(1)~='U')
     if(num>=0 && num<127)
@@ -813,7 +831,7 @@ function val=D_(num, markers, varargin)
 if(~isfloat(num))
     error('input is not a float');
 end
-isdebug=jsonopt('Debug',0,varargin{:});
+isdebug=varargin{1}.debug;
 if(isdebug)
     output=sprintf('<%g>',num);
 else
@@ -866,8 +884,8 @@ if(isstruct(dim))
     varargin={dim};
 end
 
-isnest=jsonopt('NestArray',0,varargin{:});
-isdebug=jsonopt('Debug',0,varargin{:});
+isnest=varargin{1}.nestarray;
+isdebug=varargin{1}.debug;
 if(isdebug)
     output=sprintf('<%g>',num);
 else
@@ -876,7 +894,7 @@ end
 
 if(isnest==0 && numel(num)>1 && Imarker(1)=='U')
   if(nargin>=4 && ~isstruct(dim) && (length(dim)==1 || (length(dim)>=2 && prod(dim)~=dim(2))))
-      cid=I_(uint32(max(dim)));
+      cid=I_(uint32(max(dim)),Imarker,varargin{:});
       data=['$' type '#' I_a(dim,cid(1),Imarker,varargin{:}) output(:)'];
   else
       data=['$' type '#' I_(int32(numel(data)/blen),Imarker,varargin{:}) output(:)'];
@@ -917,8 +935,8 @@ elseif(id==2)
   data=data2byte(swapbytes(double(num)),'uint8');
 end
 
-isnest=jsonopt('NestArray',0,varargin{:});
-isdebug=jsonopt('Debug',0,varargin{:});
+isnest=varargin{1}.nestarray;
+isdebug=varargin{1}.debug;
 if(isdebug)
     output=sprintf('<%g>',num);
 else
@@ -948,6 +966,21 @@ else
   end
   data=[am0 data(:)' Amarker{2}];
 end
+
+%%-------------------------------------------------------------------------
+function txt=any2ubjson(name,item,level,varargin)
+st=containers.Map();
+st('_DataInfo_')=struct('MATLABObjectClass',class(item),'MATLABObjectSize',size(item));;
+st('_ByteStream_')=getByteStreamFromArray(item);
+
+if(isempty(name))
+    txt=map2ubjson(name,st,level,varargin{:});
+else
+    temp=struct(name,struct());
+    temp.(name)=st;
+    txt=map2ubjson(name,temp.(name),level,varargin{:});
+end
+
 %%-------------------------------------------------------------------------
 function bytes=data2byte(varargin)
 bytes=typecast(varargin{:});

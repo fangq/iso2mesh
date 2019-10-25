@@ -1,5 +1,9 @@
-%PARSEMSGPACK parses a msgpack byte buffer into Matlab data structures
-% PARSEMSGPACK(BYTES)
+function data = loadmsgpack(fname,varargin)
+%
+%   data = loadmsgpack(fname,varargin)
+%
+%LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
+% LOADMSGPACK(BYTES)
 %    reads BYTES as msgpack data, and creates Matlab data structures
 %    from it.
 %    - strings are converted to strings
@@ -8,11 +12,16 @@
 %    - nil is converted to []
 %    - arrays are converted to cell arrays
 %    - maps are converted to containers.Map
-
+%
 % (c) 2016 Bastian Bechtold
-% This code is licensed under the BSD 3-clause license
+% modified by Qianqian Fang <q.fang at neu.edu>
+%
+% license:
+%     BSD 3-clause license or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+%
+% -- this function is part of JSONLab toolbox (http://iso2mesh.sf.net/cgi-bin/index.cgi?jsonlab)
+%
 
-function data = loadmsgpack(fname,varargin)
     if(exist(fname,'file'))
        fid = fopen(fname,'rb');
        bytes = fread(fid,inf,'uint8=>char')';
@@ -20,10 +29,14 @@ function data = loadmsgpack(fname,varargin)
     else
        bytes=fname;
     end
+    
+    opt=varargin2struct(varargin{:});
+    opt.simplifycell=jsonopt('SimplifyCell',0,opt);
+
     jsoncount=1;
     idx=0;
     while idx <= length(bytes)
-        [obj, idx] = parse(uint8(bytes(:)), 1);
+        [obj, idx] = parse(uint8(bytes(:)), 1, opt);
         data{jsoncount}=obj;
         jsoncount=jsoncount+1;
     end
@@ -35,11 +48,11 @@ function data = loadmsgpack(fname,varargin)
     if(iscell(data))
         data=cellfun(@(x) jdatadecode(x),data,'UniformOutput',false);
     elseif(isstruct(data))
-        data=jdatadecode(data);
+        data=jdatadecode(data,'Base64',0, opt);
     end
 end
 
-function [obj, idx] = parse(bytes, idx)
+function [obj, idx] = parse(bytes, idx, varargin)
     % masks:
     b10000000 = 128;
     b01111111 = 127;
@@ -69,12 +82,12 @@ function [obj, idx] = parse(bytes, idx)
     elseif bitand(b11110000, currentbyte) == b10000000
         % decode fixmap
         len = double(bitand(b00001111, currentbyte));
-        [obj, idx] = parsemap(len, bytes, idx+1);
+        [obj, idx] = parsemap(len, bytes, idx+1, varargin{:});
         return
     elseif bitand(b11110000, currentbyte) == b10010000
         % decode fixarray
         len = double(bitand(b00001111, currentbyte));
-        [obj, idx] = parsearray(len, bytes, idx+1);
+        [obj, idx] = parsearray(len, bytes, idx+1, varargin{:});
         return
     elseif bitand(b11100000, currentbyte) == b10100000
         % decode fixstr
@@ -163,16 +176,16 @@ function [obj, idx] = parse(bytes, idx)
             [obj, idx] = parsestring(len, bytes, idx+5);
         case 220 % array16
             len = double(bytes2scalar(bytes(idx+1:idx+2), 'uint16'));
-            [obj, idx] = parsearray(len, bytes, idx+3);
+            [obj, idx] = parsearray(len, bytes, idx+3, varargin{:});
         case 221 % array32
             len = double(bytes2scalar(bytes(idx+1:idx+4), 'uint32'));
-            [obj, idx] = parsearray(len, bytes, idx+5);
+            [obj, idx] = parsearray(len, bytes, idx+5, varargin{:});
         case 222 % map16
             len = double(bytes2scalar(bytes(idx+1:idx+2), 'uint16'));
-            [obj, idx] = parsemap(len, bytes, idx+3);
+            [obj, idx] = parsemap(len, bytes, idx+3, varargin{:});
         case 223 % map32
             len = double(bytes2scalar(bytes(idx+1:idx+4), 'uint32'));
-            [obj, idx] = parsemap(len, bytes, idx+5);
+            [obj, idx] = parsemap(len, bytes, idx+5, varargin{:});
         otherwise
             error('transplant:parsemsgpack:unknowntype', ...
                   ['Unknown type "' dec2bin(currentbyte) '"']);
@@ -185,7 +198,11 @@ function value = bytes2scalar(bytes, type)
 end
 
 function [str, idx] = parsestring(len, bytes, idx)
-    str = native2unicode(bytes(idx:idx+len-1)', 'utf-8');
+    if(~isoctavemesh)
+         str = native2unicode(bytes(idx:idx+len-1)', 'utf-8');
+    else
+         str = char(bytes(idx:idx+len-1)');
+    end
     idx = idx + len;
 end
 
@@ -200,12 +217,12 @@ function [out, idx] = parseext(len, bytes, idx)
     idx = idx + len + 1;
 end
 
-function [out, idx] = parsearray(len, bytes, idx)
-    out = cell(1, len);
+function [out, idx] = parsearray(len, bytes, idx, varargin)
+    out = cell(len,1);
     for n=1:len
-        [out{n}, idx] = parse(bytes, idx);
+        [out{n}, idx] = parse(bytes, idx, varargin{:});
     end
-    if(true)
+    if(isnumeric(out{1}))
       try
         oldobj=out;
         out=cell2mat(out);
@@ -219,46 +236,10 @@ function [out, idx] = parsearray(len, bytes, idx)
     end
 end
 
-function [out, idx] = parsemap(len, bytes, idx)
+function [out, idx] = parsemap(len, bytes, idx, varargin)
     out = struct();
     for n=1:len
-        [key, idx] = parse(bytes, idx);
-        [out.(valid_field(key)), idx] = parse(bytes, idx);
-    end
-end
-
-function str = valid_field(str,varargin)
-% From MATLAB doc: field names must begin with a letter, which may be
-% followed by any combination of letters, digits, and underscores.
-% Invalid characters will be converted to underscores, and the prefix
-% "x0x[Hex code]_" will be added if the first character is not a letter.
-    isoct=exist('OCTAVE_VERSION','builtin');
-    cpos=regexp(str,'^[^A-Za-z]','once');
-    if(~isempty(cpos))
-        if(~isoct)
-            str=regexprep(str,'^([^A-Za-z])','x0x${sprintf(''%X'',unicode2native($1))}_','once');
-        else
-            str=sprintf('x0x%X_%s',char(str(1)),str(2:end));
-        end
-    end
-    if(isempty(regexp(str,'[^0-9A-Za-z_]', 'once' )))
-        return;
-    end
-    if(~isoct)
-        str=regexprep(str,'([^0-9A-Za-z_])','_0x${sprintf(''%X'',unicode2native($1))}_');
-    else
-        cpos=regexp(str,'[^0-9A-Za-z_]');
-        if(isempty(cpos))
-            return;
-        end
-        str0=str;
-        pos0=[0 cpos(:)' length(str)];
-        str='';
-        for i=1:length(cpos)
-            str=[str str0(pos0(i)+1:cpos(i)-1) sprintf('_0x%X_',str0(cpos(i)))];
-        end
-        if(cpos(end)~=length(str))
-            str=[str str0(pos0(end-1)+1:pos0(end))];
-        end
+        [key, idx] = parse(bytes, idx, varargin{:});
+        [out.(encodevarname(char(key))), idx] = parse(bytes, idx, varargin{:});
     end
 end

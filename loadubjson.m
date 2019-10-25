@@ -7,9 +7,7 @@ function data = loadubjson(fname,varargin)
 % parse a JSON (JavaScript Object Notation) file or string
 %
 % authors:Qianqian Fang (q.fang <at> neu.edu)
-% created on 2013/08/01
-%
-% $Id$
+% initially created on 2013/08/01
 %
 % input:
 %      fname: input file name, if fname contains "{}" or "[]", fname
@@ -19,19 +17,19 @@ function data = loadubjson(fname,varargin)
 %           to a field in opt. opt can have the following 
 %           fields (first in [.|.] is the default)
 %
-%           opt.SimplifyCell [0|1]: if set to 1, loadubjson will call cell2mat
+%           SimplifyCell [0|1]: if set to 1, loadubjson will call cell2mat
 %                         for each element of the JSON data, and group 
 %                         arrays based on the cell2mat rules.
-%           opt.IntEndian [B|L]: specify the endianness of the integer fields
+%           IntEndian [B|L]: specify the endianness of the integer fields
 %                         in the UBJSON input data. B - Big-Endian format for 
 %                         integers (as required in the UBJSON specification); 
 %                         L - input integer fields are in Little-Endian order.
-%           opt.NameIsString [0|1]: for UBJSON Specification Draft 8 or 
+%           NameIsString [0|1]: for UBJSON Specification Draft 8 or 
 %                         earlier versions (JSONLab 1.0 final or earlier), 
 %                         the "name" tag is treated as a string. To load 
 %                         these UBJSON data, you need to manually set this 
 %                         flag to 1.
-%           opt.FormatVersion [2|float]: set the JSONLab format version; since
+%           FormatVersion [2|float]: set the JSONLab format version; since
 %                         v2.0, JSONLab uses JData specification Draft 1
 %                         for output format, it is incompatible with all
 %                         previous releases; if old output is desired,
@@ -94,10 +92,14 @@ function data = loadubjson(fname,varargin)
     if(jsoncount==1 && iscell(data))
         data=data{1};
     end
+
+    if(jsonopt('JDataDecode',1,varargin{:})==1)
+        data=jdatadecode(data,'Base64',0,'Recursive',1,varargin{:});
+    end
 end
 
 %%-------------------------------------------------------------------------
-%% subfunctions
+%% helper functions
 %%-------------------------------------------------------------------------
 
 function [data, adv]=parse_block(inputstr, pos, type,count,varargin)
@@ -330,7 +332,7 @@ function [object, pos] = parse_object(inputstr, pos, varargin)
             end
             [val, pos] = parse_value(inputstr, pos, varargin{:});
             num=num+1;
-            object.(valid_field(str,varargin{:}))=val;
+            object.(encodevarname(str,varargin{:}))=val;
             [cc, pos]=next_char(inputstr,pos);
             if cc == '}' || (count>=0 && num>=count)
                 break;
@@ -339,9 +341,6 @@ function [object, pos] = parse_object(inputstr, pos, varargin)
     end
     if(count==-1)
         pos=parse_char(inputstr, pos, '}');
-    end
-    if(isstruct(object))
-        object=jdatadecode(object,struct('Recursive',0, 'Base64',0));
     end
 end
 
@@ -355,40 +354,5 @@ function [cid,len]=elem_info(inputstr, pos, type)
         len=bytelen(id);
     else
         error_pos('unsupported type at position %d',inputstr, pos);
-    end
-end
-%%-------------------------------------------------------------------------
-
-function str = valid_field(str,varargin)
-% From MATLAB doc: field names must begin with a letter, which may be
-% followed by any combination of letters, digits, and underscores.
-% Invalid characters will be converted to underscores, and the prefix
-% "x0x[Hex code]_" will be added if the first character is not a letter.
-    if(~isempty(regexp(str,'^[^A-Za-z]','once')))
-        if(~isoctavemesh && str(1)+0 > 255)
-            str=regexprep(str,'^([^A-Za-z])','x0x${sprintf(''%X'',unicode2native($1))}_','once');
-        else
-            str=sprintf('x0x%X_%s',char(str(1)),str(2:end));
-        end
-    end
-    if(isvarname(str))
-        return;
-    end
-    if(~isoctavemesh)
-        str=regexprep(str,'([^0-9A-Za-z_])','_0x${sprintf(''%X'',unicode2native($1))}_');
-    else
-        cpos=regexp(str,'[^0-9A-Za-z_]');
-        if(isempty(cpos))
-            return;
-        end
-        str0=str;
-        pos0=[0 cpos(:)' length(str)];
-        str='';
-        for i=1:length(cpos)
-            str=[str str0(pos0(i)+1:cpos(i)-1) sprintf('_0x%X_',str0(cpos(i)))];
-        end
-        if(cpos(end)~=length(str))
-            str=[str str0(pos0(end-1)+1:pos0(end))];
-        end
     end
 end
