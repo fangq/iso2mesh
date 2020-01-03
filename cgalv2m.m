@@ -10,7 +10,7 @@ function [node,elem,face]=cgalv2m(vol,opt,maxvol)
 % author: Qianqian Fang (q.fang at neu.edu)
 %
 % input:
-%	 vol: a volumetric binary image
+%	 vol: a volumetric binary or labeled image
 %	 ix,iy,iz: subvolume selection indices in x,y,z directions
 %	 opt: parameters for CGAL mesher, if opt is a structure, then
 %	     opt.radbound: defines the maximum surface element size
@@ -37,10 +37,10 @@ function [node,elem,face]=cgalv2m(vol,opt,maxvol)
 
 fprintf(1,'creating surface and tetrahedral mesh from a multi-domain volume ...\n');
 
-dtype=class(vol);
-if(~(islogical(vol) || strcmp(dtype,'uint8')))
-	error('cgalmesher can only handle uint8 volumes, you have to convert your image to unit8 first.');
-end
+%dtype=class(vol);
+%if(~(islogical(vol) || strcmp(dtype,'uint8')))
+%	error('cgalmesher can only handle uint8 volumes, you have to convert your image to unit8 first.');
+%end
 
 if(~any(vol))
         error('no labeled regions found in the input volume.');
