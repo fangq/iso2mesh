@@ -22,6 +22,10 @@ function tempname=mwpath(fname)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
+if (nargin < 1) || isempty(fname)
+    fname = '';
+end
+
 p=getvarfrom({'caller','base'},'ISO2MESH_TEMP');
 session=getvarfrom({'caller','base'},'ISO2MESH_SESSION');
 
