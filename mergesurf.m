@@ -21,7 +21,7 @@ function [newnode,newelem]=mergesurf(node,elem,varargin)
 %
 %   [node1,face1,elem1]=meshabox([0 0 0],[10 10 10],1,1);
 %   [node2,face2,elem2]=meshasphere([5 5 10],3,0.3,3);
-%   [newnode,newface]=mergemesh(node1,face1,node2,face2);
+%   [newnode,newface]=mergesurf(node1,face1,node2,face2);
 %   plotmesh(newnode,newface,'x>5');
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
