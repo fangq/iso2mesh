@@ -16,8 +16,8 @@ function flag=deletemeshfile(fname)
 %
 
 try
-    if(exist(fname)) 
-	delete(fname); 
+    if(~isempty(dir(fname)))
+        delete(fname); 
     end
 catch
     error(['You do not have permission to delete temporary files. If you are working in a multi-user ',...
