@@ -43,7 +43,14 @@ if(isempty(p))
 else
 	binname=[p filesep fname];
 end
-
+% on 64bit windows machine, try 'exename_x86-64.exe' first
+if(ispc && ~isempty(regexp(computer,'64', 'once')) && isempty(regexp(fname,'_x86-64$', 'once')))
+    w64bin=regexprep(binname,'(\.[eE][xX][eE])*$','_x86-64.exe','emptymatch');
+    if(exist(w64bin,'file'))
+        binname=w64bin;
+    end
+end
+% if no such executable exist in iso2mesh/bin, find it in PATH env variable
 if(nargin>=2 && ~exist(binname,'file'))
     binname=fname;
 end
