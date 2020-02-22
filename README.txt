@@ -148,7 +148,7 @@ This will download and recompile the below binaries in the bin folder:
  cork
 
 Once these binary files are recreated, you can run all the major functionalities
-of Iso2Mesh. The gtsset and gtrefine tools are depreciated and replaced by 
+of Iso2Mesh. The gtrefine utility is depreciated and replaced by 
 cork and tetgen.
 
 To compile the above external tools, the below tools must be pre-installed
@@ -238,7 +238,7 @@ other modules are under the Lesser General Public License (LGPL)
 *URL:https://github.com/gilbo/cork
 *Author: Gilbert Bernstein
 
-=== bin/gtsset and bin/gtsrefine ===
+=== bin/gtsrefine ===
 
 *Summary: GTS is the GNU Triangulated Surface Library
 *License: LGPL (GNU Lesser General Public License)

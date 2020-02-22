@@ -71,10 +71,6 @@ catch
         exename='cork';
     end
 end
-isgts=0;
-if(strcmp(exename,'gtsset'))
-    isgts=1;
-end
 
 exesuff=fallbackexeext(getexeext,exename);
 randseed=hex2dec('623F9A9E'); % "U+623F U+9A9E"
@@ -90,24 +86,14 @@ for i=1:3:len
    if(strcmp(op,'or'))   opstr='union'; end
    if(strcmp(op,'xor'))  opstr='all';   end
    if(strcmp(op,'and'))
-        if(isgts)
-           opstr='inter'; 
-        else
-	   opstr='isct'; 
-	end
+       opstr='isct'; 
    end
    if(strcmp(op,'-'))    opstr='diff';  end
    if(strcmp(op,'self')) opstr='inter -s';  end
-   if(isgts && (strcmp(op,'first') || strcmp(op,'second') || strcmp(op,'+')))
-       opstr='all';
-   end
-   if(strcmp(opstr,'all') && isgts==0)
+   if(strcmp(opstr,'all'))
        opstr='resolve';
    end
-   tempsuff='gts';
-   if(isgts==0)
-       tempsuff='off';
-   end
+   tempsuff='off';
    deletemeshfile(mwpath(['pre_surfbool*.' tempsuff]));
    deletemeshfile(mwpath('post_surfbool.off'));
    if(strcmp(opstr,'all'))
@@ -171,17 +157,10 @@ for i=1:3:len
                mwpath('pre_decouple1.off'),mwpath('pre_decouple2.off'),opstr);
        end       
    else
-       if(isgts)
-           savegts(newnode(:,1:3),newelem(:,1:3),mwpath(['pre_surfbool1.' tempsuff]));
-           savegts(no(:,1:3),el(:,1:3),mwpath(['pre_surfbool2.' tempsuff]));
-           cmd=sprintf('cd "%s" && "%s%s" %s "%s" "%s" -v > "%s"',mwpath,mcpath('gtsset'),exesuff,...
-               opstr,mwpath('pre_surfbool1.gts'),mwpath('pre_surfbool2.gts'),mwpath('post_surfbool.off'));
-       else
-           saveoff(newnode(:,1:3),newelem(:,1:3),mwpath(['pre_surfbool1.' tempsuff]));
-           saveoff(no(:,1:3),el(:,1:3),mwpath(['pre_surfbool2.' tempsuff]));
-           cmd=sprintf('cd "%s" && "%s%s" %s%s "%s" "%s" "%s" -%d',mwpath,mcpath(exename),exesuff,'-',...
-               opstr,mwpath(['pre_surfbool1.' tempsuff]),mwpath(['pre_surfbool2.' tempsuff]),mwpath('post_surfbool.off'),randseed);
-       end
+       saveoff(newnode(:,1:3),newelem(:,1:3),mwpath(['pre_surfbool1.' tempsuff]));
+       saveoff(no(:,1:3),el(:,1:3),mwpath(['pre_surfbool2.' tempsuff]));
+       cmd=sprintf('cd "%s" && "%s%s" %s%s "%s" "%s" "%s" -%d',mwpath,mcpath(exename),exesuff,'-',...
+            opstr,mwpath(['pre_surfbool1.' tempsuff]),mwpath(['pre_surfbool2.' tempsuff]),mwpath('post_surfbool.off'),randseed);
    end
    [status outstr]=system(cmd);
    if(status~=0 && strcmp(op,'self')==0)
@@ -211,17 +190,6 @@ for i=1:3:len
       [nnode nelem]=readoff(mwpath('s2in1.off'));
       newelem=[newelem; nelem+size(newnode,1) 4*ones(size(nelem,1),1)];
       newnode=[newnode; nnode 4*ones(size(nnode,1),1)];
-      if(isgts)
-          if(strcmp(op,'first'))
-              newelem=newelem(find(mod(newelem(:,4),2)==1),:);
-              [newnode,nelem]=removeisolatednode(newnode,newelem(:,1:3));
-              newelem=[nelem newelem(:,4)];
-          elseif(strcmp(op,'second'))
-              newelem=newelem(find(mod(newelem(:,4),2)==0),:);
-              [newnode,nelem]=removeisolatednode(newnode,newelem(:,1:3));
-              newelem=[nelem,newelem(:,4)];
-          end
-      end
    elseif(strcmp(op,'decouple'))
       [newnode,newelem]=readoff(mwpath('pre_decouple1_fixed.off')); %[node1,elem1]
       %newelem=[newelem;elem1+size(newnode,1) (i+1)*ones(size(elem1,1),1)];
