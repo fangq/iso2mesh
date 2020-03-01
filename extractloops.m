@@ -23,6 +23,7 @@ function loops=extractloops(edges)
 %
 
 loops=[];
+edges(edges(:,1)==edges(:,2),:)=[]; % remove degenerated edges
 loops=[loops,edges(1,:)];
 loophead=edges(1,1);
 loopend=edges(1,end);
@@ -55,7 +56,9 @@ while(~isempty(edges))
     end
     if(length(idx)==1) % tracing along a single line thread
         idx=idx(1);
-        newend=setdiff(edges(idx,:),loopend);
+        ed=edges(idx,:);
+        ed(ed==loopend)=[];
+        newend=ed(1);
         if(newend==loophead)  % when a loop is found
             loops=[loops loophead nan];
             edges(idx,:)=[];
