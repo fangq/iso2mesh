@@ -33,7 +33,7 @@ fprintf(1,'converting a closed surface to a volumetric binary image ...\n');
 opt=varargin2struct(varargin{:});
 label=jsonopt('label',0,opt);
 
-elabel=[1];
+elabel=1;
 if(size(face,2)>=4)
         elabel=unique(face(:,end));
         if(size(face,2)==5)
@@ -50,7 +50,7 @@ else
         fc=face;
 end
 
-img=zeros(length(xi),length(yi),length(zi));
+img=zeros(length(xi),length(yi),length(zi),class(elabel));
 
 for i=1:length(elabel)
         if(size(face,2)==4)
@@ -68,10 +68,10 @@ for i=1:length(elabel)
         if(jsonopt('fill',0,opt) || label)
                 im=imfill(im,'holes');
                 if(label)
-                    im=im*elabel(i);
+                    im=cast(im,class(elabel))*elabel(i);
                 end
         end
-        img=max(im,img);
+        img=max(cast(im,class(img)),img);
 end
  
 if(nargout>1) 
