@@ -41,7 +41,7 @@ for i=1:length(iz);
     if(isempty(bcutpos))
         continue;
     end
-    enum=length(bcutedges);
+    enum=size(bcutedges,1);
     for j=1:enum
         e0=bcutpos(bcutedges(j,1),1:2);
         e1=bcutpos(bcutedges(j,2),1:2);
