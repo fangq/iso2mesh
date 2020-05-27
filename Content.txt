@@ -23,7 +23,7 @@
  method can be set to 'cgalmesh' in addition to those allowed by vol2surf.
 
 
-==== function [node,elem,face]=s2m(v,f,keepratio,maxvol,method,regions,holes) ====
+==== function [node,elem,face]=s2m(v,f,keepratio,maxvol,method,regions,holes,varargin) ====
 
  [node,elem,face]=s2m(v,f,keepratio,maxvol,method)
  [node,elem,face]=s2m(v,f,keepratio,maxvol,'tetgen',regions,holes)
@@ -199,7 +199,7 @@
 	 holes:   list of interior points for all holes, [x,y,z]
 
 
-==== function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox,method) ====
+==== function [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox,method,cmdopt) ====
 
  [node,elem,face]=surf2mesh(v,f,p0,p1,keepratio,maxvol,regions,holes,forcebox)
 
@@ -919,6 +919,73 @@
     count: total neighbor numbers
 
 
+==== function [face,labels]=layersurf(elem,varargin) ====
+
+ face=layersurf(elem, opt)
+    or
+ [face,labels]=layersurf(elem,'option1',value1,'option2',value2,...)
+
+ process a multi-layered tetrahedral mesh, like a brain mesh, to extract
+ the layer surface meshes with one enclosed by another
+
+
+ input:
+    elem: an Nx5 integer array, representing the tetrahedral mesh element
+         list. The first 4 columns represent the tetrahedral element node
+         indices; the last column represents tissue labels.
+    opt: (optional) a struct or pairs of names/values to provide
+         additional options; accepted options include
+         'order': ['>='] or '=', '<=' . if set to '>=' (default), the 
+             outmost layer has the lowest label count; if '<=', innermost 
+             is lowest; if '=', surface of each label is extracted
+             individually - meaning that inner surfaces will have two
+             duplicates
+         'innermost': [0] or an array of labels. The labels defined in
+             this list will be treated as the innermost regions, and its
+             boundary will be extracted using the '==' test (order='=').
+             by default; label 0 is assumed to be innermost (i.e. nothing
+             is enclosed inside).
+         'unique': [0] or 1. if 1, remove duplicated triangles; if 0, keep
+             all triangles.
+         'occurence': ['first'] or 'last'. if 'first', the unique operator
+             keeps a duplicated triangle with the lowest label number; 
+             otherwise, a repeated triange keeps the highest label number.
+
+ output:
+    vol: a 2-D or 3-D array of the same type/size of the input arrays. The
+         label for each voxel is determined by the index to the highest
+         value in TPM of the same voxel. If a voxel is a background voxel
+         - i.e. zeros for all TPMs, it stays 0
+    names: a cell array storing the names of the labels (if input is a
+         struct), the first string is the name for label 1, and so on
+
+ -- this function is part of brain2mesh toolbox (http://mcx.space/brain2mesh)
+    License: GPL v3 or later, see LICENSE.txt for details
+
+opt=varargin2struct(varargin{:});
+outsideislower=jsonopt('order','>=',opt);
+dounique=jsonopt('unique',false,opt);
+innermost=jsonopt('innermost',0,opt);
+occurence=jsonopt('occurence','first',opt);
+labels = sort(unique(elem(:,5)));
+face = [];
+for i = 1:length(labels)
+    if(strcmp(outsideislower,'>=') && ~ismember(labels(i),innermost))
+        newface=volface(elem(elem(:,5)>=labels(i),1:4));
+    elseif(strcmp(outsideislower,'<=') && ~ismember(labels(i),innermost))
+        newface=volface(elem(elem(:,5)<=labels(i),1:4));
+    else
+        newface=volface(elem(elem(:,5)==labels(i),1:4));
+    end
+    newface(:,4)=labels(i);
+    face = [face; newface];
+end
+if(dounique)
+    face(:,1:3) = sort(face(:,1:3),2);
+    [uniqface, idx]= unique(face(:,1:3),'rows',occurence);
+    face=[uniqface, face(idx,end)];
+end
+
 ==== function facenb=faceneighbors(t,opt) ====
 
  facenb=faceneighbors(t,opt)
@@ -1499,6 +1566,227 @@
     newnode: the output node list, in most cases it equals node
     newface: the face list with consistent ordering
 
+
+=== # Polyline handling ===
+
+==== function [bcutpos, bcutloop, bcutvalue]=slicesurf(node, face, varargin) ====
+
+ [bcutpos, bcutloop]=slicesurf(node, face, varargin)
+
+ Slice a closed surface by a plane and extract the intersection curve as a
+ polyline loop
+
+
+ input:
+    node: an N x 3 array defining the 3-D positions of the mesh
+    face: an N x 3 interger array specifying the surface triangle indices;
+
+ output:
+    bcutpos: the nodes on the intersection curve
+    bcutloop: the sequential order of the nodes to form a polyline loop;
+          the last node is assumed to be connected to the first node; an
+          nan indicates the end of a loop; the intersection may contain
+          multiple loops; if only bcutpos is returned, the nodes will be
+          made in sequential order.
+
+
+ -- this function is part of brain2mesh toolbox (http://mcx.space/brain2mesh)
+    License: GPL v3 or later, see LICENSE.txt for details
+
+[bcutpos,bcutvalue,bcutedges]=qmeshcut(face(:,1:3),node,node(:,1),varargin{:});
+[bcutpos,bcutedges]=removedupnodes(bcutpos,bcutedges);
+bcutloop=extractloops(bcutedges);
+if(nargout==1)
+    bcutloop(isnan(bcutloop))=[];
+    bcutpos=bcutpos(bcutloop,:);
+end
+
+==== function [leftpt,leftcurve,rightpt,rightcurve]=slicesurf3(node,elem,p1,p2,p3,step,minangle) ====
+
+ [leftpt,leftcurve,rightpt,rightcurve]=slicesurf3(node,elem,p1,p2,p3,step,minangle)
+
+ Slice a closed surface by a plane and extract the landmark nodes along
+ the intersection between p1 and p3, then output into 2 segments: between
+ p2 to p1 (left half), and p2 to p3 (right half)
+
+
+ input:
+    node: an N x 3 array defining the 3-D positions of the mesh
+    elem: an N x 3 interger array specifying the surface triangle indices;
+    p1: 3D position of the start on the curve-of-interest
+    p2: 3D position of the middle on the curve-of-interest
+    p3: 3D position of the end on the curve-of-interest
+    step: (optional) a percentage (0-100) specifying the spacing of the
+        output landmark nodes; step=20 means the landmarks on the left
+        curve are spaced as 20% of the total lengths of the left-half, and
+        those on the right-curve are spaced at 20% of the right-half,
+        starting from p2.
+    minangle: (optional) a positive minangle will ask this function to
+        call polylinesimplify to remove sharp turns on the curve.
+
+ output:
+    leftpt: the equal-spaced landmark nodes on the left-half (p2-p1)
+            intersection curve; spacing between these nodes are
+            (step% * length of the curve between p2-p1)
+    leftcurve: all nodes on the left-half (p2-p1) intersection curve
+    rightpt: the equal-spaced landmark nodes on the right-half (p2-p3)
+            intersection curve; spacing between these nodes are
+            (step% * length of the curve between p2-p3)
+    rightcurve: all nodes on the left-half (p2-p1) intersection curve
+
+ -- this function is part of brain2mesh toolbox (http://mcx.space/brain2mesh)
+    License: GPL v3 or later, see LICENSE.txt for details
+
+fullcurve=slicesurf(node, elem, [p1;p2;p3]);
+if(nargin>=7 && minangle>0)
+    fullcurve=polylinesimplify(fullcurve,minangle);
+end
+[fulllen, fullcurve]=polylinelen(fullcurve, p1,p3,p2);
+[leftlen,  leftcurve]=polylinelen(fullcurve, p2, p1);
+if(nargin>=6)
+    [idx, weight, leftpt]=polylineinterp(leftlen, sum(leftlen)*(step:step:(100-step*0.5))*0.01, leftcurve);
+else
+    leftpt=leftcurve;
+end
+if(nargout>2)
+    [rightlen, rightcurve]=polylinelen(fullcurve, p2, p3);
+    if(nargin>=6)
+        [idx, weight, rightpt]=polylineinterp(rightlen, sum(rightlen)*(step:step:(100-step*0.5))*0.01, rightcurve);
+    else
+        rightpt=rightcurve;
+    end
+end
+
+==== function [len, node]=polylinelen(node, p0, p1, pmid) ====
+
+ [len, node]=polylinelen(node, p0, p1)
+
+ Calculate the polyline line segment length vector in sequential order
+
+
+ input:
+    node: an N x 3 array defining each vertex of the polyline in
+          sequential order
+    p0:(optional) a given node to define the start of the polyline, if not
+         defined, start position is assumed to be 1st node
+    p1:(optional) a given node to define the end of the polyline, if not
+         defined, end position is assumed to be last node
+    pmid:(optional) a given node sits between p0 and p1, if not
+         defined, index of the middle (floored) node is used
+
+ output:
+    len: the length of each segment between the start and the end points
+    node: the node list between the start and end points of the polyline
+
+
+ -- this function is part of brain2mesh toolbox (http://mcx.space/brain2mesh)
+    License: GPL v3 or later, see LICENSE.txt for details
+
+if(nargin<3)
+    p1=size(node,1);
+    if(nargin<2)
+        p0=1;
+    end
+end
+if(nargin<4)
+    pmid=floor((p0+p1)*0.5);
+end
+if(size(p0,2)==3)
+    p0=closestnode(node,p0);
+end
+if(size(p1,2)==3)
+    p1=closestnode(node,p1);
+end
+if(size(pmid,2)==3)
+    pmid=closestnode(node,pmid);
+end
+if(p0<pmid && pmid<p1)
+    node=node(p0:p1,:);
+elseif(p0<pmid && p1<pmid)
+    node=node([min(p0,p1):-1:1 end:-1:max(p0,p1)],:);
+elseif(p0>pmid && pmid>p1)
+    node=node(p0:-1:p1,:);
+elseif(p0>pmid && p1>pmid)
+    node=node([max(p0,p1):end 1:min(p0,p1)],:);
+end
+len=node(1:end-1,:) - node(2:end,:);
+len=sqrt(sum(len.*len,2));
+
+==== function [newnodes, len]=polylinesimplify(nodes, minangle) ====
+
+ [newnodes, len]=polylinesimplify(nodes, minangle)
+
+ Calculate a simplified polyline by removing nodes where two adjacent
+ segment have an angle less than a specified limit
+
+
+ input:
+    node: an N x 3 array defining each vertex of the polyline in
+          sequential order
+    minangle:(optional) minimum segment angle in radian, if not given, use
+          0.75*pi
+
+ output:
+    newnodes: the updated node list; start/end will not be removed
+    len: the length of each segment between the start and the end points
+
+
+ -- this function is part of brain2mesh toolbox (http://mcx.space/brain2mesh)
+    License: GPL v3 or later, see LICENSE.txt for details
+
+if(nargin<2)
+    minangle=0.75*pi;
+end
+v=segvec(nodes(1:end-1,:), nodes(2:end,:));
+ang=acos(max(min(sum(-v(1:end-1,:).*(v(2:end,:)),2),1),-1));
+newnodes=nodes;
+newv=v;
+newang=ang;
+idx=find(newang<minangle);
+while(~isempty(idx))
+    newnodes(idx+1,:)=[];
+    newv(idx+1,:)=[];
+    newang(idx)=[];
+    idx=unique(idx-(0:(length(idx)-1))');
+    idx1=idx(idx<size(newnodes,1));
+    newv(idx1,:)  =segvec(newnodes(idx1,:),newnodes(idx1+1,:));
+    idx1=idx(idx<size(newv,1));
+    newang(idx1)  =acos(sum(-newv(idx1,:).*(newv(idx1+1,:)),2));
+    idx0=idx(idx>1);
+    newang(idx0-1)=acos(sum(-newv(idx0-1,:).*(newv(idx0,:)),2));
+    idx=find(newang<minangle);
+end
+if(nargout>1)
+    len=newnodes(1:end-1,:) - newnodes(2:end,:);
+    len=sqrt(sum(len.*len,2));
+end
+
+==== function v=segvec(n1, n2) ====
+v=n2-n1;
+normals=sqrt(sum(v.*v,2));
+v=v./repmat(normals,1,size(v,2));
+
+==== function [idx, dist]=closestnode(node,p) ====
+
+ [idx, dist]=closestnode(node,p)
+
+ Find the closest point in a node list and return its index
+
+ input:
+    node: each row is an N-D node coordinate
+    p: a given position in the same space
+
+ output:
+    idx: the index of the position in the node list that has the shortest
+         Euclidean distance to the position p
+    dist: the distances between p and each node
+
+
+ -- this function is part of brain2mesh toolbox (http://mcx.space/brain2mesh)
+    License: GPL v3 or later, see LICENSE.txt for details
+
+dd=node-repmat(p,size(node,1),1);
+[dist,idx]=min(sum(dd.*dd,2));
 
 === # Mesh resampling and optimization ===
 
@@ -2297,34 +2585,35 @@
 
 ==== function json=savejson(rootname,obj,varargin) ====
 
- json=savejson(rootname,obj,filename)
+ json=savejson(obj)
     or
+ json=savejson(rootname,obj,filename)
  json=savejson(rootname,obj,opt)
  json=savejson(rootname,obj,'param1',value1,'param2',value2,...)
 
  convert a MATLAB object (cell, struct or array) into a JSON (JavaScript
  Object Notation) string
 
- created on 2011/09/09
-
- $Id$
+ initially created on 2011/09/09
 
  input:
       rootname: the name of the root-object, when set to '', the root name
-        is ignored, however, when opt.ForceRootName is set to 1 (see below),
-        the MATLAB variable name will be used as the root name.
+           is ignored, however, when opt.ForceRootName is set to 1 (see below),
+           the MATLAB variable name will be used as the root name.
       obj: a MATLAB object (array, cell, cell array, struct, struct array,
-      class instance).
+           class instance).
       filename: a string for the file name to save the output JSON data.
       opt: a struct for additional options, ignore to use default values.
-        opt can have the following fields (first in [.|.] is the default)
+           opt can have the following fields (first in [.|.] is the default)
 
-        opt.FileName [''|string]: a file name to save the output JSON data
-        opt.FloatFormat ['%.10g'|string]: format to show each numeric element
+           FileName [''|string]: a file name to save the output JSON data
+           FloatFormat ['%.10g'|string]: format to show each numeric element
                          of a 1D/2D array;
-        opt.ArrayIndent [1|0]: if 1, output explicit data array with
+           IntFormat ['%d'|string]: format to display integer elements
+                         of a 1D/2D array;
+           ArrayIndent [1|0]: if 1, output explicit data array with
                          precedent indentation; if 0, no indentation
-        opt.ArrayToStruct[0|1]: when set to 0, savejson outputs 1D/2D
+           ArrayToStruct[0|1]: when set to 0, savejson outputs 1D/2D
                          array in JSON array format; if sets to 1, an
                          array will be shown as a struct with fields
                          "_ArrayType_", "_ArraySize_" and "_ArrayData_"; for
@@ -2335,34 +2624,63 @@
                          _ArrayData_ array will include two columns 
                          (4 for sparse) to record the real and imaginary 
                          parts, and also "_ArrayIsComplex_":1 is added. 
-        opt.ParseLogical [0|1]: if this is set to 1, logical array elem
+           NestArray    [0|1]: If set to 1, use nested array constructs
+                         to store N-dimensional arrays; if set to 0,
+                         use the annotated array format defined in the
+                         JData Specification (Draft 1 or later).
+           ParseLogical [0|1]: if this is set to 1, logical array elem
                          will use true/false rather than 1/0.
-        opt.SingletArray [0|1]: if this is set to 1, arrays with a single
+           SingletArray [0|1]: if this is set to 1, arrays with a single
                          numerical element will be shown without a square
                          bracket, unless it is the root object; if 0, square
                          brackets are forced for any numerical arrays.
-        opt.SingletCell  [1|0]: if 1, always enclose a cell with "[]" 
+           SingletCell  [1|0]: if 1, always enclose a cell with "[]" 
                          even it has only one element; if 0, brackets
                          are ignored when a cell has only 1 element.
-        opt.ForceRootName [0|1]: when set to 1 and rootname is empty, savejson
+           ForceRootName [0|1]: when set to 1 and rootname is empty, savejson
                          will use the name of the passed obj variable as the 
                          root object name; if obj is an expression and 
                          does not have a name, 'root' will be used; if this 
                          is set to 0 and rootname is empty, the root level 
                          will be merged down to the lower level.
-        opt.Inf ['"$1_Inf_"'|string]: a customized regular expression pattern
+           Inf ['"$1_Inf_"'|string]: a customized regular expression pattern
                          to represent +/-Inf. The matched pattern is '([-+]*)Inf'
                          and $1 represents the sign. For those who want to use
                          1e999 to represent Inf, they can set opt.Inf to '$11e999'
-        opt.NaN ['"_NaN_"'|string]: a customized regular expression pattern
+           NaN ['"_NaN_"'|string]: a customized regular expression pattern
                          to represent NaN
-        opt.JSONP [''|string]: to generate a JSONP output (JSON with padding),
+           JSONP [''|string]: to generate a JSONP output (JSON with padding),
                          for example, if opt.JSONP='foo', the JSON data is
                          wrapped inside a function call as 'foo(...);'
-        opt.UnpackHex [1|0]: conver the 0x[hex code] output by loadjson 
+           UnpackHex [1|0]: conver the 0x[hex code] output by loadjson 
                          back to the string form
-        opt.SaveBinary [0|1]: 1 - save the JSON file in binary mode; 0 - text mode.
-        opt.Compact [0|1]: 1- out compact JSON format (remove all newlines and tabs)
+           SaveBinary [0|1]: 1 - save the JSON file in binary mode; 0 - text mode.
+           Compact [0|1]: 1- out compact JSON format (remove all newlines and tabs)
+           Compression  'zlib', 'gzip', 'lzma', 'lzip', 'lz4' or 'lz4hc': specify array 
+                         compression method; currently only supports 6 methods. The
+                         data compression only applicable to numerical arrays 
+                         in 3D or higher dimensions, or when ArrayToStruct
+                         is 1 for 1D or 2D arrays. If one wants to
+                         compress a long string, one must convert
+                         it to uint8 or int8 array first. The compressed
+                         array uses three extra fields
+                         "_ArrayZipType_": the opt.Compression value. 
+                         "_ArrayZipSize_": a 1D interger array to
+                            store the pre-compressed (but post-processed)
+                            array dimensions, and 
+                         "_ArrayZipData_": the "base64" encoded
+                             compressed binary array data. 
+           CompressArraySize [100|int]: only to compress an array if the total 
+                         element count is larger than this number.
+           FormatVersion [2|float]: set the JSONLab output version; since
+                         v2.0, JSONLab uses JData specification Draft 1
+                         for output format, it is incompatible with all
+                         previous releases; if old output is desired,
+                         please set FormatVersion to 1.9 or earlier.
+           Encoding ['']: json file encoding. Support all encodings of
+                         fopen() function
+           PreEncode [1|0]: if set to 1, call jdataencode first to preprocess
+                         the input data before saving
 
         opt can be replaced by a list of ('param',value) pairs. The param 
         string is equivallent to a field in opt and is case sensitive.
@@ -2371,8 +2689,8 @@
 
  examples:
       jsonmesh=struct('MeshNode',[0 0 0;1 0 0;0 1 0;1 1 0;0 0 1;1 0 1;0 1 1;1 1 1],... 
-               'MeshTetra',[1 2 4 8;1 3 4 8;1 2 6 8;1 5 6 8;1 5 7 8;1 3 7 8],...
-               'MeshTri',[1 2 4;1 2 6;1 3 4;1 3 7;1 5 6;1 5 7;...
+               'MeshElem',[1 2 4 8;1 3 4 8;1 2 6 8;1 5 6 8;1 5 7 8;1 3 7 8],...
+               'MeshSurf',[1 2 4;1 2 6;1 3 4;1 3 7;1 5 6;1 5 7;...
                           2 8 4;2 8 6;3 8 4;3 8 7;5 8 6;5 8 7],...
                'MeshCreator','FangQ','MeshTitle','T6 Cube',...
                'SpecialData',[nan, inf, -inf]);
@@ -2401,20 +2719,18 @@
          http://www.mathworks.com/matlabcentral/fileexchange/20565
             created on 2008/07/03
 
- $Id$
-
  input:
-      fname: input file name, if fname contains "{}" or "[]", fname
+      fname: input file name; if fname contains "{}" or "[]", fname
              will be interpreted as a JSON string
-      opt: a struct to store parsing options, opt can be replaced by 
+      opt: (optional) a struct to store parsing options, opt can be replaced by 
            a list of ('param',value) pairs - the param string is equivallent
            to a field in opt. opt can have the following 
            fields (first in [.|.] is the default)
 
-           opt.SimplifyCell [0|1]: if set to 1, loadjson will call cell2mat
+           SimplifyCell [0|1]: if set to 1, loadjson will call cell2mat
                          for each element of the JSON data, and group 
                          arrays based on the cell2mat rules.
-           opt.FastArrayParser [1|0 or integer]: if set to 1, use a
+           FastArrayParser [1|0 or integer]: if set to 1, use a
                          speed-optimized array parser when loading an 
                          array object. The fast array parser may 
                          collapse block arrays into a single large
@@ -2428,7 +2744,20 @@
                          arrays; setting to 3 will return to a 2D cell
                          array of 1D vectors; setting to 4 will return a
                          3D cell array.
-           opt.ShowProgress [0|1]: if set to 1, loadjson displays a progress bar.
+           ShowProgress [0|1]: if set to 1, loadjson displays a progress bar.
+           ParseStringArray [0|1]: if set to 0, loadjson converts "string arrays" 
+                         (introduced in MATLAB R2016b) to char arrays; if set to 1,
+                         loadjson skips this conversion.
+           FormatVersion [2|float]: set the JSONLab format version; since
+                         v2.0, JSONLab uses JData specification Draft 1
+                         for output format, it is incompatible with all
+                         previous releases; if old output is desired,
+                         please set FormatVersion to 1.9 or earlier.
+           Encoding ['']: json file encoding. Support all encodings of
+                         fopen() function
+           JDataDecode [1|0]: if set to 1, call jdatadecode to decode
+                        JData structures defined in the JData
+                        Specification.
 
  output:
       dat: a cell array, where {...} blocks are converted into cell arrays,
@@ -2445,60 +2774,92 @@
 
 ==== function json=saveubjson(rootname,obj,varargin) ====
 
- json=saveubjson(rootname,obj,filename)
+ json=saveubjson(obj)
     or
+ json=saveubjson(rootname,obj,filename)
  json=saveubjson(rootname,obj,opt)
  json=saveubjson(rootname,obj,'param1',value1,'param2',value2,...)
 
- convert a MATLAB object (cell, struct or array) into a Universal 
- Binary JSON (UBJSON) binary string
+ convert a MATLAB object  (cell, struct, array, table, map, handles ...) 
+ into a Universal Binary JSON (UBJSON) or a MessagePack binary stream
 
- created on 2013/08/17
-
- $Id$
+ initially created on 2013/08/17
 
  input:
       rootname: the name of the root-object, when set to '', the root name
-        is ignored, however, when opt.ForceRootName is set to 1 (see below),
-        the MATLAB variable name will be used as the root name.
+           is ignored, however, when opt.ForceRootName is set to 1 (see below),
+           the MATLAB variable name will be used as the root name.
       obj: a MATLAB object (array, cell, cell array, struct, struct array,
-      class instance)
+           class instance)
       filename: a string for the file name to save the output UBJSON data
       opt: a struct for additional options, ignore to use default values.
-        opt can have the following fields (first in [.|.] is the default)
+           opt can have the following fields (first in [.|.] is the default)
 
-        opt.FileName [''|string]: a file name to save the output JSON data
-        opt.ArrayToStruct[0|1]: when set to 0, saveubjson outputs 1D/2D
+           FileName [''|string]: a file name to save the output JSON data
+           ArrayToStruct[0|1]: when set to 0, saveubjson outputs 1D/2D
                          array in JSON array format; if sets to 1, an
                          array will be shown as a struct with fields
                          "_ArrayType_", "_ArraySize_" and "_ArrayData_"; for
                          sparse arrays, the non-zero elements will be
-                         saved to _ArrayData_ field in triplet-format i.e.
-                         (ix,iy,val) and "_ArrayIsSparse_" will be added
+                         saved to "_ArrayData_" field in triplet-format i.e.
+                         (ix,iy,val) and "_ArrayIsSparse_":true will be added
                          with a value of 1; for a complex array, the 
-                         _ArrayData_ array will include two columns 
+                         "_ArrayData_" array will include two rows 
                          (4 for sparse) to record the real and imaginary 
-                         parts, and also "_ArrayIsComplex_":1 is added. 
-        opt.ParseLogical [1|0]: if this is set to 1, logical array elem
+                         parts, and also "_ArrayIsComplex_":true is added. 
+          NestArray    [0|1]: If set to 1, use nested array constructs
+                         to store N-dimensional arrays (compatible with 
+                         UBJSON specification Draft 12); if set to 0,
+                         use the JData (v0.5) optimized N-D array header;
+                         NestArray is automatically set to 1 when
+                         MessagePack is set to 1
+          ParseLogical [1|0]: if this is set to 1, logical array elem
                          will use true/false rather than 1/0.
-        opt.SingletArray [0|1]: if this is set to 1, arrays with a single
+          SingletArray [0|1]: if this is set to 1, arrays with a single
                          numerical element will be shown without a square
                          bracket, unless it is the root object; if 0, square
                          brackets are forced for any numerical arrays.
-        opt.SingletCell  [1|0]: if 1, always enclose a cell with "[]" 
+          SingletCell  [1|0]: if 1, always enclose a cell with "[]" 
                          even it has only one element; if 0, brackets
                          are ignored when a cell has only 1 element.
-        opt.ForceRootName [0|1]: when set to 1 and rootname is empty, saveubjson
+          ForceRootName [0|1]: when set to 1 and rootname is empty, saveubjson
                          will use the name of the passed obj variable as the 
                          root object name; if obj is an expression and 
                          does not have a name, 'root' will be used; if this 
                          is set to 0 and rootname is empty, the root level 
                          will be merged down to the lower level.
-        opt.JSONP [''|string]: to generate a JSONP output (JSON with padding),
+          JSONP [''|string]: to generate a JSONP output (JSON with padding),
                          for example, if opt.JSON='foo', the JSON data is
                          wrapped inside a function call as 'foo(...);'
-        opt.UnpackHex [1|0]: conver the 0x[hex code] output by loadjson 
+          UnpackHex [1|0]: conver the 0x[hex code] output by loadjson 
                          back to the string form
+          Compression  'zlib', 'gzip', 'lzma', 'lzip', 'lz4' or 'lz4hc': specify array 
+                         compression method; currently only supports 6 methods. The
+                         data compression only applicable to numerical arrays 
+                         in 3D or higher dimensions, or when ArrayToStruct
+                         is 1 for 1D or 2D arrays. If one wants to
+                         compress a long string, one must convert
+                         it to uint8 or int8 array first. The compressed
+                         array uses three extra fields
+                         "_ArrayZipType_": the opt.Compression value. 
+                         "_ArrayZipSize_": a 1D interger array to
+                            store the pre-compressed (but post-processed)
+                            array dimensions, and 
+                         "_ArrayZipData_": the binary stream of
+                            the compressed binary array data WITHOUT
+                            'base64' encoding
+          CompressArraySize [100|int]: only to compress an array if the total 
+                         element count is larger than this number.
+          MessagePack [0|1]: output MessagePack (https://msgpack.org/)
+                         binary stream instead of UBJSON
+          FormatVersion [2|float]: set the JSONLab output version; since
+                         v2.0, JSONLab uses JData specification Draft 2
+                         for output format, it is incompatible with all
+                         previous releases; if old output is desired,
+                         please set FormatVersion to 1.9 or earlier.
+          Debug [0|1]: output binary numbers in <%g> format for debugging
+          PreEncode [1|0]: if set to 1, call jdataencode first to preprocess
+                         the input data before saving
 
         opt can be replaced by a list of ('param',value) pairs. The param 
         string is equivallent to a field in opt and is case sensitive.
@@ -2506,14 +2867,15 @@
       json: a binary string in the UBJSON format (see http://ubjson.org)
 
  examples:
-      jsonmesh=struct('MeshNode',[0 0 0;1 0 0;0 1 0;1 1 0;0 0 1;1 0 1;0 1 1;1 1 1],... 
-               'MeshTetra',[1 2 4 8;1 3 4 8;1 2 6 8;1 5 6 8;1 5 7 8;1 3 7 8],...
-               'MeshTri',[1 2 4;1 2 6;1 3 4;1 3 7;1 5 6;1 5 7;...
+      jsonmesh=struct('MeshVertex3',[0 0 0;1 0 0;0 1 0;1 1 0;0 0 1;1 0 1;0 1 1;1 1 1],... 
+               'MeshTet4',[1 2 4 8;1 3 4 8;1 2 6 8;1 5 6 8;1 5 7 8;1 3 7 8],...
+               'MeshTri3',[1 2 4;1 2 6;1 3 4;1 3 7;1 5 6;1 5 7;...
                           2 8 4;2 8 6;3 8 4;3 8 7;5 8 6;5 8 7],...
                'MeshCreator','FangQ','MeshTitle','T6 Cube',...
                'SpecialData',[nan, inf, -inf]);
-      saveubjson('jsonmesh',jsonmesh)
-      saveubjson('jsonmesh',jsonmesh,'meshdata.ubj')
+      saveubjson(jsonmesh)
+      saveubjson('',jsonmesh,'meshdata.ubj')
+      saveubjson('mesh1',jsonmesh,'FileName','meshdata.msgpk','MessagePack',1)
 
  license:
      BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details
@@ -2527,9 +2889,7 @@
 
  parse a JSON (JavaScript Object Notation) file or string
 
- created on 2013/08/01
-
- $Id$
+ initially created on 2013/08/01
 
  input:
       fname: input file name, if fname contains "{}" or "[]", fname
@@ -2539,18 +2899,23 @@
            to a field in opt. opt can have the following 
            fields (first in [.|.] is the default)
 
-           opt.SimplifyCell [0|1]: if set to 1, loadubjson will call cell2mat
+           SimplifyCell [0|1]: if set to 1, loadubjson will call cell2mat
                          for each element of the JSON data, and group 
                          arrays based on the cell2mat rules.
-           opt.IntEndian [B|L]: specify the endianness of the integer fields
+           IntEndian [B|L]: specify the endianness of the integer fields
                          in the UBJSON input data. B - Big-Endian format for 
                          integers (as required in the UBJSON specification); 
                          L - input integer fields are in Little-Endian order.
-           opt.NameIsString [0|1]: for UBJSON Specification Draft 8 or 
+           NameIsString [0|1]: for UBJSON Specification Draft 8 or 
                          earlier versions (JSONLab 1.0 final or earlier), 
                          the "name" tag is treated as a string. To load 
                          these UBJSON data, you need to manually set this 
                          flag to 1.
+           FormatVersion [2|float]: set the JSONLab format version; since
+                         v2.0, JSONLab uses JData specification Draft 1
+                         for output format, it is incompatible with all
+                         previous releases; if old output is desired,
+                         please set FormatVersion to 1.9 or earlier.
 
  output:
       dat: a cell array, where {...} blocks are converted into cell arrays,
@@ -2567,26 +2932,46 @@
      BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
 
 
-==== function savejmesh(node,face,elem,fname,varargin) ====
+==== function data = loadmsgpack(fname,varargin) ====
 
- savejmesh(node,face,elem,fname,opt)
+   data = loadmsgpack(fname,varargin)
 
- export a mesh to the JMesh format
+LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
+ LOADMSGPACK(BYTES)
+    reads BYTES as msgpack data, and creates Matlab data structures
+    from it.
+    - strings are converted to strings
+    - numbers are converted to appropriate numeric values
+    - true, false are converted to logical 1, 0
+    - nil is converted to []
+    - arrays are converted to cell arrays
+    - maps are converted to containers.Map
+
+ (c) 2016 Bastian Bechtold
+
+ license:
+     BSD 3-clause license or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
 
 
- input:
-      node: input, node list, dimension (nn,3)
-      face: input, optional, surface face element list, dimension (be,3)
-      elem: input, tetrahedral element list, dimension (ne,4)
-      fname: output file name
-      opt: additional parameters in the form of 'parameter',value pairs
-           valid parameters include:
-           'Dimension': 0 - a user defined mesh, 2- a 2D mesh, 3- a 3D mesh
-           'Author': a string to set the author of the mesh
-           'MeshTitle': a string to set the title of the mesh
-           'MeshTag': a value as the tag of the mesh data
-           'MeshGroup': a value to group this mesh with other mesh data
-           'Comment': a string as the additional note for the mesh data
+==== function msgpk=savemsgpack(rootname,obj,varargin) ====
+
+ msgpk=savemsgpack(obj)
+    or
+ msgpk=savemsgpack(rootname,obj,filename)
+ msgpk=savemsgpack(rootname,obj,opt)
+ msgpk=savemsgpack(rootname,obj,'param1',value1,'param2',value2,...)
+
+ convert a MATLAB object (cell, struct, array, table, map, handles ...) 
+ into a MessagePack binary stream
+
+ initially created on 2019/05/20
+
+ This function is the same as calling saveubjson(...,'MessagePack',1)
+
+ Please type "help saveubjson" for details for the supported inputs and outputs.
+
+ license:
+     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details
 
 
 ==== function savemphtxt(node, face, elem, filename) ====
@@ -2765,6 +3150,680 @@
 
  output:
       dat: output, data read from the TIFF file
+
+
+=== # JData functions ===
+
+==== function savejmesh(node,face,elem,fname,varargin) ====
+
+ savejmesh(node,face,elem,fname,opt)
+
+ export a mesh to the JMesh format defined in http://github.com/fangq/jmesh
+
+
+ input:
+      node: input, node list, dimension (nn,3)
+      face: input, optional, surface face element list, dimension (be,3)
+      elem: input, tetrahedral element list, dimension (ne,4)
+      fname: output file name; if file name has a suffix .bmsh or .bmesh, 
+           the mesh data will be saved in the binary jmesh format; otherwise,
+           the file will be saved as a text-based jmesh (which is a plain 
+           JSON file)
+      opt: additional parameters in the form of 'parameter',value pairs
+           valid parameters include:
+           'Dimension': 0 - a user defined mesh, 2- a 2D mesh, 3- a 3D mesh
+           'Author': a string to set the author of the mesh
+           'MeshTitle': a string to set the title of the mesh
+           'MeshTag': a value as the tag of the mesh data
+           'Comment': a string as the additional note for the mesh data
+
+           please type 'help savejson' and 'help saveubjson' to see additional 
+           supported options    
+
+ examples:
+
+    [no,fc,el]=meshabox([0 0 0],[60,30,40],3,10);
+    savejmesh(no,fc,[],'box_surf.jmsh','dimension',3);
+    savejmesh(no,fc,el,'box_zlib.jmsh','compression','zlib');
+    savejmesh(no,fc,el,'box.bmsh','dimension',3);
+    savejmesh(no,fc,el,'box_zlib.bmsh','dimension',3,'compression','zlib');
+    mesh=loadubjson('box.bmsh')
+
+
+==== function jnii=loadjnifti(filename, varargin) ====
+
+    jnii=loadjnifti(inputfile)
+       or
+    jnii=loadjnifti(inputfile, 'Param1',value1, 'Param2',value2,...)
+
+    Load a standard NIFTI-1/2 file or text or binary JNIfTI file with
+    format defined in JNIfTI specification: https://github.com/fangq/jnifti
+
+
+    input:
+        inputfile: the output file name to the JNIfTI or NIFTI-1/2 file
+                *.bnii for binary JNIfTI file
+                *.jnii for text JNIfTI file
+                *.nii  for NIFTI-1/2 files
+        options: (optional) if loading from a .bnii file, please see the options for
+               loadubjson.m (part of JSONLab); if loading from a .jnii, please see the 
+               supported options for loadjson.m (part of JSONLab).
+
+    output:
+        jnii: a structure (array) or cell (array). The data structure can
+            be completely generic or auxilary data without any JNIfTI
+            constructs. However, if a JNIfTI object is included, it shall
+            contain the below subfields (can appear within any depth of the
+            structure)
+                jnii.NIFTIHeader -  a structure containing the 1-to-1 mapped NIFTI-1/2 header
+                jnii.NIFTIData - the main image data array
+                jnii.NIFTIExtension - a cell array contaiing the extension data buffers
+
+    example:
+        jnii=jnifticreate(uint8(magic(10)),'Name','10x10 magic matrix');
+        savejnifti(jnii, 'magic10.jnii')
+        newjnii=loadjnifti('magic10.jnii');
+
+    this file is part of JNIfTI specification: https://github.com/fangq/jnifti
+
+    License: Apache 2.0, see https://github.com/fangq/jnifti for details
+
+if(nargin<1)
+    error('you must provide data and output file name');
+end
+if(~exist('savejson','file'))
+    error('you must first install JSONLab from http://github.com/fangq/jsonlab/');
+end
+if(regexp(filename,'\.nii$'))
+    jnii=nii2jnii(filename,'jnii');
+elseif(regexp(filename,'\.jnii$'))
+    jnii=loadjson(filename,varargin{:});
+elseif(regexp(filename,'\.bnii$'))
+    jnii=loadubjson(filename,varargin{:});
+else
+    error('file suffix must be .jnii for text JNIfTI, .bnii for binary JNIfTI or .nii for NIFTI-1/2 files');
+end
+
+==== function savejnifti(jnii, filename, varargin) ====
+
+    savejnifti(jnii, outputfile)
+       or
+    savejnifti(jnii, outputfile, 'Param1',value1, 'Param2',value2,...)
+
+    Save an in-memory JNIfTI structure into a JNIfTI file with format
+    defined in JNIfTI specification: https://github.com/fangq/jnifti
+
+
+    input:
+        jnii: a structure (array) or cell (array). The data structure can
+            be completely generic or auxilary data without any JNIfTI
+            constructs. However, if a JNIfTI object is included, it shall
+            contain the below subfields (can appear within any depth of the
+            structure)
+                jnii.NIFTIHeader -  a structure containing the 1-to-1 mapped NIFTI-1/2 header
+                jnii.NIFTIData - the main image data array
+                jnii.NIFTIExtension - a cell array contaiing the extension data buffers
+        outputfile: the output file name to the JNIfTI file 
+                *.bnii for binary JNIfTI file
+                *.jnii for text JNIfTI file
+        options: (optional) if saving to a .bnii file, please see the options for
+               saveubjson.m (part of JSONLab); if saving to .jnii, please see the 
+               supported options for savejson.m (part of JSONLab).
+
+    example:
+        jnii=jnifticreate(uint8(magic(10)),'Name','10x10 magic matrix');
+        savejnifti(jnii, 'magic10.jnii')
+        savejnifti(jnii, 'magic10_debug.bnii','Debug',1)
+
+    this file is part of JNIfTI specification: https://github.com/fangq/jnifti
+
+    License: Apache 2.0, see https://github.com/fangq/jnifti for details
+
+if(nargin<2)
+    error('you must provide data and output file name');
+end
+if(~exist('savejson','file'))
+    error('you must first install JSONLab from http://github.com/fangq/jsonlab/');
+end
+if(regexp(filename,'\.jnii$'))
+    savejnii(jnii,filename,varargin{:});
+elseif(regexp(filename,'\.bnii$'))
+    savebnii(jnii,filename,varargin{:});
+else
+    error('file suffix must be .jnii for text JNIfTI or .bnii for binary JNIfTI');
+end
+
+==== function varargout = loadnifti (varargin) ====
+
+    jnii=loadnifti(filename)
+        or
+    nii=loadnifti(filename,option)
+
+    Read a NIfTI-1/2 (*.nii/.nii.gz) or Analyze 7.5 (*.hdr/*.img/.hdr.gz/.img.gz) 
+    image file.
+
+
+    Please run `help nii2jnii` to see the input output outputs.
+    This function is an alias to nii2jnii
+
+
+    this file is part of JNIfTI specification: https://github.com/fangq/jnifti
+
+    License: Apache 2.0, see https://github.com/fangq/jnifti for details
+
+[varargout{1:nargout}]=nii2jnii(varargin{:});
+
+==== function bytestream=savenifti(img, filename, varargin) ====
+
+    savenifti(img, filename)
+        or
+    savenifti(img, filename, rawhdr)
+    savenifti(img, filename, 'nifti2')
+    bytestream=savenifti(img)
+
+    Write an image to a NIfTI (*.nii) or compressed NIfTI file (.nii.gz)
+
+
+    input:
+        img: this is a numerical array to be stored in the NIfTI file
+        filename: output file name, can have a suffix of '.nii' or '.nii.gz'
+                 if a .gz suffix is used, this function needs the JSONLab 
+                 (http://gitlab.com/fangq/jsonlab) and ZMat (http://gitlab.com/fangq/zmat)
+                 to perform the compression.
+        rawhdr (optional): a struct, as a pre-created/loaded NIfTI header data structure
+                if rawhdr is 'nifti1' or 'nifti2', this function calls 
+                nifticreate to create a default header.
+    output:
+        bytestream (optional): the output file byte stream. it only returns this output if
+                no filename is given. 
+
+    example:
+        a=single(rand(10,20,30));
+        savenifti(a,'randnii.nii');
+        savenifti(a,'randnii2.nii.gz','nifti2'); % needs zmat
+
+
+    this file is part of JNIfTI specification: https://github.com/fangq/jnifti
+
+    License: Apache 2.0, see https://github.com/fangq/jnifti for details
+
+if(~isempty(varargin))
+    if(isstruct(varargin{1}))
+        header=varargin{1};
+    elseif(ischar(varargin{1}))
+        header=nifticreate(img,varargin{1});
+    end
+else
+    header=nifticreate(img);
+end
+names=fieldnames(header);
+buf=[];
+for i=1:length(names)
+    buf=[buf,typecast(header.(names{i}),'uint8')];
+end
+if(length(buf)~=352 && length(buf)~=544)
+    error('incorrect nifti-1/2 header %d',length(buf));
+end
+buf=[buf,typecast(img(:)','uint8')];
+if(nargout>1 && nargin<2)
+    bytestream=buf;
+    return;
+end
+if(regexp(filename,'\.[Gg][Zz]$'))
+    buf=gzipencode(buf);
+end
+fid=fopen(filename,'wb');
+if(fid==0)
+    error('can not write to the specified file');
+end
+fwrite(fid,buf);
+fclose(fid);
+
+==== function jdata=jdataencode(data, varargin) ====
+
+ jdata=jdataencode(data)
+    or
+ jdata=jdataencode(data, options)
+ jdata=jdataencode(data, 'Param1',value1, 'Param2',value2,...)
+
+ Serialize a MATLAB struct or cell array into a JData-compliant 
+ structure as defined in the JData spec: http://github.com/fangq/jdata
+
+ This function implements the JData Specification Draft 2 (Oct. 2019)
+ see http://github.com/fangq/jdata for details
+
+
+ input:
+     data: a structure (array) or cell (array) to be encoded.
+     options: (optional) a struct or Param/value pairs for user
+              specified options (first in [.|.] is the default)
+         Base64: [0|1] if set to 1, _ArrayZipData_ is assumed to
+       	       be encoded with base64 format and need to be
+       	       decoded first. This is needed for JSON but not
+       	       UBJSON data
+         Prefix: ['x0x5F'|'x'] for JData files loaded via loadjson/loadubjson, the
+                      default JData keyword prefix is 'x0x5F'; if the
+                      json file is loaded using matlab2018's
+                      jsondecode(), the prefix is 'x'; this function
+                      attempts to automatically determine the prefix;
+                      for octave, the default value is an empty string ''.
+         UseArrayZipSize: [1|0] if set to 1, _ArrayZipSize_ will be added to 
+       	       store the "pre-processed" data dimensions, i.e.
+       	       the original data stored in _ArrayData_, and then flaten
+       	       _ArrayData_ into a row vector using row-major
+       	       order; if set to 0, a 2D _ArrayData_ will be used
+         MapAsStruct: [0|1] if set to 1, convert containers.Map into
+       	       struct; otherwise, keep it as map
+         Compression: ['zlib'|'gzip','lzma','lz4','lz4hc'] - use zlib method 
+       	       to compress data array
+         CompressArraySize: [100|int]: only to compress an array if the  
+       	       total element count is larger than this number.
+         FormatVersion [2|float]: set the JSONLab output version; since
+       	       v2.0, JSONLab uses JData specification Draft 1
+       	       for output format, it is incompatible with all
+       	       previous releases; if old output is desired,
+       	       please set FormatVersion to 1.9 or earlier.
+
+ example:
+     jd=jdataencode(struct('a',rand(5)+1i*rand(5),'b',[],'c',sparse(5,5)))
+
+ license:
+     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+
+
+==== function newdata=jdatadecode(data,varargin) ====
+
+ newdata=jdatadecode(data,opt,...)
+
+ Convert all JData object (in the form of a struct array) into an array
+ (accepts JData objects loaded from either loadjson/loadubjson or 
+ jsondecode for MATLAB R2018a or later)
+
+ This function implements the JData Specification Draft 2 (Oct. 2019)
+ see http://github.com/fangq/jdata for details
+
+
+ input:
+      data: a struct array. If data contains JData keywords in the first
+            level children, these fields are parsed and regrouped into a
+            data object (arrays, trees, graphs etc) based on JData 
+            specification. The JData keywords are
+               "_ArrayType_", "_ArraySize_", "_ArrayData_"
+               "_ArrayIsSparse_", "_ArrayIsComplex_", 
+               "_ArrayZipType_", "_ArrayZipSize", "_ArrayZipData_"
+      opt: (optional) a list of 'Param',value pairs for additional options 
+           The supported options include
+               Recursive: [1|0] if set to 1, will apply the conversion to 
+                            every child; 0 to disable
+               Base64: [0|1] if set to 1, _ArrayZipData_ is assumed to
+                         be encoded with base64 format and need to be
+                         decoded first. This is needed for JSON but not
+                         UBJSON data
+               Prefix: ['x0x5F'|'x'] for JData files loaded via loadjson/loadubjson, the
+                         default JData keyword prefix is 'x0x5F'; if the
+                         json file is loaded using matlab2018's
+                         jsondecode(), the prefix is 'x'; this function
+                         attempts to automatically determine the prefix;
+                         for octave, the default value is an empty string ''.
+               FormatVersion: [2|float]: set the JSONLab output version; 
+                         since v2.0, JSONLab uses JData specification Draft 1
+                         for output format, it is incompatible with all
+                         previous releases; if old output is desired,
+                         please set FormatVersion to 1
+
+ output:
+      newdata: the covnerted data if the input data does contain a JData 
+               structure; otherwise, the same as the input.
+
+ examples:
+      obj={[],{'test'},true,struct('sparse',sparse(2,3),'magic',uint8(magic(5)))}
+      jdata=jdatadecode(jdataencode(obj))
+      isequaln(obj,jdata)
+
+ license:
+     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+
+
+=== # Data compression ===
+
+==== function varargout = zlibencode(varargin) ====
+
+ output = zlibencode(input)
+    or
+ [output, info] = zlibencode(input)
+
+ Compress a string or numerical array using the ZLIB-compression
+
+ This function depends on JVM in MATLAB or, can optionally use the ZMat 
+ toolbox (http://github.com/fangq/zmat)
+
+ Copyright (c) 2012, Kota Yamaguchi
+ URL: https://www.mathworks.com/matlabcentral/fileexchange/39526-byte-encoding-utilities
+
+
+ input:
+      input: the original data, can be a string, a numerical vector or array
+
+ output:
+      output: the decompressed byte stream stored in a uint8 vector; if info is 
+            given, output will restore the original data's type and dimensions
+
+ examples:
+      [bytes, info]=zlibencode(eye(10));
+      orig=zlibdecode(bytes,info);
+
+ license:
+     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+
+
+==== function varargout = zlibdecode(varargin) ====
+
+ output = zlibdecode(input)
+    or
+ output = zlibdecode(input,info)
+
+ Decompressing a ZLIB-compressed byte-stream to recover the original data
+ This function depends on JVM in MATLAB or, can optionally use the ZMat 
+ toolbox (http://github.com/fangq/zmat)
+
+ Copyright (c) 2012, Kota Yamaguchi
+ URL: https://www.mathworks.com/matlabcentral/fileexchange/39526-byte-encoding-utilities
+
+
+ input:
+      input: a string, int8/uint8 vector or numerical array to store ZLIB-compressed data
+      info (optional): a struct produced by the zmat/lz4hcencode function during 
+            compression; if not given, the inputs/outputs will be treated as a
+            1-D vector
+
+ output:
+      output: the decompressed byte stream stored in a uint8 vector; if info is 
+            given, output will restore the original data's type and dimensions
+
+ examples:
+      [bytes, info]=zlibencode(eye(10));
+      orig=zlibdecode(bytes,info);
+
+ license:
+     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+
+
+==== function varargout = gzipencode(varargin) ====
+
+ output = gzipencode(input)
+    or
+ [output, info] = gzipencode(input)
+
+ Compress a string or numerical array using the GZIP-compression
+
+ This function depends on JVM in MATLAB or, can optionally use the ZMat 
+ toolbox (http://github.com/fangq/zmat)
+
+ Copyright (c) 2012, Kota Yamaguchi
+ URL: https://www.mathworks.com/matlabcentral/fileexchange/39526-byte-encoding-utilities
+
+
+ input:
+      input: the original data, can be a string, a numerical vector or array
+
+ output:
+      output: the decompressed byte stream stored in a uint8 vector; if info is 
+            given, output will restore the original data's type and dimensions
+
+ examples:
+      [bytes, info]=gzipencode(eye(10));
+      orig=gzipdecode(bytes,info);
+
+ license:
+     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+
+
+==== function varargout = gzipdecode(varargin) ====
+
+ output = gzipdecode(input)
+    or
+ output = gzipdecode(input,info)
+
+ Decompressing a GZIP-compressed byte-stream to recover the original data
+ This function depends on JVM in MATLAB or, can optionally use the ZMat 
+ toolbox (http://github.com/fangq/zmat)
+
+ Copyright (c) 2012, Kota Yamaguchi
+ URL: https://www.mathworks.com/matlabcentral/fileexchange/39526-byte-encoding-utilities
+
+
+ input:
+      input: a string, int8/uint8 vector or numerical array to store the GZIP-compressed data
+      info (optional): a struct produced by the zmat/lz4hcencode function during 
+            compression; if not given, the inputs/outputs will be treated as a
+            1-D vector
+
+ output:
+      output: the decompressed byte stream stored in a uint8 vector; if info is 
+            given, output will restore the original data's type and dimensions
+
+ examples:
+      [bytes, info]=gzipencode(eye(10));
+      orig=gzipdecode(bytes,info);
+
+ license:
+     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+
+
+==== function varargout = lzmaencode(varargin) ====
+
+ output = lzmaencode(input)
+    or
+ [output, info] = lzmaencode(input)
+
+ Compress a string or a numerical array using LZMA-compression
+
+ This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+
+
+ input:
+      input: the original data, can be a string, a numerical vector or array
+
+ output:
+      output: the compressed byte stream stored in a uint8 vector
+      info: (optional) a struct storing the metadata of the input, see "help zmat" for details
+
+ examples:
+      [bytes, info]=lzmaencode(eye(10));
+      orig=lzmadecode(bytes,info);
+
+ license:
+     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+
+
+==== function varargout = lzmadecode(varargin) ====
+
+ output = lzmadecode(input)
+    or
+ output = lzmadecode(input,info)
+
+ Decompressing an LZMA-compressed byte-stream to recover the original data
+ This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+
+
+ input:
+      input: a string, int8/uint8 vector or numerical array to store LZMA-compressed data
+      info (optional): a struct produced by the zmat/lzmaencode function during 
+            compression; if not given, the inputs/outputs will be treated as a
+            1-D vector
+
+ output:
+      output: the decompressed byte stream stored in a uint8 vector; if info is 
+            given, output will restore the original data's type and dimensions
+
+ examples:
+      [bytes, info]=lzmaencode(eye(10));
+      orig=lzmadecode(bytes,info);
+
+ license:
+     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+
+
+==== function varargout = lzipencode(varargin) ====
+
+ output = lzipencode(input)
+    or
+ [output, info] = lzipencode(input)
+
+ Compress a string or a numerical array using LZip-compression
+
+ This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+
+
+ input:
+      input: the original data, can be a string, a numerical vector or array
+
+ output:
+      output: the compressed byte stream stored in a uint8 vector
+      info: (optional) a struct storing the metadata of the input, see "help zmat" for details
+
+ examples:
+      [bytes, info]=lzipencode(eye(10));
+      orig=lzipdecode(bytes,info);
+
+ license:
+     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+
+
+==== function varargout = lzipdecode(varargin) ====
+
+ output = lzipdecode(input)
+    or
+ output = lzipdecode(input,info)
+
+ Decompressing an Lzip-compressed byte-stream to recover the original data
+ This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+
+
+ input:
+      input: a string, int8/uint8 vector or numerical array to store Lzip-compressed data
+      info (optional): a struct produced by the zmat/lzipencode function during 
+            compression; if not given, the inputs/outputs will be treated as a
+            1-D vector
+
+ output:
+      output: the decompressed byte stream stored in a uint8 vector; if info is 
+            given, output will restore the original data's type and dimensions
+
+ examples:
+      [bytes, info]=lzipencode(eye(10));
+      orig=lzipdecode(bytes,info);
+
+ license:
+     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+
+
+==== function varargout = lz4hcencode(varargin) ====
+
+ output = lz4encode(input)
+    or
+ [output, info] = lz4encode(input)
+
+ Compress a string or a numerical array using LZ4-compression
+
+ This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+
+
+ input:
+      input: the original data, can be a string, a numerical vector or array
+
+ output:
+      output: the compressed byte stream stored in a uint8 vector
+      info: (optional) a struct storing the metadata of the input, see "help zmat" for details
+
+ examples:
+      [bytes, info]=lz4encode(eye(10));
+      orig=lz4decode(bytes,info);
+
+ license:
+     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+
+
+==== function varargout = lz4decode(varargin) ====
+
+ output = lz4decode(input)
+    or
+ output = lz4decode(input,info)
+
+ Decompressing an LZ4-compressed byte-stream to recover the original data
+ This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+
+
+ input:
+      input: a string, int8/uint8 vector or numerical array to store LZ4-compressed data
+      info (optional): a struct produced by the zmat/lz4encode function during 
+            compression; if not given, the inputs/outputs will be treated as a
+            1-D vector
+
+ output:
+      output: the decompressed byte stream stored in a uint8 vector; if info is 
+            given, output will restore the original data's type and dimensions
+
+ examples:
+      [bytes, info]=lz4encode(eye(10));
+      orig=lz4decode(bytes,info);
+
+ license:
+     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+
+
+==== function varargout = lz4hcencode(varargin) ====
+
+ output = lz4hcencode(input)
+    or
+ [output, info] = lz4hcencode(input)
+
+ Compress a string or a numerical array using LZ4HC-compression
+
+ This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+
+
+ input:
+      input: the original data, can be a string, a numerical vector or array
+
+ output:
+      output: the compressed byte stream stored in a uint8 vector
+      info: (optional) a struct storing the metadata of the input, see "help zmat" for details
+
+ examples:
+      [bytes, info]=lz4hcencode(eye(10));
+      orig=lz4hcdecode(bytes,info);
+
+ license:
+     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
+
+
+==== function varargout = lz4hcdecode(varargin) ====
+
+ output = lz4hcdecode(input)
+    or
+ output = lz4hcdecode(input,info)
+
+ Decompressing an LZ4HC-compressed byte-stream to recover the original data
+ This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+
+
+ input:
+      input: a string, int8/uint8 vector or numerical array to store LZ4HC-compressed data
+      info (optional): a struct produced by the zmat/lz4hcencode function during 
+            compression; if not given, the inputs/outputs will be treated as a
+            1-D vector
+
+ output:
+      output: the decompressed byte stream stored in a uint8 vector; if info is 
+            given, output will restore the original data's type and dimensions
+
+ examples:
+      [bytes, info]=lz4hcencode(eye(10));
+      orig=lz4hcdecode(bytes,info);
+
+ license:
+     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
 
 
 === # Volumetric image pre-processing ===
@@ -3176,7 +4235,7 @@
                    [x,y,z]_new=Amat*[x,y,z]_old+Bvec
 
 
-==== function [isoctave verinfo]=isoctavemesh ====
+==== function [isoctave, verinfo]=isoctavemesh ====
 
  [isoctave verinfo]=isoctavemesh
 
@@ -3404,23 +4463,6 @@
  license:
      BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
 
- -- this function is part of jsonlab toolbox (http://iso2mesh.sf.net/cgi-bin/index.cgi?jsonlab)
-
-len=length(varargin);
-opt=struct;
-if(len==0) return; end
-i=1;
-while(i<=len)
-    if(isstruct(varargin{i}))
-        opt=mergestruct(opt,varargin{i});
-    elseif(ischar(varargin{i}) && i<len)
-        opt=setfield(opt,lower(varargin{i}),varargin{i+1});
-        i=i+1;
-    else
-        error('input must be in the form of ...,''name'',value,... pairs or structs');
-    end
-    i=i+1;
-end
 
 ==== function val=jsonopt(key,default,varargin) ====
 
@@ -3429,8 +4471,6 @@ end
  setting options based on a struct. The struct can be produced
  by varargin2struct from a list of 'param','value' pairs
 
-
- $Id: loadjson.m 371 2012-06-20 12:43:06Z fangq $
 
  input:
       key: a string with which one look up a value from a struct
@@ -3443,18 +4483,6 @@ end
  license:
      BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details
 
- -- this function is part of jsonlab toolbox (http://iso2mesh.sf.net/cgi-bin/index.cgi?jsonlab)
- 
-val=default;
-if(nargin<=2) return; end
-opt=varargin{1};
-if(isstruct(opt))
-    if(isfield(opt,key))
-       val=getfield(opt,key);
-    elseif(isfield(opt,lower(key)))
-       val=getfield(opt,lower(key));
-    end
-end
 
 ==== function s=mergestruct(s1,s2) ====
 
@@ -3472,19 +4500,6 @@ end
  license:
      BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
 
- -- this function is part of jsonlab toolbox (http://iso2mesh.sf.net/cgi-bin/index.cgi?jsonlab)
-
-if(~isstruct(s1) || ~isstruct(s2))
-    error('input parameters contain non-struct');
-end
-if(length(s1)>1 || length(s2)>1)
-    error('can not merge struct arrays');
-end
-fn=fieldnames(s2);
-s=s1;
-for i=1:length(fn)              
-    s=setfield(s,fn{i},getfield(s2,fn{i}));
-end
 
 ==== function node=orthdisk(c0,c1,r,ndiv,v1,angle0) ====
 
@@ -3506,37 +4521,5 @@ end
 
  output:
      node: the 3D vertices of the disk
-
-
-==== function newdata=struct2jdata(data,varargin) ====
-
- newdata=struct2jdata(data,opt,...)
-
- convert a JData object (in the form of a struct array) into an array
-
-
- input:
-      data: a struct array. If data contains JData keywords in the first
-            level children, these fields are parsed and regrouped into a
-            data object (arrays, trees, graphs etc) based on JData 
-            specification. The JData keywords are
-               "_ArrayType_", "_ArraySize_", "_ArrayData_"
-               "_ArrayIsSparse_", "_ArrayIsComplex_"
-      opt: (optional) a list of 'Param',value pairs for additional options 
-           The supported options include
-               'Recursive', if set to 1, will apply the conversion to 
-                            every child; 0 to disable
-
- output:
-      newdata: the covnerted data if the input data does contain a JData 
-               structure; otherwise, the same as the input.
-
- examples:
-      obj=struct('_ArrayType_','double','_ArraySize_',[2 3],
-                 '_ArrayIsSparse_',1 ,'_ArrayData_',null);
-      ubjdata=struct2jdata(obj);
-
- license:
-     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
 
 

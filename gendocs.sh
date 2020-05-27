@@ -29,7 +29,7 @@ func_backend="binsurface cgalv2m cgals2m vol2restrictedtri surf2volz mesh2mask"
 func_primitive="meshabox meshasphere meshanellip meshunitsphere meshacylinder 
                 meshgrid5 meshgrid6 latticegrid extrudecurve meshcylinders"
 func_inquery="finddisconnsurf surfedge volface extractloops meshconn  
-                meshcentroid nodevolume elemvolume neighborelem 
+                meshcentroid nodevolume elemvolume neighborelem layersurf 
 		faceneighbors edgeneighbors maxsurf flatsegment orderloopedge  
 		mesheuler bbxflatsegment surfplane surfinterior surfpart
                 surfseeds meshquality meshedge meshface surfacenorm uniqedges uniqfaces
@@ -40,13 +40,19 @@ func_meshfix="meshcheckrepair meshreorient removedupelem
 func_remesh="meshresample remeshsurf smoothsurf sortmesh mergemesh 
                 meshrefine mergesurf surfboolean fillsurf highordertet
 		elemfacecenter barydualmesh meshinterp meshremap extrudesurf"
+func_polyline="slicesurf slicesurf3 polylinelen polylinesimplify closestnode"
 func_fileio="saveasc savedxf savestl savebinstl saveinr saveoff 
                 savesmf savesurfpoly savegts readgts savemsh
                 savevrml readasc readinr readmedit readoff readsmf
 	        readtetgen deletemeshfile mcpath mwpath savemedit
-		savejson loadjson saveubjson loadubjson savejmesh
+		savejson loadjson saveubjson loadubjson loadmsgpack savemsgpack
                 savemphtxt savetetgenele savetetgennode saveabaqus
 		savenirfast readnirfast readnifti readmptiff"
+func_jdata="savejmesh loadjnifti savejnifti loadnifti savenifti jdataencode 
+                jdatadecode"
+func_compression="zlibencode zlibdecode gzipencode gzipdecode lzmaencode 
+                lzmadecode lzipencode lzipdecode lz4encode lz4decode lz4hcencode 
+		lz4hcdecode"
 func_binimage="bwislands fillholes3d deislands2d deislands3d 
                 imedge3d internalpoint smoothbinvol 
 		thickenbinvol thinbinvol maskdist"
@@ -54,7 +60,7 @@ func_plotting="plotmesh plotsurf plottetra plotedges qmeshcut"
 func_misc="surfdiffuse volmap2mesh isoctavemesh getvarfrom raytrace
 		getplanefrom3pt getexeext fallbackexeext iso2meshver
                 raysurf getoptkey rotatevec3d rotmat2vec varargin2struct
-                jsonopt mergestruct orthdisk jdatadecode jdataencode"
+                jsonopt mergestruct orthdisk"
 
 echo === "#" Streamlined mesh generation - shortcuts ===
 print_group $func_shortcut
@@ -74,11 +80,20 @@ print_group $func_inquery
 echo === "#" Mesh processing and reparing ===
 print_group $func_meshfix
 
+echo === "#" Polyline handling ===
+print_group $func_polyline
+
 echo === "#" Mesh resampling and optimization ===
 print_group $func_remesh
 
 echo === "#" File I/O ===
 print_group $func_fileio
+
+echo === "#" JData functions ===
+print_group $func_jdata
+
+echo === "#" Data compression ===
+print_group $func_compression
 
 echo === "#" Volumetric image pre-processing ===
 print_group $func_binimage
