@@ -80,7 +80,12 @@ end
 % --- Executes just before metchgui is made visible.
 function metchgui_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.hasoutput=0;
-if(ischar(varargin{end}) & strcmp(varargin{end},'hasoutput'))
+if(isempty(varargin))
+    fprintf(1,'Metch GUI must be called with parameters:\nFormat: alldata = metchgui(node,elem,points,pface);\n');
+    close(handles.MetchGUI);
+    return;
+end
+if(ischar(varargin{end}) && strcmp(varargin{end},'hasoutput'))
         handles.hasoutput=1;
         varargin(end)=[];
 end
@@ -90,7 +95,7 @@ set(handles.btAddMeshPt,'userdata',[handles.axMesh,handles.btAddMeshPt,handles.b
 set(handles.btAddCloudPt,'userdata',[handles.axMesh,handles.btAddCloudPt,handles.btAddMeshPt]);
 
 % if uses supplied 2 input variables, assume a volume image and a point cloud
-if(isnumeric(varargin{1}) & length(size(varargin{1}))==3)
+if(isnumeric(varargin{1}) && length(size(varargin{1}))==3)
        vol=varargin{1};
        pt=varargin{2};
        
@@ -128,7 +133,7 @@ if(isnumeric(varargin{1}) & length(size(varargin{1}))==3)
 end
 
 % if uses supplied 3 input variables, assume a surface mesh and a point cloud/surface
-if(length(varargin)>=3 & length(size(varargin{1}))==2)
+if(length(varargin)>=3 && length(size(varargin{1}))==2)
        node=varargin{1};
        elem=varargin{2};
        pt=varargin{3};
@@ -186,7 +191,7 @@ rotate3d(gcf,'on');
 
 %---------------------------------------------------------------------------
 function varargout = metchgui_OutputFcn(hObject, eventdata, handles) 
-if(length(handles) & isfield(handles,'output') & isfield(handles,'hasoutput') & handles.hasoutput)
+if(length(handles) && isfield(handles,'output') && isfield(handles,'hasoutput') && handles.hasoutput)
         handles.output=get(handles.MetchGUI,'userdata');
         varargout{1} =handles.output;
         close(handles.MetchGUI);
@@ -342,11 +347,11 @@ end
 %---------------------------------------------------------------------------
 function btOptimize_Callback(hObject, eventdata, handles)
 dat=get(handles.MetchGUI,'userdata');
-if(isfield(dat,'A0') & isfield(dat,'b0')& isfield(dat,'node')& isfield(dat,'elem')& ...
+if(isfield(dat,'A0') && isfield(dat,'b0')& isfield(dat,'node')& isfield(dat,'elem')& ...
    isfield(dat,'pointsinit')& isfield(dat,'toidx')& isfield(dat,'fromidx'))
         pmask=-1*ones(size(dat.pointsinit,1),1);
         pmask(dat.fromidx)=dat.toidx;
-	if(isfield(dat,'A') & isfield(dat,'b'))
+	if(isfield(dat,'A') && isfield(dat,'b'))
 	        [Anew,bnew,posnew]=regpt2surf(dat.node,dat.elem,dat.points,pmask,dat.A,dat.b,ones(12,1),20);
 	else
                 [Anew,bnew,posnew]=regpt2surf(dat.node,dat.elem,dat.points,pmask,dat.A0,dat.b0,ones(12,1),20);
@@ -354,7 +359,7 @@ if(isfield(dat,'A0') & isfield(dat,'b0')& isfield(dat,'node')& isfield(dat,'elem
         dat.A=Anew;
         dat.b=bnew;
         dat.pointsopt=posnew;
-        if(isfield(dat,'optplot') & dat.optplot)
+        if(isfield(dat,'optplot') && dat.optplot)
                 delete dat.optplot;
                 dat.optplot=0;
         end
@@ -387,7 +392,7 @@ end
 function btProj_Callback(hObject, eventdata, handles)
 dat=get(handles.MetchGUI,'userdata');
 if(isfield(dat,'pointsopt'))
-        if(isfield(dat,'projplot') & dat.projplot)
+        if(isfield(dat,'projplot') && dat.projplot)
                 delete dat.projplot;
                 dat.projplot=0;
         end

@@ -25,7 +25,7 @@ nn=size(node,1);
 ne=size(elem,1);
 nedim=size(elem,2);
 
-ev=trisurfnorm(node,elem);
+ev=surfacenorm(node,elem);
 
 nv=zeros(nn,3);
 ev2=repmat(ev,1,3);
