@@ -90,7 +90,7 @@ else
     if(any(size(mask.cdata)<[output_size([2 1]) 3]))
         error('the requested rasterization grid is larger than the screen resolution');
     end
-    mask=mask.cdata(1:output_size(2),1:output_size(1),:);
+    mask=mask.cdata((end-output_size(2)+1):end,1:output_size(1),:);
 end
 if(nargin<5)
     close(hf);
