@@ -5,7 +5,7 @@ function facecell=finddisconnsurf(f)
 % subroutine to extract disconnected surfaces from a 
 % cluster of surfaces
 % 
-% author: Qianqian Fang (fangq@nmr.mgh.harvard.edu)
+% author: Qianqian Fang (q.fang at neu.edu)
 % Date: 2008/03/06
 %
 % input: 
