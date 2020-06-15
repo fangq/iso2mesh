@@ -185,8 +185,10 @@ axis(handles.axMesh,'off');
 set(handles.axMesh,'tag','axMesh');
 set(handles.axPoints,'tag','axPoints');
 
-rotate3d(handles.axPoints,'on');
-rotate3d(handles.axMesh,'on');
+if(~exist('OCTAVE_VERSION'))
+  rotate3d(handles.axPoints,'on');
+  rotate3d(handles.axMesh,'on');
+end
 rotate3d(gcf,'on');
 
 %---------------------------------------------------------------------------

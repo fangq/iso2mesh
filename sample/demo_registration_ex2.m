@@ -13,10 +13,6 @@
 %   el: the surface triangles
 %   pt: the point cloud to be registered
 
-if(exist('OCTAVE_VERSION')~=0)
-        error('this demo can only be run in matlab, please run demo_registration_ex1 in octave');
-end
-
 load sampledata
 
 
@@ -42,4 +38,9 @@ load sampledata
 % 8. you can quit the GUI by hit "Close", your results will be saved to reg
 % 9. close the window 
 
-reg=metchgui(no,el,pt);
+if(exist('OCTAVE_VERSION')~=0)
+        reg=metchgui_one(no,el,pt);
+else
+        reg=metchgui(no,el,pt);
+end
+
