@@ -32,11 +32,13 @@ func_inquery="finddisconnsurf surfedge volface extractloops meshconn
                 meshcentroid nodevolume elemvolume neighborelem layersurf 
 		faceneighbors edgeneighbors maxsurf flatsegment orderloopedge  
 		mesheuler bbxflatsegment surfplane surfinterior surfpart
-                surfseeds meshquality meshedge meshface surfacenorm uniqedges uniqfaces
-                advancefront innersurf outersurf surfvolume insurface"
+                surfseeds meshquality meshedge meshface surfacenorm nodesurfnorm
+                uniqedges uniqfaces advancefront innersurf outersurf surfvolume
+		insurface"
 func_meshfix="meshcheckrepair meshreorient removedupelem 
                 removedupnodes removeisolatednode removeisolatedsurf
                 surfaceclean getintersecttri delendelem surfreorient"
+func_metch="proj2mesh dist2mesh regpt2mesh affinemap metchgui metchgui_one"
 func_remesh="meshresample remeshsurf smoothsurf sortmesh mergemesh 
                 meshrefine mergesurf surfboolean fillsurf highordertet
 		elemfacecenter barydualmesh meshinterp meshremap extrudesurf"
@@ -46,10 +48,10 @@ func_fileio="saveasc savedxf savestl savebinstl saveinr saveoff
                 savevrml readasc readinr readmedit readoff readsmf
 	        readtetgen deletemeshfile mcpath mwpath savemedit
 		savejson loadjson saveubjson loadubjson loadmsgpack savemsgpack
-                savemphtxt savetetgenele savetetgennode saveabaqus
+                savebj loadbj savemphtxt savetetgenele savetetgennode saveabaqus
 		savenirfast readnirfast readnifti readmptiff"
 func_jdata="savejmesh loadjnifti savejnifti loadnifti savenifti jdataencode 
-                jdatadecode"
+                jdatadecode jload jsave"
 func_compression="zlibencode zlibdecode gzipencode gzipdecode lzmaencode 
                 lzmadecode lzipencode lzipdecode lz4encode lz4decode lz4hcencode 
 		lz4hcdecode"
@@ -57,10 +59,11 @@ func_binimage="bwislands fillholes3d deislands2d deislands3d
                 imedge3d internalpoint smoothbinvol 
 		thickenbinvol thinbinvol maskdist"
 func_plotting="plotmesh plotsurf plottetra plotedges qmeshcut"
-func_misc="surfdiffuse volmap2mesh isoctavemesh getvarfrom raytrace
+func_misc="surfdiffuse volmap2mesh isoctavemesh getvarfrom raytrace linextriangle
 		getplanefrom3pt getexeext fallbackexeext iso2meshver
                 raysurf getoptkey rotatevec3d rotmat2vec varargin2struct
-                jsonopt mergestruct orthdisk"
+                jsonopt mergestruct orthdisk nestbracket2dim fast_match_bracket 
+		match_bracket"
 
 echo === "#" Streamlined mesh generation - shortcuts ===
 print_group $func_shortcut
@@ -79,6 +82,9 @@ print_group $func_inquery
 
 echo === "#" Mesh processing and reparing ===
 print_group $func_meshfix
+
+echo === "#" Mesh registration - Metch Toolbox ===
+print_group $func_metch
 
 echo === "#" Polyline handling ===
 print_group $func_polyline
