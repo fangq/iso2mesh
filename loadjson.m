@@ -25,7 +25,7 @@ function data = loadjson(fname,varargin)
 %           to a field in opt. opt can have the following 
 %           fields (first in [.|.] is the default)
 %
-%           SimplifyCell [0|1]: if set to 1, loadjson will call cell2mat
+%           SimplifyCell [1|0]: if set to 1, loadjson will call cell2mat
 %                         for each element of the JSON data, and group 
 %                         arrays based on the cell2mat rules.
 %           FastArrayParser [1|0 or integer]: if set to 1, use a
@@ -42,6 +42,8 @@ function data = loadjson(fname,varargin)
 %                         arrays; setting to 3 will return to a 2D cell
 %                         array of 1D vectors; setting to 4 will return a
 %                         3D cell array.
+%           UseMap [0|1]: if set to 1, loadjson uses a containers.Map to 
+%                         store map objects; otherwise use a struct object
 %           ShowProgress [0|1]: if set to 1, loadjson displays a progress bar.
 %           ParseStringArray [0|1]: if set to 0, loadjson converts "string arrays" 
 %                         (introduced in MATLAB R2016b) to char arrays; if set to 1,
@@ -53,9 +55,13 @@ function data = loadjson(fname,varargin)
 %                         please set FormatVersion to 1.9 or earlier.
 %           Encoding ['']: json file encoding. Support all encodings of
 %                         fopen() function
+%           ObjectID [0|interger or list]: if set to a positive number, 
+%                         it returns the specified JSON object by index 
+%                         in a multi-JSON document; if set to a vector,
+%                         it returns a list of specified objects.
 %           JDataDecode [1|0]: if set to 1, call jdatadecode to decode
-%                        JData structures defined in the JData
-%                        Specification.
+%                         JData structures defined in the JData
+%                         Specification.
 %
 % output:
 %      dat: a cell array, where {...} blocks are converted into cell arrays,
@@ -64,7 +70,7 @@ function data = loadjson(fname,varargin)
 % examples:
 %      dat=loadjson('{"obj":{"string":"value","array":[1,2,3]}}')
 %      dat=loadjson(['examples' filesep 'example1.json'])
-%      dat=loadjson(['examples' filesep 'example1.json'],'SimplifyCell',1)
+%      dat=loadjson(['examples' filesep 'example1.json'],'SimplifyCell',0)
 %
 % license:
 %     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
@@ -94,7 +100,7 @@ function data = loadjson(fname,varargin)
            end
        end
     else
-       error('input file does not exist');
+       error_pos('input file does not exist');
     end
 
     pos = 1; inputlen = length(string); inputstr = string;
@@ -107,10 +113,24 @@ function data = loadjson(fname,varargin)
 
     opt.arraytoken_=arraytoken;
     opt.arraytokenidx_=arraytokenidx;
+    opt.simplifycell=jsonopt('SimplifyCell',1,opt);
+    opt.simplifycellarray=jsonopt('SimplifyCellArray',0,opt);
+    opt.formatversion=jsonopt('FormatVersion',2,opt);
+    opt.fastarrayparser=jsonopt('FastArrayParser',1,opt);
+    opt.parsestringarray=jsonopt('ParseStringArray',0,opt);
+    opt.usemap=jsonopt('UseMap',0,opt);
+    opt.arraydepth_=1;
 
     if(jsonopt('ShowProgress',0,opt)==1)
         opt.progressbar_=waitbar(0,'loading ...');
     end
+
+    objid=jsonopt('ObjectID',0,opt);
+    maxobjid=max(objid);
+    if(maxobjid==0)
+        maxobjid=inf;
+    end
+
     jsoncount=1;
     while pos <= inputlen
         [cc,pos]=next_char(inputstr, pos);
@@ -122,8 +142,15 @@ function data = loadjson(fname,varargin)
             otherwise
                 pos=error_pos('Outer level structure must be an object or an array',inputstr,pos);
         end
+	if(jsoncount>=maxobjid)
+	    break;
+	end
         jsoncount=jsoncount+1;
     end % while
+
+    if(length(objid)>1 || min(objid)>1)
+        data=data(objid(objid<=length(data)));
+    end
 
     jsoncount=length(data);
     if(jsoncount==1 && iscell(data))
@@ -146,17 +173,18 @@ end
 function [object, pos,index_esc] = parse_array(inputstr, pos, esc, index_esc, varargin) % JSON array is written in row-major order
     pos=parse_char(inputstr, pos, '[');
     object = cell(0, 1);
-    arraydepth=jsonopt('arraydepth_',1,varargin{:});
+    arraydepth=varargin{1}.arraydepth_;
     pbar=-1;
     if(isfield(varargin{1},'progressbar_'))
         pbar=varargin{1}.progressbar_;
     end
-    format=jsonopt('FormatVersion',2,varargin{:});
+    format=varargin{1}.formatversion;
     [cc,pos]=next_char(inputstr,pos);
+    endpos=[];
     
     if cc ~= ']'
         try
-            if(jsonopt('FastArrayParser',1,varargin{:})>=1 && arraydepth>=jsonopt('FastArrayParser',1,varargin{:}))
+            if((varargin{1}.fastarrayparser)>=1 && arraydepth>=varargin{1}.fastarrayparser)
                 [endpos, maxlevel]=fast_match_bracket(varargin{1}.arraytoken_,varargin{1}.arraytokenidx_,pos);
                 if(~isempty(endpos))
                     arraystr=['[' inputstr(pos:endpos)];
@@ -227,7 +255,7 @@ function [object, pos,index_esc] = parse_array(inputstr, pos, esc, index_esc, va
             if(isempty(regexp(arraystr,':','once')))
                 arraystr=regexprep(arraystr,'\[','{');
                 arraystr=regexprep(arraystr,'\]','}');
-                if(jsonopt('ParseStringArray',0,varargin{:})==0)
+                if(varargin{1}.parsestringarray==0)
                     arraystr=regexprep(arraystr,'\"','''');
                 end
                 object=eval(arraystr);
@@ -240,8 +268,8 @@ function [object, pos,index_esc] = parse_array(inputstr, pos, esc, index_esc, va
         end
         if(isempty(endpos) || pos~=endpos)
             while 1
-                newopt=varargin2struct(varargin{:},'arraydepth_',arraydepth+1);
-                [val, pos,index_esc] = parse_value(inputstr, pos, esc, index_esc,newopt);
+                varargin{1}.arraydepth_=arraydepth+1;
+                [val, pos,index_esc] = parse_value(inputstr, pos, esc, index_esc,varargin{:});
                 object{end+1} = val;
                 [cc,pos]=next_char(inputstr,pos);
                 if cc == ']'
@@ -252,16 +280,28 @@ function [object, pos,index_esc] = parse_array(inputstr, pos, esc, index_esc, va
         end
     end
 
-    if(jsonopt('SimplifyCell',0,varargin{:})==1)
-      try
-        oldobj=object;
-        object=cell2mat(object')';
-        if(iscell(oldobj) && isstruct(object) && numel(object)>1 && jsonopt('SimplifyCellArray',1,varargin{:})==0)
-            object=oldobj;
-        elseif(size(object,1)>1 && ismatrix(object))
+    if(varargin{1}.simplifycell)
+      if(iscell(object) && ~isempty(object) && isnumeric(object{1}))
+          if(all(cellfun(@(e) isequal(size(object{1}), size(e)) , object(2:end))))
+              try
+                  oldobj=object;
+                  if(iscell(object) && length(object)>1 && ndims(object{1})>=2)
+                      catdim=size(object{1});
+                      catdim=ndims(object{1})-(catdim(end)==1)+1;
+                      object=cat(catdim,object{:});
+                      object=permute(object,ndims(object):-1:1);
+                  else
+                      object=cell2mat(object')';
+                  end
+                  if(iscell(oldobj) && isstruct(object) && numel(object)>1 && varargin{1}.simplifycellarray==0)
+                      object=oldobj;
+                  end
+              catch
+              end
+          end
+      end
+      if(~iscell(object) && size(object,1)>1 && ndims(object)==2)
             object=object';
-        end
-      catch
       end
     end
     pos=parse_char(inputstr, pos, ']');
@@ -410,7 +450,12 @@ end
 %%-------------------------------------------------------------------------
 function [object, pos, index_esc] = parse_object(inputstr, pos, esc, index_esc, varargin)
     pos=parse_char(inputstr, pos, '{');
-    object = [];
+    usemap=varargin{1}.usemap;
+    if(usemap)
+	object = containers.Map();
+    else
+	object = [];
+    end
     [cc,pos]=next_char(inputstr,pos);
     if cc ~= '}'
         while 1
@@ -420,7 +465,11 @@ function [object, pos, index_esc] = parse_object(inputstr, pos, esc, index_esc, 
             end
             pos=parse_char(inputstr, pos, ':');
             [val, pos,index_esc] = parse_value(inputstr, pos, esc, index_esc, varargin{:});
-            object.(encodevarname(str,varargin{:}))=val;
+            if(usemap)
+		object(str)=val;
+	    else
+		object.(encodevarname(str,varargin{:}))=val;
+	    end
             [cc,pos]=next_char(inputstr,pos);
             if cc == '}'
                 break;
@@ -440,7 +489,7 @@ function pos=error_pos(msg, inputstr, pos)
     end
     msg = [sprintf(msg, pos) ': ' ...
     inputstr(poShow(1):poShow(2)) '<error>' inputstr(poShow(3):poShow(4)) ];
-    error( ['JSONparser:invalidFormat: ' msg] );
+    error( ['JSONLAB:JSON:InvalidFormat: ' msg] );
 end
 
 %%-------------------------------------------------------------------------

@@ -31,7 +31,8 @@ function data = loadmsgpack(fname,varargin)
     end
     
     opt=varargin2struct(varargin{:});
-    opt.simplifycell=jsonopt('SimplifyCell',0,opt);
+    opt.simplifycell=jsonopt('SimplifyCell',1,opt);
+    opt.simplifycellarray=jsonopt('SimplifyCellArray',0,opt);
 
     jsoncount=1;
     idx=0;
@@ -187,7 +188,7 @@ function [obj, idx] = parse(bytes, idx, varargin)
             len = double(bytes2scalar(bytes(idx+1:idx+4), 'uint32'));
             [obj, idx] = parsemap(len, bytes, idx+5, varargin{:});
         otherwise
-            error('transplant:parsemsgpack:unknowntype', ...
+            error('JSONLAB:MSGPACK:InvalidFormat', ...
                   ['Unknown type "' dec2bin(currentbyte) '"']);
     end
 end
@@ -218,21 +219,36 @@ function [out, idx] = parseext(len, bytes, idx)
 end
 
 function [out, idx] = parsearray(len, bytes, idx, varargin)
-    out = cell(len,1);
+    out = cell(1,len);
     for n=1:len
         [out{n}, idx] = parse(bytes, idx, varargin{:});
     end
-    if(isnumeric(out{1}))
-      try
-        oldobj=out;
-        out=cell2mat(out);
-        if(iscell(oldobj) && isstruct(out) && numel(out)>1 && jsonopt('SimplifyCellArray',1,varargin{:})==0)
-            out=oldobj;
-        elseif(size(out,1)>1 && ismatrix(out))
+    if(len==1)
+        out=out{1};
+    end
+    if(varargin{1}.simplifycell)
+        if(iscell(out) && ~isempty(out) && isnumeric(out{1}))
+          if(all(cellfun(@(e) isequal(size(out{1}), size(e)) , out(2:end))))
+              try
+                  oldobj=out;
+                  if(iscell(out) && length(out)>1 && ndims(out{1})>=2)
+                      catdim=size(out{1});
+                      catdim=ndims(out{1})-(catdim(end)==1)+1;
+                      out=cat(catdim,out{:});
+                      out=permute(out,ndims(out):-1:1);
+                  else
+                      out=cell2mat(out')';
+                  end
+                  if(iscell(oldobj) && isstruct(out) && numel(out)>1 && varargin{1}.simplifycellarray==0)
+                      out=oldobj;
+                  end  
+              catch
+              end
+          end
+        end
+        if(~iscell(out) && size(out,2)>1 && ndims(out)==2)
             out=out';
         end
-      catch
-      end
     end
 end
 
