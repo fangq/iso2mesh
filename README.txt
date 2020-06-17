@@ -2,16 +2,15 @@
 = Iso2Mesh: An Image-based 3D Surface and Volumetric Mesh Generator  =
 ----------------------------------------------------------------------
 
-*Author: Qianqian Fang <q.fang at neu.edu>
-      Department of Bioengineering
-      Northeastern University
-      360 Huntington Ave, Boston, MA 02115
-*Version: 1.9.5 (Lion's Head)
-*License: GPL v2 or later (see COPYING) 
-      (this license does not cover the binaries under the bin/ 
-       directory, see Section III for more details)
-*URL: http://iso2mesh.sf.net
-
+*'''Author''': Qianqian Fang <q.fang at neu.edu>
+**      Department of Bioengineering
+**      Northeastern University
+**      360 Huntington Ave, Boston, MA 02115
+*'''Version''': 1.9.5 (Lion's Head)
+*'''License''': GPL v2 or later (see COPYING) 
+**      (this license does not cover the binaries under the bin/ 
+**       directory, see Section III for more details)
+*'''URL''': http://iso2mesh.sf.net
 
 == Table of Content ==
 <toc>
@@ -22,7 +21,7 @@
 "Iso2Mesh" is a MATLAB/Octave-based mesh generation toolbox,
 designed for easy creation of high quality surface and 
 tetrahedral meshes from 3D volumetric images. It contains 
-a rich set of mesh processing scripts/programs, working 
+over 200 mesh processing scripts/programs, working 
 either independently or interacting with external free 
 meshing utilities. Iso2Mesh toolbox can directly convert
 a 3D image stack, including binary, segmented or gray-scale 
@@ -38,7 +37,7 @@ cross-platform and is compatible with both MATLAB and GNU Octave
 The details of this toolbox can be found in the following
 papers (citing the first paper is highly encouraged):
 
-*Anh Phong Tran, Shijie Yan and Qianqian Fang*, (2020) “Improving \
+*Anh Phong Tran, Shijie Yan and Qianqian Fang*, (2020) "Improving \
  model-based fNIRS analysis using mesh-based anatomical and \
  light-transport models," Neurophotonics, 7(1), 015008
 *Qianqian Fang and David Boas, "Tetrahedral mesh generation \
@@ -46,8 +45,43 @@ papers (citing the first paper is highly encouraged):
  IEEE International Symposium on Biomedical Imaging \
  (ISBI 2009), pp. 1142-1145, 2009
 
+The first paper published recently describes a fully automated high-quality
+[http://mcx.space/brain2mesh brain mesh generation pipeline]
+built upon Iso2Mesh, providing a showcase for nearly all core
+functionalities provided in this toolbox.
 
-== # Overview of the functions ==
+== #  Iso2Mesh Suite ==
+
+In addition to convenient 3D mesh generation functionalities,
+the development of Iso2Mesh has also resulted in a number of 
+submodules that have also received wide adoption - some 
+are even more popular than Iso2Mesh itself. For example:
+
+* JSONLab (http://openjdata.org/jsonlab): a JSON/UBJSON/MassagePack \
+ encoder and decoder ([https://www.mathworks.com/matlabcentral/fileexchange/33381-jsonlab-a-toolbox-to-encode-decode-json-files Editor Pick-of-the-week, Popular Files 2018])
+* Brain2Mesh (http://mcx.space/brain2mesh): a fully automated \
+ high-quality brain mesh generation toolbox built on Iso2Mesh
+* JNIfTI (http://github.com/fangq/jnifti): a fast and portable \
+ NIfTI-1/2 reader/writer and next-gen NIfTI file format
+* Metch (http://iso2mesh.sf.net/metch): a 3D mesh registration toolbox
+* JData specification (http://openjdata.org): a highly portable \
+ easy-to-use scientific data annotation method and specification
+* ZMat (http://github.com/fangq/zmat): a data compression library \
+ and MATLAB/Octave toolbox
+
+Currently, Iso2Mesh and its submodules are broadly distributed 
+among popular open-source MATLAB toolboxes, especially among major 
+neuroimaging tools, including
+
+* Fieldtrip (http://www.fieldtriptoolbox.org) [https://github.com/fieldtrip/fieldtrip/tree/master/external/iso2mesh [iso2mesh/jsonlab]]
+* BrainStorm (https://neuroimage.usc.edu/brainstorm) [https://neuroimage.usc.edu/brainstorm/Tutorials/FemMesh#Mesh_tools [iso2mesh/brain2mesh/easyh5]]
+* Lead-DBS (http://www.lead-dbs.org) [https://github.com/netstim/leaddbs/tree/master/ext_libs/iso2mesh [iso2mesh]]
+* ROAST (https://www.parralab.org/roast) [https://github.com/andypotatohy/roast/tree/master/lib/iso2mesh [iso2mesh]]
+* HOMER2 (https://github.com/BUNPC/AtlasViewer) [https://github.com/BUNPC/AtlasViewer/tree/master/iso2mesh [iso2mesh/metch]]
+* REST (https://github.com/goodshawn12/REST) [https://github.com/goodshawn12/REST/tree/master/dependencies/iso2mesh [iso2mesh]]
+
+
+== # Overview of functions ==
 
 Creation of high-quality surface and tetrahedral meshes 
 from volumetric images has been a challenging task. 
@@ -112,7 +146,7 @@ export an iso2mesh-generated mesh for 3D printing.
 Users can not only export the data to a file, but also make
 3D plots in MATLAB/Octave using the powerful "plotmesh" function.
 
-These examples are only a small fraction in the over 100 optimized 
+These examples are only a small fraction in the over 200 optimized 
 functions provided by iso2mesh. The modular design of iso2mesh 
 makes the code easy to understand and easy to be intergrated in 
 your data analysis workflow. Please check out the full iso2mesh 
@@ -130,7 +164,8 @@ to recompile, Iso2Mesh can be executed out-of-box on MATLAB or GNU Octave.
 However, in the event that your operating system is not supported, or
 due to license restrictions, such as creating a release for various
 Linux distributions, you can recreate the mesh utility binaries under
-iso2mesh/bin folder by following the below commands:
+`iso2mesh/bin` folder using the source codes provided under `iso2mesh/tools`
+by following the below commands:
 
  git clone --recurse-submodules https://github.com/fangq/iso2mesh.git
  cd iso2mesh
