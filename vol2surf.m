@@ -84,7 +84,7 @@ if(~isempty(img))
 
     for i=1:maxlevel
       if(i<maxlevel)
-          levelmask=int8(newimg>=isovalues(i) && newimg<isovalues(i+1));
+          levelmask=int8(newimg>=isovalues(i) & newimg<isovalues(i+1));
       else
           levelmask=int8(newimg>=isovalues(i));
       end
