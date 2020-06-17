@@ -28,7 +28,7 @@ if(isempty(p))
 	% the bin folder under iso2mesh is searched first
 	tempname=[fileparts(which(mfilename)) filesep 'bin' filesep fname];
 	if(exist([fileparts(which(mfilename)) filesep 'bin'])==7)
-        if(nargin>=2)
+        if(nargin>=2 && ~isempty(ext))
             if(exist([tempname ext],'file'))
                 binname=[tempname ext];
             else
