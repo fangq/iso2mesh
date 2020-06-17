@@ -1,6 +1,6 @@
 Name: iso2mesh
-Version: 2.0
-Date: 2020-15-06
+Version: 1.9.5
+Date: 2020-17-06
 Title: A 3D surface and volumetric mesh generator for MATLAB/Octave
 Author: Qianqian Fang <fangqq@gmail.com>
 Maintainer: Qianqian Fang <fangqq@gmail.com>
