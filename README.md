@@ -77,12 +77,12 @@ Currently, Iso2Mesh and its submodules are broadly distributed
 among popular open-source MATLAB toolboxes, especially among major 
 neuroimaging tools, including
 
-- Fieldtrip (http://www.fieldtriptoolbox.org) [iso2mesh/jsonlab](https://github.com/fieldtrip/fieldtrip/tree/master/external/iso2mesh)
-- BrainStorm (https://neuroimage.usc.edu/brainstorm) [iso2mesh/brain2mesh/easyh5](https://neuroimage.usc.edu/brainstorm/Tutorials/FemMesh#Mesh_tools)
-- Lead-DBS (http://www.lead-dbs.org) [iso2mesh](https://github.com/netstim/leaddbs/tree/master/ext_libs/iso2mesh)
-- ROAST (https://www.parralab.org/roast) [iso2mesh](https://github.com/andypotatohy/roast/tree/master/lib/iso2mesh)
-- HOMER2 (https://github.com/BUNPC/AtlasViewer) [iso2mesh/metch](https://github.com/BUNPC/AtlasViewer/tree/master/iso2mesh)
-- REST (https://github.com/goodshawn12/REST) [iso2mesh](https://github.com/goodshawn12/REST/tree/master/dependencies/iso2mesh)
+- Fieldtrip (http://www.fieldtriptoolbox.org) [[iso2mesh/jsonlab](https://github.com/fieldtrip/fieldtrip/tree/master/external/iso2mesh)]
+- BrainStorm (https://neuroimage.usc.edu/brainstorm) [[iso2mesh/brain2mesh/easyh5](https://neuroimage.usc.edu/brainstorm/Tutorials/FemMesh#Mesh_tools)]
+- Lead-DBS (http://www.lead-dbs.org) [[iso2mesh](https://github.com/netstim/leaddbs/tree/master/ext_libs/iso2mesh)]
+- ROAST (https://www.parralab.org/roast) [[iso2mesh](https://github.com/andypotatohy/roast/tree/master/lib/iso2mesh)]
+- HOMER2 (https://github.com/BUNPC/AtlasViewer) [[iso2mesh/metch](https://github.com/BUNPC/AtlasViewer/tree/master/iso2mesh)]
+- REST (https://github.com/goodshawn12/REST) [[iso2mesh](https://github.com/goodshawn12/REST/tree/master/dependencies/iso2mesh)]
 
 #### Overview of functions
 
