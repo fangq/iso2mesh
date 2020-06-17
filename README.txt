@@ -6,7 +6,7 @@
       Department of Bioengineering
       Northeastern University
       360 Huntington Ave, Boston, MA 02115
-*Version: 1.9.5 (Century Egg)
+*Version: 1.9.5 (Lion's Head)
 *License: GPL v2 or later (see COPYING) 
       (this license does not cover the binaries under the bin/ 
        directory, see Section III for more details)
@@ -36,12 +36,14 @@ cross-platform and is compatible with both MATLAB and GNU Octave
 (a free MATLAB clone).
 
 The details of this toolbox can be found in the following
-papers:
+papers (citing the first paper is highly encouraged):
 
-*Anh Phong Tran and Qianqian Fang, "Fast and high-quality tetrahedral \
- mesh generation from neuroanatomical scans," arXiv preprint arXiv:1708.08954, 2017
-*Qianqian Fang and David Boas, "Tetrahedral mesh generation from volumetric binary and \
- gray-scale images," Proceedings of IEEE International Symposium on Biomedical Imaging \
+*Anh Phong Tran, Shijie Yan and Qianqian Fang*, (2020) “Improving \
+ model-based fNIRS analysis using mesh-based anatomical and \
+ light-transport models," Neurophotonics, 7(1), 015008
+*Qianqian Fang and David Boas, "Tetrahedral mesh generation \
+ from volumetric binary and gray-scale images," Proceedings of \
+ IEEE International Symposium on Biomedical Imaging \
  (ISBI 2009), pp. 1142-1145, 2009
 
 
@@ -155,15 +157,20 @@ To compile the above external tools, the below tools must be pre-installed
 (tested on Ubuntu 14.04 LTS, if you use another Linux distribution, the package
 names might be different)
 
- libcgal-dev
- clang
+ gcc
  cmake
+ libcgal-dev
+ libsuitesparse-dev
+ zlib1g-dev
 
 you can install these by
 
- sudo apt-get install libcgal-dev clang cmake
- 
-on Ubuntu.
+ sudo apt-get install gcc cmake libcgal-dev libsuitesparse-dev zlib1g-dev
+
+on Ubuntu or Debian. If you use Fedora, you need to install the below packages
+
+ sudo dnf install cmake CGAL-devel SuperLU-devel blas-static gcc-c++ zlib-devel octave-devel
+
 
 == # Acknowledgement ==
 
