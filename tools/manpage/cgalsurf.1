@@ -1,0 +1,60 @@
+.\" Manpage for cgalsurf.
+.\" Contact fangqq@gmail.com to correct errors or typos.
+.TH man 7 "30 June 2020" "1.0" "cgalsurf man page"
+.SH NAME
+cgalsurf \- 3D surface mesh extraction from volumetric image
+.SH SYNOPSIS
+cgalsurf input.inr threshold x0 y0 z0 r2 angle surf-size approx maxnode output.off <randomseed> <init-size>
+.SH DESCRIPTION
+The cgalsurf utility extracts a surface mesh at a specified threshold
+(level-set) from a volumetric image - either in binary or gray-scale 
+values, using the CGAL library (http://cgal.org). This utility is adapted
+based on the 3D surface generation demo in the CGAL package.
+
+Please see https://doc.cgal.org/latest/Surface_mesher/ for details regarding
+the underlying algorithm.
+.SH OPTIONS
+This program accepts the following input parameters (all but the last two 
+parameters are required):
+.TP
+\fBinput.inr
+The input volumetric image in the INR format
+.TP
+\fBthreshold
+A number representing the threshold at which the surface is extracted.
+.TP
+\fBx0
+The bounding sphere center x-coordinate
+.TP
+\fBy0
+The bounding sphere center y-coordinate
+.TP
+\fBz0
+The bounding sphere center y-coordinate
+.TP
+\fBr2
+The bounding sphere's radius squared
+.TP
+\fBangle
+Lower-bound of the angles (in degree) in surface triangles
+.TP
+\fBsurf-size
+Lower-bound of the edge-length (in voxel unit) in surface triangles
+.TP
+\fBapprox
+Upper-bound of the deviation distance (in voxel unit) of the surface triangles to the voxelated boundaries
+.TP
+\fBmaxnode
+Upper-bound of the node numbers in the output mesh
+.TP
+\fBoutput.off
+Output surface mesh in the OFF format
+.TP
+\fBrandomseed\fR|(optional, default: -1)
+Random number generator seed (large positive integer, -1 to use system clock)
+.TP
+\fBinit-size\fR|(optional)
+The number of nodes in the initial surface (sampled on the bounding sphere)
+cgalmesh(7), cgalsimp2(7), cgalpoly(7), cork(7), meshfix(7), jmeshlib(7)
+.SH AUTHOR
+Laurent Rineau, Mariette Yvinec, and Qianqian Fang (fangqq@gmail.com)
