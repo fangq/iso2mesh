@@ -1,0 +1,24 @@
+.\" Manpage for jmeshlib.
+.\" Contact fangqq@gmail.com to correct errors or typos.
+.TH man 7 "30 June 2020" "1.0" "jmeshlib man page"
+.SH NAME
+jmeshlib \- triangular surface mesh cleaning and repairing
+.SH SYNOPSIS
+jmeshlib input.off output.off
+.SH DESCRIPTION
+The jmeshlib utility is a surface mesh repairing and cleaning 
+utility written by Marco Attene (http://jmeshlib.sourceforge.net/). 
+JMeshLib removes non-manifold vertices in a surface mesh and
+re-orient the triangles in a consistent node order.
+
+This program accepts the following input parameters:
+.TP
+\fBinput.off\fR|(required)
+The input surface mesh in the OFF format
+.TP
+\fBoutput.off\fR|(required)
+The cleaned surface mesh are saved as output.off
+.SH SEE ALSO
+cgalmesh(7), cgalsurf(7), cgalsimp2(2), cork(7), meshfix(7)
+.SH AUTHOR
+Marco Attene (attene@ge.imati.cnr.it)

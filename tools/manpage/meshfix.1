@@ -1,0 +1,110 @@
+.\" Manpage for meshfix.
+.\" Contact fangqq@gmail.com to correct errors or typos.
+.TH man 7 "30 June 2020" "1.2-alpha" "meshfix man page"
+.SH NAME
+meshfix \- a surface mesh cleaning and repairing utility
+.SH SYNOPSIS
+meshfix <file1> [<file2>] [OPTIONS]
+.SH DESCRIPTION
+Meshfix is a surface mesh repairing and cleaning tool. It was
+written by Marco Attene, Mirko Windhoff, Axel Thielscher. The
+details regarding this tool can be found in the below paper
+
+M. Attene \- A lightweight approach to repairing digitized polygon meshes.
+The Visual Computer, 2010. (c) Springer.
+
+Meshfix processes file1 and saves the result to <file1>_fixed.off.
+An optionally passed file2 is merged with the first one.
+
+Accepted input formats are OFF, PLY and STL.
+.SH OPTIONS
+This program accepts the following input parameters:
+.TP
+\fB-a <epsilon_angle>
+Allowed range: 0 < epsilon_angle < 2, default: 0 (degrees)
+.TP
+\fB-j
+Join 2 biggest components if they overlap, remove the rest.
+.TP
+\fB-jc
+Join the closest pair of components.
+.TP
+\fB-h\fR|(--help)
+Print this help and exit.
+.TP
+\fB--shells <n>
+Only the n biggest shells are kept.
+.TP
+\fB-o <output>
+Set the output filename (without extension).
+.TP
+\fB-q
+Quiet mode, don't write much to stdout.
+.TP
+\fB-u <steps>
+Uniform remeshing of the whole mesh, steps > 0
+.TP
+\fB--vertices <n>
+Constrain number of vertices to n (only with -u)
+.TP
+\fB--no-clean
+Don't clean.
+.TP
+\fB--smooth <n>
+Apply n laplacian smoothing steps.
+.TP
+\fB-s\fR|(--stl)
+Result is saved in STL     format instead of OFF.
+.TP
+\fB-w\fR|(--wrl)
+Result is saved in VRML1.0 format instead of OFF.
+.TP
+\fB--fsmesh <n>
+Result is saved in FreeSurfer format instead of OFF.
+.TP
+\fB--xshift <d>
+Shift x-coordinates of vertices by d when saving output.
+Only works with --fsmesh; used to deal with small FreeSurfer glitch
+.TP
+\fB--msh
+Result is saved in gmsh format for debugging (including vertex and triangle masks)
+.TP
+\fB--cut-outer <d>
+Remove triangles of 1st that are outside of the 2nd shell.
+.TP
+\fB--cut-inner <d>
+Remove triangles of 1st that are inside  of the 2nd shell.
+Dilate 2nd by d; Fill holes and keep only 1st afterwards.
+.TP
+\fB--decouple-inin <d>
+Treat 1st file as inner, 2nd file as outer component.
+Resolve overlaps by moving inners triangles inwards.
+.TP
+\fB--decouple-outin <d>
+Treat 1st file as outer, 2nd file as inner component.
+Resolve overlaps by moving outers triangles inwards.
+.TP
+\fB--decouple-outout <d>
+Treat 1st file as outer, 2nd file as inner component.
+Resolve overlaps by moving outers triangles outwards.
+Constrain the min distance between the components > d.
+.TP
+\fB--fineTuneIn <d> <n>
+Used to fine-tune the minimal distance between surfaces 
+A minimal distance d is ensured, and reached in n substeps 
+When using the surfaces for subsequent volume meshing by gmsh
+this step prevent too flat tetrahedra
+.TP
+\fB--fineTuneOut <d> <n>
+Similar to --fineTuneIn, but ensures minimal distance in the other direction
+\fB--dilate <d>
+Dilate the surface by d. d < 0 means shrinking.
+\fB--intersect
+If the mesh contains intersections, return value = 1.
+\fB--intersect -o fname.msh
+If the mesh contains intersections, return value = 1.
+In addtion, save mesh with highlighted intersections in Gmsh format
+.SH SEE ALSO
+cgalsurf(7), cgalmesh(7), cgalsimp2(7), meshfix(7), jmeshlib(7)
+.SH AUTHOR
+Marco Attene (attene@ge.imati.cnr.it), Mirko Windhoff, Axel Thielscher and Qianqian Fang (fangqq@gmail.com)

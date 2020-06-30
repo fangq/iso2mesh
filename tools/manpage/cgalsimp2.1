@@ -1,0 +1,32 @@
+.\" Manpage for cgalsimp2.
+.\" Contact fangqq@gmail.com to correct errors or typos.
+.TH man 7 "30 June 2020" "1.0" "cgalsimp2 man page"
+.SH NAME
+cgalsimp2 \- triangular surface mesh simplification
+.SH SYNOPSIS
+cgalsimp2 input.off keepratio
+.SH DESCRIPTION
+The cgalsimp2 utility is a surface mesh simplification utility 
+built on the CGAL library (http://cgal.org). This tool utilizes
+the Lindstrom–Turk algorithm and decimate a surface mesh into
+a coarser downsampled surface. The output mesh is stored in
+a file named "out.off".
+
+Please see https://doc.cgal.org/latest/Surface_mesh_simplification/
+for details regarding the underlying algorithm.
+.SH OPTIONS
+This program accepts the following input parameters:
+.TP
+\fBinput.off\fR|(required)
+The input surface mesh in the OFF format
+.TP
+\fBkeepratio\fR|(required)
+A 0-1 floating point number denoting the percentage of edges 
+that will be preserved (1-keepratio is the percentage of edges 
+that will be decimated. If keepratio is negative, it triggers 
+the "LindstromTurk placement" policy; otherwise, it uses a 
+mid-point placement policy by clapsing an edge to its mid-point.
+.SH SEE ALSO
+cgalsurf(7), cgalmesh(7), cork(7), meshfix(7), jmeshlib(7)
+.SH AUTHOR
+Qianqian Fang (fangqq@gmail.com), Fernando Cacciola and Andreas Fabri

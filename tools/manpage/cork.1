@@ -1,0 +1,58 @@
+.\" Manpage for cork.
+.\" Contact fangqq@gmail.com to correct errors or typos.
+.TH man 7 "30 June 2020" "1.0" "cork man page"
+.SH NAME
+cork \- combining triangular surface meshes using Boolean
+.SH SYNOPSIS
+cork \-command input1.off input2.off result.off
+.SH DESCRIPTION
+Cork is designed to support Boolean operations between 
+triangle meshes.
+
+Cork was developed by Gilbert Bernstein, a computer scientist 
+who has worked on robust geometric intersections in various projects 
+since 2007. The code was updated by Qianqian Fang and added
+the \-first and \-second options.
+.SH OPTIONS
+This program accepts the following input parameters:
+.TP
+\fB-help
+Show help message
+.TP
+\fB-solid in
+Determine whether the input mesh represents
+a solid object.  (aka. watertight) (technically
+solid == closed and non-self-intersecting)
+.TP
+\fB-union in0 in1 out
+Compute the Boolean union of in0 and in1,
+and output the result
+.TP
+\fB-diff in0 in1 out
+Compute the Boolean difference of in0 and in1,
+and output the result
+.TP
+\fB-isct in0 in1 out
+Compute the Boolean intersection of in0 and in1,
+and output the result
+.TP
+\fB-xor in0 in1 out
+Compute the Boolean XOR of in0 and in1,
+and output the result
+.TP
+\fB-resolve in0 in1 out
+Intersect the two meshes in0 and in1,
+and output the connected mesh with those
+intersections made explicit and connected
+.TP
+\fB-first in0 in1 out
+Compute the first mesh in0 cut by the second mesh in1,
+and output the result
+.TP
+\fB-second in0 in1 out
+Compute the second mesh in1 cut by the first mesh in0,
+and output the result
+.SH SEE ALSO
+cgalsurf(7), cgalmesh(7), cgalsimp2(7), meshfix(7), jmeshlib(7)
+.SH AUTHOR
+Gilbert Bernstein and Qianqian Fang (fangqq@gmail.com)

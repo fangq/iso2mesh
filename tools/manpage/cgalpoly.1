@@ -1,0 +1,46 @@
+.\" Manpage for cgalpoly.
+.\" Contact fangqq@gmail.com to correct errors or typos.
+.TH man 7 "30 June 2020" "1.0" "cgalpoly man page"
+.SH NAME
+cgalpoly \- 3D mesh generation from polyhedral surfaces
+.SH SYNOPSIS
+cgalpoly input.off output.mesh <angle|30> <surf-size|6> <approx|4> 
+<rad-edge-ratio|3> <tetra-size|8> <randomseed|-1>
+.SH DESCRIPTION
+The cgalpoly utility is a surface-mesh-to-tetrahedral-mesh converter  
+based on the CGAL library (http://cgal.org). This utility is capable 
+of reading a surface model made of triangular patches and generating a 
+tetrahedral mesh conforming to the surface.
+
+Please see https://doc.cgal.org/latest/Mesh_3/ for details regarding
+the underlying algorithm.
+.SH OPTIONS
+This program accepts the following input parameters:
+.TP
+\fBinput.off\fR|(required)
+The input data file in the OFF format
+.TP
+\fBoutput.mesh\fR|(required)
+The output mesh file in the MEDIT format
+.TP
+\fBangle\fR|(optional, default: 30)
+Lower-bound of the angles (in degree) in surface triangles
+.TP
+\fBsurf-size\fR|(optional, default: 6)
+Lower-bound of the edge-length (in voxel unit) in surface triangles
+.TP
+\fBapprox\fR|(optional, default: 4)
+Upper-bound of the deviation distance (in voxel unit) of the surface triangles to the voxelated boundaries
+.TP
+\fBrad-edge-ratio\fR|(optional, default: 3)
+Upper-bound of the radius-to-edge ratio of the surface triangles
+.TP
+\fBtetra-size\fR|(optional, default: 8)
+Lower-bound of the tetrahedron volume (in voxel^3) of the 3D mesh
+.TP
+\fBrandomseed\fR|(optional, default: -1)
+Random number generator seed (large positive integer, -1 to use system clock)
+.SH SEE ALSO
+cgalmesh(7), cgalsimp2(7), cork(7), meshfix(7), jmeshlib(7)
+.SH AUTHOR
+Qianqian Fang (fangqq@gmail.com)
