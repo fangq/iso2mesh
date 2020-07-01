@@ -31,9 +31,9 @@ if(exist([mcpath(exename) exesuff],'file')==0) % fall back to OS native package
 end
 
 if(exist([mcpath(exename) exesuff],'file')==0)
-        if(strcmp(exename,'tetgen'))
+        if(system(['which ' exename])==0)
                return;
-        end  
+        end
         error([ 'The following executable:\n' ...
                         '\t%s%s\n' ...
                         'is missing. Please download it from ' ...
