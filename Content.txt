@@ -1875,6 +1875,38 @@
 
 
 
+==== function [idx, weight, newnodes]=polylineinterp(polylen, len, nodes) ====
+
+ [idx, weight]=polylineinterp(polylen, len)
+ [idx, weight, newnodes]=polylineinterp(polylen, len, nodes)
+
+ Find the polyline segment indices and interpolation weights for a 
+ specified total length or a set of lengths
+
+
+ input:
+    polylen: a 1D vector sequentially recording the length of each segment
+         of a polyline, the first number is the length of the 1st segment,
+         and so on
+    len: a single scalar, or a vector of scalars, specifying the total
+         length
+    nodes: if nodes is an array with a row-number equal to length(polylen)+1,
+         we assume each row defines a coordinate for the nodes along the
+         polyline
+
+ output:
+    idx: the indices of the polyline segments, starting from 1, where each
+         length defined in len ends; if len> sum(polylen), nan is
+         returned; if len<0, the weight will be a negative value.
+    weight: the interpolation weight between 0-1 towards the end node 
+         of the containing segment; the weight for the start-node is 1-weight
+    newnodes: the interpolated node positions at the end of the len
+
+ example:
+    lineseg=[2,2,1,7,10];
+    [idx, weight]=polylineinterp(lineseg, [3, 12, 7])
+
+
 ==== function [idx, dist]=closestnode(node,p) ====
 
  [idx, dist]=closestnode(node,p)

@@ -58,7 +58,7 @@ func_metch="proj2mesh dist2surf regpt2surf affinemap metchgui metchgui_one"
 func_remesh="meshresample remeshsurf smoothsurf sortmesh mergemesh 
                 meshrefine mergesurf surfboolean fillsurf highordertet
 		elemfacecenter barydualmesh meshinterp meshremap extrudesurf"
-func_polyline="slicesurf slicesurf3 polylinelen polylinesimplify closestnode"
+func_polyline="slicesurf slicesurf3 polylinelen polylinesimplify polylineinterp closestnode"
 func_fileio="saveasc savedxf savestl savebinstl saveinr saveoff 
                 savesmf savesurfpoly savegts readgts savemsh
                 savevrml readasc readinr readmedit readoff readsmf

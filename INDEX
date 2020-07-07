@@ -89,6 +89,7 @@ Polyline handling
  slicesurf3
  polylinelen
  polylinesimplify
+ polylineinterp
  closestnode
 Mesh resampling and optimization
  meshresample
