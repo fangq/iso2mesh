@@ -1,5 +1,10 @@
 function savemphtxt(node, face, elem, filename)
-% revised from iso2mesh by ZhangWei
+% savemphtxt(node, face, elem, filename)
+%
+% save tetrahedron mesh to comsol file (.mphtxt)
+%
+% author: Donghyeon Kim (danielkim<at> gist.ac.kr)
+% date: 2011/09/29
 %
 % input:
 %      node: input, node list, dimension (nn,3)
