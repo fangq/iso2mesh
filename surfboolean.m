@@ -14,7 +14,7 @@ function [newnode,newelem,newelem0]=surfboolean(node,elem,varargin)
 %           'inter' or 'and': the surface of the domain contained by both meshes
 %           'diff' or '-': the surface of the domain in mesh 1 excluding that of
 %                   mesh 2
-%           'all' or 'xor' or '+': the output contains 4 subsurfaces, identified by the 4th
+%           'all', 'resolve', or 'xor' or '+': the output contains 4 subsurfaces, identified by the 4th
 %                  column of newelem:
 %                    1: mesh 1 outside of mesh 2
 %                    2: mesh 2 outside of mesh 1
@@ -27,8 +27,14 @@ function [newnode,newelem,newelem0]=surfboolean(node,elem,varargin)
 %           'second': combine 2 and 4 from the output of 'all'
 %           'self': test for self-intersections; only the first mesh is
 %                   tested; other inputs are ignored.
+%           'remesh': remesh the first input mesh (2nd input mesh is ignored)
 %           'decouple': separate two shells and make sure there is no intersection;
 %                   the input surfaces must be closed and ordered from outer to inner
+%
+%           if a dash '-' is preceding a command, including
+%              -diff, -union, -isct, -resolve, -first, -second, -xor
+%           a 'remesh' operation is applied to the output mesh to remove poorly shaped 
+%           triangles
 %
 % output:
 %      newnode: the node coordinates after boolean operations, dimension (nn,3)
@@ -42,9 +48,10 @@ function [newnode,newelem,newelem0]=surfboolean(node,elem,varargin)
 %   [node2,face2,elem2]=meshabox([0 0 0]+5,[10 10 10]+5,1,1);
 %   [newnode,newface]=surfboolean(node1,face1,'union',node2,face2);
 %   plotmesh(newnode,newface);
-%   figure;
+%   [newnode,newface]=surfboolean(node1,face1,'-union',node2,face2);
+%   figure; plotmesh(newnode,newface);
 %   [newnode,newface]=surfboolean(node1,face1,'diff',node2,face2);
-%   plotmesh(newnode,newface,'x>5');
+%   figure;plotmesh(newnode,newface,'x>5');
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
@@ -156,6 +163,10 @@ for i=1:3:len
            cmd=sprintf('cd "%s" && "%s%s" "%s" "%s" %s',mwpath,mcpath('meshfix'),exesuff,...
                mwpath('pre_decouple1.off'),mwpath('pre_decouple2.off'),opstr);
        end       
+   elseif(strcmp(op,'remesh'))
+       saveoff(newnode(:,1:3),newelem(:,1:3),mwpath(['pre_surfbool1.' tempsuff]));
+       cmd=sprintf('cd "%s" && "%s%s" %s%s "%s" "%s" -%d',mwpath,mcpath(exename),exesuff,'-',...
+            opstr,mwpath(['pre_surfbool1.' tempsuff]),mwpath('post_surfbool.off'),randseed);
    else
        saveoff(newnode(:,1:3),newelem(:,1:3),mwpath(['pre_surfbool1.' tempsuff]));
        saveoff(no(:,1:3),el(:,1:3),mwpath(['pre_surfbool2.' tempsuff]));
