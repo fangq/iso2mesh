@@ -22,9 +22,9 @@ if ( MESH_3_VERBOSE )
   add_definitions(-DCGAL_MESH_3_VERBOSE)
 endif()
 
-#find_package( COMPONENTS )
+find_package(CGAL COMPONENTS ImageIO)
 
-if ( true )
+if ( CGAL_FOUND )
   include( ${CGAL_USE_FILE} )
   find_package(Boost)
 
