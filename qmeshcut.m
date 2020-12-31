@@ -1,6 +1,6 @@
-function [cutpos,cutvalue,facedata,elemid]=qmeshcut(elem,node,value,cutat,varargin)
+function [cutpos,cutvalue,facedata,elemid,nodeid]=qmeshcut(elem,node,value,cutat,varargin)
 %
-% [cutpos,cutvalue,facedata,elemid]=qmeshcut(elem,node,value,cutat)
+% [cutpos,cutvalue,facedata,elemid,nodeid]=qmeshcut(elem,node,value,cutat)
 %
 % fast tetrahedral mesh slicer
 %
@@ -37,6 +37,10 @@ function [cutpos,cutvalue,facedata,elemid]=qmeshcut(elem,node,value,cutat,vararg
 %           same as "value".
 %   facedata: define the intersection polygons in the form of patch "Faces"
 %   elemid: the index of the elem in which each intersection polygon locates
+%   nodeid: 3 column array, first two columns are the node indices that
+%           each intersection position is interpolated between, and the
+%           last column is a weight (0-1) for the first node (that for
+%           the 2nd node is 1-weight).
 %
 %   without any output, qmeshcut generates a cross-section plot
 %
@@ -83,7 +87,8 @@ elseif(numel(cutat)==9 || numel(cutat)==4)
     if(numel(cutat)==9)
         [a,b,c,d]=getplanefrom3pt(cutat);
     else
-        [a,b,c,d]=deal(cutat(:));
+        coeff=num2cell(cutat(:));
+        [a,b,c,d]=deal(coeff{:});
     end
 
     % compute which side of the cutat for all nodes in the mesh
@@ -136,6 +141,9 @@ totalweight=diff(cutweight');
 cutweight=abs(cutweight./repmat(totalweight(:),1,2));
 
 % calculate the cross-cut position and the interpolated values
+
+nodeid=edges(cutedges,:);
+nodeid(:,3)=cutweight(:,2);
 
 cutpos=node(edges(cutedges,1),:).*repmat(cutweight(:,2),[1 3])+...
        node(edges(cutedges,2),:).*repmat(cutweight(:,1),[1 3]);
