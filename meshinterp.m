@@ -1,6 +1,6 @@
-function newval=meshinterp(fromval,elemid,elembary,fromelem)
+function newval=meshinterp(fromval,elemid,elembary,fromelem,initval)
 %
-% newval=meshinterp(fromval,elemid,elembary,fromelem)
+% newval=meshinterp(fromval,elemid,elembary,fromelem,initval)
 %
 % Interpolate nodal values from the source mesh to the target mesh based on
 % a linear interpolation
@@ -48,6 +48,10 @@ idx=find(~isnan(elemid));
 
 allval=reshape(fromval(fromelem(elemid(idx),:),:),length(idx),size(elembary,2),size(fromval,2));
 tmp=cellfun(@(x) sum(elembary(idx,:).*x,2), num2cell(allval,[1 2]),'UniformOutput',false);
-newval=size(length(elemid),size(fromval,2));
+if(nargin>4)
+    newval=initval;
+else
+    newval=nan(length(elemid),size(fromval,2));
+end
 newval(idx,:)=squeeze(cat(3,tmp{:}));
 
