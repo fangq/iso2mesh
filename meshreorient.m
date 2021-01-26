@@ -1,6 +1,6 @@
-function [newelem, evol]=meshreorient(node,elem)
+function [newelem, evol, idx]=meshreorient(node,elem)
 %
-% [newelem, evol]=meshreorient(node,elem)
+% [newelem, evol, idx]=meshreorient(node,elem)
 %
 % reorder nodes in a surface or tetrahedral mesh to ensure all
 % elements are oriented consistently
@@ -11,6 +11,7 @@ function [newelem, evol]=meshreorient(node,elem)
 % input:
 %    node: list of nodes
 %    elem: list of elements (each row are indices of nodes of each element)
+%    idx: indices of the elements there had negative volume
 %
 % output:
 %    newelem: the element list with consistent ordering
