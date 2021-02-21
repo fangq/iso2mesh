@@ -285,6 +285,13 @@ below:
 - URL:http://gts.sourceforge.net/
 - Author: GTS developers
 
+> bin/PoissonRecon:
+
+- Summary: Screened Poisson Surface Reconstruction (Version 8.0)
+- License: MIT
+- URL:http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version8.0/
+- Author: Michael Kazhdan (http://www.cs.jhu.edu/~misha/)
+
 
 **Note:** Iso2Mesh and the above meshing utilities are considered 
 as an "aggregate" rather than "derived work", based on the 

@@ -14,7 +14,7 @@ names and origins of these tools are explained below:
 # jmeshlib.*  - Mesh Validation and Repairing Utility (build on JMeshLib) by Marco Attene
 # meshfix.*   - Mesh Validation and Repairing Utility (build on Meshfix) by Marco Attene
 # cork.*      - A robust surface mesh Boolean operation algorithm by Gilbert Bernstein (https://github.com/gilbo/cork)
-
+# PoissonRecon.* - Screened Poisson Surface Reconstruction (Version 8.0) by Michael Kazhdan (http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version8.0/)
 
 To distinguish binaries for different platforms, we added 
 matlab mexext output for different platforms as the file
