@@ -7,3 +7,6 @@
 [submodule "tools/tetgen"]
 	path = tools/tetgen
 	url = https://github.com/ufz/tetgen
+[submodule "tools/PoissonRecon"]
+	path = tools/PoissonRecon
+	url = https://github.com/mkazhdan/PoissonRecon.git
