@@ -56,7 +56,7 @@ fromval=fromval(idx,:);
 elembary=elembary(idx,:);
 idx=elemid(idx);
 
-nodeval=repmat(fromval,1,1,size(elembary,2)).*repmat(permute(elembary,[1,3,2]),1,size(fromval,2),1);
+nodeval=repmat(fromval,[1,1,size(elembary,2)]).*repmat(permute(elembary,[1,3,2]),[1,size(fromval,2),1]);
 
 for i=1:size(elembary,2)
     [ix,iy]=meshgrid(toelem(idx,i),1:size(fromval,2));
