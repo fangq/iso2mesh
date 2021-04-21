@@ -114,7 +114,7 @@ else
 end
 
 if(status~=0)
-       error(sprintf('Tetgen command failed'));
+       error('Tetgen command failed:\n%s\n', cmdout);
 end
 
 % read in the generated mesh
