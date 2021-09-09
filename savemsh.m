@@ -69,8 +69,8 @@ clear elem
 M.Regions.nb = max(reg);
 for k = 1 : nbRegion
    if length(rname) < k , rname{k} = sprintf('region_%d', k) ; end
-   M.Regions.name{reg(k)} = sprintf ('%s', rname{k});
-   M.Regions.dimension(reg(k)) = 3;
+   M.Regions.name{k} = sprintf ('%s', rname{k});
+   M.Regions.dimension(k) = 3;
 end
 
 % Writhe the header
