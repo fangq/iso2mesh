@@ -28,6 +28,7 @@ elem(:,1:4)=meshreorient(node,elem(:,1:4));
 
 nbNodes = size (node,1);
 reg = unique (elem(:,5));
+reg(reg<=0)=max(reg)+1-reg(reg<=0); % convert label 0 to max(reg)+1, -1 to max(reg)+2, and so on
 nbRegion = length (reg);
 nbElements = size (elem, 1);
 
