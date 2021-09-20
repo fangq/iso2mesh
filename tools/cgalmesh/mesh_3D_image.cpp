@@ -5,6 +5,7 @@
 #include <CGAL/Mesh_criteria_3.h>
 
 #include <CGAL/Labeled_image_mesh_domain_3.h>
+#include <CGAL/Mesh_domain_with_polyline_features_3.h>
 #include <CGAL/make_mesh_3.h>
 #include <CGAL/Image_3.h>
 
@@ -17,7 +18,8 @@
 // Domain
 struct K: public CGAL::Exact_predicates_inexact_constructions_kernel {};
 typedef CGAL::Image_3 Image;
-typedef CGAL::Labeled_image_mesh_domain_3<Image,K> Mesh_domain;
+typedef CGAL::Labeled_image_mesh_domain_3<Image,K> Image_domain;
+typedef CGAL::Mesh_domain_with_polyline_features_3<Image_domain> Mesh_domain;
 
 // Triangulation
 typedef CGAL::Mesh_triangulation_3<Mesh_domain>::type Tr;
@@ -27,12 +29,28 @@ typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr> C3t3;
 typedef CGAL::Mesh_criteria_3<Tr> Mesh_criteria;
 typedef Mesh_criteria::Facet_criteria    Facet_criteria;
 typedef Mesh_criteria::Cell_criteria     Cell_criteria;
+typedef Mesh_criteria::Edge_criteria     Edge_criteria;
 
 // start PV //
 typedef CGAL::Mesh_constant_domain_field_3<Mesh_domain::R,
                                            Mesh_domain::Index> Sizing_field_cell;
 // end PV //
 
+
+#include <CGAL/Mesh_3/polylines_to_protect.h> // undocumented header
+
+bool add_1D_features(const CGAL::Image_3& image,
+                     Mesh_domain& domain)
+{
+  typedef K::Point_3 Point_3;
+  typedef unsigned char Word_type;
+
+  std::vector<std::vector<Point_3> > polylines_on_bbox;
+  CGAL::polylines_to_protect<Point_3, Word_type>(image, polylines_on_bbox);
+
+  domain.add_features(polylines_on_bbox.begin(), polylines_on_bbox.end());
+  return true;
+}
 
 void usage(char *exename){
 	printf("usage:\n\t%s input.inr output.mesh <angle|30> <surf-size|6> <approx|4> <rad-edge-ratio|3> \
@@ -75,9 +93,11 @@ int main(int argc,char *argv[])
   Image image;
   image.read(argv[1]);
   Mesh_domain domain(image);
+  add_1D_features(image, domain);
 
   // Mesh criteria
   Facet_criteria facet_criteria(angle, ssize, approx); // angle, size, approximation
+  Edge_criteria edge_criteria(ssize);
 
 // start PV //
   //Cell_criteria cell_criteria(reratio, vsize); // radius-edge ratio, size
@@ -118,7 +138,7 @@ int main(int argc,char *argv[])
   int volume_dimension = 3;
 
   for (int i=0; i<vsize_vect.size(); i++)
-    vsize_cell.set_size(vsize_vect[i], volume_dimension, 
+    vsize_cell.set_size(vsize_vect[i], volume_dimension,
                 domain.index_from_subdomain_index(labels_vect[i]));
 
   std::cout << "Mesh sizes are (label=size) ";
@@ -130,7 +150,7 @@ int main(int argc,char *argv[])
   Cell_criteria cell_criteria(reratio, vsize_cell);
 // end PV //
 
-  Mesh_criteria criteria(facet_criteria, cell_criteria);
+  Mesh_criteria criteria(edge_criteria, facet_criteria, cell_criteria);
 
   // Meshing
   C3t3 c3t3 = CGAL::make_mesh_3<C3t3>(domain, criteria);
