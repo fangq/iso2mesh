@@ -232,28 +232,28 @@ below:
 
 - Summary: cgalsurf is a utility to extract a surface mesh from a gray-scale or a binary 3D image
 - Source: it is a slightly modified version from Surface_mesher example from CGAL 3.4
-- License: CGAL v3 core library is licensed under QPL (Q Public License) other modules are under the Lesser General Public License (LGPL)
+- License: CGAL is licensed under General Public License (GPL) version 3 or later; many of its core modules are under the Lesser General Public License (LGPL)
 - URL: http://www.cgal.org/Manual/3.3/doc_html/cgal_manual/Surface_mesher/Chapter_main.html
 
 > bin/cgalmesh and bin/cgalpoly:
 
 - Summary: cgalmesh and cgalpoly are utilities to produce surface and volumetric meshes from a multi-valued volumetric image
-- Source: it is a slightly modified version from Mesh_3 example from CGAL 3.5
-- License: CGAL v3 core library is licensed under QPL (Q Public License) other modules are under the Lesser General Public License (LGPL)
-- URL: http://www.cgal.org/Manual/3.5/doc_html/cgal_manual/Mesh_3/Chapter_main.html
+- Source: it is a slightly modified version from Mesh_3 example from CGAL 5.3
+- License: CGAL is licensed under General Public License (GPL) version 3 or later; many of its core modules are under the Lesser General Public License (LGPL)
+- URL: https://doc.cgal.org/latest/Mesh_3/
 
 > bin/cgalsimp2:
 
 - Summary: cgalsimp2 performs surface mesh simplification in iso2mesh.
 - Source: it is adapted from Surface_mesh_simplification example of CGAL library
-- License: CGAL v3 core library is licensed under QPL (Q Public License) other modules are under the Lesser General Public License (LGPL)
-- URL: http://www.cgal.org/Manual/3.4/doc_html/cgal_manual/Surface_mesh_simplification/Chapter_main.html
+- License: CGAL is licensed under General Public License (GPL) version 3 or later; many of its core modules are under the Lesser General Public License (LGPL)
+- URL: https://doc.cgal.org/latest/Surface_mesh_simplification/index.html
 
 > bin/jmeshlib:
 
 - Summary: meshfix is adapted from the sample code of JMeshLib
 - License: GPL (GNU General Public License) v2 or later
-- URL:http://jmeshlib.sourceforge.net/
+- URL: http://jmeshlib.sourceforge.net/
 - Author:Marco Attene <attene at ge.imati.cnr.it>
 ::Istituto di Matematica Applicata e Tecnologie Informatiche
 ::Consiglio Nazionale delle Ricerche
@@ -264,7 +264,7 @@ below:
 
 - Summary: meshfix is a mesh-repairing utility
 - License: GPL (GNU General Public License) v2 or later
-- URL:http://code.google.com/p/meshfix/
+- URL: http://code.google.com/p/meshfix/
 - Author: Marco Attene, Mirko Windhoff and Axel Thielscher.
 ::Istituto di Matematica Applicata e Tecnologie Informatiche
 ::Consiglio Nazionale delle Ricerche
@@ -275,21 +275,21 @@ below:
 
 - Summary: A robust surface mesh Boolean operation algorithm
 - License: LGPL (GNU Lesser General Public License)
-- URL:https://github.com/gilbo/cork
+- URL: https://github.com/gilbo/cork
 - Author: Gilbert Bernstein
 
 > bin/gtsrefine:
 
 - Summary: GTS is the GNU Triangulated Surface Library
 - License: LGPL (GNU Lesser General Public License)
-- URL:http://gts.sourceforge.net/
+- URL: http://gts.sourceforge.net/
 - Author: GTS developers
 
 > bin/PoissonRecon:
 
 - Summary: Screened Poisson Surface Reconstruction (Version 8.0)
 - License: MIT
-- URL:http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version8.0/
+- URL: http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version8.0/
 - Author: Michael Kazhdan (http://www.cs.jhu.edu/~misha/)
 
 
