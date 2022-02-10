@@ -23,7 +23,7 @@ function savejmesh(node,face,elem,fname,varargin)
 %           'MeshTag': a value as the tag of the mesh data
 %           'Comment': a string as the additional note for the mesh data
 %
-%           please type 'help savejson' and 'help saveubjson' to see additional 
+%           please type 'help savejson' and 'help savebj' to see additional 
 %           supported options    
 %
 % examples:
@@ -33,7 +33,7 @@ function savejmesh(node,face,elem,fname,varargin)
 %    savejmesh(no,fc,el,'box_zlib.jmsh','compression','zlib');
 %    savejmesh(no,fc,el,'box.bmsh','dimension',3);
 %    savejmesh(no,fc,el,'box_zlib.bmsh','dimension',3,'compression','zlib');
-%    mesh=loadubjson('box.bmsh')
+%    mesh=loadbj('box.bmsh')
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
@@ -139,7 +139,7 @@ end
 mesh.x0x5F_DataInfo_=metadata;
 
 if(~isempty(regexp(fname,'\.bmesh$', 'once')) || ~isempty(regexp(fname,'\.bmsh$', 'once')))
-   saveubjson('',mesh,'FileName',fname,varargin{:});
+   savebj('',mesh,'FileName',fname,varargin{:});
 else
    savejson('',mesh,'FileName',fname,varargin{:});
 end

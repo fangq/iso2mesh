@@ -90,7 +90,7 @@ function json=savejson(rootname,obj,varargin)
 %                         element count is larger than this number.
 %           CompressStringSize [400|int]: only to compress a string if the total 
 %                         element count is larger than this number.
-%           FormatVersion [2|float]: set the JSONLab output version; since
+%           FormatVersion [3|float]: set the JSONLab output version; since
 %                         v2.0, JSONLab uses JData specification Draft 1
 %                         for output format, it is incompatible with all
 %                         previous releases; if old output is desired,
@@ -102,6 +102,10 @@ function json=savejson(rootname,obj,varargin)
 %                         'b': big endian, 'l': little-endian)
 %           PreEncode [1|0]: if set to 1, call jdataencode first to preprocess
 %                         the input data before saving
+%           BuiltinJSON [0|1]: if set to 1, this function attempts to call
+%                         jsonencode, if presents (MATLAB R2016b or Octave
+%                         6) first. If jsonencode does not exist or failed, 
+%                         this function falls back to the jsonlab savejson
 %
 %        opt can be replaced by a list of ('param',value) pairs. The param 
 %        string is equivallent to a field in opt and is case sensitive.
@@ -144,7 +148,7 @@ opt.nestarray=jsonopt('NestArray',0,opt);
 opt.compact=jsonopt('Compact',0,opt);
 opt.singletcell=jsonopt('SingletCell',1,opt);
 opt.singletarray=jsonopt('SingletArray',0,opt);
-opt.formatversion=jsonopt('FormatVersion',2,opt);
+opt.formatversion=jsonopt('FormatVersion',3,opt);
 opt.compressarraysize=jsonopt('CompressArraySize',100,opt);
 opt.compressstringsize=jsonopt('CompressStringSize',opt.compressarraysize*4,opt);
 opt.intformat=jsonopt('IntFormat','%.0f',opt);
@@ -158,13 +162,30 @@ opt.nan=jsonopt('NaN','"_NaN_"',opt);
 opt.num2cell_=0;
 opt.nosubstruct_=0;
 
+if(jsonopt('BuiltinJSON',0,opt) && exist('jsonencode','builtin'))
+    try
+        obj=jdataencode(obj,'Base64',1,'AnnotateArray',1,'UseArrayZipSize',1,opt);
+        if(isempty(rootname))
+            json=jsonencode(obj);
+        else
+            json=jsonencode(struct(rootname,obj));
+        end
+        if(isempty(regexp(json,'^[{\[]', 'once')))
+            json=['[',json,']'];
+        end
+        return;
+    catch
+        warning('built-in jsonencode function failed to encode the data, fallback to savejson');
+    end
+end
+
 if(jsonopt('PreEncode',1,opt))
     obj=jdataencode(obj,'Base64',1,'UseArrayZipSize',0,opt);
 end
 
 dozip=opt.compression;
 if(~isempty(dozip))
-    if(isempty(strmatch(dozip,{'zlib','gzip','lzma','lzip','lz4','lz4hc'})))
+    if(~ismember(dozip,{'zlib','gzip','lzma','lzip','lz4','lz4hc'}))
         error('compression method "%s" is not supported',dozip);
     end
     if(exist('zmat','file')~=2 && exist('zmat','file')~=3)
@@ -294,17 +315,16 @@ end
 isnum2cell=varargin{1}.num2cell_;
 if(isnum2cell)
     item=squeeze(item);
-    format=varargin{1}.formatversion;
-    if(format>1.9 && ~isvector(item))
+    if(~isvector(item))
         item=permute(item,ndims(item):-1:1);
     end
 end
 
 dim=size(item);
-if(ndims(squeeze(item))>2) % for 3D or higher dimensions, flatten to 2D for now
-    item=reshape(item,dim(1),numel(item)/dim(1));
-    dim=size(item);
-end
+% if(ndims(squeeze(item))>2) % for 3D or higher dimensions, flatten to 2D for now
+%     item=reshape(item,dim(1),numel(item)/dim(1));
+%     dim=size(item);
+% end
 len=numel(item);
 ws=varargin{1}.whitespaces_;
 padding0=repmat(ws.tab,1,level);

@@ -731,7 +731,7 @@ else
        nodedata.vol=loadmc2(fullfile(path,file),eval(res{1}),res{2});
        nodetype.hasvol=1;
    elseif(regexp(file,'\.[Uu][Bb][Jj]$'))
-       nodedata=loadubjson(fullfile(path,file));
+       nodedata=loadbj(fullfile(path,file));
        if(isstruct(nodedata) && isfield(nodedata,'vol'))
            nodetype.hasvol=1;
        end

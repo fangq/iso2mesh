@@ -123,7 +123,7 @@ function newdata=jdatadecode(data,varargin)
             if(isfield(data,N_('_ArrayZipType_')))
                 zipmethod=data(j).(N_('_ArrayZipType_'));
             end
-            if(~isempty(strmatch(zipmethod,{'zlib','gzip','lzma','lzip','lz4','lz4hc'})))
+            if(ismember(zipmethod,{'zlib','gzip','lzma','lzip','lz4','lz4hc'}))
                 decompfun=str2func([zipmethod 'decode']);
                 arraytype=data(j).(N_('_ArrayType_'));
                 chartype=0;
@@ -441,7 +441,7 @@ function newdata=jdatadecode(data,varargin)
     end
 
     %% handle bytestream and arbitrary matlab objects
-    if(isfield(data,N_('_ByteStream_')) && isfield(data,N_('_DataInfo_'))==2)
+    if(isfield(data,N_('_ByteStream_')) && isfield(data,N_('_DataInfo_')))
         newdata=cell(len,1);
         for j=1:len
             if(isfield(data(j).(N_('_DataInfo_')),'MATLABObjectClass'))
