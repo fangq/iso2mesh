@@ -12,7 +12,7 @@ function [data, mmap] = loadbj(fname,varargin)
 % including uint16(u), uint32(m), uint64(M) and half-precision float (h).
 % Starting from BJD Draft-2 (JSONLab 3.0 beta or later), all integer and
 % floating-point numbers are parsed in Little-Endian as opposed to
-% Big-Endian form as in BJD Draft-1/UBJSON Draft-12 (JSONLab 2.1 or older)
+% Big-Endian form as in BJD Draft-1/UBJSON Draft-12 (JSONLab 2.0 or older)
 %
 % authors:Qianqian Fang (q.fang <at> neu.edu)
 % initially created on 2013/08/01
@@ -58,10 +58,25 @@ function [data, mmap] = loadbj(fname,varargin)
 %                         for output format, it is incompatible with all
 %                         previous releases; if old output is desired,
 %                         please set FormatVersion to 1.9 or earlier.
+%           MmapOnly [0|1]: if set to 1, this function only returns mmap
+%           MMapInclude 'str1' or  {'str1','str2',..}: if provided, the
+%                         returned mmap will be filtered by only keeping
+%                         entries containing any one of the string patterns
+%                         provided in a cell
+%           MMapExclude 'str1' or  {'str1','str2',..}: if provided, the
+%                         returned mmap will be filtered by removing
+%                         entries containing any one of the string patterns
+%                         provided in a cell
 %
 % output:
 %      dat: a cell array, where {...} blocks are converted into cell arrays,
 %           and [...] are converted to arrays
+%      mmap: (optional) a cell array in the form of
+%           {{jsonpath1,[start,length]}, {jsonpath2,[start,length]}, ...}
+%           where jsonpath_i is a string in the form of JSONPath, and
+%           start is an integer referring to the offset from the begining
+%           of the stream, and length is the JSON object string length.
+%           For more details, please see the help section of loadjson.m
 %
 % examples:
 %      obj=struct('string','value','array',[1 2 3]);
@@ -98,6 +113,7 @@ function [data, mmap] = loadbj(fname,varargin)
     opt.simplifycellarray=jsonopt('SimplifyCellArray',0,opt);
     opt.usemap=jsonopt('UseMap',0,opt);
     opt.nameisstring=jsonopt('NameIsString',0,opt);
+    mmaponly=jsonopt('MmapOnly',0,opt);
 
     [os,maxelem,systemendian]=computer;
     opt.flipendian_=(systemendian ~= upper(jsonopt('Endian','L',opt)));
@@ -108,34 +124,40 @@ function [data, mmap] = loadbj(fname,varargin)
         maxobjid=inf;
     end
 
-    mmap={};
     opt.jsonpath_='$';
+    if(nargout>1 || mmaponly)
+        mmap={};
+    end
     jsoncount=1;
     while pos <= inputlen
         [cc, pos]=next_char(inputstr, pos);
         switch(cc)
             case '{'
-                if(nargout>1)
+                if(nargout>1 || mmaponly)
+                    mmap{end+1}={opt.jsonpath_,pos};
                     [data{jsoncount}, pos, newmmap] = parse_object(inputstr, pos, opt);
+                    mmap{end}{2}=[mmap{end}{2},pos-mmap{end}{2}];
                     mmap=[mmap(:);newmmap(:)];
                 else
                     [data{jsoncount}, pos] = parse_object(inputstr, pos, opt);
                 end
             case '['
-                if(nargout>1)
+                if(nargout>1 || mmaponly)
+                    mmap{end+1}={opt.jsonpath_,pos};
                     [data{jsoncount}, pos, newmmap] = parse_array(inputstr, pos, opt);
+                    mmap{end}{2}=[mmap{end}{2},pos-mmap{end}{2}];
                     mmap=[mmap(:);newmmap(:)];
                 else
                     [data{jsoncount}, pos] = parse_array(inputstr, pos, opt);
                 end
             case {'S','C','H','i','U','I','u','l','m','L','M','h','d','D','T','F','Z','N'}
-                [data{jsoncount}, pos] = parse_value(inputstr, pos, opt);
+                [data{jsoncount}, pos] = parse_value(inputstr, pos, [], opt);
             otherwise
-                error_pos('Outer level structure must be an object or an array', inputstr, pos);
+                error_pos('Root level structure must start with a valid marker "{[SCHiUIulmLMhdDTFZN"', inputstr, pos);
         end
-	if(jsoncount>=maxobjid)
-	    break;
-	end
+        if(jsoncount>=maxobjid)
+            break;
+        end
         opt.jsonpath_=sprintf('$%d',jsoncount);
         jsoncount=jsoncount+1;
     end % while
@@ -148,7 +170,11 @@ function [data, mmap] = loadbj(fname,varargin)
     if(jsoncount==1 && iscell(data))
         data=data{1};
     end
-
+    if(nargout>1 || mmaponly)
+        mmap=mmap';
+        mmap=filterjsonmmap(mmap, jsonopt('MMapExclude',{},opt), 0);
+        mmap=filterjsonmmap(mmap, jsonopt('MMapInclude',{},opt), 1);
+    end
     if(jsonopt('JDataDecode',1,varargin{:})==1)
         try
             data=jdatadecode(data,'Base64',0,'Recursive',1,varargin{:});
@@ -158,6 +184,9 @@ function [data, mmap] = loadbj(fname,varargin)
                 ME.identifier, ME.message, savejson('',ME.stack));
         end
     end
+    if(mmaponly)
+        data=mmap;
+    end
 end
 
 %%-------------------------------------------------------------------------
@@ -165,10 +194,29 @@ end
 %%-------------------------------------------------------------------------
 
 function [data, adv]=parse_block(inputstr, pos, type,count,varargin)
+    if(count>=0 && ~isempty(type) && isempty(strfind('iUIulmLMdDh', type)))
+        adv=0;
+        switch(type)
+            case {'S', 'H', '{', '['}
+                data=cell(1,count);
+                adv=pos;
+                for i=1:count
+                    [data{i}, pos] = parse_value(inputstr, pos, type, varargin{:});
+                end
+                adv=pos-adv;
+            case 'C'
+                data=inputstr(pos:pos+count);
+                adv=count;
+            case {'T','F','N'}
+                error_pos(sprintf('For security reasons, optimized type %c is disabled at position %%d', type),inputstr, pos);
+            otherwise
+                error_pos(sprintf('Unsupported optimized type %c at position %%d', type),inputstr, pos);
+        end
+        return;
+    end
     [cid,len]=elem_info(inputstr, pos, type);
     datastr=inputstr(pos:pos+len*count-1);
     newdata=uint8(datastr);
-    %id=strfind('iUIulmLMhdD',type);
     if(varargin{1}.flipendian_)
         newdata=swapbytes(typecast(newdata,cid));
     end
@@ -179,7 +227,7 @@ end
 
 function [object, pos, mmap] = parse_array(inputstr,  pos, varargin) % JSON array is written in row-major order
     if(nargout>2)
-        mmap={{[varargin{1}.jsonpath_ '.[*]'],pos}};
+        mmap={};
         origpath=varargin{1}.jsonpath_;
     end
     pos=parse_char(inputstr, pos, '[');
@@ -216,9 +264,6 @@ function [object, pos, mmap] = parse_array(inputstr,  pos, varargin) % JSON arra
                 object=permute(reshape(object,fliplr(dim(:)')),length(dim):-1:1);
             end
             pos=pos+adv;
-            if(nargout>2)
-                mmap{1}{2}=[mmap{1}{2},pos-mmap{1}{2}];
-            end
             return;
         else
             endpos=match_bracket(inputstr,pos);
@@ -227,9 +272,6 @@ function [object, pos, mmap] = parse_array(inputstr,  pos, varargin) % JSON arra
             [object, adv]=parse_block(inputstr, pos, type,count,varargin{:});
             pos=pos+adv;
             pos=parse_char(inputstr, pos, ']');
-            if(nargout>2)
-                mmap{1}{2}=[mmap{1}{2},pos-mmap{1}{2}+1];
-            end
             return;
         end
     end
@@ -238,10 +280,12 @@ function [object, pos, mmap] = parse_array(inputstr,  pos, varargin) % JSON arra
          while 1
             if(nargout>2)
                 varargin{1}.jsonpath_=[origpath '.' sprintf('[%d]',length(object))];
-                [val, pos, newmmap] = parse_value(inputstr, pos, varargin{:});
+                mmap{end+1}={varargin{1}.jsonpath_, pos};
+                [val, pos, newmmap] = parse_value(inputstr, pos, [], varargin{:});
+                mmap{end}{2}=[mmap{end}{2}, pos-mmap{end}{2}];
                 mmap=[mmap(:);newmmap(:)];
             else
-                [val, pos] = parse_value(inputstr, pos, varargin{:});
+                [val, pos] = parse_value(inputstr, pos, [], varargin{:});
             end
             object{end+1} = val;
             [cc,pos]=next_char(inputstr,pos);
@@ -276,9 +320,6 @@ function [object, pos, mmap] = parse_array(inputstr,  pos, varargin) % JSON arra
     end
     if(count==-1)
         pos=parse_char(inputstr, pos, ']');
-    end
-    if(nargout>2)
-        mmap{1}{2}=[mmap{1}{2},pos-mmap{1}{2}+1];
     end
 end
 
@@ -320,13 +361,16 @@ end
 
 %%-------------------------------------------------------------------------
 
-function [str, pos] = parseStr(inputstr, pos, varargin)
-    type=inputstr(pos);
-    if type ~= 'S' && type ~= 'C' && type ~= 'H'
-        error_pos('String starting with S expected at position %d',inputstr, pos);
-    else
-        pos = pos + 1;
+function [str, pos] = parseStr(inputstr, pos, type, varargin)
+    if(isempty(type))
+        type=inputstr(pos);
+        if type ~= 'S' && type ~= 'C' && type ~= 'H'
+            error_pos('String starting with S expected at position %d',inputstr, pos);
+        else
+            pos = pos + 1;
+        end
     end
+
     if(type == 'C')
         str=inputstr(pos);
         pos=pos+1;
@@ -365,14 +409,19 @@ end
 
 %%-------------------------------------------------------------------------
 
-function varargout = parse_value(inputstr, pos, varargin)
-    [cc,varargout{2}]=next_char(inputstr,pos);
+function varargout = parse_value(inputstr, pos, type, varargin)
+    if(length(type)==1)
+            cc=type;
+            varargout{2}=pos;
+    else
+            [cc,varargout{2}]=next_char(inputstr,pos);
+    end
     if(nargout>2)
             varargout{3}={};
     end
     switch(cc)
         case {'S','C','H'}
-            [varargout{1:2}] = parseStr(inputstr, varargout{2}, varargin{:});
+            [varargout{1:2}] = parseStr(inputstr, varargout{2}, type, varargin{:});
             return;
         case '['
             [varargout{1:nargout}] = parse_array(inputstr, varargout{2}, varargin{:});
@@ -413,7 +462,8 @@ end
 %%-------------------------------------------------------------------------
 function [object, pos, mmap] = parse_object(inputstr, pos, varargin)
     if(nargout>2)
-        mmap={{varargin{1}.jsonpath_,pos}};
+        mmap={};
+        origpath=varargin{1}.jsonpath_;
     end
     pos=parse_char(inputstr,pos,'{');
     usemap=varargin{1}.usemap;
@@ -438,7 +488,7 @@ function [object, pos, mmap] = parse_object(inputstr, pos, varargin)
         num=0;
         while 1
             if(varargin{1}.nameisstring)
-                [str, pos] = parseStr(inputstr, pos, varargin{:});
+                [str, pos] = parseStr(inputstr, pos, [], varargin{:});
             else
                 [str, pos] = parse_name(inputstr, pos, varargin{:});
             end
@@ -446,15 +496,13 @@ function [object, pos, mmap] = parse_object(inputstr, pos, varargin)
                 error_pos('Name of value at position %d cannot be empty', inputstr, pos);
             end
             if(nargout>2)
-                varargin{1}.jsonpath_=[mmap{1}{1},'.',str];
-                mmap{end+1}={varargin{1}.jsonpath_,pos-length(str)-2};
-            end
-            if(nargout>2)
-                [val, pos,newmmap] = parse_value(inputstr, pos, varargin{:});
+                varargin{1}.jsonpath_=[origpath,'.',str];
+                mmap{end+1}={varargin{1}.jsonpath_,pos};
+                [val, pos,newmmap] = parse_value(inputstr, pos, [], varargin{:});
                 mmap{end}{2}=[mmap{end}{2}, pos-mmap{end}{2}];
                 mmap=[mmap(:);newmmap(:)];
             else
-                [val, pos] = parse_value(inputstr, pos, varargin{:});
+                [val, pos] = parse_value(inputstr, pos, [], varargin{:});
             end
             num=num+1;
             if(usemap)
@@ -470,9 +518,6 @@ function [object, pos, mmap] = parse_object(inputstr, pos, varargin)
     end
     if(count==-1)
         pos=parse_char(inputstr, pos, '}');
-    end
-    if(nargout>2)
-        mmap{1}={[mmap{1}{1} '.*'],[mmap{1}{2}, pos-mmap{1}{2}]};
     end
 end
 

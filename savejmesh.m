@@ -17,11 +17,15 @@ function savejmesh(node,face,elem,fname,varargin)
 %           JSON file)
 %      opt: additional parameters in the form of 'parameter',value pairs
 %           valid parameters include:
-%           'Dimension': 0 - a user defined mesh, 2- a 2D mesh, 3- a 3D mesh
+%           'Dimension': 2- a 2D mesh, 3- a 3D mesh
 %           'Author': a string to set the author of the mesh
 %           'MeshTitle': a string to set the title of the mesh
 %           'MeshTag': a value as the tag of the mesh data
 %           'Comment': a string as the additional note for the mesh data
+%           'MeshTag': a value as the tag of the mesh data
+%           'Flexible': 0 (default)- use dimension-specific data containers
+%                 (MeshVertex3, MeshTet4 ...). 1 - use flexible mesh data
+%                 containers (MeshNode, MeshSurf, MeshElem)
 %
 %           please type 'help savejson' and 'help savebj' to see additional 
 %           supported options    
@@ -55,15 +59,25 @@ else
    opt=varargin2struct(varargin{:});
 end
 
-meshdim=jsonopt('Dimension',0,opt);
+meshdim=jsonopt('Dimension',size(node,2),opt);
 
-mesh.x0x5F_DataInfo_=struct();
+mesh.(encodevarname('_DataInfo_'))=struct();
 
 metadata.JMeshVersion=0.4;
+metadata.Dimension=meshdim;
 metadata.CreationTime=datestr(now);
 metadata.Comment=['Created by iso2mesh ' iso2meshver '(http://iso2mesh.sf.net)'];
+metadata.AnnotationFormat='https://github.com/NeuroJSON/jmesh/blob/master/JMesh_specification.md';
+metadata.SerialFormat='http://json.org';
+metadata.Parser=struct('Python',[], ...
+                       'MATLAB',[], ...
+                       'JavaScript', 'https://github.com/NeuroJSON/jsdata',...
+                       'CPP', 'https://github.com/NeuroJSON/json',...
+                       'C', 'https://github.com/NeuroJSON/ubj');
+metadata.Parser.Python={'https://pypi.org/project/jdata','https://pypi.org/project/bjdata'};
+metadata.Parser.MATLAB={'https://github.com/NeuroJSON/jnifty','https://github.com/NeuroJSON/jsonlab'};
 
-if(meshdim==0) % a user-defined mesh
+if(jsonopt('Flexible',0,opt)==1) % a user-defined mesh
     mesh.MeshNode=node;
     if(~isempty(face))
         mesh.MeshSurf=face;
@@ -73,14 +87,18 @@ if(meshdim==0) % a user-defined mesh
     end
 elseif(meshdim==3) % a 3D mesh
     nd=size(node);
-    if(nd(2)<3) error('expecting 3 or more columns in node'); end
+    if(nd(2)<3)
+        error('expecting 3 or more columns in node');
+    end
     mesh.MeshVertex3=node(:,1:3);
     if(nd(2)>3)
         mesh.MeshVertex3=struct('Data',mesh.MeshVertex3,'Properties',struct('Value',node(:,4:end)));
     end
     if(~isempty(face))
         nd=size(face);
-        if(nd(2)<3) error('expecting 3 or more columns in face'); end
+        if(nd(2)<3)
+            error('expecting 3 or more columns in face');
+        end
         mesh.MeshTri3=face(:,1:3);
         if(nd(2)>3)
             mesh.MeshTri3=struct('Data',mesh.MeshTri3,'Properties',struct('Value',face(:,4:end)));
@@ -88,7 +106,9 @@ elseif(meshdim==3) % a 3D mesh
     end
     if(~isempty(elem))
         nd=size(elem);
-        if(nd(2)<4) error('expecting 4 or more columns in elem'); end
+        if(nd(2)<4)
+            error('expecting 4 or more columns in elem');
+        end
         mesh.MeshTet4=elem(:,1:4);
         if(nd(2)>4)
             mesh.MeshTet4=struct('Data',mesh.MeshTet4,'Properties',struct('Value',elem(:,5:end))); 
@@ -96,14 +116,18 @@ elseif(meshdim==3) % a 3D mesh
     end
 elseif(meshdim==2) % a 2D mesh
     nd=size(node);
-    if(nd(2)<2) error('expecting 2 or more columns in node'); end
+    if(nd(2)<2)
+        error('expecting 2 or more columns in node');
+    end
     mesh.MeshVertex2=node(:,1:2);
     if(nd(2)>2)
         mesh.MeshVertex2=struct('Data',mesh.MeshVertex2,'Properties',struct('Value',node(:,3:end)));
     end
     if(~isempty(face))
         nd=size(face);
-        if(nd(2)<3) error('expecting 3 or more columns in face'); end
+        if(nd(2)<3)
+            error('expecting 3 or more columns in face');
+        end
         mesh.MeshTri3=face(:,1:3);
         if(nd(2)>3)
             mesh.MeshTri3=struct('Data',mesh.MeshTri3,'Properties',struct('Value',face(:,4:end)));
@@ -136,9 +160,9 @@ if(~isempty(comm))
     metadata.Comment=comm;
 end
 
-mesh.x0x5F_DataInfo_=metadata;
+mesh.(encodevarname('_DataInfo_'))=metadata;
 
-if(~isempty(regexp(fname,'\.bmesh$', 'once')) || ~isempty(regexp(fname,'\.bmsh$', 'once')))
+if(~isempty(regexp(fname,'\.bmsh$', 'once')) || ~isempty(regexp(fname,'\.bemsh$', 'once')))
    savebj('',mesh,'FileName',fname,varargin{:});
 else
    savejson('',mesh,'FileName',fname,varargin{:});
