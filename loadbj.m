@@ -101,14 +101,11 @@ function [data, mmap] = loadbj(fname,varargin)
        error_pos('input file does not exist or buffer is invalid');
     end
 
-    pos = 1; inputlen = length(string); inputstr = string;
-    arraytoken=find(inputstr=='[' | inputstr==']' | inputstr=='"');
-    jstr=regexprep(inputstr,'\\\\','  ');
-    escquote=regexp(jstr,'\\"');
-    arraytoken=sort([arraytoken escquote]);
+    pos = 1;
+    inputlen = length(string);
+    inputstr = string;
 
     opt=varargin2struct(varargin{:});
-    opt.arraytoken_=arraytoken;
     opt.simplifycell=jsonopt('SimplifyCell',1,opt);
     opt.simplifycellarray=jsonopt('SimplifyCellArray',0,opt);
     opt.usemap=jsonopt('UseMap',0,opt);
@@ -493,7 +490,7 @@ function [object, pos, mmap] = parse_object(inputstr, pos, varargin)
                 [str, pos] = parse_name(inputstr, pos, varargin{:});
             end
             if isempty(str)
-                error_pos('Name of value at position %d cannot be empty', inputstr, pos);
+                str='x0x0_'; % empty name is valid in BJData/UBJSON, decodevarname('x0x0_') restores '\0'
             end
             if(nargout>2)
                 varargin{1}.jsonpath_=[origpath,'.',str];
