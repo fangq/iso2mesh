@@ -8,16 +8,16 @@ function savejmesh(node,face,elem,fname,varargin)
 % date: 2011/10/06
 %
 % input:
-%      node: input, node list, dimension (nn,3)
-%      face: input, optional, surface face element list, dimension (be,3)
-%      elem: input, tetrahedral element list, dimension (ne,4)
-%      fname: output file name; if file name has a suffix .bmsh or .bmesh, 
+%      node: node list, dimension (nn,3)
+%      face: can be empty, surface face element list, dimension (be,3)
+%      elem: can be empty, tetrahedral element list, dimension (ne,4)
+%      fname: output file name; if file name has a suffix .bmsh, 
 %           the mesh data will be saved in the binary jmesh format; otherwise,
 %           the file will be saved as a text-based jmesh (which is a plain 
 %           JSON file)
 %      opt: additional parameters in the form of 'parameter',value pairs
 %           valid parameters include:
-%           'Dimension': 2- a 2D mesh, 3- a 3D mesh
+%           'Dimension': 2 - a 2D mesh, 3 - a 3D mesh
 %           'Author': a string to set the author of the mesh
 %           'MeshTitle': a string to set the title of the mesh
 %           'MeshTag': a value as the tag of the mesh data
@@ -37,6 +37,7 @@ function savejmesh(node,face,elem,fname,varargin)
 %    savejmesh(no,fc,el,'box_zlib.jmsh','compression','zlib');
 %    savejmesh(no,fc,el,'box.bmsh','dimension',3);
 %    savejmesh(no,fc,el,'box_zlib.bmsh','dimension',3,'compression','zlib');
+%    savejmesh(no,[],el,'box_elem.jmsh','flexible',1) %sue MeshNode/MeshSurf/MeshElem
 %    mesh=loadbj('box.bmsh')
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
@@ -66,16 +67,17 @@ mesh.(encodevarname('_DataInfo_'))=struct();
 metadata.JMeshVersion=0.4;
 metadata.Dimension=meshdim;
 metadata.CreationTime=datestr(now);
-metadata.Comment=['Created by iso2mesh ' iso2meshver '(http://iso2mesh.sf.net)'];
+metadata.Comment=['Created by Iso2Mesh ' iso2meshver '(http://iso2mesh.sf.net)'];
 metadata.AnnotationFormat='https://github.com/NeuroJSON/jmesh/blob/master/JMesh_specification.md';
 metadata.SerialFormat='http://json.org';
 metadata.Parser=struct('Python',[], ...
-                       'MATLAB',[], ...
-                       'JavaScript', 'https://github.com/NeuroJSON/jsdata',...
+                       'MATLAB','https://github.com/NeuroJSON/jsonlab', ...
+                       'JavaScript',[],...
                        'CPP', 'https://github.com/NeuroJSON/json',...
-                       'C', 'https://github.com/NeuroJSON/ubj');
+                       'C', []);
 metadata.Parser.Python={'https://pypi.org/project/jdata','https://pypi.org/project/bjdata'};
-metadata.Parser.MATLAB={'https://github.com/NeuroJSON/jnifty','https://github.com/NeuroJSON/jsonlab'};
+metadata.Parser.JavaScript={'https://github.com/NeuroJSON/jsdata','https://github.com/NeuroJSON/js-bjdata'};
+metadata.Parser.C={'https://github.com/DaveGamble/cJSON','https://github.com/NeuroJSON/ubj'};
 
 if(jsonopt('Flexible',0,opt)==1) % a user-defined mesh
     mesh.MeshNode=node;
@@ -162,7 +164,7 @@ end
 
 mesh.(encodevarname('_DataInfo_'))=metadata;
 
-if(~isempty(regexp(fname,'\.bmsh$', 'once')) || ~isempty(regexp(fname,'\.bemsh$', 'once')))
+if(~isempty(regexp(fname,'\.bmsh$', 'once')) || ~isempty(regexp(fname,'\.bmesh$', 'once')))
    savebj('',mesh,'FileName',fname,varargin{:});
 else
    savejson('',mesh,'FileName',fname,varargin{:});
