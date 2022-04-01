@@ -111,4 +111,4 @@ if(nargin>=8 && dotopbottom==1)
     face=[face; endface; endface+size(newyz,1)-1];
 end
 
-[node,face]=meshcheckrepair(node,face,'dup');
+[node,face]=meshcheckrepair(node,face,'deep');

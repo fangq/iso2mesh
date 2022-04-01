@@ -29,4 +29,4 @@ edge=surfedge(fc);
 sideface=[edge edge(:,1)+nlen; edge+nlen edge(:,2)];
 face=[face; sideface];
 
-
+[node,face]=meshcheckrepair(node,face);

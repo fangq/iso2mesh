@@ -63,7 +63,11 @@ elem=zeros(nt*nind,n+1);
 L=(1:nind)';
 for i=1:nt
   elem(L,:)=repmat(ind,1,n+1)+repmat(offset(thc(i,:))',nind,1);
-L=L+nind;
+  L=L+nind;
+end
+
+if(n==2 || n==3)
+  elem=meshreorient(node,elem);
 end
 
 % ======== subfunction ========

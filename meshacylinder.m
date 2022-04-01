@@ -58,7 +58,9 @@ if(nargin<5)
 end
 
 % calculate the cylinder end face nodes
-if(nargin<6) ndiv=20; end
+if(nargin<6)
+    ndiv=20;
+end
 
 dt=2*pi/ndiv;
 theta=dt:dt:2*pi;
@@ -71,14 +73,13 @@ p1=[cx(:,2) cy(:,2) len*ones(ndiv,1)];
 pp=[p0;p1];
 no=rotatevec3d(pp,v0)+repmat(c0',size(pp,1),1);
 
-count=1;
+fc=cell(ndiv+2,1);
 for i=1:ndiv-1
-   fc{count}={[i i+ndiv i+ndiv+1 i+1],1}; count=count+1;
+   fc{i}={[i i+ndiv i+ndiv+1 i+1],1};
 end
-i=ndiv;
-fc{count}={[i i+ndiv 1+ndiv 1],1}; count=count+1;
-fc{count}={1:ndiv,2};count=count+1;  % bottom inner circle
-fc{count}={1+ndiv:2*ndiv,3};count=count+1;  % top inner circle
+fc{ndiv}={[ndiv ndiv+ndiv 1+ndiv 1],1};
+fc{ndiv+1}={1:ndiv,2};
+fc{ndiv+2}={1+ndiv:2*ndiv,3};
 
 if(nargout==2 && tsize==0.0 && maxvol==0.0)
     node=no;
@@ -91,4 +92,5 @@ end
 if(nargin<5)
     maxvol=tsize*tsize*tsize;
 end
-[node,elem,face]=surf2mesh(no,fc,min(no),max(no),1,maxvol,[0 0 1],[],0);
+[node,elem]=surf2mesh(no,fc,min(no),max(no),1,maxvol,[0 0 1],[],0);
+face=volface(elem(:,1:4));

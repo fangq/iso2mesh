@@ -1,8 +1,6 @@
-function val=getoptkey(key,default,varargin)
+function varargout=getoptkey(varargin)
 %
 % val=getoptkey(key,default,opt)
-%    or
-% val=getoptkey(key,default,'key1',val1,'key2',val2, ...)
 %
 % query the value of a key from a structure or a list of key/value pairs
 %
@@ -20,10 +18,4 @@ function val=getoptkey(key,default,varargin)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-val=default;
-if(nargin<=2) return; end
-opt=varargin2struct(varargin{:});
-if(isstruct(opt) && isfield(opt,key))
-    val=getfield(opt,key);
-end
-
+[varargout{1:nargout}]=jsonopt(varargin{:});

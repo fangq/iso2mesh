@@ -24,7 +24,9 @@ if(fp==0)
 	error('node file is missing!'); 
 end
 [dim,count] = fscanf(fp,'%d',4);
-if(count<4) error('wrong node file'); end
+if(count<4)
+        error('wrong node file');
+end
 node=fscanf(fp,'%f',[4,dim(1)]);
 idx=node(1,:);
 node=node(2:4,:)';
@@ -36,7 +38,9 @@ if(fp==0)
         error('elem file is missing!'); 
 end
 [dim,count] = fscanf(fp,'%d',3);
-if(count<3) error('wrong elem file'); end
+if(count<3)
+        error('wrong elem file');
+end
 elem=fscanf(fp,'%d',[dim(2)+dim(3)+1,dim(1)]);
 elem=elem';
 elem(:,1)=[];
@@ -49,8 +53,11 @@ if(fp==0)
         error('surface data file is missing!');
 end
 [dim,count] = fscanf(fp,'%d',2);
-if(count<2) error('wrong surface file'); end
+if(count<2)
+        error('wrong surface file');
+end
 face=fscanf(fp,'%d',[5,dim(1)]);
 face=[face(2:end-1,:)+1;face(end,:)]';
 fclose(fp);
 
+elem(:,1:4)=meshreorient(node(:,1:3),elem(:,1:4));

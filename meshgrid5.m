@@ -71,6 +71,8 @@ for i=1:nc
 	elem((1:40)+(i-1)*40,:)=reshape(nodeshift(cube8(:)),4,40)'+ind(i);
 end
 
+elem(:,1:4)=meshreorient(node(:,1:3),elem(:,1:4));
+
 % ======== subfunction ========
 function g = lattice(varargin)
 % generate a factorial lattice in n variables

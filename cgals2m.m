@@ -48,12 +48,12 @@ if(~isstruct(opt))
 end
 
 if(isstruct(opt) && length(opt)==1)  % does not support settings for multiple labels
-	if(isfield(opt,'radbound'))   ssize=opt.radbound; end
-	if(isfield(opt,'angbound'))   ang=opt.angbound; end
-	if(isfield(opt,'distbound'))  approx=opt.distbound; end
-	if(isfield(opt,'reratio'))    reratio=opt.reratio; end
+        ssize=jsonopt('radbound',ssize,opt);
+        ang=jsonopt('angbound',ang,opt);
+        approx=jsonopt('distbound',approx,opt);
+        reratio=jsonopt('reratio',reratio,opt);
 end
-if(getoptkey('DoRepair',0,flags)==1)
+if(jsonopt('DoRepair',0,flags)==1)
     [v,f]=meshcheckrepair(v,f);
 end
 saveoff(v,f,mwpath('pre_cgalpoly.off'));
@@ -73,7 +73,7 @@ if(status)
     error('cgalpoly command failed');
 end
 if(~exist(mwpath('post_cgalpoly.mesh'),'file'))
-    error(sprintf('output file was not found, failure was encountered when running command: \n%s\n',cmd));
+    error('output file was not found, failure was encountered when running command: \n%s\n',cmd);
 end
 [node,elem,face]=readmedit(mwpath('post_cgalpoly.mesh'));
 

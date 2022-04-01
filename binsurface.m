@@ -17,11 +17,7 @@ function [node,elem]=binsurface(img,nface)
 %         a surface mesh face element 
 %   node: node coordinates, 3 columns for x, y and z respectively
 %
-% the outputs of this subroutine can be easily plotted using 
-%     patch('Vertices',node,'faces',elem,'FaceVertexCData',node(:,3),
-%           'FaceColor','interp');
-% if the surface mesh has triangular faces, one can plot it with
-%     trisurf(elem,node(:,1),node(:,2),node(:,3))
+% the outputs of this subroutine can be easily plotted using plotmesh()
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 % 
@@ -92,3 +88,7 @@ elem=nodemap(elem);
 
 % assuming the origin [0 0 0] is located at the lower-bottom corner of the image
 node=[xi(:),yi(:),zi(:)]-1;
+
+if(nargin==1 || nface==3)
+    [node, elem]=meshcheckrepair(node, elem);
+end

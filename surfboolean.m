@@ -56,12 +56,6 @@ function [newnode,newelem,newelem0]=surfboolean(node,elem,varargin)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-allinputs=varargin;
-opt=struct;
-if(length(allinputs)>0 && isstruct(allinputs{end}))
-    opt=allinputs{end};
-    allinputs{end}=[];
-end
 len=length(varargin);
 newnode=node;
 newelem=elem;
@@ -90,13 +84,21 @@ for i=1:3:len
    no=varargin{i+1};
    el=varargin{i+2};
    opstr=op;
-   if(strcmp(op,'or'))   opstr='union'; end
-   if(strcmp(op,'xor'))  opstr='all';   end
-   if(strcmp(op,'and'))
-       opstr='isct'; 
+   if(strcmp(op,'or'))
+       opstr='union';
    end
-   if(strcmp(op,'-'))    opstr='diff';  end
-   if(strcmp(op,'self')) opstr='inter -s';  end
+   if(strcmp(op,'xor'))
+       opstr='all';
+   end
+   if(strcmp(op,'and'))
+       opstr='isct';
+   end
+   if(strcmp(op,'-'))
+       opstr='diff';
+   end
+   if(strcmp(op,'self'))
+       opstr='inter -s';
+   end
    if(strcmp(opstr,'all'))
        opstr='resolve';
    end
@@ -116,7 +118,7 @@ for i=1:3:len
           newnode(:,4)=1;
           newelem(:,4)=1;
        end
-       opstr=[' --decouple-inin 1 --shells 2']; %-q
+       opstr=' --decouple-inin 1 --shells 2'; %-q
        saveoff(node1(:,1:3),elem1(:,1:3),mwpath('pre_decouple1.off'));
        if(size(no,2)~=3)
            opstr=['-q --shells ' num2str(no)];
@@ -152,7 +154,7 @@ for i=1:3:len
           newnode(:,4)=1;
           newelem(:,4)=1;
        end
-       opstr=[' --shells 2']; %-q
+       opstr=' --shells 2'; %-q
        saveoff(node1(:,1:3),elem1(:,1:3),mwpath('pre_decouple1.off'));
        if(size(no,2)~=3)
            opstr=['-q --shells ' num2str(no)];
@@ -173,9 +175,9 @@ for i=1:3:len
        cmd=sprintf('cd "%s" && "%s%s" %s%s "%s" "%s" "%s" -%d',mwpath,mcpath(exename),exesuff,'-',...
             opstr,mwpath(['pre_surfbool1.' tempsuff]),mwpath(['pre_surfbool2.' tempsuff]),mwpath('post_surfbool.off'),randseed);
    end
-   [status outstr]=system(cmd);
+   [status, outstr]=system(cmd);
    if(status~=0 && strcmp(op,'self')==0)
-       error(sprintf('surface boolean command failed:\n%s\nERROR: %s\n',cmd,outstr));
+       error('surface boolean command failed:\n%s\nERROR: %s\n',cmd,outstr);
    end
    if(status~=0 && strcmp(op,'self') && ~isempty(strfind(outstr,'(new_ear): assertion failed')))
        fprintf(1,'no self-intersection was found! (ignore the above error)\n');
@@ -186,19 +188,19 @@ for i=1:3:len
    end
    if(strcmp(opstr,'all'))
       % tag the 4 piceses of meshes, this tag do not propagate to the next boolean operation
-      [nnode nelem]=readoff(mwpath('s1out2.off'));
+      [nnode, nelem]=readoff(mwpath('s1out2.off'));
       newelem=[nelem ones(size(nelem,1),1)];
       newnode=[nnode ones(size(nnode,1),1)];
 
-      [nnode nelem]=readoff(mwpath('s1in2.off'));
+      [nnode, nelem]=readoff(mwpath('s1in2.off'));
       newelem=[newelem; nelem+size(newnode,1) 3*ones(size(nelem,1),1)];
       newnode=[newnode; nnode 3*ones(size(nnode,1),1)];
 
-      [nnode nelem]=readoff(mwpath('s2out1.off'));
+      [nnode, nelem]=readoff(mwpath('s2out1.off'));
       newelem=[newelem; nelem+size(newnode,1) 2*ones(size(nelem,1),1)];
       newnode=[newnode; nnode 2*ones(size(nnode,1),1)];
 
-      [nnode nelem]=readoff(mwpath('s2in1.off'));
+      [nnode, nelem]=readoff(mwpath('s2in1.off'));
       newelem=[newelem; nelem+size(newnode,1) 4*ones(size(nelem,1),1)];
       newnode=[newnode; nnode 4*ones(size(nnode,1),1)];
    elseif(strcmp(op,'decouple'))

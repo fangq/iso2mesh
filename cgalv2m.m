@@ -37,8 +37,7 @@ function [node,elem,face]=cgalv2m(vol,opt,maxvol)
 
 fprintf(1,'creating surface and tetrahedral mesh from a multi-domain volume ...\n');
 
-dtype=class(vol);
-if(~(islogical(vol) || strcmp(dtype,'uint8')))
+if(~(islogical(vol) || isa(vol,'uint8')))
 	error('cgalmesher can only handle uint8 volumes, you have to convert your image to unit8 first.');
 end
 
@@ -59,10 +58,10 @@ if(~isstruct(opt))
 end
 
 if(isstruct(opt) && length(opt)==1)  % does not support settings for multiple labels
-	if(isfield(opt,'radbound'))   ssize=opt.radbound; end
-	if(isfield(opt,'angbound'))   ang=opt.angbound; end
-	if(isfield(opt,'distbound')) approx=opt.distbound; end
-	if(isfield(opt,'reratio'))    reratio=opt.reratio; end
+        ssize=jsonopt('radbound',ssize,opt);
+        ang=jsonopt('angbound',ang,opt);
+        approx=jsonopt('distbound',approx,opt);
+        reratio=jsonopt('reratio',reratio,opt);
 end
 
 saveinr(vol,mwpath('pre_cgalmesh.inr'));
@@ -104,3 +103,5 @@ if(size(node,1)>0)
 end
 
 node=node+0.5;
+elem(:,1:4)=meshreorient(node(:,1:3),elem(:,1:4));
+

@@ -53,5 +53,7 @@ system([' "' mcpath('cgalsurf') exesuff '" "' mwpath('pre_extract.inr') ...
     ' "' mwpath('post_extract.off') '" ' sprintf('%.0f %d',randseed,initnum)]);
 [node,elem]=readoff(mwpath('post_extract.off'));
 
+[node, elem]=meshcheckrepair(node, elem);
+
 % assuming the origin [0 0 0] is located at the lower-bottom corner of the image
 node=node+0.5;

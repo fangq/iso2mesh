@@ -51,7 +51,7 @@ if(nargin>=8)
                                 'volume. If you are certain to run cgalmesher ' ...
                                 'on your data, please set dofix=0 and run this again.' ]);
 		end
-		[node elem,face]=cgalv2m(vol,opt,maxvol);
+		[node,elem,face]=cgalv2m(vol,opt,maxvol);
 		return;
 	end
 end

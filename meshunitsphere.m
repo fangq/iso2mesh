@@ -32,7 +32,7 @@ esize=tsize*dim;
 thresh=dim/2-1;
 [xi,yi,zi]=meshgrid(0:0.5:dim,0:0.5:dim,0:0.5:dim);
 dist=thresh-sqrt((xi-30).^2+(yi-30).^2+(zi-30).^2);
-dist(find(dist<0))=0;
+dist(dist<0)=0;
 clear xi yi zi;
 
 % extract a level-set at v=thresh, being a sphere with R=thresh
@@ -48,8 +48,11 @@ r0=sqrt(sum((node.*node)'));
 node=node.*repmat(1./r0(:),1,3);
 
 if(nargout==3)
-   if(nargin==1) maxvol=tsize*tsize*tsize; end
+   if(nargin==1)
+       maxvol=tsize*tsize*tsize;
+   end
    [node,elem,face]=surf2mesh(node,face,[-1 -1 -1]*1.1,[1 1 1]*1.1,1,maxvol,[],[]);
    elem=elem(:,1:4);
 end
+
 face=face(:,1:3);

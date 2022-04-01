@@ -26,6 +26,6 @@ opt=varargin2struct(varargin{:});
 snorm=surfplane(node,face);
 snorm=snorm(:,1:3);
 
-if(getoptkey('Normalize',1,opt))
+if(jsonopt('Normalize',1,opt))
     snorm=snorm./repmat(sqrt(sum(snorm.*snorm,2)),1,3);
 end
