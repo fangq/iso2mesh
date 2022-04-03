@@ -26,6 +26,7 @@ function savejmesh(node,face,elem,fname,varargin)
 %           'Flexible': 0 (default)- use dimension-specific data containers
 %                 (MeshVertex3, MeshTet4 ...). 1 - use flexible mesh data
 %                 containers (MeshNode, MeshSurf, MeshElem)
+%           'Header': 1 - include _DataInfo_ header, 0 - do not include
 %
 %           please type 'help savejson' and 'help savebj' to see additional 
 %           supported options    
@@ -62,22 +63,24 @@ end
 
 meshdim=jsonopt('Dimension',size(node,2),opt);
 
-mesh.(encodevarname('_DataInfo_'))=struct();
+if(jsonopt('Header',1,opt)==1) % use metadata header
+    mesh.(encodevarname('_DataInfo_'))=struct();
 
-metadata.JMeshVersion=0.4;
-metadata.Dimension=meshdim;
-metadata.CreationTime=datestr(now);
-metadata.Comment=['Created by Iso2Mesh ' iso2meshver '(http://iso2mesh.sf.net)'];
-metadata.AnnotationFormat='https://github.com/NeuroJSON/jmesh/blob/master/JMesh_specification.md';
-metadata.SerialFormat='http://json.org';
-metadata.Parser=struct('Python',[], ...
-                       'MATLAB','https://github.com/NeuroJSON/jsonlab', ...
-                       'JavaScript',[],...
-                       'CPP', 'https://github.com/NeuroJSON/json',...
-                       'C', []);
-metadata.Parser.Python={'https://pypi.org/project/jdata','https://pypi.org/project/bjdata'};
-metadata.Parser.JavaScript={'https://github.com/NeuroJSON/jsdata','https://github.com/NeuroJSON/js-bjdata'};
-metadata.Parser.C={'https://github.com/DaveGamble/cJSON','https://github.com/NeuroJSON/ubj'};
+    metadata.JMeshVersion=0.5;
+    metadata.Dimension=meshdim;
+    metadata.CreationTime=datestr(now);
+    metadata.Comment=['Created by Iso2Mesh ' iso2meshver '(http://iso2mesh.sf.net)'];
+    metadata.AnnotationFormat='https://github.com/NeuroJSON/jmesh/blob/master/JMesh_specification.md';
+    metadata.SerialFormat='http://json.org';
+    metadata.Parser=struct('Python',[], ...
+                           'MATLAB','https://github.com/NeuroJSON/jsonlab', ...
+                           'JavaScript',[],...
+                           'CPP', 'https://github.com/NeuroJSON/json',...
+                           'C', []);
+    metadata.Parser.Python={'https://pypi.org/project/jdata','https://pypi.org/project/bjdata'};
+    metadata.Parser.JavaScript={'https://github.com/NeuroJSON/jsdata','https://github.com/NeuroJSON/js-bjdata'};
+    metadata.Parser.C={'https://github.com/DaveGamble/cJSON','https://github.com/NeuroJSON/ubj'};
+end
 
 if(jsonopt('Flexible',0,opt)==1) % a user-defined mesh
     mesh.MeshNode=node;
@@ -162,7 +165,9 @@ if(~isempty(comm))
     metadata.Comment=comm;
 end
 
-mesh.(encodevarname('_DataInfo_'))=metadata;
+if(exist('metadata','var')) % use metadata
+    mesh.(encodevarname('_DataInfo_'))=metadata;
+end
 
 if(~isempty(regexp(fname,'\.bmsh$', 'once')) || ~isempty(regexp(fname,'\.bmesh$', 'once')))
    savebj('',mesh,'FileName',fname,varargin{:});
