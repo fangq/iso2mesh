@@ -37,7 +37,7 @@ if(nargin<1)
     error('you must provide data and output file name');
 end
 
-if(~exist('loadubjson','file'))
+if(~exist('loadbj','file'))
     error('you must first install JSONLab from http://github.com/fangq/jsonlab/');
 end
 
