@@ -31,4 +31,4 @@ if(nargin<4)
 end
 [node,elem]=surf2mesh([],[],p0,p1,1,opt,[],[],nodesize);
 elem=meshreorient(node,elem(:,1:4));
-face=valface(elem);
+face=volface(elem);
