@@ -1,4 +1,4 @@
-function json=savejson(rootname,obj,varargin)
+function output=savejson(rootname,obj,varargin)
 %
 % json=savejson(obj)
 %    or
@@ -270,6 +270,10 @@ if(~isempty(filename))
         fwrite(fid,json,'char');
     end
     fclose(fid);
+end
+
+if(nargout>0 || isempty(filename))
+    output=json;
 end
 
 %%-------------------------------------------------------------------------
@@ -795,14 +799,14 @@ if(isoct)
    end
 end
 if(isoct)
-  escapechars={'\\','\"','\/','\a','\f','\n','\r','\t','\v'};
+  escapechars={'\\','\"','\a','\f','\n','\r','\t','\v'};
   for i=1:length(escapechars)
     newstr=regexprep(newstr,escapechars{i},escapechars{i});
   end
   newstr=regexprep(newstr,'\\\\(u[0-9a-fA-F]{4}[^0-9a-fA-F]*)','\$1');
 else
-  escapechars={'\\','\"','\/','\a','\b','\f','\n','\r','\t','\v'};
-  esc={'\\\\','\\"','\\/','\\a','\\b','\\f','\\n','\\r','\\t','\\v'};
+  escapechars={'\\','\"','\a','\b','\f','\n','\r','\t','\v'};
+  esc={'\\\\','\\"','\\a','\\b','\\f','\\n','\\r','\\t','\\v'};
   for i=1:length(escapechars)
     newstr=regexprep(newstr,escapechars{i},esc{i});
   end

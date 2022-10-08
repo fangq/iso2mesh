@@ -78,6 +78,10 @@ function [data, mmap] = loadbj(fname,varargin)
 %           of the stream, and length is the JSON object string length.
 %           For more details, please see the help section of loadjson.m
 %
+%           The format of the mmap table retruned from this function
+%           follows the JSON-Mmap Specification Draft 1 [3] defined by the
+%           NeuroJSON project, see https://neurojson.org/jsonmmap/draft1/
+%
 % examples:
 %      obj=struct('string','value','array',[1 2 3]);
 %      ubjdata=savebj('obj',obj);
@@ -91,9 +95,11 @@ function [data, mmap] = loadbj(fname,varargin)
 % -- this function is part of JSONLab toolbox (http://iso2mesh.sf.net/cgi-bin/index.cgi?jsonlab)
 %
 
+    opt=varargin2struct(varargin{:});
+
     if(length(fname)<4096 && exist(fname,'file'))
        fid = fopen(fname,'rb');
-       string = fread(fid,inf,'uint8=>char')';
+       string = fread(fid,jsonopt('MaxBuffer',inf,opt),'uint8=>char')';
        fclose(fid);
     elseif(regexp(fname, '^\s*[\[\{SCHiUIulmLMhdDTFZN]'))
        string=fname;
@@ -105,7 +111,6 @@ function [data, mmap] = loadbj(fname,varargin)
     inputlen = length(string);
     inputstr = string;
 
-    opt=varargin2struct(varargin{:});
     opt.simplifycell=jsonopt('SimplifyCell',1,opt);
     opt.simplifycellarray=jsonopt('SimplifyCellArray',0,opt);
     opt.usemap=jsonopt('UseMap',0,opt);
@@ -276,7 +281,7 @@ function [object, pos, mmap] = parse_array(inputstr,  pos, varargin) % JSON arra
     if cc ~= ']'
          while 1
             if(nargout>2)
-                varargin{1}.jsonpath_=[origpath '.' sprintf('[%d]',length(object))];
+                varargin{1}.jsonpath_=[origpath sprintf('[%d]',length(object))];
                 mmap{end+1}={varargin{1}.jsonpath_, pos};
                 [val, pos, newmmap] = parse_value(inputstr, pos, [], varargin{:});
                 mmap{end}{2}=[mmap{end}{2}, pos-mmap{end}{2}];
