@@ -27,7 +27,7 @@ elseif(strcmp(dtype,'uint16'))
    btype='unsigned fixed';
    dtype='uint16';
    bitlen=16;	
-elseif(strcmp(dtype,'float'))
+elseif(strcmp(dtype,'single'))
    btype='float';
    dtype='float';
    bitlen=32;
