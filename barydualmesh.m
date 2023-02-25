@@ -25,6 +25,15 @@ function [newnode,newelem]=barydualmesh(node,elem,flag)
 %
 
 [enodes,eidx]=highordertet(node,elem);               % compute edge-centers
+
+if(size(elem,2)==3)
+    fnodes=meshcentroid(node,elem);                  % compute face-centers
+    fidx=1:
+    newnode=[enodes;fnodes];
+    newidx=[eidx, fidx+size(enodes,1), (1:size(elem,1))'+(size(enodes,1)+size(fnodes,1))];
+    return;
+end
+
 [fnodes,fidx]=elemfacecenter(node,elem);             % compute face-centers
 c0=meshcentroid(node,elem(:,1:min(size(elem,2),4))); % compute elem-centers
 

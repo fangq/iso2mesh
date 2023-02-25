@@ -12,15 +12,15 @@ function varargout=loadjd(filename, varargin)
 %
 %    input:
 %        inputfile: the input hierarchical container data file, supporting:
-%                *.json,.jnii,.jdt,.jmsh,.jnirs: JSON/JData based data files, see http://neurojson.org/jdata/draft2
-%                *.bjd,.bnii,.jdb,.bmsh,.bnirs: binary JData (BJData) files, see http://neurojson.org/bjdata/draft2
+%                *.json,.jnii,.jdt,.jmsh,.jnirs,.jbids: JSON/JData based data files, see https://neurojson.org/jdata/draft2
+%                *.bjd,.bnii,.jdb,.bmsh,.bnirs: binary JData (BJData) files, see https://neurojson.org/bjdata/draft2
 %                *.ubj: UBJSON-encoded files, see http://ubjson.org
 %                *.msgpack: MessagePack-encoded files, see http://msgpack.org
 %                *.h5,.hdf5,.snirf: HDF5 files, see https://www.hdfgroup.org/
 %        options: (optional) for JSON/JData files, these are optional 'param',value pairs
 %                supported by loadjson.m; for BJData/UBJSON/MessagePack files, these are
 %                options supported by loadbj.m; for HDF5 files, these are options
-%                supported by loadh5.m (part of EasyH5 toolbox, http://github.com/fangq/easyh5/)
+%                supported by loadh5.m (part of EasyH5 toolbox, http://github.com/NeuroJSON/easyh5/)
 %
 %    output:
 %        data: a structure (array) or cell (array) storing the hierarchical data
@@ -43,9 +43,9 @@ if(nargin<1)
     error('you must provide file name');
 end
 
-if(regexpi(filename,'\.json$|\.jnii$\.jdt$\.jdat$|\.jmsh$|\.jnirs$'))
+if(regexpi(filename,'\.json$|\.jnii$|\.jdt$|\.jdat$|\.jmsh$|\.jnirs|\.jbids$'))
     [varargout{1:nargout}]=loadjson(filename,varargin{:});
-elseif(regexpi(filename,'\.bjd$|\.bnii$\.jdb$\.jbat$|\.bmsh$|\.bnirs$'))
+elseif(regexpi(filename,'\.bjd$|\.bnii$|\.jdb$|\.jbat$|\.bmsh$|\.bnirs$'))
     [varargout{1:nargout}]=loadbj(filename,varargin{:});
 elseif(regexpi(filename,'\.ubj$'))
     [varargout{1:nargout}]=loadubjson(filename,varargin{:});
@@ -53,9 +53,9 @@ elseif(regexpi(filename,'\.msgpack$'))
     [varargout{1:nargout}]=loadmsgpack(filename,varargin{:});
 elseif(regexpi(filename,'\.h5$|\.hdf5$|\.snirf$'))
     if(~exist('loadh5','file'))
-        error('you must first install EasyH5 from http://github.com/fangq/easyh5/');
+        error('you must first install EasyH5 from http://github.com/NeuroJSON/easyh5/');
     end
     [varargout{1:nargout}]=loadh5(filename,varargin{:});
 else
-    error('file suffix must be one of .json,.jnii,.jdt,.jmsh,.jnirs,.bjd,.bnii,.jdb,.bmsh,.bnirs,.ubj,.msgpack,.h5,.hdf5,.snirf');
+    error('file suffix must be one of .json,.jnii,.jdt,.jmsh,.jnirs,.jbids,.bjd,.bnii,.jdb,.bmsh,.bnirs,.ubj,.msgpack,.h5,.hdf5,.snirf');
 end

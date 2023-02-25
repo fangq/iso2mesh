@@ -1,4 +1,4 @@
-function json=savebj(rootname,obj,varargin)
+function output=savebj(rootname,obj,varargin)
 %
 % bjd=savebj(obj)
 %    or
@@ -292,8 +292,12 @@ if(~isempty(filename))
     else
         fid = fopen(filename, writemode, fileendian);
     end
-    fwrite(fid,json);
+    fwrite(fid,uint8(json));
     fclose(fid);
+end
+
+if(nargout>0 || isempty(filename))
+    output=json;
 end
 
 %%-------------------------------------------------------------------------

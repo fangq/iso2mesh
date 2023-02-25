@@ -31,7 +31,7 @@ end
 if(order>=3 || order<=1)
     error('currently this function only supports order=2');
 end
-[edges,idx,newelem]=uniqedges(elem(:,1:4));
+[edges,idx,newelem]=uniqedges(elem(:,1:min(size(elem,2),4)));
 newnode=node(edges',1:3);
 newnode=reshape(newnode',[3,2,size(edges,1)]);
 newnode=squeeze(mean(permute(newnode,[3 2 1]),2));

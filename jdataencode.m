@@ -6,13 +6,13 @@ function jdata=jdataencode(data, varargin)
 % jdata=jdataencode(data, 'Param1',value1, 'Param2',value2,...)
 %
 % Annotate a MATLAB struct or cell array into a JData-compliant data
-% structure as defined in the JData spec: http://github.com/fangq/jdata.
+% structure as defined in the JData spec: http://github.com/NeuroJSON/jdata.
 % This encoded form servers as an intermediate format that allows unambiguous
 % storage, exchange of complex data structures and easy-to-serialize by
 % json encoders such as savejson and jsonencode (MATLAB R2016b or newer)
 %
 % This function implements the JData Specification Draft 3 (Jun. 2020)
-% see http://github.com/fangq/jdata for details
+% see http://github.com/NeuroJSON/jdata for details
 %
 % author: Qianqian Fang (q.fang <at> neu.edu)
 %
@@ -139,12 +139,14 @@ if(num>1)  % struct array
        newitem=cell2mat(newitem);
     catch
     end
-else       % a single struct
+elseif(num==1) % a single struct
     names=fieldnames(item);
     newitem=struct;
     for i=1:length(names)
         newitem.(names{i})=obj2jd(item.(names{i}),varargin{:});
     end
+else
+    newitem=item;
 end
 
 %%-------------------------------------------------------------------------
