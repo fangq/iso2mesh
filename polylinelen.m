@@ -1,6 +1,6 @@
-function [len, node]=polylinelen(node, p0, p1, pmid)
+function [len, node, inputreversed]=polylinelen(node, p0, p1, pmid)
 %
-% [len, node]=polylinelen(node, p0, p1)
+% [len, node, inputreversed]=polylinelen(node, p0, p1, pmid)
 %
 % Calculate the polyline line segment length vector in sequential order
 %
@@ -19,6 +19,7 @@ function [len, node]=polylinelen(node, p0, p1, pmid)
 % output:
 %    len: the length of each segment between the start and the end points
 %    node: the node list between the start and end points of the polyline
+%    inputreversed: if 1, the input node is reversed from p0 to pmid to p1
 %
 %
 % -- this function is part of brain2mesh toolbox (http://mcx.space/brain2mesh)
@@ -47,13 +48,23 @@ if(size(pmid,2)==3)
 end
 
 if(p0<pmid && pmid<p1)
+    inputreversed=0;
     node=node(p0:p1,:);
 elseif(p0<pmid && p1<pmid)
+    inputreversed=(min(p0,p1) == p0);
     node=node([min(p0,p1):-1:1 end:-1:max(p0,p1)],:);
+    if(~inputreversed)
+        node=flipud(node);
+    end
 elseif(p0>pmid && pmid>p1)
+    inputreversed=1;
     node=node(p0:-1:p1,:);
 elseif(p0>pmid && p1>pmid)
+    inputreversed=(max(p0,p1) == p1);
     node=node([max(p0,p1):end 1:min(p0,p1)],:);
+    if(inputreversed)
+        node=flipud(node);
+    end
 end
 
 len=node(1:end-1,:) - node(2:end,:);
