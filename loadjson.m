@@ -56,7 +56,7 @@ function [data, mmap] = loadjson(fname,varargin)
 %                         please set FormatVersion to 1.9 or earlier.
 %           Encoding ['']: json file encoding. Support all encodings of
 %                         fopen() function
-%           ObjectID [0|interger or list]: if set to a positive number, 
+%           ObjectID [0|integer or list]: if set to a positive number, 
 %                         it returns the specified JSON object by index 
 %                         in a multi-JSON document; if set to a vector,
 %                         it returns a list of specified objects.
@@ -84,13 +84,13 @@ function [data, mmap] = loadjson(fname,varargin)
 %             {{jsonpath1,[start,length,<whitespace_pre>]},
 %              {jsonpath2,[start,length,<whitespace_pre>]}, ...}
 %           where jsonpath_i is a string in the JSONPath [1,2] format, and
-%           "start" is an integer referring to the offset from the begining
+%           "start" is an integer referring to the offset from the beginning
 %           of the stream, and "length" is the JSON object string length.
 %           An optional 3rd integer "whitespace_pre" may appear to record
 %           the preceding whitespace length in case expansion of the data
 %           record is needed when using the mmap.
 %
-%           The format of the mmap table retruned from this function
+%           The format of the mmap table returned from this function
 %           follows the JSON-Mmap Specification Draft 1 [3] defined by the
 %           NeuroJSON project, see https://neurojson.org/jsonmmap/draft1/
 %
@@ -100,7 +100,7 @@ function [data, mmap] = loadjson(fname,varargin)
 %
 %           The JSONPath keys used in mmap is largely compatible to the
 %           upstream specification defined in [1], with a slight extension
-%           to handle contatenated JSON files.
+%           to handle concatenated JSON files.
 %
 %           In the mmap jsonpath key, a '$' denotes the root object, a '.'
 %           denotes a child of the preceding element; '.key' points to the
@@ -132,7 +132,7 @@ function [data, mmap] = loadjson(fname,varargin)
 %             {"root3": ...}
 %
 %           we use '$' or '$0' for the first root-object, and '$1' refers
-%           to the 2nd root object (["root2",...]) and '$2' referrs to the
+%           to the 2nd root object (["root2",...]) and '$2' refers to the
 %           3rd root object, and so on. Please note that this syntax is an
 %           extension from the JSONPath documentation [1,2]
 %
@@ -274,7 +274,7 @@ function [data, mmap] = loadjson(fname,varargin)
         catch ME
             warning(['Failed to decode embedded JData annotations, '...
                 'return raw JSON data\n\njdatadecode error: %s\n%s\nCall stack:\n%s\n'], ...
-                ME.identifier, ME.message, savejson('',ME.stack));
+                ME.identifier, ME.message, char(savejson('',ME.stack)));
         end
     end
     if(opt.mmaponly)
@@ -514,7 +514,7 @@ end
 
 function [num, pos] = parse_number(inputstr, pos, varargin)
     currstr=inputstr(pos:min(pos+30,end));
-    [num, one, err, delta] = sscanf(currstr, '%f', 1);
+    [num, tmp, err, delta] = sscanf(currstr, '%f', 1);
     if ~isempty(err)
         pos=error_pos('Error reading number at position %d',inputstr,pos);
     end
@@ -529,7 +529,7 @@ function varargout = parse_value(inputstr, pos, esc, index_esc, varargin)
     end
     varargout{3}=index_esc;
     if(nargout>3)
-            varargout{4}={};
+        varargout{4}={};
     end
     switch(inputstr(pos))
         case '"'
@@ -600,7 +600,7 @@ function [object, pos, index_esc, mmap] = parse_object(inputstr, pos, esc, index
 		object(str)=val;
 	    else
 		object.(encodevarname(str,varargin{:}))=val;
-	    end
+            end
             [cc,pos]=next_char(inputstr,pos);
             if cc == '}'
                 break;
@@ -620,7 +620,7 @@ function pos=error_pos(msg, inputstr, pos)
     end
     msg = [sprintf(msg, pos) ': ' ...
     inputstr(poShow(1):poShow(2)) '<error>' inputstr(poShow(3):poShow(4)) ];
-    error( ['JSONLAB:JSON:InvalidFormat: ' msg] );
+    error('JSONLAB:JSON:InvalidFormat', msg);
 end
 
 %%-------------------------------------------------------------------------
@@ -641,7 +641,7 @@ function newstr=unescapejsonstring(str)
         catch
         end
     end
-    if(~ischar(str))
+    if(~ischar(str) || isempty(find(str=='\', 1)))
         return;
     end
     escapechars={'\\','\"','\/','\a','\b','\f','\n','\r','\t','\v'};

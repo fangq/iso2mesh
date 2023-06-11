@@ -5,7 +5,7 @@ function savebnii(jnii, filename, varargin)
 %    savebnii(jniidata, bniifile, 'Param1',value1, 'Param2',value2,...)
 %
 %    Save an in-memory JNIfTI structure into a binary-JNIfTI file with format
-%    defined in JNIfTI specification: https://github.com/fangq/jnifti
+%    defined in JNIfTI specification: https://github.com/NeuroJSON/jnifti
 %
 %    author: Qianqian Fang (q.fang <at> neu.edu)
 %
@@ -27,9 +27,9 @@ function savebnii(jnii, filename, varargin)
 %        savebnii(jnii, 'magic10.bnii')
 %        savebnii(jnii, 'magic10_debug.bnii','Debug',1)
 %
-%    this file is part of JNIfTI specification: https://github.com/fangq/jnifti
+%    this file is part of JNIfTI specification: https://github.com/NeuroJSON/jnifti
 %
-%    License: Apache 2.0, see https://github.com/fangq/jnifti for details
+%    License: Apache 2.0, see https://github.com/NeuroJSON/jnifti for details
 %
 
 if(nargin<2)

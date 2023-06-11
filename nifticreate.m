@@ -15,9 +15,9 @@ function header=nifticreate(img,format)
 %    output:
 %        header: a struct that is byte-wise compatible with NIfTI-1
 %
-%    this file is part of JNIfTI specification: https://github.com/fangq/jnifti
+%    this file is part of JNIfTI specification: https://github.com/NeuroJSON/jnifti
 %
-%    License: Apache 2.0, see https://github.com/fangq/jnifti for details
+%    License: Apache 2.0, see https://github.com/NeuroJSON/jnifti for details
 %
 
 if(nargin<2)

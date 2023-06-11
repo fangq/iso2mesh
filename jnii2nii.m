@@ -45,12 +45,12 @@ function nii=jnii2nii(jnii, varargin)
 %    dependency:
 %
 %          To load a JNIfTI file with compression or niifile ends with (.nii.gz/.hdr.gz/.img.gz),
-%          one must install the ZMat Toolbox (http://github.com/fangq/zmat) and
+%          one must install the ZMat Toolbox (http://github.com/NeuroJSON/zmat) and
 %          JSONLab Toolbox (http://github.com/fangq/jsonlab);
 %
-%    this file is part of JNIfTI specification: https://github.com/fangq/jnifti
+%    this file is part of JNIfTI specification: https://github.com/NeuroJSON/jnifti
 %
-%    License: Apache 2.0, see https://github.com/fangq/jnifti for details
+%    License: Apache 2.0, see https://github.com/NeuroJSON/jnifti for details
 %
 
 if(nargin<=0)
