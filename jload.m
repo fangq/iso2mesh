@@ -18,7 +18,7 @@ function varargout=jload(filename, varargin)
 %           JSON/JData file will be expected; if the suffix is '.pmat' or
 %           '.jdb', a Binary JData file will be expected.
 %      opt: (optional) a struct to store parsing options, opt can be replaced by 
-%           a list of ('param',value) pairs - the param string is equivallent
+%           a list of ('param',value) pairs - the param string is equivalent
 %           to a field in opt. opt can have the following 
 %           fields (first in [.|.] is the default)
 %
@@ -60,15 +60,6 @@ opt=varargin2struct(varargin{:});
 
 ws=jsonopt('ws','caller',opt);
 
-loadfun=@loadbj;
-if(regexp(filename,'\.[jJ][sS][oO][nN]$'))
-    loadfun=@loadjson;
-elseif(regexp(filename,'\.[jJ][dD][tT]$'))
-    loadfun=@loadjson;
-elseif(regexp(filename,'\.[mM][sS][gG][pP][kK]$'))
-    loadfun=@loadmsgpack;
-end
-
 if(jsonopt('matlab',0,opt) && exist('jsonencode','builtin'))
     jsonstr=fileread(filename);
     pos=regexp(jsonstr,'}\n\n\n{"WorkspaceData":','once');
@@ -78,9 +69,9 @@ if(jsonopt('matlab',0,opt) && exist('jsonencode','builtin'))
     header=jsondecode(jsonstr(1:pos+1));
 else
     try
-        header=loadfun(filename,'ObjectID',1, 'MaxBuffer', 65536, varargin{:});
+        header=loadjd(filename,'ObjectID',1, 'MaxBuffer', 65536, varargin{:});
     catch
-        header=loadfun(filename,'ObjectID',1, varargin{:});
+        header=loadjd(filename,'ObjectID',1, varargin{:});
     end
 end
 
@@ -97,7 +88,7 @@ end
 if(jsonopt('matlab',0,opt) && exist('jsonencode','builtin'))
     body=jdatadecode(jsondecode(jsonstr(pos+4:end)));
 else
-    body=loadfun(filename,'ObjectID',2, varargin{:});
+    body=loadjd(filename,'ObjectID',2, varargin{:});
 end
 
 if(nargout==0)
