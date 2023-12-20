@@ -52,7 +52,7 @@ if ( CGAL_FOUND )
   endif()
 
 
-  if ( Boost_FOUND AND Boost_VERSION GREATER 103400 )
+  if ( Boost_FOUND )
     include( CGAL_CreateSingleSourceCGALProgram )
 
     # Compilable examples
