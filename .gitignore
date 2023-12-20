@@ -1,3 +1,5 @@
+# cMake File 
+
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
@@ -10,3 +12,9 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 .DS_Store
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
