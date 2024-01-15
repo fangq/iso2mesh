@@ -44,7 +44,7 @@ function newdata=jdatadecode(data,varargin)
 %                         please set FormatVersion to 1
 %
 % output:
-%      newdata: the covnerted data if the input data does contain a JData 
+%      newdata: the converted data if the input data does contain a JData 
 %               structure; otherwise, the same as the input.
 %
 % examples:
@@ -126,8 +126,14 @@ function newdata=jdatadecode(data,varargin)
             if(isfield(data,N_('_ArrayZipType_')))
                 zipmethod=data(j).(N_('_ArrayZipType_'));
             end
-            if(ismember(zipmethod,{'zlib','gzip','lzma','lzip','lz4','lz4hc','base64'}))
-                decompfun=str2func([zipmethod 'decode']);
+            if(ismember(zipmethod,{'zlib','gzip','lzma','lzip','lz4','lz4hc','base64'}) || ~isempty(regexp(zipmethod,'^blosc2', 'once')))
+                decodeparam={};
+                if(~isempty(regexp(zipmethod,'^blosc2', 'once')))
+                    decompfun=@blosc2decode;
+                    decodeparam={zipmethod};
+                else
+                    decompfun=str2func([zipmethod 'decode']);
+                end
                 arraytype=data(j).(N_('_ArrayType_'));
                 chartype=0;
                 if(strcmp(arraytype,'char') || strcmp(arraytype,'logical'))
@@ -135,9 +141,9 @@ function newdata=jdatadecode(data,varargin)
                     arraytype='uint8';
                 end
                 if(needbase64 && strcmp(zipmethod,'base64')==0)
-                    ndata=reshape(typecast(decompfun(base64decode(data(j).(N_('_ArrayZipData_')))),arraytype),dims);
+                    ndata=reshape(typecast(decompfun(base64decode(data(j).(N_('_ArrayZipData_'))),decodeparam{:}),arraytype),dims);
                 else
-                    ndata=reshape(typecast(decompfun(data(j).(N_('_ArrayZipData_'))),arraytype),dims);
+                    ndata=reshape(typecast(decompfun(data(j).(N_('_ArrayZipData_')),decodeparam{:}),arraytype),dims);
                 end
                 if(chartype)
                     ndata=char(ndata);
@@ -476,12 +482,12 @@ function newdata=jdatadecode(data,varargin)
                 switch(lower(fext))
                     case {'.json','.jnii','.jdt','.jdat','.jmsh','.jnirs'}
                         newdata=loadjson(uripath, opt);
-                    case {'.bjd' ,'.bnii','.jdb','.jbat','.bmsh','.bnirs', '.jamm'}
-                        newdata=loadbj(uripath, opt);
+                    case {'.bjd' ,'.bnii','.jdb','.jbat','.bmsh','.bnirs', '.pmat'}
+                        newdata=loadbj(uripath, opt, 'Base64', 0);
                     case {'.ubj'}
-                        newdata=loadubjson(uripath, opt);
+                        newdata=loadubjson(uripath, opt, 'Base64', 0);
                     case {'.msgpack'}
-                        newdata=loadmsgpack(uripath, opt);
+                        newdata=loadmsgpack(uripath, opt, 'Base64', 0);
                     case {'.h5','.hdf5','.snirf'}  % this requires EasyH5 toolbox
                         newdata=loadh5(uripath, opt);
                     otherwise

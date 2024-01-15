@@ -61,12 +61,12 @@ are even more popular than Iso2Mesh itself. For example:
  encoder and decoder ([https://www.mathworks.com/matlabcentral/fileexchange/33381-jsonlab-a-toolbox-to-encode-decode-json-files Editor Pick-of-the-week, Popular Files 2018])
 * Brain2Mesh (http://mcx.space/brain2mesh): a fully automated \
  high-quality brain mesh generation toolbox built on Iso2Mesh
-* JNIfTI (http://github.com/fangq/jnifti): a fast and portable \
+* JNIfTI (http://github.com/NeuroJSON/jnifti): a fast and portable \
  NIfTI-1/2 reader/writer and next-gen NIfTI file format
 * Metch (http://iso2mesh.sf.net/metch): a 3D mesh registration toolbox
 * JData specification (http://openjdata.org): a highly portable \
  easy-to-use scientific data annotation method and specification
-* ZMat (http://github.com/fangq/zmat): a data compression library \
+* ZMat (http://github.com/NeuroJSON/zmat): a data compression library \
  and MATLAB/Octave toolbox
 
 Currently, Iso2Mesh and its submodules are broadly distributed 

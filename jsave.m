@@ -11,12 +11,12 @@ function varargout=jsave(filename, varargin)
 % created on 2020/05/31
 %
 % input:
-%      fname: (optional) output file name; if not given, save to 'jamdata.jamm'
+%      fname: (optional) output file name; if not given, save to 'default.pmat'
 %           if fname has a '.json' or '.jdt' suffix, a text-based
-%           JSON/JData file will be created (slow); if the suffix is '.jamm' or
+%           JSON/JData file will be created (slow); if the suffix is '.pmat' or
 %           '.jdb', a Binary JData (https://github.com/NeuroJSON/bjdata/) file will be created.
 %      opt: (optional) a struct to store parsing options, opt can be replaced by 
-%           a list of ('param',value) pairs - the param string is equivallent
+%           a list of ('param',value) pairs - the param string is equivalent
 %           to a field in opt. opt can have the following 
 %           fields (first in [.|.] is the default)
 %
@@ -34,9 +34,9 @@ function varargout=jsave(filename, varargin)
 %      varlist: a list of variables loaded
 %
 % examples:
-%      jsave  % save all variables in the 'caller' workspace to jamdata.jamm
-%      jsave('mydat.jamm','vars', {'v1','v2',...}) % save selected variables
-%      jsave('mydat.jamm','compression','lzma')
+%      jsave  % save all variables in the 'caller' workspace to jamdata.pmat
+%      jsave('mydat.pmat','vars', {'v1','v2',...}) % save selected variables
+%      jsave('mydat.pmat','compression','lzma')
 %
 % license:
 %     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details 
@@ -45,10 +45,26 @@ function varargout=jsave(filename, varargin)
 %
 
 if(nargin==0)
-    filename=[pwd filesep 'jamdata.jamm'];
+    filename=[pwd filesep 'default.pmat'];
 end
 
 opt=varargin2struct(varargin{:});
+if(~isfield(opt,'nthread'))
+    opt.nthread=4;
+end
+if(~isfield(opt,'compression'))
+    if(exist('zipmat'))
+        opt.compression='blosc2zstd';
+    else
+        opt.compression='zlib';
+    end
+end
+if(~isfield(opt,'shuffle'))
+    opt.shuffle=1;
+end
+if(~isfield(opt,'typesize'))
+    opt.typesize=4;
+end
 
 ws=jsonopt('ws','caller',opt);
 
@@ -90,21 +106,12 @@ for i=1:length(varlist)
     body.(varlist{i})=evalin(ws,varlist{i});
 end
 
-savefun=@savebj;
-loadfun=@loadbj;
-if(regexp(filename,'\.[jJ][sS][oO][nN]$'))
-    savefun=@savejson;
-    loadfun=@loadjson;
-elseif(regexp(filename,'\.[jJ][dD][tT]$'))
-    savefun=@savejson;
-    loadfun=@loadjson;
-elseif(regexp(filename,'\.[mM][sS][gG][pP][kK]$'))
-    savefun=@savemsgpack;
-end
-
 if(nargout==1)
     varargout{1}=header;
 end
+
+defaultopt={'compression',opt.compression,'nthread',opt.nthread,...
+    'shuffle',opt.shuffle,'typesize',opt.typesize,'keeptype',1,'array2struct',1};
 
 if(jsonopt('matlab',0,opt) && exist('jsonencode','builtin'))
     if(isempty(regexp(filename,'\.[jJ][sS][oO][nN]$', 'once')))
@@ -115,8 +122,7 @@ if(jsonopt('matlab',0,opt) && exist('jsonencode','builtin'))
     clear output;
 
     output.WorkspaceData=jdataencode(body,'AnnotateArray',1,'base64',1,...
-       'Compression','zlib','UseArrayZipSize',1,'MapAsStruct',1,...
-       'prefix','x',varargin{:});
+       'UseArrayZipSize',1,'MapAsStruct',1,'prefix','x',defaultopt{:},varargin{:});
     bodyjson=jsonencode(output);
     clear output;
 
@@ -126,15 +132,15 @@ if(jsonopt('matlab',0,opt) && exist('jsonencode','builtin'))
     fwrite(fid,bodyjson);
     fclose(fid);
 elseif(jsonopt('usemmap',0,opt)==1)
-    bodyjson=savefun('WorkspaceData',body,...
-        'compression','zlib','keeptype',1,'array2struct',1,varargin{:});
-    header.(encodevarname('_MMap_'))=loadfun(bodyjson,'mmaponly',1,varargin{:});
-    savefun('WorkspaceHeader',header,'filename',filename,varargin{:});
+    bodyjson=savejd('WorkspaceData',body,...
+        defaultopt{:},varargin{:});
+    header.(encodevarname('_MMap_'))=loadjd(bodyjson,'mmaponly',1,varargin{:});
+    savejd('WorkspaceHeader',header,'filename',filename,varargin{:});
     fid=fopen(filename,'ab+');
     fwrite(fid,bodyjson);
     fclose(fid);
 else
-    savefun('WorkspaceHeader',header,'filename',filename,varargin{:});
-    savefun('WorkspaceData',body,'filename',filename,'append',1,...
-        'compression','zlib','keeptype',1,'array2struct',1,varargin{:});
+    savejd('WorkspaceHeader',header,'filename',filename,varargin{:});
+    savejd('WorkspaceData',body,'filename',filename,'append',1,...
+        defaultopt{:},varargin{:});
 end

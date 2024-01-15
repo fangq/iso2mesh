@@ -2,7 +2,7 @@ function savejmesh(node,face,elem,fname,varargin)
 %
 % savejmesh(node,face,elem,fname,opt)
 %
-% export a mesh to the JMesh format defined in http://github.com/fangq/jmesh
+% export a mesh to the JMesh format defined in http://github.com/NeuroJSON/jmesh
 %
 % author: Qianqian Fang, <q.fang at neu.edu>
 % date: 2011/10/06

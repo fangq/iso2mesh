@@ -73,7 +73,7 @@ function output=savebj(rootname,obj,varargin)
 %          JSONP [''|string]: to generate a JSONP output (JSON with padding),
 %                         for example, if opt.JSON='foo', the JSON data is
 %                         wrapped inside a function call as 'foo(...);'
-%          UnpackHex [1|0]: conver the 0x[hex code] output by loadjson 
+%          UnpackHex [1|0]: convert the 0x[hex code] output by loadjson 
 %                         back to the string form
 %          Compression  'zlib', 'gzip', 'lzma', 'lzip', 'lz4' or 'lz4hc': specify array 
 %                         compression method; currently only supports 6 methods. The
@@ -84,7 +84,7 @@ function output=savebj(rootname,obj,varargin)
 %                         it to uint8 or int8 array first. The compressed
 %                         array uses three extra fields
 %                         "_ArrayZipType_": the opt.Compression value. 
-%                         "_ArrayZipSize_": a 1D interger array to
+%                         "_ArrayZipSize_": a 1D integer array to
 %                            store the pre-compressed (but post-processed)
 %                            array dimensions, and 
 %                         "_ArrayZipData_": the binary stream of
@@ -92,7 +92,7 @@ function output=savebj(rootname,obj,varargin)
 %                            'base64' encoding
 %          CompressArraySize [100|int]: only to compress an array if the total 
 %                         element count is larger than this number.
-%          CompressStringSize [400|int]: only to compress a string if the total 
+%          CompressStringSize [inf|int]: only to compress a string if the total 
 %                         element count is larger than this number.
 %          MessagePack [0|1]: output MessagePack (https://msgpack.org/)
 %                         binary stream instead of BJD/UBJSON
@@ -131,7 +131,7 @@ function output=savebj(rootname,obj,varargin)
 %                         the input data before saving
 %
 %        opt can be replaced by a list of ('param',value) pairs. The param 
-%        string is equivallent to a field in opt and is case sensitive.
+%        string is equivalent to a field in opt and is case sensitive.
 % output:
 %      bjd: a binary string in the UBJSON format (see http://ubjson.org)
 %
@@ -172,7 +172,7 @@ opt.compression=jsonopt('Compression','',opt);
 opt.nestarray=jsonopt('NestArray',0,opt);
 opt.formatversion=jsonopt('FormatVersion',2,opt);
 opt.compressarraysize=jsonopt('CompressArraySize',100,opt);
-opt.compressstringsize=jsonopt('CompressStringSize',opt.compressarraysize*4,opt);
+opt.compressstringsize=jsonopt('CompressStringSize',inf,opt);
 opt.singletcell=jsonopt('SingletCell',1,opt);
 opt.singletarray=jsonopt('SingletArray',0,opt);
 opt.arraytostruct=jsonopt('ArrayToStruct',0,opt);
@@ -192,7 +192,7 @@ end
 
 dozip=opt.compression;
 if(~isempty(dozip))
-    if(~ismember(dozip,{'zlib','gzip','lzma','lzip','lz4','lz4hc'}))
+    if (~ismember(dozip, {'zlib', 'gzip', 'lzma', 'lzip', 'lz4', 'lz4hc'}) && isempty(regexp(dozip,'^blosc2', 'once')))
         error('compression method "%s" is not supported',dozip);
     end
     if(exist('zmat','file')~=2 && exist('zmat','file')~=3)
@@ -656,8 +656,14 @@ else
         cid=I_(uint32(max(size(fulldata))),varargin{:});
         txt=[txt, N_('_ArrayZipSize_',opt),I_a(size(fulldata),cid(1),varargin{:})];
         txt=[txt, N_('_ArrayZipType_',opt),S_(dozip,opt)];
-	compfun=str2func([dozip 'encode']);
-	txt=[txt,N_('_ArrayZipData_',opt), I_a(compfun(typecast(fulldata(:),'uint8')),Imarker(1),varargin{:})];
+        encodeparam={};
+        if(~isempty(regexp(dozip,'^blosc2', 'once')))
+            compfun=@blosc2encode;
+            encodeparam={dozip, 'nthread', jsonopt('nthread',1,opt), 'shuffle', jsonopt('shuffle',1,opt), 'typesize', jsonopt('typesize',length(typecast(fulldata(1),'uint8')),opt)};
+        else
+            compfun=str2func([dozip 'encode']);
+        end
+        txt=[txt,N_('_ArrayZipData_',opt), I_a(compfun(typecast(fulldata(:),'uint8'),encodeparam{:}),Imarker(1),varargin{:})];
         childcount=childcount+3;
     else
         if(ismsgpack)
@@ -705,19 +711,19 @@ try
     if numel(item) == 0 %empty object
         st = struct();
     elseif numel(item) == 1 %
-        txt = str2ubjson(name, char(item), level, varargin(:));
+        txt = str2ubjson(name, char(item), level, varargin{:});
         return
     else
             propertynames = properties(item);
             for p = 1:numel(propertynames)
-                for o = numel(item):-1:1 % aray of objects
+                for o = numel(item):-1:1 % array of objects
                     st(o).(propertynames{p}) = item(o).(propertynames{p});
                 end
             end
     end
     txt = struct2ubjson(name,st,level,varargin{:});
 catch
-    txt = any2ubjson(name,item, level, varargin(:));
+    txt = any2ubjson(name,item, level, varargin{:});
 end
 
 %%-------------------------------------------------------------------------

@@ -2931,7 +2931,7 @@
  initially created on 2013/08/17
 
  Format specifications:
-    Binary JData (BJData):https://github.com/fangq/bjdata
+    Binary JData (BJData):https://github.com/NeuroJSON/bjdata
     UBJSON:               https://github.com/ubjson/universal-binary-json
     MessagePack:          https://github.com/msgpack/msgpack
 
@@ -3074,7 +3074,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
  including uint16(u), uint32(m), uint64(M) and half-precision float (h)
 
  Format specifications:
-    Binary JData (BJD):   https://github.com/fangq/bjdata
+    Binary JData (BJD):   https://github.com/NeuroJSON/bjdata
     UBJSON:               https://github.com/ubjson/universal-binary-json
     MessagePack:          https://github.com/msgpack/msgpack
 
@@ -3430,7 +3430,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
 
  savejmesh(node,face,elem,fname,opt)
 
- export a mesh to the JMesh format defined in http://github.com/fangq/jmesh
+ export a mesh to the JMesh format defined in http://github.com/NeuroJSON/jmesh
 
 
  input:
@@ -3469,7 +3469,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
     jnii=loadjnifti(inputfile, 'Param1',value1, 'Param2',value2,...)
 
     Load a standard NIFTI-1/2 file or text or binary JNIfTI file with
-    format defined in JNIfTI specification: https://github.com/fangq/jnifti
+    format defined in JNIfTI specification: https://github.com/NeuroJSON/jnifti
 
 
     input:
@@ -3504,7 +3504,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
     savejnifti(jnii, outputfile, 'Param1',value1, 'Param2',value2,...)
 
     Save an in-memory JNIfTI structure into a JNIfTI file with format
-    defined in JNIfTI specification: https://github.com/fangq/jnifti
+    defined in JNIfTI specification: https://github.com/NeuroJSON/jnifti
 
 
     input:
@@ -3559,7 +3559,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
         img: this is a numerical array to be stored in the NIfTI file
         filename: output file name, can have a suffix of '.nii' or '.nii.gz'
                  if a .gz suffix is used, this function needs the JSONLab 
-                 (http://gitlab.com/fangq/jsonlab) and ZMat (http://gitlab.com/fangq/zmat)
+                 (http://gitlab.com/fangq/jsonlab) and ZMat (http://gitlab.com/NeuroJSON/zmat)
                  to perform the compression.
         rawhdr (optional): a struct, as a pre-created/loaded NIfTI header data structure
                 if rawhdr is 'nifti1' or 'nifti2', this function calls 
@@ -3767,7 +3767,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
       fname: (optional) output file name; if not given, save to 'jamdata.jamm'
            if fname has a '.json' or '.jdt' suffix, a text-based
            JSON/JData file will be created (slow); if the suffix is '.jamm' or
-           '.jdb', a Binary JData (https://github.com/fangq/bjdata/) file will be created.
+           '.jdb', a Binary JData (https://github.com/NeuroJSON/bjdata/) file will be created.
       opt: (optional) a struct to store parsing options, opt can be replaced by 
            a list of ('param',value) pairs - the param string is equivallent
            to a field in opt. opt can have the following 
@@ -3868,7 +3868,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
     input:
         img: set the jnii.NIFTIData section
         'header_i': the header subfield name defined in the JNIfTI
-                    specification, see https://github.com/fangq/jnifti
+                    specification, see https://github.com/NeuroJSON/jnifti
         value_i: set the value for the specified JNIfTI header field
 
     output:
@@ -3903,7 +3903,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
 
     A fast and portable NIFTI-1/2 and Analyze7.5 file parser and converter
     to the text and binary JNIfTI formats defined in JNIfTI specification:
-    https://github.com/fangq/jnifti  
+    https://github.com/NeuroJSON/jnifti  
 
     This function is compatible with both MATLAB and GNU Octave. 
     It accepts .nii, .nii.gz, .hdr/.img and .hdr.gz/.img.gz input files
@@ -3952,7 +3952,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
           No external dependency if reading .nii/.hdr/.img files;
 
           To load gzipped input files (.nii.gz/.hdr.gz/.img.gz), one must
-          install the ZMat Toolbox (http://github.com/fangq/zmat) and
+          install the ZMat Toolbox (http://github.com/NeuroJSON/zmat) and
           JSONLab Toolbox (http://github.com/fangq/jsonlab);
 
           To save files into the text/binary JNIfTI formatted files, one
@@ -4007,7 +4007,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
     dependency:
 
           To load a JNIfTI file with compression or niifile ends with (.nii.gz/.hdr.gz/.img.gz),
-          one must install the ZMat Toolbox (http://github.com/fangq/zmat) and
+          one must install the ZMat Toolbox (http://github.com/NeuroJSON/zmat) and
           JSONLab Toolbox (http://github.com/fangq/jsonlab);
 
 
@@ -4074,7 +4074,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
     savebnii(jniidata, bniifile, 'Param1',value1, 'Param2',value2,...)
 
     Save an in-memory JNIfTI structure into a binary-JNIfTI file with format
-    defined in JNIfTI specification: https://github.com/fangq/jnifti
+    defined in JNIfTI specification: https://github.com/NeuroJSON/jnifti
 
 
     input:
@@ -4103,7 +4103,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
     savejnii(jniidata, jniifile, 'Param1',value1, 'Param2',value2,...)
 
     Save an in-memory JNIfTI structure into a text-JNIfTI file with format
-    defined in JNIfTI specification: https://github.com/fangq/jnifti
+    defined in JNIfTI specification: https://github.com/NeuroJSON/jnifti
 
 
     input:
@@ -4135,7 +4135,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
  Compress a string or numerical array using the ZLIB-compression
 
  This function depends on JVM in MATLAB or, can optionally use the ZMat 
- toolbox (http://github.com/fangq/zmat)
+ toolbox (http://github.com/NeuroJSON/zmat)
 
  Copyright (c) 2012, Kota Yamaguchi
  URL: https://www.mathworks.com/matlabcentral/fileexchange/39526-byte-encoding-utilities
@@ -4164,7 +4164,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
 
  Decompressing a ZLIB-compressed byte-stream to recover the original data
  This function depends on JVM in MATLAB or, can optionally use the ZMat 
- toolbox (http://github.com/fangq/zmat)
+ toolbox (http://github.com/NeuroJSON/zmat)
 
  Copyright (c) 2012, Kota Yamaguchi
  URL: https://www.mathworks.com/matlabcentral/fileexchange/39526-byte-encoding-utilities
@@ -4197,7 +4197,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
  Compress a string or numerical array using the GZIP-compression
 
  This function depends on JVM in MATLAB or, can optionally use the ZMat 
- toolbox (http://github.com/fangq/zmat)
+ toolbox (http://github.com/NeuroJSON/zmat)
 
  Copyright (c) 2012, Kota Yamaguchi
  URL: https://www.mathworks.com/matlabcentral/fileexchange/39526-byte-encoding-utilities
@@ -4226,7 +4226,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
 
  Decompressing a GZIP-compressed byte-stream to recover the original data
  This function depends on JVM in MATLAB or, can optionally use the ZMat 
- toolbox (http://github.com/fangq/zmat)
+ toolbox (http://github.com/NeuroJSON/zmat)
 
  Copyright (c) 2012, Kota Yamaguchi
  URL: https://www.mathworks.com/matlabcentral/fileexchange/39526-byte-encoding-utilities
@@ -4258,7 +4258,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
 
  Compress a string or a numerical array using LZMA-compression
 
- This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+ This function depends on the ZMat toolbox (http://github.com/NeuroJSON/zmat)
 
 
  input:
@@ -4283,7 +4283,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
  output = lzmadecode(input,info)
 
  Decompressing an LZMA-compressed byte-stream to recover the original data
- This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+ This function depends on the ZMat toolbox (http://github.com/NeuroJSON/zmat)
 
 
  input:
@@ -4312,7 +4312,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
 
  Compress a string or a numerical array using LZip-compression
 
- This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+ This function depends on the ZMat toolbox (http://github.com/NeuroJSON/zmat)
 
 
  input:
@@ -4337,7 +4337,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
  output = lzipdecode(input,info)
 
  Decompressing an Lzip-compressed byte-stream to recover the original data
- This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+ This function depends on the ZMat toolbox (http://github.com/NeuroJSON/zmat)
 
 
  input:
@@ -4366,7 +4366,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
 
  Compress a string or a numerical array using LZ4-compression
 
- This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+ This function depends on the ZMat toolbox (http://github.com/NeuroJSON/zmat)
 
 
  input:
@@ -4391,7 +4391,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
  output = lz4decode(input,info)
 
  Decompressing an LZ4-compressed byte-stream to recover the original data
- This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+ This function depends on the ZMat toolbox (http://github.com/NeuroJSON/zmat)
 
 
  input:
@@ -4420,7 +4420,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
 
  Compress a string or a numerical array using LZ4HC-compression
 
- This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+ This function depends on the ZMat toolbox (http://github.com/NeuroJSON/zmat)
 
 
  input:
@@ -4445,7 +4445,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
  output = lz4hcdecode(input,info)
 
  Decompressing an LZ4HC-compressed byte-stream to recover the original data
- This function depends on the ZMat toolbox (http://github.com/fangq/zmat)
+ This function depends on the ZMat toolbox (http://github.com/NeuroJSON/zmat)
 
 
  input:
@@ -4472,7 +4472,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
 
  Decoding a Base64-encoded byte-stream to recover the original data
  This function depends on JVM in MATLAB or, can optionally use the ZMat 
- toolbox (http://github.com/fangq/zmat)
+ toolbox (http://github.com/NeuroJSON/zmat)
 
  Copyright (c) 2012, Kota Yamaguchi
  URL: https://www.mathworks.com/matlabcentral/fileexchange/39526-byte-encoding-utilities
@@ -4499,7 +4499,7 @@ LOADMSGPACK parses a msgpack byte buffer into Matlab data structures
  Encoding a binary vector or array using Base64
 
  This function depends on JVM in MATLAB or, can optionally use the ZMat 
- toolbox (http://github.com/fangq/zmat)
+ toolbox (http://github.com/NeuroJSON/zmat)
 
  Copyright (c) 2012, Kota Yamaguchi
  URL: https://www.mathworks.com/matlabcentral/fileexchange/39526-byte-encoding-utilities

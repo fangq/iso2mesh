@@ -97,7 +97,7 @@ for i=1:3:len
        opstr='diff';
    end
    if(strcmp(op,'self'))
-       opstr='inter -s';
+       opstr='solid';
    end
    if(strcmp(opstr,'all'))
        opstr='resolve';
@@ -179,12 +179,19 @@ for i=1:3:len
    if(status~=0 && strcmp(op,'self')==0)
        error('surface boolean command failed:\n%s\nERROR: %s\n',cmd,outstr);
    end
-   if(status~=0 && strcmp(op,'self') && ~isempty(strfind(outstr,'(new_ear): assertion failed')))
-       fprintf(1,'no self-intersection was found! (ignore the above error)\n');
-       newnode=[];
-       newelem=[];
-       newelem0=[];
-       return;
+   if(strcmp(op,'self'))
+       if(isempty(strfind(outstr,'NOT SOLID')))
+           fprintf(1,'no self-intersection was found!\n');
+           newnode=[];
+           newelem=[];
+           newelem0=[];
+       else
+           fprintf(1,'input mesh is self-intersecting\n');
+           newnode=1;
+           newelem=[];
+           newelem0=1;
+       end
+       return
    end
    if(strcmp(opstr,'all'))
       % tag the 4 piceses of meshes, this tag do not propagate to the next boolean operation

@@ -22,9 +22,9 @@ function niiheader=niiformat(format)
 %             column 2: an integer vector denoting the size of the data
 %             column 3: a string denoting the fieldname in the output struct
 %
-%    this file is part of JNIfTI specification: https://github.com/fangq/jnifti
+%    this file is part of JNIfTI specification: https://github.com/NeuroJSON/jnifti
 %
-%    License: Apache 2.0, see https://github.com/fangq/jnifti for details
+%    License: Apache 2.0, see https://github.com/NeuroJSON/jnifti for details
 %
 
 header.nifti1={                            ...

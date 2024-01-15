@@ -21,7 +21,7 @@ function [data, mmap] = loadbj(fname,varargin)
 %      fname: input file name, if fname contains "{}" or "[]", fname
 %             will be interpreted as a BJData/UBJSON string
 %      opt: a struct to store parsing options, opt can be replaced by 
-%           a list of ('param',value) pairs - the param string is equivallent
+%           a list of ('param',value) pairs - the param string is equivalent
 %           to a field in opt. opt can have the following 
 %           fields (first in [.|.] is the default)
 %
@@ -49,7 +49,7 @@ function [data, mmap] = loadbj(fname,varargin)
 %                         flag to 1.
 %           UseMap [0|1]: if set to 1, loadbj uses a containers.Map to 
 %                         store map objects; otherwise use a struct object
-%           ObjectID [0|interger or list]: if set to a positive number, 
+%           ObjectID [0|integer or list]: if set to a positive number, 
 %                         it returns the specified JSON object by index 
 %                         in a multi-JSON document; if set to a vector,
 %                         it returns a list of specified objects.
@@ -74,11 +74,11 @@ function [data, mmap] = loadbj(fname,varargin)
 %      mmap: (optional) a cell array in the form of
 %           {{jsonpath1,[start,length]}, {jsonpath2,[start,length]}, ...}
 %           where jsonpath_i is a string in the form of JSONPath, and
-%           start is an integer referring to the offset from the begining
+%           start is an integer referring to the offset from the beginning
 %           of the stream, and length is the JSON object string length.
 %           For more details, please see the help section of loadjson.m
 %
-%           The format of the mmap table retruned from this function
+%           The format of the mmap table returned from this function
 %           follows the JSON-Mmap Specification Draft 1 [3] defined by the
 %           NeuroJSON project, see https://neurojson.org/jsonmmap/draft1/
 %
@@ -101,7 +101,9 @@ function [data, mmap] = loadbj(fname,varargin)
        fid = fopen(fname,'rb');
        string = fread(fid,jsonopt('MaxBuffer',inf,opt),'uint8=>char')';
        fclose(fid);
-    elseif(regexp(fname, '^\s*[\[\{SCHiUIulmLMhdDTFZN]'))
+    elseif(all(fname<128) && ~isempty(regexpi(fname,'^\s*(http|https|ftp|file)://')))
+       string = char(webread(fname, weboptions('ContentType','binary')))';
+    elseif(~isempty(fname) && any(fname(1)=='[{SCHiUIulmLMhdDTFZN'))
        string=fname;
     else
        error_pos('input file does not exist or buffer is invalid');
@@ -183,7 +185,7 @@ function [data, mmap] = loadbj(fname,varargin)
         catch ME
             warning(['Failed to decode embedded JData annotations, '...
                 'return raw JSON data\n\njdatadecode error: %s\n%s\nCall stack:\n%s\n'], ...
-                ME.identifier, ME.message, savejson('',ME.stack));
+                ME.identifier, ME.message, char(savejson('',ME.stack)));
         end
     end
     if(mmaponly)
@@ -458,7 +460,7 @@ function pos=error_pos(msg, inputstr, pos)
     end
     msg = [sprintf(msg, pos) ': ' ...
     inputstr(poShow(1):poShow(2)) '<error>' inputstr(poShow(3):poShow(4)) ];
-    error( ['JSONLAB:BJData:InvalidFormat: ' msg] );
+    error('JSONLAB:BJData:InvalidFormat', msg);
 end
 
 %%-------------------------------------------------------------------------
@@ -513,7 +515,7 @@ function [object, pos, mmap] = parse_object(inputstr, pos, varargin)
                 object.(encodevarname(str,varargin{:}))=val;
             end
             [cc, pos]=next_char(inputstr,pos);
-            if cc == '}' || (count>=0 && num>=count)
+            if (count>=0 && num>=count) || cc == '}'
                 break;
             end
         end

@@ -28,9 +28,9 @@ function jmsh=loadjmesh(filename, varargin)
 %        savejmesh(no,fc,el,'box.jmsh');
 %        newmesh=loadjmesh('box.jmsh');
 %
-%    this file is part of JMesh specification: https://github.com/fangq/jmesh
+%    this file is part of JMesh specification: https://github.com/NeuroJSON/jmesh
 %
-%    License: Apache 2.0, see https://github.com/fangq/jmesh for details
+%    License: Apache 2.0, see https://github.com/NeuroJSON/jmesh for details
 %
 
 if(nargin<1)

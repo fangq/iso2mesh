@@ -7,7 +7,7 @@ function nii=nii2jnii(filename, format, varargin)
 %
 %    A fast and portable NIFTI-1/2 and Analyze7.5 file parser and converter
 %    to the text and binary JNIfTI formats defined in JNIfTI specification:
-%    https://github.com/fangq/jnifti  
+%    https://github.com/NeuroJSON/jnifti  
 %
 %    This function is compatible with both MATLAB and GNU Octave. 
 %    It accepts .nii, .nii.gz, .hdr/.img and .hdr.gz/.img.gz input files
@@ -57,7 +57,7 @@ function nii=nii2jnii(filename, format, varargin)
 %          No external dependency if reading .nii/.hdr/.img files;
 %
 %          To load gzipped input files (.nii.gz/.hdr.gz/.img.gz), one must
-%          install the ZMat Toolbox (http://github.com/fangq/zmat) and
+%          install the ZMat Toolbox (http://github.com/NeuroJSON/zmat) and
 %          JSONLab Toolbox (http://github.com/fangq/jsonlab);
 %
 %          To save files into the text/binary JNIfTI formatted files, one
@@ -65,9 +65,9 @@ function nii=nii2jnii(filename, format, varargin)
 %
 %    this file was initially developed for the MCX project: https://github.com/fangq/mcx/blob/master/utils/mcxloadnii.m
 %
-%    this file is part of JNIfTI specification: https://github.com/fangq/jnifti
+%    this file is part of JNIfTI specification: https://github.com/NeuroJSON/jnifti
 %
-%    License: Apache 2.0, see https://github.com/fangq/jnifti for details
+%    License: Apache 2.0, see https://github.com/NeuroJSON/jnifti for details
 %
 
 

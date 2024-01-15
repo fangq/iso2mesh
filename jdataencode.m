@@ -314,12 +314,20 @@ if(varargin{1}.usearrayzipsize==0 && isfield(newitem,N('_ArrayZipSize_')))
 end
 
 if(~isempty(zipmethod) && numel(item)>minsize)
-    compfun=str2func([zipmethod 'encode']);
+    encodeparam={};
+    if(~isempty(regexp(zipmethod,'^blosc2', 'once')))
+        compfun=@blosc2encode;
+        encodeparam={zipmethod, 'nthread', jsonopt('nthread',1,varargin{1}),...
+            'shuffle', jsonopt('shuffle',1,varargin{1}), ...
+            'typesize', jsonopt('typesize',length(typecast(item(1),'uint8')),varargin{1})};
+    else
+        compfun=str2func([zipmethod 'encode']);
+    end
     newitem.(N('_ArrayZipType_'))=lower(zipmethod);
     if(~isfield(newitem,N('_ArrayZipSize_')))
         newitem.(N('_ArrayZipSize_'))=size(newitem.(N('_ArrayData_')));
     end
-    newitem.(N('_ArrayZipData_'))=compfun(typecast(newitem.(N('_ArrayData_'))(:).','uint8'));
+    newitem.(N('_ArrayZipData_'))=compfun(typecast(newitem.(N('_ArrayData_'))(:).','uint8'), encodeparam{:});
     newitem=rmfield(newitem,N('_ArrayData_'));
     if(varargin{1}.base64)
         newitem.(N('_ArrayZipData_'))=char(base64encode(newitem.(N('_ArrayZipData_'))));
@@ -375,7 +383,7 @@ try
     else
         propertynames = properties(item);
         for p = 1:numel(propertynames)
-            for o = numel(item):-1:1 % aray of objects
+            for o = numel(item):-1:1 % array of objects
                 newitem(o).(propertynames{p}) = item(o).(propertynames{p});
             end
         end

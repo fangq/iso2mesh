@@ -7,7 +7,7 @@ function varargout = zlibencode(varargin)
 % Compress a string or numerical array using the ZLIB-compression
 %
 % This function depends on JVM in MATLAB or, can optionally use the ZMat 
-% toolbox (http://github.com/fangq/zmat)
+% toolbox (http://github.com/NeuroJSON/zmat)
 %
 % Copyright (c) 2012, Kota Yamaguchi
 % URL: https://www.mathworks.com/matlabcentral/fileexchange/39526-byte-encoding-utilities
@@ -39,7 +39,8 @@ if(exist('zmat','file')==2 || exist('zmat','file')==3)
     [varargout{1:nargout}]=zmat(varargin{1},1,'zlib');
     return;
 elseif(isoctavemesh)
-    error('You must install the ZMat toolbox (http://github.com/fangq/zmat) to use this function in Octave');
+    [varargout{1:nargout}]=octavezmat(varargin{1}, 1, 'zlib');
+    return;
 end
 
 error(javachk('jvm'));
@@ -54,5 +55,5 @@ zlib.close();
 varargout{1} = typecast(buffer.toByteArray(), 'uint8')';
 
 if(nargout>1)
-    varargout{2}=struct('type',class(varargin{1}),'size',size(varargin{1}),'method','gzip','status',0);
+    varargout{2}=struct('type',class(varargin{1}),'size',size(varargin{1}),'method','zlib','status',0);
 end

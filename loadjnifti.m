@@ -5,7 +5,7 @@ function jnii=loadjnifti(filename, varargin)
 %    jnii=loadjnifti(inputfile, 'Param1',value1, 'Param2',value2,...)
 %
 %    Load a standard NIFTI-1/2 file or text or binary JNIfTI file with
-%    format defined in JNIfTI specification: https://github.com/fangq/jnifti
+%    format defined in JNIfTI specification: https://github.com/NeuroJSON/jnifti
 %
 %    author: Qianqian Fang (q.fang <at> neu.edu)
 %
@@ -33,9 +33,9 @@ function jnii=loadjnifti(filename, varargin)
 %        savejnifti(jnii, 'magic10.jnii')
 %        newjnii=loadjnifti('magic10.jnii');
 %
-%    this file is part of JNIfTI specification: https://github.com/fangq/jnifti
+%    this file is part of JNIfTI specification: https://github.com/NeuroJSON/jnifti
 %
-%    License: Apache 2.0, see https://github.com/fangq/jnifti for details
+%    License: Apache 2.0, see https://github.com/NeuroJSON/jnifti for details
 %
 
 if(nargin<1)
