@@ -254,21 +254,43 @@ nii=niiheader2jnii(nii0);
 nii.NIFTIData=nii0.img;
 
 if(isfield(nii0.hdr,'extension') && nii0.hdr.extension(1)>0)
-    fid=fopen(filename,'rb');
-    fseek(fid,nii0.hdr.sizeof_hdr+4,'bof');
-    nii.NIFTIExtension=cell(1);
-    count=1;
-    while(ftell(fid)<nii0.hdr.vox_offset)
-       nii.NIFTIExtension{count}.Size=fread(fid,1,'int32=>int32');
-       nii.NIFTIExtension{count}.Type=fread(fid,1,'int32=>int32');
-       if(strcmp(dataendian,'big'))
-           nii.NIFTIExtension{count}.Size=swapbytes(nii.NIFTIExtension{count}.Size);
-           nii.NIFTIExtension{count}.Type=swapbytes(nii.NIFTIExtension{count}.Type);
-       end
-       nii.NIFTIExtension{count}.x0x5F_ByteStream_=fread(fid,nii.NIFTIExtension{count}.Size-8,'uint8=>uint8');
-       count=count+1;
+    if(exist('gzdata','var'))
+        nii.NIFTIExtension=cell(1);
+        count=1;
+        bufpos = nii0.hdr.sizeof_hdr + 4;
+        while(bufpos<nii0.hdr.vox_offset)
+           nii.NIFTIExtension{count}.Size=typecast(gzdata(bufpos+1:bufpos+4), 'int32') - 8;
+           nii.NIFTIExtension{count}.Type=typecast(gzdata(bufpos+5:bufpos+8), 'int32');
+           bufpos = bufpos + 8;
+           if(strcmp(dataendian,'big'))
+               nii.NIFTIExtension{count}.Size=swapbytes(nii.NIFTIExtension{count}.Size);
+               nii.NIFTIExtension{count}.Type=swapbytes(nii.NIFTIExtension{count}.Type);
+           end
+           if(bufpos + nii.NIFTIExtension{count}.Size <= nii0.hdr.vox_offset)
+               nii.NIFTIExtension{count}.x0x5F_ByteStream_=gzdata(bufpos+1:bufpos+nii.NIFTIExtension{count}.Size);
+           end
+           bufpos = bufpos + bufpos+nii.NIFTIExtension{count}.Size;
+           count=count+1;
+        end
+    else
+        fid=fopen(filename,'rb');
+        fseek(fid,nii0.hdr.sizeof_hdr+4,'bof');
+        nii.NIFTIExtension=cell(1);
+        count=1;
+        while(ftell(fid)<nii0.hdr.vox_offset)
+           nii.NIFTIExtension{count}.Size=fread(fid,1,'int32=>int32') - 8;
+           nii.NIFTIExtension{count}.Type=fread(fid,1,'int32=>int32');
+           if(strcmp(dataendian,'big'))
+               nii.NIFTIExtension{count}.Size=swapbytes(nii.NIFTIExtension{count}.Size);
+               nii.NIFTIExtension{count}.Type=swapbytes(nii.NIFTIExtension{count}.Type);
+           end
+           if(ftell(fid) + nii.NIFTIExtension{count}.Size < nii0.hdr.vox_offset)
+               nii.NIFTIExtension{count}.x0x5F_ByteStream_=fread(fid,nii.NIFTIExtension{count}.Size,'uint8=>uint8');
+           end
+           count=count+1;
+        end
+        fclose(fid);
     end
-    fclose(fid);
 end
 
 if(nargout==0 && strcmp(format,'nii')==0 && strcmp(format,'jnii')==0)
