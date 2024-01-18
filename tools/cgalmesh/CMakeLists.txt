@@ -54,12 +54,16 @@ if ( CGAL_FOUND )
 
   if ( Boost_FOUND )
     include( CGAL_CreateSingleSourceCGALProgram )
-
+    
     # Compilable examples
     create_single_source_cgal_program( "mesh_polyhedral_domain.cpp")
+    target_link_libraries(mesh_polyhedral_domain TBB::tbb)
+
     if( WITH_CGAL_ImageIO )
       if( CGAL_ImageIO_USE_ZLIB )
         create_single_source_cgal_program( "mesh_3D_image.cpp")
+        target_link_libraries(mesh_3D_image TBB::tbb)
+
       else()
         message( STATUS "NOTICE: The examples mesh_3D_image.cpp and mesh_3D_image_variable_size.cpp need CGAL_ImageIO to be configured with ZLIB support, and will not be compiled." )
       endif()
