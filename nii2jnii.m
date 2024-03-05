@@ -237,11 +237,14 @@ else
         nii.img=fread(fid,imgbytenum,[nii.datatype '=>' nii.datatype]);
         fclose(fid);
     else
-        nii.img=typecast(gzdata(nii.hdr.vox_offset+1:nii.hdr.vox_offset+imgbytenum),nii.datatype);
+        nii.img=typecast(gzdata((double(nii.hdr.vox_offset)+1):(double(nii.hdr.vox_offset)+imgbytenum)),nii.datatype);
     end
 end
-
-nii.img=reshape(nii.img,nii.hdr.dim(2:nii.hdr.dim(1)+1));
+try
+    nii.img=reshape(nii.img,nii.hdr.dim(2:nii.hdr.dim(1)+1));
+catch
+    error(['fail to load ' filename]);
+end
 
 if(nargin>1 && strcmp(format,'nii'))
     return;
