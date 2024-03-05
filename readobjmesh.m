@@ -17,10 +17,12 @@ function [node,face]=readobjmesh(fname)
 %
 
 str = fileread(fname);
-nodestr=regexprep(str,'[#f][^\n]+\n','');
-node=textscan(nodestr,'v %f %f %f');
-facestr=regexprep(regexprep(str,'[^a-eg-zA-Z][^\n]+\n',''),'f\s+([^\n]+)\n', '$1\n');
-facestr=regexprep(facestr,'(\d+)(/\d+){0,2}', '\1');
-face=textscan(facestr,'f %d %d %d');
-node=cell2mat(node);
-face=cell2mat(face);
+nodestr=regexp(str,'v\s+([0-9.\-e]+\s+[0-9.\-e]+\s+[0-9.\-e]+)','tokens');
+nodestr = [nodestr{:}];
+node=sscanf(sprintf('%s ',nodestr{:}),'%f %f %f', [3,inf])';
+facestr=regexp(str,'f\s+(\d+(/\d+)*\s+\d+(/\d+)*\s+\d+(/\d+)*)','tokens');
+facestr = [facestr{:}];
+facestr=sprintf('%s ',facestr{:});
+facestr=regexprep(facestr,'/\d+', '');
+face=sscanf(facestr,'%d %d %d', [3, inf])';
+
