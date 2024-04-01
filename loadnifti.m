@@ -4,7 +4,7 @@ function varargout = loadnifti (varargin)
 %        or
 %    nii=loadnifti(filename,option)
 %
-%    Read a NIfTI-1/2 (*.nii/.nii.gz) or Analyze 7.5 (*.hdr/*.img/.hdr.gz/.img.gz) 
+%    Read a NIfTI-1/2 (*.nii/.nii.gz) or Analyze 7.5 (*.hdr/*.img/.hdr.gz/.img.gz)
 %    image file.
 %
 %    author: Qianqian Fang (q.fang <at> neu.edu)
@@ -18,4 +18,4 @@ function varargout = loadnifti (varargin)
 %    License: Apache 2.0, see https://github.com/NeuroJSON/jnifti for details
 %
 
-[varargout{1:nargout}]=nii2jnii(varargin{:});
+[varargout{1:nargout}] = nii2jnii(varargin{:});

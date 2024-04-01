@@ -1,4 +1,4 @@
-function jnii=loadjnifti(filename, varargin)
+function jnii = loadjnifti(filename, varargin)
 %
 %    jnii=loadjnifti(inputfile)
 %       or
@@ -15,7 +15,7 @@ function jnii=loadjnifti(filename, varargin)
 %                *.jnii for text JNIfTI file
 %                *.nii  for NIFTI-1/2 files
 %        options: (optional) if loading from a .bnii file, please see the options for
-%               loadbj.m (part of JSONLab); if loading from a .jnii, please see the 
+%               loadbj.m (part of JSONLab); if loading from a .jnii, please see the
 %               supported options for loadjson.m (part of JSONLab).
 %
 %    output:
@@ -38,20 +38,20 @@ function jnii=loadjnifti(filename, varargin)
 %    License: Apache 2.0, see https://github.com/NeuroJSON/jnifti for details
 %
 
-if(nargin<1)
+if (nargin < 1)
     error('you must provide data and output file name');
 end
 
-if(~exist('savejson','file'))
+if (~exist('savejson', 'file'))
     error('you must first install JSONLab from http://github.com/fangq/jsonlab/');
 end
 
-if(regexp(filename,'\.nii$'))
-    jnii=nii2jnii(filename,'jnii');
-elseif(regexp(filename,'\.jnii$'))
-    jnii=loadjson(filename,varargin{:});
-elseif(regexp(filename,'\.bnii$'))
-    jnii=loadbj(filename,varargin{:});
+if (regexp(filename, '\.nii$'))
+    jnii = nii2jnii(filename, 'jnii');
+elseif (regexp(filename, '\.jnii$'))
+    jnii = loadjson(filename, varargin{:});
+elseif (regexp(filename, '\.bnii$'))
+    jnii = loadbj(filename, varargin{:});
 else
     error('file suffix must be .jnii for text JNIfTI, .bnii for binary JNIfTI or .nii for NIFTI-1/2 files');
 end

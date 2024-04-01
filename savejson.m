@@ -176,6 +176,9 @@ if (jsonopt('BuiltinJSON', 0, opt) && exist('jsonencode', 'builtin'))
         if (isempty(regexp(json, '^[{\[]', 'once')))
             json = ['[', json, ']'];
         end
+        if (nargout > 0)
+            output = json;
+        end
         return
     catch
         warning('built-in jsonencode function failed to encode the data, fallback to savejson');
@@ -188,7 +191,7 @@ end
 
 dozip = opt.compression;
 if (~isempty(dozip))
-    if (~ismember(dozip, {'zlib', 'gzip', 'lzma', 'lzip', 'lz4', 'lz4hc'}) && isempty(regexp(dozip,'^blosc2', 'once')))
+    if (~ismember(dozip, {'zlib', 'gzip', 'lzma', 'lzip', 'lz4', 'lz4hc'}) && isempty(regexp(dozip, '^blosc2', 'once')))
         error('compression method "%s" is not supported', dozip);
     end
     if (exist('zmat', 'file') ~= 2 && exist('zmat', 'file') ~= 3)
@@ -218,7 +221,7 @@ else
         rootname = varname;
     end
 end
-if (isa(obj, 'containers.Map') && ~strcmp(obj.KeyType, 'char'))
+if ((isa(obj, 'containers.Map') && ~strcmp(obj.KeyType, 'char')) || (isa(obj, 'dictionary') && ~strcmp(obj.types, 'string')))
     rootisarray = 0;
 end
 if ((isstruct(obj) || iscell(obj)) && isempty(rootname) && forceroot)
@@ -251,8 +254,8 @@ end
 % save to a file if FileName is set, suggested by Patrick Rapin
 filename = jsonopt('FileName', '', opt);
 if (~isempty(filename))
-    if(jsonopt('UTF8', 1, opt) && exist('unicode2native', 'builtin'))
-        json= unicode2native(json);
+    if (jsonopt('UTF8', 1, opt) && exist('unicode2native', 'builtin'))
+        json = unicode2native(json);
     end
 
     encoding = jsonopt('Encoding', '', opt);
@@ -300,7 +303,7 @@ elseif (ischar(item))
     end
 elseif (isa(item, 'function_handle'))
     txt = struct2json(name, functions(item), level, varargin{:});
-elseif (isa(item, 'containers.Map'))
+elseif (isa(item, 'containers.Map') || isa(item, 'dictionary'))
     txt = map2json(name, item, level, varargin{:});
 elseif (isa(item, 'categorical'))
     txt = cell2json(name, cellstr(item), level, varargin{:});
@@ -451,14 +454,28 @@ txt = sprintf('%s', txt{:});
 %% -------------------------------------------------------------------------
 function txt = map2json(name, item, level, varargin)
 txt = {};
-if (~isa(item, 'containers.Map'))
-    error('input is not a containers.Map class');
-end
+itemtype = isa(item, 'containers.Map');
 dim = size(item);
+
+if (isa(item, 'dictionary'))
+    itemtype = 2;
+    dim = item.numEntries;
+end
+if (itemtype == 0)
+    error('input is not a containers.Map or dictionary class');
+end
 names = keys(item);
 val = values(item);
 
-if (~strcmp(item.KeyType, 'char'))
+if (~iscell(names))
+    names = num2cell(names, ndims(names));
+end
+
+if (~iscell(val))
+    val = num2cell(val, ndims(val));
+end
+
+if ((itemtype == 1 && ~strcmp(item.KeyType, 'char')) || (itemtype == 2 && ~strcmp(item.types, 'string')))
     mm = cell(1, length(names));
     for i = 1:length(names)
         mm{i} = {names{i}, val{i}};
@@ -565,7 +582,7 @@ function txt = mat2json(name, item, level, varargin)
 if (~isnumeric(item) && ~islogical(item) && ~ischar(item))
     error('input is not an array');
 end
-opt=varargin{1};
+opt = varargin{1};
 ws = opt.whitespaces_;
 padding1 = repmat(ws.tab, 1, level);
 padding0 = repmat(ws.tab, 1, level + 1);
@@ -578,7 +595,7 @@ format = opt.formatversion;
 isnest = opt.nestarray;
 
 if (~opt.nosubstruct_ && (((isnest == 0) && length(size(item)) > 2) || issparse(item) || ~isreal(item) || ...
-                                  (isempty(item) && any(size(item))) || opt.arraytostruct || (~isempty(dozip) && numel(item) > zipsize)))
+                          (isempty(item) && any(size(item))) || opt.arraytostruct || (~isempty(dozip) && numel(item) > zipsize)))
     if (isempty(name))
         txt = sprintf('%s{%s%s"_ArrayType_":"%s",%s%s"_ArraySize_":%s,%s', ...
                       padding1, nl, padding0, class(item), nl, padding0, regexprep(mat2str(size(item)), '\s+', ','), nl);
@@ -660,14 +677,14 @@ else
         end
         txt = sprintf(dataformat, txt, padding0, '"_ArrayZipSize_":', regexprep(mat2str(size(fulldata)), '\s+', ','), sep);
         txt = sprintf(dataformat, txt, padding0, '"_ArrayZipType_":"', dozip, ['"' sep]);
-        encodeparam={};
-        if(~isempty(regexp(dozip,'^blosc2', 'once')))
-            compfun=@blosc2encode;
-            encodeparam={dozip, 'nthread', jsonopt('nthread',1,opt), 'shuffle', jsonopt('shuffle',1,opt), 'typesize', jsonopt('typesize',length(typecast(fulldata(1),'uint8')),opt)};
+        encodeparam = {};
+        if (~isempty(regexp(dozip, '^blosc2', 'once')))
+            compfun = @blosc2encode;
+            encodeparam = {dozip, 'nthread', jsonopt('nthread', 1, opt), 'shuffle', jsonopt('shuffle', 1, opt), 'typesize', jsonopt('typesize', length(typecast(fulldata(1), 'uint8')), opt)};
         else
-            compfun=str2func([dozip 'encode']);
+            compfun = str2func([dozip 'encode']);
         end
-        txt = sprintf(dataformat, txt, padding0, '"_ArrayZipData_":"', char(base64encode(compfun(typecast(fulldata(:), 'uint8'),encodeparam{:}))), ['"' nl]);
+        txt = sprintf(dataformat, txt, padding0, '"_ArrayZipData_":"', char(base64encode(compfun(typecast(fulldata(:), 'uint8'), encodeparam{:}))), ['"' nl]);
     else
         if (isreal(item))
             txt = sprintf(dataformat, txt, padding0, '"_ArrayData_":', ...
@@ -749,8 +766,8 @@ else
 end
 
 if (isempty(mat))
-    if(varargin{1}.emptyarrayasnull)
-        txt='null';
+    if (varargin{1}.emptyarrayasnull)
+        txt = 'null';
     else
         txt = '[]';
     end
