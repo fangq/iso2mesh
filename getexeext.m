@@ -25,7 +25,9 @@ if(isoctavemesh)
               exesuff='.mexa64';
 	   end
       else
-           if(isempty(regexp(computer,'86_64')))
+           if(~isempty(regexp(computer,'aarch64')))
+              exesuff='.mexmaca64';
+           elseif(isempty(regexp(computer,'86_64')))
               exesuff='.mexmaci';
            else
               exesuff='.mexmaci64';
