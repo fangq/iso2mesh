@@ -42,7 +42,7 @@ http://iso2mesh.sf.net\n\n",CGAL_VERSION_STR);
 		CGAL::Random rd(atoi(argv[12]));
 		CGAL::Random::State st;
 		rd.save_state(st);
-		CGAL::default_random.restore_state(st);
+		CGAL::get_default_random().restore_state(st);
 	}
 	if(argc>=14){
 		sscanf(argv[13],"%d",&initnum);
@@ -51,7 +51,7 @@ http://iso2mesh.sf.net\n\n",CGAL_VERSION_STR);
   }
   Tr tr;            // 3D-Delaunay triangulation
   C2t3 c2t3 (tr);   // 2D-complex in 3D-Delaunay triangulation
-  
+
   Gray_level_image image(argv[1], atof(argv[2]));
   // Carefully choosen bounding sphere: the center must be inside the
   // surface defined by 'image' and the radius must be high enough so that

@@ -14,10 +14,10 @@ if("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" VERSION_GREATER 2.6)
 endif()
 
 set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
- 
+
 if ( COMMAND cmake_policy )
 
-  cmake_policy( SET CMP0003 NEW )  
+  cmake_policy( SET CMP0003 NEW )
 
 endif()
 
@@ -27,12 +27,9 @@ find_package( CGAL QUIET COMPONENTS  )
 if ( NOT CGAL_FOUND )
 
   message(STATUS "This project requires the CGAL library, and will not be compiled.")
-  return()  
+  return()
 
 endif()
-
-# include helper file
-include( ${CGAL_USE_FILE} )
 
 
 # Boost and its components
@@ -42,7 +39,7 @@ if ( NOT Boost_FOUND )
 
   message(STATUS "This project requires the Boost library, and will not be compiled.")
 
-  return()  
+  return()
 
 endif()
 

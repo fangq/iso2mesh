@@ -65,7 +65,7 @@ int main(int argc,char *argv[])
         CGAL::Random rd(atoi(argv[8]));
         CGAL::Random::State st;
         rd.save_state(st);
-        CGAL::default_random.restore_state(st);
+        CGAL::get_default_random().restore_state(st);
   }
   std::ifstream input(argv[1]);
   input >> polyhedron;
