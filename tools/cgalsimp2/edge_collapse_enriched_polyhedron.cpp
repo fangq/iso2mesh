@@ -30,7 +30,7 @@
 #include <CGAL/Polyhedron_items_with_id_3.h>
 
 // Stop-condition policy
-#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Edge_count_ratio_stop_predicate.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_ratio_stop_predicate.h>
 
 // Default cost and placement policies
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/LindstromTurk_placement.h>
@@ -213,7 +213,7 @@ int main( int argc, char** argv )
 
   // In this example, the simplification stops when the number of undirected edges
   // drops below 10% of the initial count
-  SMS::Edge_count_ratio_stop_predicate<Surface> stop(maxface);
+  SMS::Count_ratio_stop_predicate<Surface> stop(maxface);
 
   Visitor vis ;
 
