@@ -9,12 +9,12 @@ function [no,el,fa]=removeisolatednode(node,elem,face)
 % input:
 %     node: list of node coordinates
 %     elem: list of elements of the mesh, can be a regular array or a cell array for PLCs
-%     face: list of triangular surface face
+%     face: (optional) list of triangular surface face
 %
 % output:
 %     no: node coordinates after removing the isolated nodes
 %     el: element list of the resulting mesh
-%     fa: face list of the resulting mesh
+%     fa: (optional) face list of the resulting mesh
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
@@ -36,7 +36,7 @@ if(~iscell(elem))
 else
     el=cellfun(@(x) oid(x), elem,'UniformOutput',false);
 end
-if(nargin>=3)
+if(nargout >=3 && nargin >= 3)
   if(~iscell(face))
       fa=oid(face);             % face list in the new index
   else
