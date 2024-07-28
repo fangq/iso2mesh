@@ -25,14 +25,13 @@ endif()
 find_package(CGAL COMPONENTS ImageIO)
 
 if ( CGAL_FOUND )
-  include( ${CGAL_USE_FILE} )
   find_package(Boost)
 
   # Activate concurrency ? (turned OFF by default)
   option(ACTIVATE_CONCURRENT_MESH_3
     "Activate parallelism in Mesh_3"
     OFF)
-    
+
   # And add -DCGAL_CONCURRENT_MESH_3 if that option is ON
   if( ACTIVATE_CONCURRENT_MESH_3 OR ENV{ACTIVATE_CONCURRENT_MESH_3} )
     add_definitions( -DCGAL_CONCURRENT_MESH_3 )
@@ -42,24 +41,26 @@ if ( CGAL_FOUND )
       "Link with TBB anyway so we can use TBB timers for profiling"
       ON)
     if( LINK_WITH_TBB )
-      find_package( TBB )
+      find_package(TBB REQUIRED)
+      include(CGAL_TBB_support)
     endif( LINK_WITH_TBB )
   endif()
-  
-  if( TBB_FOUND )
-    include(${TBB_USE_FILE})
-    list(APPEND CGAL_3RD_PARTY_LIBRARIES ${TBB_LIBRARIES})
-  endif()
 
 
-  if ( Boost_FOUND AND Boost_VERSION GREATER 103400 )
+  if ( Boost_FOUND )
     include( CGAL_CreateSingleSourceCGALProgram )
 
     # Compilable examples
     create_single_source_cgal_program( "mesh_polyhedral_domain.cpp")
+    if(CGAL_ACTIVATE_CONCURRENT_MESH_3 AND TARGET CGAL::TBB_support)
+      target_link_libraries(mesh_polyhedral_domain PUBLIC CGAL::TBB_support)
+    endif()
     if( WITH_CGAL_ImageIO )
       if( CGAL_ImageIO_USE_ZLIB )
         create_single_source_cgal_program( "mesh_3D_image.cpp")
+        if(CGAL_ACTIVATE_CONCURRENT_MESH_3 AND TARGET CGAL::TBB_support)
+          target_link_libraries(mesh_3D_image PUBLIC CGAL::TBB_support)
+        endif()
       else()
         message( STATUS "NOTICE: The examples mesh_3D_image.cpp and mesh_3D_image_variable_size.cpp need CGAL_ImageIO to be configured with ZLIB support, and will not be compiled." )
       endif()

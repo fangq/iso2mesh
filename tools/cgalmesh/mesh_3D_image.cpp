@@ -4,7 +4,7 @@
 #include <CGAL/Mesh_complex_3_in_triangulation_3.h>
 #include <CGAL/Mesh_criteria_3.h>
 
-#include <CGAL/Labeled_image_mesh_domain_3.h>
+#include <CGAL/Labeled_mesh_domain_3.h>
 #include <CGAL/Mesh_domain_with_polyline_features_3.h>
 #include <CGAL/make_mesh_3.h>
 #include <CGAL/Image_3.h>
@@ -18,7 +18,7 @@
 // Domain
 struct K: public CGAL::Exact_predicates_inexact_constructions_kernel {};
 typedef CGAL::Image_3 Image;
-typedef CGAL::Labeled_image_mesh_domain_3<Image,K> Image_domain;
+typedef CGAL::Labeled_mesh_domain_3<K> Image_domain;
 typedef CGAL::Mesh_domain_with_polyline_features_3<Image_domain> Mesh_domain;
 
 // Triangulation
@@ -88,11 +88,11 @@ int main(int argc,char *argv[])
         CGAL::Random rd(atoi(argv[8]));
         CGAL::Random::State st;
         rd.save_state(st);
-        CGAL::default_random.restore_state(st);
+        CGAL::get_default_random().restore_state(st);
   }
   Image image;
   image.read(argv[1]);
-  Mesh_domain domain(image);
+  Mesh_domain domain = Mesh_domain::create_labeled_image_mesh_domain(image);
   add_1D_features(image, domain);
 
   // Mesh criteria
