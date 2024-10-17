@@ -38,7 +38,7 @@ if (nargin < 1)
 end
 
 if (~exist('loadbj', 'file'))
-    error('you must first install JSONLab from http://github.com/fangq/jsonlab/');
+    error('you must first install JSONLab from http://github.com/NeuroJSON/jsonlab/');
 end
 
 if (regexp(filename, '\.jmsh$'))
