@@ -1,4 +1,4 @@
-function [no,el,fa]=removeisolatednode(node,elem,face)
+function [no, el, fa] = removeisolatednode(node, elem, face)
 %
 % [no,el,fa]=removeisolatednode(node,elem,face)
 %
@@ -19,29 +19,29 @@ function [no,el,fa]=removeisolatednode(node,elem,face)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-oid=1:size(node,1);       % old node index
-if(~iscell(elem))
-    idx=setdiff(oid,elem(:)); % indices to the isolated nodes
+oid = 1:size(node, 1);       % old node index
+if (~iscell(elem))
+    idx = setdiff(oid, elem(:)); % indices to the isolated nodes
 else
-    el=cell2mat(elem);
-    idx=setdiff(oid,el(:)); % indices to the isolated nodes
+    el = cell2mat(elem);
+    idx = setdiff(oid, el(:)); % indices to the isolated nodes
 end
-idx=sort(idx);
-delta=zeros(size(oid));   
-delta(idx)=1;
-delta=-cumsum(delta);     % calculate the new node index after removing the isolated nodes
-oid=oid+delta;            % map to new index
-if(~iscell(elem))
-    el=oid(elem);             % element list in the new index
+idx = sort(idx);
+delta = zeros(size(oid));
+delta(idx) = 1;
+delta = -cumsum(delta);     % calculate the new node index after removing the isolated nodes
+oid = oid + delta;            % map to new index
+if (~iscell(elem))
+    el = oid(elem);             % element list in the new index
 else
-    el=cellfun(@(x) oid(x), elem,'UniformOutput',false);
+    el = cellfun(@(x) oid(x), elem, 'UniformOutput', false);
 end
-if(nargout >=3 && nargin >= 3)
-  if(~iscell(face))
-      fa=oid(face);             % face list in the new index
-  else
-      fa=cellfun(@(x) oid(x), face,'UniformOutput',false);
-  end
+if (nargout >= 3 && nargin >= 3)
+    if (~iscell(face))
+        fa = oid(face);             % face list in the new index
+    else
+        fa = cellfun(@(x) oid(x), face, 'UniformOutput', false);
+    end
 end
-no=node;                  
-no(idx,:)=[];             % remove the isolated nodes
+no = node;
+no(idx, :) = [];             % remove the isolated nodes

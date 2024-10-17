@@ -1,4 +1,4 @@
-function [node,elem,face]=readtetgen(fstub)
+function [node, elem, face] = readtetgen(fstub)
 %
 % [node,elem,face]=readtetgen(fstub)
 %
@@ -19,45 +19,45 @@ function [node,elem,face]=readtetgen(fstub)
 %
 
 % read node file
-fp=fopen([fstub,'.node'],'rt');
-if(fp==0) 
-	error('node file is missing!'); 
+fp = fopen([fstub, '.node'], 'rt');
+if (fp == 0)
+    error('node file is missing!');
 end
-[dim,count] = fscanf(fp,'%d',4);
-if(count<4)
-        error('wrong node file');
+[dim, count] = fscanf(fp, '%d', 4);
+if (count < 4)
+    error('wrong node file');
 end
-node=fscanf(fp,'%f',[4,dim(1)]);
-idx=node(1,:);
-node=node(2:4,:)';
+node = fscanf(fp, '%f', [4, dim(1)]);
+idx = node(1, :);
+node = node(2:4, :)';
 fclose(fp);
 
 % read element file
-fp=fopen([fstub,'.ele'],'rt');
-if(fp==0) 
-        error('elem file is missing!'); 
+fp = fopen([fstub, '.ele'], 'rt');
+if (fp == 0)
+    error('elem file is missing!');
 end
-[dim,count] = fscanf(fp,'%d',3);
-if(count<3)
-        error('wrong elem file');
+[dim, count] = fscanf(fp, '%d', 3);
+if (count < 3)
+    error('wrong elem file');
 end
-elem=fscanf(fp,'%d',[dim(2)+dim(3)+1,dim(1)]);
-elem=elem';
-elem(:,1)=[];
-elem(:,1:dim(2))=elem(:,1:dim(2))+(1-idx(1));
+elem = fscanf(fp, '%d', [dim(2) + dim(3) + 1, dim(1)]);
+elem = elem';
+elem(:, 1) = [];
+elem(:, 1:dim(2)) = elem(:, 1:dim(2)) + (1 - idx(1));
 fclose(fp);
 
 % read surface mesh file
-fp=fopen([fstub,'.face'],'rt');
-if(fp==0)
-        error('surface data file is missing!');
+fp = fopen([fstub, '.face'], 'rt');
+if (fp == 0)
+    error('surface data file is missing!');
 end
-[dim,count] = fscanf(fp,'%d',2);
-if(count<2)
-        error('wrong surface file');
+[dim, count] = fscanf(fp, '%d', 2);
+if (count < 2)
+    error('wrong surface file');
 end
-face=fscanf(fp,'%d',[5,dim(1)]);
-face=[face(2:end-1,:)+1;face(end,:)]';
+face = fscanf(fp, '%d', [5, dim(1)]);
+face = [face(2:end - 1, :) + 1; face(end, :)]';
 fclose(fp);
 
-elem(:,1:4)=meshreorient(node(:,1:3),elem(:,1:4));
+elem(:, 1:4) = meshreorient(node(:, 1:3), elem(:, 1:4));

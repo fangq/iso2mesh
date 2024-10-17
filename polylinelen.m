@@ -1,4 +1,4 @@
-function [len, node, inputreversed]=polylinelen(node, p0, p1, pmid)
+function [len, node, inputreversed] = polylinelen(node, p0, p1, pmid)
 %
 % [len, node, inputreversed]=polylinelen(node, p0, p1, pmid)
 %
@@ -26,46 +26,46 @@ function [len, node, inputreversed]=polylinelen(node, p0, p1, pmid)
 %    License: GPL v3 or later, see LICENSE.txt for details
 %
 
-if(nargin<3)
-    p1=size(node,1);
-    if(nargin<2)
-        p0=1;
+if (nargin < 3)
+    p1 = size(node, 1);
+    if (nargin < 2)
+        p0 = 1;
     end
 end
 
-if(nargin<4)
-    pmid=floor((p0+p1)*0.5);
+if (nargin < 4)
+    pmid = floor((p0 + p1) * 0.5);
 end
 
-if(size(p0,2)==3)
-    p0=closestnode(node,p0);
+if (size(p0, 2) == 3)
+    p0 = closestnode(node, p0);
 end
-if(size(p1,2)==3)
-    p1=closestnode(node,p1);
+if (size(p1, 2) == 3)
+    p1 = closestnode(node, p1);
 end
-if(size(pmid,2)==3)
-    pmid=closestnode(node,pmid);
+if (size(pmid, 2) == 3)
+    pmid = closestnode(node, pmid);
 end
 
-if(p0<pmid && pmid<p1)
-    inputreversed=0;
-    node=node(p0:p1,:);
-elseif(p0<pmid && p1<pmid)
-    inputreversed=(min(p0,p1) == p0);
-    node=node([min(p0,p1):-1:1 end:-1:max(p0,p1)],:);
-    if(~inputreversed)
-        node=flipud(node);
+if (p0 < pmid && pmid < p1)
+    inputreversed = 0;
+    node = node(p0:p1, :);
+elseif (p0 < pmid && p1 < pmid)
+    inputreversed = (min(p0, p1) == p0);
+    node = node([min(p0, p1):-1:1 end:-1:max(p0, p1)], :);
+    if (~inputreversed)
+        node = flipud(node);
     end
-elseif(p0>pmid && pmid>p1)
-    inputreversed=1;
-    node=node(p0:-1:p1,:);
-elseif(p0>pmid && p1>pmid)
-    inputreversed=(max(p0,p1) == p1);
-    node=node([max(p0,p1):end 1:min(p0,p1)],:);
-    if(inputreversed)
-        node=flipud(node);
+elseif (p0 > pmid && pmid > p1)
+    inputreversed = 1;
+    node = node(p0:-1:p1, :);
+elseif (p0 > pmid && p1 > pmid)
+    inputreversed = (max(p0, p1) == p1);
+    node = node([max(p0, p1):end 1:min(p0, p1)], :);
+    if (inputreversed)
+        node = flipud(node);
     end
 end
 
-len=node(1:end-1,:) - node(2:end,:);
-len=sqrt(sum(len.*len,2));
+len = node(1:end - 1, :) - node(2:end, :);
+len = sqrt(sum(len .* len, 2));

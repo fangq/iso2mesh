@@ -18,11 +18,11 @@ function savejnifti(jnii, filename, varargin)
 %                jnii.NIFTIHeader -  a structure containing the 1-to-1 mapped NIFTI-1/2 header
 %                jnii.NIFTIData - the main image data array
 %                jnii.NIFTIExtension - a cell array contaiing the extension data buffers
-%        outputfile: the output file name to the JNIfTI file 
+%        outputfile: the output file name to the JNIfTI file
 %                *.bnii for binary JNIfTI file
 %                *.jnii for text JNIfTI file
 %        options: (optional) if saving to a .bnii file, please see the options for
-%               savebj.m (part of JSONLab); if saving to .jnii, please see the 
+%               savebj.m (part of JSONLab); if saving to .jnii, please see the
 %               supported options for savejson.m (part of JSONLab).
 %
 %    example:
@@ -35,18 +35,18 @@ function savejnifti(jnii, filename, varargin)
 %    License: Apache 2.0, see https://github.com/NeuroJSON/jnifti for details
 %
 
-if(nargin<2)
+if (nargin < 2)
     error('you must provide data and output file name');
 end
 
-if(~exist('savejson','file'))
+if (~exist('savejson', 'file'))
     error('you must first install JSONLab from http://github.com/fangq/jsonlab/');
 end
 
-if(regexp(filename,'\.jnii$'))
-    savejnii(jnii,filename,varargin{:});
-elseif(regexp(filename,'\.bnii$'))
-    savebnii(jnii,filename,varargin{:});
+if (regexp(filename, '\.jnii$'))
+    savejnii(jnii, filename, varargin{:});
+elseif (regexp(filename, '\.bnii$'))
+    savebnii(jnii, filename, varargin{:});
 else
     error('file suffix must be .jnii for text JNIfTI or .bnii for binary JNIfTI');
 end

@@ -1,4 +1,4 @@
-function [faces,idx,facemap]=uniqfaces(elem)
+function [faces, idx, facemap] = uniqfaces(elem)
 %
 % [faces,idx,facemap]=uniqfaces(elem)
 %
@@ -18,16 +18,16 @@ function [faces,idx,facemap]=uniqfaces(elem)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-if(size(elem)==3)
-   faces=elem;
-elseif(size(elem)>=4)
-   faces=meshface(elem);
+if (size(elem) == 3)
+    faces = elem;
+elseif (size(elem) >= 4)
+    faces = meshface(elem);
 else
-   error('invalid input');
+    error('invalid input');
 end
 
-[ufaces,idx,jdx]=unique(sort(faces,2),'rows');
-faces=faces(idx,:);
-if(nargout>2)
-    facemap=reshape(jdx,[size(elem,1) nchoosek(size(elem,2),3)]);
+[ufaces, idx, jdx] = unique(sort(faces, 2), 'rows');
+faces = faces(idx, :);
+if (nargout > 2)
+    facemap = reshape(jdx, [size(elem, 1) nchoosek(size(elem, 2), 3)]);
 end

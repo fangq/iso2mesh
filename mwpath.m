@@ -1,4 +1,4 @@
-function tempname=mwpath(fname)
+function tempname = mwpath(fname)
 %
 % tempname=meshtemppath(fname)
 %
@@ -26,42 +26,44 @@ if (nargin < 1) || isempty(fname)
     fname = '';
 end
 
-p=getvarfrom({'caller','base'},'ISO2MESH_TEMP');
-session=getvarfrom({'caller','base'},'ISO2MESH_SESSION');
+p = getvarfrom({'caller', 'base'}, 'ISO2MESH_TEMP');
+session = getvarfrom({'caller', 'base'}, 'ISO2MESH_SESSION');
 
-if(isempty(session))
-    session='';
+if (isempty(session))
+    session = '';
 end
 
-username=getenv('USER'); % for Linux/Unix/Mac OS
+username = getenv('USER'); % for Linux/Unix/Mac OS
 
-if(isempty(username))
-   username=getenv('UserName'); % for windows
+if (isempty(username))
+    username = getenv('UserName'); % for windows
 end
 
-if(~isempty(username))
-   username=['iso2mesh-' username];
+if (~isempty(username))
+    username = ['iso2mesh-' username];
 end
 
-tempname=[];
-if(isempty(p))
-      if(isoctavemesh && tempdir=='\')
-		tempname=['.'  filesep session fname];
-	else
-		tdir=tempdir;
-		if(tdir(end)~=filesep)
-			tdir=[tdir filesep];
-		end
-		if(~isempty(username))
-                    tdir=[tdir username filesep];
-                    if(exist(tdir)==0) mkdir(tdir); end
+tempname = [];
+if (isempty(p))
+    if (isoctavemesh && tempdir == '\')
+        tempname = ['.'  filesep session fname];
+    else
+        tdir = tempdir;
+        if (tdir(end) ~= filesep)
+            tdir = [tdir filesep];
         end
-        if(nargin==0)
-            tempname=tdir;
+        if (~isempty(username))
+            tdir = [tdir username filesep];
+            if (exist(tdir) == 0)
+                mkdir(tdir);
+            end
+        end
+        if (nargin == 0)
+            tempname = tdir;
         else
-            tempname=[tdir session fname];
+            tempname = [tdir session fname];
         end
-	end
+    end
 else
-	tempname=[p filesep session fname];
+    tempname = [p filesep session fname];
 end

@@ -1,4 +1,4 @@
-function [idx, dist]=closestnode(node,p)
+function [idx, dist] = closestnode(node, p)
 %
 % [idx, dist]=closestnode(node,p)
 %
@@ -20,5 +20,5 @@ function [idx, dist]=closestnode(node,p)
 %    License: GPL v3 or later, see LICENSE.txt for details
 %
 
-dd=node-repmat(p,size(node,1),1);
-[dist,idx]=min(sum(dd.*dd,2));
+dd = node - repmat(p, size(node, 1), 1);
+[dist, idx] = min(sum(dd .* dd, 2));

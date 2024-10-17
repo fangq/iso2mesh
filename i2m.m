@@ -1,4 +1,4 @@
-function varargout=i2m(varargin)
+function varargout = i2m(varargin)
 %
 % newworkspace=i2m;
 %  or
@@ -13,4 +13,4 @@ function varargout=i2m(varargin)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-[varargout{1:nargout}]=img2mesh(varargin{:});
+[varargout{1:nargout}] = img2mesh(varargin{:});

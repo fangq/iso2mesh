@@ -1,4 +1,4 @@
-function dat=readmptiff(fname)
+function dat = readmptiff(fname)
 %
 % vol=readmptiff(fname)
 %
@@ -17,10 +17,10 @@ function dat=readmptiff(fname)
 
 info = imfinfo(fname);
 nslice = length(info);
-if(nslice<=0)
+if (nslice <= 0)
     error('no data found in the tiff');
 end
 
 for i = 1:nslice
-    dat(:,:,i) = imread(fname, i);
+    dat(:, :, i) = imread(fname, i);
 end

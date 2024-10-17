@@ -1,4 +1,4 @@
-function bytestream=savenifti(img, filename, varargin)
+function bytestream = savenifti(img, filename, varargin)
 %
 %    savenifti(img, filename)
 %        or
@@ -13,15 +13,15 @@ function bytestream=savenifti(img, filename, varargin)
 %    input:
 %        img: this is a numerical array to be stored in the NIfTI file
 %        filename: output file name, can have a suffix of '.nii' or '.nii.gz'
-%                 if a .gz suffix is used, this function needs the JSONLab 
+%                 if a .gz suffix is used, this function needs the JSONLab
 %                 (http://gitlab.com/fangq/jsonlab) and ZMat (http://gitlab.com/NeuroJSON/zmat)
 %                 to perform the compression.
 %        rawhdr (optional): a struct, as a pre-created/loaded NIfTI header data structure
-%                if rawhdr is 'nifti1' or 'nifti2', this function calls 
+%                if rawhdr is 'nifti1' or 'nifti2', this function calls
 %                nifticreate to create a default header.
 %    output:
 %        bytestream (optional): the output file byte stream. it only returns this output if
-%                no filename is given. 
+%                no filename is given.
 %
 %    example:
 %        a=single(rand(10,20,30));
@@ -34,41 +34,40 @@ function bytestream=savenifti(img, filename, varargin)
 %    License: Apache 2.0, see https://github.com/NeuroJSON/jnifti for details
 %
 
-
-if(~isempty(varargin))
-    if(isstruct(varargin{1}))
-        header=varargin{1};
-    elseif(ischar(varargin{1}))
-        header=nifticreate(img,varargin{1});
+if (~isempty(varargin))
+    if (isstruct(varargin{1}))
+        header = varargin{1};
+    elseif (ischar(varargin{1}))
+        header = nifticreate(img, varargin{1});
     end
 else
-    header=nifticreate(img);
+    header = nifticreate(img);
 end
 
-names=fieldnames(header);
-buf=[];
-for i=1:length(names)
-    buf=[buf,typecast(header.(names{i}),'uint8')];
+names = fieldnames(header);
+buf = [];
+for i = 1:length(names)
+    buf = [buf, typecast(header.(names{i}), 'uint8')];
 end
 
-if(length(buf)~=352 && length(buf)~=544)
-    error('incorrect nifti-1/2 header %d',length(buf));
+if (length(buf) ~= 352 && length(buf) ~= 544)
+    error('incorrect nifti-1/2 header %d', length(buf));
 end
 
-buf=[buf,typecast(img(:)','uint8')];
+buf = [buf, typecast(img(:)', 'uint8')];
 
-if(nargout>1 && nargin<2)
-    bytestream=buf;
-    return;
+if (nargout > 1 && nargin < 2)
+    bytestream = buf;
+    return
 end
 
-if(regexp(filename,'\.[Gg][Zz]$'))
-    buf=gzipencode(buf);
+if (regexp(filename, '\.[Gg][Zz]$'))
+    buf = gzipencode(buf);
 end
 
-fid=fopen(filename,'wb');
-if(fid==0)
+fid = fopen(filename, 'wb');
+if (fid == 0)
     error('can not write to the specified file');
 end
-fwrite(fid,buf);
+fwrite(fid, buf);
 fclose(fid);

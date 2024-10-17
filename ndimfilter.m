@@ -1,4 +1,4 @@
-function img=ndimfilter(im,kernel,varargin)
+function img = ndimfilter(im, kernel, varargin)
 %
 % img=ndimfilter(im,kernel,r,sigma)
 %
@@ -24,18 +24,18 @@ function img=ndimfilter(im,kernel,varargin)
 %    License: GPL v3 or later, see LICENSE.txt for details
 %
 
-if(nargin<2)
-    kernel='box';
+if (nargin < 2)
+    kernel = 'box';
 end
-if(ischar(kernel))
-    switch(kernel)
+if (ischar(kernel))
+    switch (kernel)
         case 'box'
-            kernel=ndgaussian(varargin{1},inf,ndims(im));
+            kernel = ndgaussian(varargin{1}, inf, ndims(im));
         case 'gaussian'
-            kernel=ndgaussian(varargin{1},varargin{2},ndims(im));
+            kernel = ndgaussian(varargin{1}, varargin{2}, ndims(im));
         otherwise
-            error('filter type %s is not supported',type);
+            error('filter type %s is not supported', type);
     end
 end
 
-img=convn(im,kernel,'same');
+img = convn(im, kernel, 'same');

@@ -1,4 +1,4 @@
-function [newnode,newelem]=barydualmesh(node,elem,flag)
+function [newnode, newelem] = barydualmesh(node, elem, flag)
 %
 % [newnode,newelem]=barydualmesh(node,elem)
 %
@@ -24,36 +24,28 @@ function [newnode,newelem]=barydualmesh(node,elem,flag)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-[enodes,eidx]=highordertet(node,elem);               % compute edge-centers
+[enodes, eidx] = highordertet(node, elem);               % compute edge-centers
 
-if(size(elem,2)==3)
-    fnodes=meshcentroid(node,elem);                  % compute face-centers
-    fidx=1:
-    newnode=[enodes;fnodes];
-    newidx=[eidx, fidx+size(enodes,1), (1:size(elem,1))'+(size(enodes,1)+size(fnodes,1))];
-    return;
-end
-
-[fnodes,fidx]=elemfacecenter(node,elem);             % compute face-centers
-c0=meshcentroid(node,elem(:,1:min(size(elem,2),4))); % compute elem-centers
+[fnodes, fidx] = elemfacecenter(node, elem);             % compute face-centers
+c0 = meshcentroid(node, elem(:, 1:min(size(elem, 2), 4))); % compute elem-centers
 
 % concatenated new nodes and their indices
-newnode=[enodes;fnodes;c0];
-newidx=[eidx, fidx+size(enodes,1), (1:size(elem,1))'+(size(enodes,1)+size(fnodes,1))];
+newnode = [enodes; fnodes; c0];
+newidx = [eidx, fidx + size(enodes, 1), (1:size(elem, 1))' + (size(enodes, 1) + size(fnodes, 1))];
 
-newelem=[
-    1 8 11 7
-    2 7 11 9
-    3 9 11 8
-    4 7 11 10
-    5 8 11 10
-    6 9 11 10
-    ];
-newelem=newelem';
-newelem=newidx(:,newelem(:));
-newelem=reshape(newelem,[size(elem,1) 4 6]);
-newelem=permute(newelem,[1 3 2]);
-newelem=reshape(newelem,[size(elem,1)*6 4]);
-if(nargin>2 && ischar(flag) && strcmp(flag,'cell'))
-    newelem=num2cell(newelem,2);
+newelem = [
+           1 8 11 7
+           2 7 11 9
+           3 9 11 8
+           4 7 11 10
+           5 8 11 10
+           6 9 11 10
+          ];
+newelem = newelem';
+newelem = newidx(:, newelem(:));
+newelem = reshape(newelem, [size(elem, 1) 4 6]);
+newelem = permute(newelem, [1 3 2]);
+newelem = reshape(newelem, [size(elem, 1) * 6 4]);
+if (nargin > 2 && ischar(flag) && strcmp(flag, 'cell'))
+    newelem = num2cell(newelem, 2);
 end

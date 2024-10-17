@@ -1,9 +1,9 @@
-function [newnode,newelem]=mergesurf(node,elem,varargin)
+function [newnode, newelem] = mergesurf(node, elem, varargin)
 %
 % [newnode,newelem]=mergesurf(node1,elem1,node2,elem2,...)
 %
 % merge two or more triangular meshes and split intersecting elements
-% 
+%
 % author: Qianqian Fang <q.fang at neu.edu>
 %
 % input:
@@ -27,14 +27,14 @@ function [newnode,newelem]=mergesurf(node,elem,varargin)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-len=length(varargin);
-newnode=node;
-newelem=elem;
-if(len>0 && mod(len,2)~=0)
-   error('you must give node and element in pairs');
+len = length(varargin);
+newnode = node;
+newelem = elem;
+if (len > 0 && mod(len, 2) ~= 0)
+    error('you must give node and element in pairs');
 end
-for i=1:2:len
-   no=varargin{i};
-   el=varargin{i+1};
-   [newnode,newelem]=surfboolean(newnode,newelem,'all',no,el);
+for i = 1:2:len
+    no = varargin{i};
+    el = varargin{i + 1};
+    [newnode, newelem] = surfboolean(newnode, newelem, 'all', no, el);
 end

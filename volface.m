@@ -1,4 +1,4 @@
-function varargout=volface(t)
+function varargout = volface(t)
 %
 % [openface,elemid]=volface(t)
 %
@@ -12,11 +12,11 @@ function varargout=volface(t)
 %
 % output:
 %      openface: list of faces of the specified volume
-%      elemid (optional): the corresponding index of the 
-%                tetrahedron of an open-edge or triangle, 
+%      elemid (optional): the corresponding index of the
+%                tetrahedron of an open-edge or triangle,
 %                elemid has the same length as openedge.
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-[varargout{1:nargout}]=surfedge(t);
+[varargout{1:nargout}] = surfedge(t);

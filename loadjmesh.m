@@ -1,4 +1,4 @@
-function jmsh=loadjmesh(filename, varargin)
+function jmsh = loadjmesh(filename, varargin)
 %
 %    jmsh=loadjmesh(inputfile)
 %       or
@@ -14,7 +14,7 @@ function jmsh=loadjmesh(filename, varargin)
 %                *.bmsh for binary JMesh file
 %                *.jmsh for text JMesh file
 %        options: (optional) if loading from a .bmsh file, please see the options for
-%               loadbj.m (part of JSONLab); if loading from a .jmsh, please see the 
+%               loadbj.m (part of JSONLab); if loading from a .jmsh, please see the
 %               supported options for loadjson.m (part of JSONLab).
 %
 %    output:
@@ -33,18 +33,18 @@ function jmsh=loadjmesh(filename, varargin)
 %    License: Apache 2.0, see https://github.com/NeuroJSON/jmesh for details
 %
 
-if(nargin<1)
+if (nargin < 1)
     error('you must provide data and output file name');
 end
 
-if(~exist('loadbj','file'))
+if (~exist('loadbj', 'file'))
     error('you must first install JSONLab from http://github.com/fangq/jsonlab/');
 end
 
-if(regexp(filename,'\.jmsh$'))
-    jmsh=loadjson(filename,varargin{:});
-elseif(regexp(filename,'\.bmsh$'))
-    jmsh=loadbj(filename,varargin{:});
+if (regexp(filename, '\.jmsh$'))
+    jmsh = loadjson(filename, varargin{:});
+elseif (regexp(filename, '\.bmsh$'))
+    jmsh = loadbj(filename, varargin{:});
 else
     error('file suffix must be .jmsh for text JMesh, .bmsh for binary JMesh');
 end

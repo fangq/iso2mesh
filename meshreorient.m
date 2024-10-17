@@ -1,4 +1,4 @@
-function [newelem, evol, idx]=meshreorient(node,elem)
+function [newelem, evol, idx] = meshreorient(node, elem)
 %
 % [newelem, evol, idx]=meshreorient(node,elem)
 %
@@ -21,9 +21,9 @@ function [newelem, evol, idx]=meshreorient(node,elem)
 %
 
 % calculate the canonical volume of the element (can be a 2D or 3D)
-evol=elemvolume(node,elem,'signed');
+evol = elemvolume(node, elem, 'signed');
 
 % make sure all elements are positive in volume
-idx=find(evol<0);
-elem(idx,[end-1,end])=elem(idx,[end,end-1]);
-newelem=elem;
+idx = find(evol < 0);
+elem(idx, [end - 1, end]) = elem(idx, [end, end - 1]);
+newelem = elem;

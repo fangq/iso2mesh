@@ -10,12 +10,12 @@
 % to windows/Linux/Unix PATH environment variable
 
 %% load the sample data
-load tube_surface.mat
+load tube_surface.mat;
 
 % f and v stores the surface patch faces and nodes
 %% perform mesh generation
-[node,elem,face]=surf2mesh(v,f,[1 1 1],[100 100 100],0.1,25);
+[node, elem, face] = surf2mesh(v, f, [1 1 1], [100 100 100], 0.1, 25);
 
 %% visualize the resulting mesh
-plotmesh(node,face(:,1:3));
+plotmesh(node, face(:, 1:3));
 axis equal;

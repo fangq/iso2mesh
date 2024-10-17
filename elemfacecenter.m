@@ -1,4 +1,4 @@
-function [newnode,newelem]=elemfacecenter(node,elem)
+function [newnode, newelem] = elemfacecenter(node, elem)
 %
 % [newnode,newelem]=elemfacecenter(node,elem)
 %
@@ -24,7 +24,7 @@ function [newnode,newelem]=elemfacecenter(node,elem)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-[faces,idx,newelem]=uniqfaces(elem(:,1:4));
-newnode=node(faces',1:3);
-newnode=reshape(newnode',[3,3,size(faces,1)]);
-newnode=squeeze(mean(permute(newnode,[3 2 1]),2));
+[faces, idx, newelem] = uniqfaces(elem(:, 1:4));
+newnode = node(faces', 1:3);
+newnode = reshape(newnode', [3, 3, size(faces, 1)]);
+newnode = squeeze(mean(permute(newnode, [3 2 1]), 2));

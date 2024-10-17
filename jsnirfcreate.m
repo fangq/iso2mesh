@@ -1,11 +1,11 @@
-function jsn=jsnirfcreate(varargin)
+function jsn = jsnirfcreate(varargin)
 %
 %    jsn=jsnirfcreate
 %       or
 %    jsn=jsnirfcreate(option)
 %    jsn=jsnirfcreate('Format',format,'Param1',value1, 'Param2',value2,...)
 %
-%    Create an empty JSNIRF data structure defined in the JSNIRF 
+%    Create an empty JSNIRF data structure defined in the JSNIRF
 %    specification: https://github.com/NeuroJSON/jsnirf or a SNIRF data structure
 %    based on https://github.com/fNIRS/snirf
 %
@@ -32,47 +32,47 @@ function jsn=jsnirfcreate(varargin)
 
 % define empty SNIRF data structure with all required fields
 
-defaultmeta=struct('SubjectID','default','MeasurementDate',datestr(now,29),...
-                'MeasurementTime',datestr(now,'hh:mm:ss'),'LengthUnit','mm', ...
-                'TimeUnit','s', 'FrequencyUnit','Hz');
-defaultsrcmap=struct('sourceIndex',[],'detectorIndex',[],...
-              'wavelengthIndex',[],'dataType',1,'dataTypeIndex',1); 
-defaultdata=struct('dataTimeSeries',[],'time',[],'measurementList',defaultsrcmap);
-defaultaux=struct('name','','dataTimeSeries',[],'time',[],'timeOffset',0);
-defaultstim=struct('name','','data',[]);
-defaultprobe=struct('wavelengths',[],'sourcePos2D',[],'detectorPos2D',[]);
+defaultmeta = struct('SubjectID', 'default', 'MeasurementDate', datestr(now, 29), ...
+                     'MeasurementTime', datestr(now, 'hh:mm:ss'), 'LengthUnit', 'mm', ...
+                     'TimeUnit', 's', 'FrequencyUnit', 'Hz');
+defaultsrcmap = struct('sourceIndex', [], 'detectorIndex', [], ...
+                       'wavelengthIndex', [], 'dataType', 1, 'dataTypeIndex', 1);
+defaultdata = struct('dataTimeSeries', [], 'time', [], 'measurementList', defaultsrcmap);
+defaultaux = struct('name', '', 'dataTimeSeries', [], 'time', [], 'timeOffset', 0);
+defaultstim = struct('name', '', 'data', []);
+defaultprobe = struct('wavelengths', [], 'sourcePos2D', [], 'detectorPos2D', []);
 
-nirsdata=struct('metaDataTags',defaultmeta,...
-                'data',defaultdata,...
-                'aux',defaultaux,...
-                'stim',defaultstim,...
-                'probe',defaultprobe);
+nirsdata = struct('metaDataTags', defaultmeta, ...
+                  'data', defaultdata, ...
+                  'aux', defaultaux, ...
+                  'stim', defaultstim, ...
+                  'probe', defaultprobe);
 
 % read user specified data fields - will validate format in future updates
 
-if(nargin>1 && bitand(nargin,1)==0)
-    for i=1:nargin*0.5
-        key=varargin{2*i-1};
-        if(strcmpi(key,'format'))
-            key='format';
+if (nargin > 1 && bitand(nargin, 1) == 0)
+    for i = 1:nargin * 0.5
+        key = varargin{2 * i - 1};
+        if (strcmpi(key, 'format'))
+            key = 'format';
         end
-        nirsdata.(key)=varargin{2*i};
+        nirsdata.(key) = varargin{2 * i};
     end
 end
 
-jsn=struct();
+jsn = struct();
 
 % return either a SNIRF data structure, or JSNIRF data (enclosed in SNIRFData tag)
 
-if((nargin==1 && strcmpi(varargin{1},'snirf')) || ...
-   (isfield(nirsdata,'format') && strcmpi(nirsdata.format,'snirf')))
-    if(isfield(nirsdata,'format'))
-        nirsdata=rmfield(nirsdata,'format');
+if ((nargin == 1 && strcmpi(varargin{1}, 'snirf')) || ...
+    (isfield(nirsdata, 'format') && strcmpi(nirsdata.format, 'snirf')))
+    if (isfield(nirsdata, 'format'))
+        nirsdata = rmfield(nirsdata, 'format');
     end
-    jsn=struct('formatVersion','1.0','nirs', nirsdata);
+    jsn = struct('formatVersion', '1.0', 'nirs', nirsdata);
 else
-    nirsdata.formatVersion='1.0';
-    len=length(fieldnames(nirsdata));
-    nirsdata=orderfields(nirsdata,[len,1:len-1]);
-    jsn=struct('SNIRFData', nirsdata);
+    nirsdata.formatVersion = '1.0';
+    len = length(fieldnames(nirsdata));
+    nirsdata = orderfields(nirsdata, [len, 1:len - 1]);
+    jsn = struct('SNIRFData', nirsdata);
 end

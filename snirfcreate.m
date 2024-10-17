@@ -1,11 +1,11 @@
-function snf=snirfcreate(varargin)
+function snf = snirfcreate(varargin)
 %
 %    snf=snirfcreate
 %       or
 %    snf=snirfcreate(option)
 %    snf=snirfcreate('Format',format,'Param1',value1, 'Param2',value2,...)
 %
-%    Create a empty SNIRF data structure defined in the SNIRF 
+%    Create a empty SNIRF data structure defined in the SNIRF
 %    specification: https://github.com/fNIRS/snirf
 %
 %    author: Qianqian Fang (q.fang <at> neu.edu)
@@ -29,8 +29,8 @@ function snf=snirfcreate(varargin)
 %    License: GPLv3 or Apache 2.0, see https://github.com/NeuroJSON/jsnirf for details
 %
 
-if(nargin==1)
-    snf=jsnirfcreate(varargin{:});
+if (nargin == 1)
+    snf = jsnirfcreate(varargin{:});
 else
-    snf=jsnirfcreate('Format','snirf',varargin{:});
+    snf = jsnirfcreate('Format', 'snirf', varargin{:});
 end

@@ -1,4 +1,4 @@
-function [bcutpos, bcutloop, bcutvalue]=slicesurf(node, face, varargin)
+function [bcutpos, bcutloop, bcutvalue] = slicesurf(node, face, varargin)
 %
 % [bcutpos, bcutloop]=slicesurf(node, face, varargin)
 %
@@ -24,10 +24,10 @@ function [bcutpos, bcutloop, bcutvalue]=slicesurf(node, face, varargin)
 %    License: GPL v3 or later, see LICENSE.txt for details
 %
 
-[bcutpos,bcutvalue,bcutedges]=qmeshcut(face(:,1:3),node,node(:,1),varargin{:});
-[bcutpos,bcutedges]=removedupnodes(bcutpos,bcutedges);
-bcutloop=extractloops(bcutedges);
-if(nargout==1)
-    bcutloop(isnan(bcutloop))=[];
-    bcutpos=bcutpos(bcutloop,:);
+[bcutpos, bcutvalue, bcutedges] = qmeshcut(face(:, 1:3), node, node(:, 1), varargin{:});
+[bcutpos, bcutedges] = removedupnodes(bcutpos, bcutedges);
+bcutloop = extractloops(bcutedges);
+if (nargout == 1)
+    bcutloop(isnan(bcutloop)) = [];
+    bcutpos = bcutpos(bcutloop, :);
 end

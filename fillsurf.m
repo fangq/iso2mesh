@@ -1,4 +1,4 @@
-function [no,el]=fillsurf(node,face)
+function [no, el] = fillsurf(node, face)
 %
 % [no,el]=fillsurf(node,face)
 %
@@ -16,4 +16,4 @@ function [no,el]=fillsurf(node,face)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-[no,el]=surf2mesh(node,face,[],[],1,1,[],[],0,'tetgen','-YY');
+[no, el] = surf2mesh(node, face, [], [], 1, 1, [], [], 0, 'tetgen', '-YY');

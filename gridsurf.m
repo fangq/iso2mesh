@@ -1,4 +1,4 @@
-function [no,fc]=gridsurf(x,y,z, varargin)
+function [no, fc] = gridsurf(x, y, z, varargin)
 %
 % [no,fc]=gridsurf(x,y,z)
 %    or
@@ -27,31 +27,31 @@ function [no,fc]=gridsurf(x,y,z, varargin)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-opt=varargin2struct(varargin{:});
+opt = varargin2struct(varargin{:});
 
-s=size(x);
-if(~all(s==size(y) & s==size(z)))
+s = size(x);
+if (~all(s == size(y) & s == size(z)))
     error('x/y/z must be a 2D array of the same size');
 end
 
-no=[x(:),y(:),z(:)];
-nodelen=size(no,1);
-fc=zeros((s(1)-1)*s(2),4);
-row=[(1:s(1)-1)', (2:s(1))', (s(1)+2:2*s(1))', (s(1)+1:2*s(1)-1)'];
+no = [x(:), y(:), z(:)];
+nodelen = size(no, 1);
+fc = zeros((s(1) - 1) * s(2), 4);
+row = [(1:s(1) - 1)', (2:s(1))', (s(1) + 2:2 * s(1))', (s(1) + 1:2 * s(1) - 1)'];
 
-for i=0:s(2)-1
-    fc(i*(s(1)-1)+1:(i+1)*(s(1)-1),:)=row+i*s(1);
+for i = 0:s(2) - 1
+    fc(i * (s(1) - 1) + 1:(i + 1) * (s(1) - 1), :) = row + i * s(1);
 end
 
-fc(fc>nodelen)=fc(fc>nodelen)-nodelen;
+fc(fc > nodelen) = fc(fc > nodelen) - nodelen;
 
-if(jsonopt('nodup',0,opt))
-    [no,fc]=removedupnodes(no,fc);
+if (jsonopt('nodup', 0, opt))
+    [no, fc] = removedupnodes(no, fc);
 end
 
-outputtype=jsonopt('type',3,opt);
-if(outputtype==3)
-    fc=[fc(:,[1 2 3]); fc(:,[1 3 4])];
-elseif(outputtype==4)
-    fc=num2cell(fc,2);
+outputtype = jsonopt('type', 3, opt);
+if (outputtype == 3)
+    fc = [fc(:, [1 2 3]); fc(:, [1 3 4])];
+elseif (outputtype == 4)
+    fc = num2cell(fc, 2);
 end

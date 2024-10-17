@@ -1,4 +1,4 @@
-function varargout=getoptkey(varargin)
+function varargout = getoptkey(varargin)
 %
 % val=getoptkey(key,default,opt)
 %
@@ -9,7 +9,7 @@ function varargout=getoptkey(varargin)
 % input:
 %   key: a string name for the target struct field name
 %   default: the default value of the key is not found
-%   opt: a struct object; the field names will be searched to match the 
+%   opt: a struct object; the field names will be searched to match the
 %        key input, opt can be a list of 'keyname'/value pairs
 %
 % output:
@@ -18,4 +18,4 @@ function varargout=getoptkey(varargin)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-[varargout{1:nargout}]=jsonopt(varargin{:});
+[varargout{1:nargout}] = jsonopt(varargin{:});

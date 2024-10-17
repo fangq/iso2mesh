@@ -1,4 +1,4 @@
-function starray=soa2aos(st)
+function starray = soa2aos(st)
 %
 %    starray=soa2aos(st)
 %
@@ -23,31 +23,30 @@ function starray=soa2aos(st)
 %    License: GPLv3 or Apache 2.0, see https://github.com/NeuroJSON/jsnirf for details
 %
 
-
-if(nargin<1 || ~isstruct(st))
+if (nargin < 1 || ~isstruct(st))
     error('you must give an array of struct');
 end
 
-fn=fieldnames(st);
+fn = fieldnames(st);
 
-if(length(st)>1)
+if (length(st) > 1)
     error('you must give a struct of length 1');
 end
 
-if(isempty(fn))
-    starray=st;
-    return;
+if (isempty(fn))
+    starray = st;
+    return
 end
 
-elemlen=numel(st.(fn{1}));
+elemlen = numel(st.(fn{1}));
 
-if(~all(structfun(@(x) numel(x(:))==elemlen, st)))
+if (~all(structfun(@(x) numel(x(:)) == elemlen, st)))
     error('all subfield must have the same length');
 end
 
-starray=struct;
-for i=1:elemlen
-    for j=1:length(fn)
-        starray(i).(fn{j})=st.(fn{j})(i);
+starray = struct;
+for i = 1:elemlen
+    for j = 1:length(fn)
+        starray(i).(fn{j}) = st.(fn{j})(i);
     end
 end

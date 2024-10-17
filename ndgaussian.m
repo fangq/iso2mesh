@@ -1,4 +1,4 @@
-function h=ndgaussian(r, sigma, ndim)
+function h = ndgaussian(r, sigma, ndim)
 %
 % h=ndgaussian(r, sigma, ndim)
 %
@@ -20,25 +20,25 @@ function h=ndgaussian(r, sigma, ndim)
 %    License: GPL v3 or later, see LICENSE.txt for details
 %
 
-if(nargin<3)
-    ndim=3;
-    if(nargin<2)
-        sigma=1;
-        if(nargin==0)
-            r=1;
+if (nargin < 3)
+    ndim = 3;
+    if (nargin < 2)
+        sigma = 1;
+        if (nargin == 0)
+            r = 1;
         end
     end
 end
-latt=cell(ndim,1);
-if(isinf(sigma)) % ND box filter
-    if(ndim==1)
-         h=ones(1,(2*r+1));
+latt = cell(ndim, 1);
+if (isinf(sigma)) % ND box filter
+    if (ndim == 1)
+        h = ones(1, (2 * r + 1));
     else
-         h=ones((2*r+1)*ones(1,ndim));
+        h = ones((2 * r + 1) * ones(1, ndim));
     end
-    return;
+    return
 end
-[latt{:}]=meshgrid(-r:r);
-latt=cellfun(@(x) x.*x, latt,'uniformoutput',false);
-h=exp(-(sum(cat(ndims(latt{1})+1,latt{:}),ndims(latt{1})+1))./(2*sigma*sigma));
-h=h./(sum(h(:)));
+[latt{:}] = meshgrid(-r:r);
+latt = cellfun(@(x) x .* x, latt, 'uniformoutput', false);
+h = exp(-(sum(cat(ndims(latt{1}) + 1, latt{:}), ndims(latt{1}) + 1)) ./ (2 * sigma * sigma));
+h = h ./ (sum(h(:)));

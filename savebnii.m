@@ -19,7 +19,7 @@ function savebnii(jnii, filename, varargin)
 %                jnii.NIFTIData - the main image data array
 %                jnii.NIFTIExtension - a cell array contaiing the extension data buffers
 %        filename: the output file name to the binary-JNIfTI file (.bnii)
-%        options: (optional) if saving to .bnii, please see the 
+%        options: (optional) if saving to .bnii, please see the
 %               supported options for savebj.m (part of JSONLab).
 %
 %    example:
@@ -32,12 +32,12 @@ function savebnii(jnii, filename, varargin)
 %    License: Apache 2.0, see https://github.com/NeuroJSON/jnifti for details
 %
 
-if(nargin<2)
+if (nargin < 2)
     error('you must provide data and output file name');
 end
 
-if(~exist('savebj','file'))
+if (~exist('savebj', 'file'))
     error('you must first install JSONLab from http://github.com/fangq/jsonlab/');
 end
 
-savebj('',jnii,'FileName',filename,varargin{:});
+savebj('', jnii, 'FileName', filename, varargin{:});
