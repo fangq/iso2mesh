@@ -7,7 +7,7 @@
 | **Department** | Bioengineering           |
 | **Institute**  | Northeastern University  |
 | **Address**    | 360 Huntington Ave, Boston, MA 02115 |
-| **Version**    | 1.9.6 (Lion's Head)      |
+| **Version**    | 1.9.8 (Pot Stickers)     |
 | **License**    | GPL v2 or later (see COPYING) (this license does not cover the binaries under the bin/ directory, see Section III for more details) |
 | **URL**        | http://iso2mesh.sf.net   |
 

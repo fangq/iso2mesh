@@ -146,14 +146,27 @@ File I/O
  readnirfast
  readnifti
  readmptiff
+ loadjsnirf
+ savejsnirf
+ loadsnirf
+ savesnirf
+ readobjmesh
+ loadh5
+ saveh5
+ loadjd
+ savejd
+ loadjmesh
+ readobjmesh
 JData functions
  savejmesh
  loadjnifti
  savejnifti
  loadnifti
  savenifti
+ jdatahash
  jdataencode
  jdatadecode
+ jdict
  jload
  jsave
  decodevarname
@@ -166,6 +179,11 @@ JData functions
  niiformat
  savebnii
  savejnii
+ jsonpath
+ jsonset
+ jsoncache
+ json2couch
+ filterjsonmmap
 Data compression
  zlibencode
  zlibdecode
@@ -181,6 +199,11 @@ Data compression
  lz4hcdecode
  base64decode
  base64encode
+ blosc2encode
+ blosc2decode
+ zstdeecode
+ zstddecode
+ octavezmat
 Volumetric image pre-processing
  bwislands
  fillholes3d
@@ -223,3 +246,10 @@ Miscellaneous functions
  fast_match_bracket
  match_bracket
  memmapstream
+ aos2soa
+ soa2aos
+ snirfcheck
+ snirfcreate
+ snirfdecode
+ jsnirfcreate
+ niiheader2jnii
