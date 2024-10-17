@@ -57,7 +57,7 @@ if (regexp(filename, '\.[Jj][Nn][Ii][Rr][Ss]$'))
 elseif (regexp(filename, '\.[Bb][Nn][Ii][Rr][Ss]$'))
     data = savebj('', jnirs, 'filename', filename, varargin{:});
 elseif (~isempty(regexp(filename, '\.[Ss][Nn][Ii][Rr][Ff]$', 'once')) || ~isempty(regexp(outfile, '\.[Hh]5$', 'once')))
-    saveh5(jnirs, filename, 'VariableLengthString', 1, varargin{:});
+    saveh5(jnirs, filename, varargin{:});
 else
     error('file suffix must be .jnirs for text JSNIRF or .bnirs for binary JSNIRF');
 end

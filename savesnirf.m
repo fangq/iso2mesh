@@ -35,8 +35,12 @@ opt = varargin2struct(varargin{:});
 if (~isfield(opt, 'root'))
     opt.rootname = '';
 end
-opt.variablelengthstring = jsonopt('VariableLengthString', 1, opt);
-opt.rowas1d = jsonopt('RowAs1D', 1, opt);
+if (~isfield(opt, 'variablelengthstring'))
+    opt.variablelengthstring = 1;
+end
+if (~isfield(opt, 'rowas1d'))
+    opt.rowas1d = 1;
+end
 
 if (isfield(data, 'SNIRFData'))
     data.nirs = data.SNIRFData;
@@ -55,6 +59,9 @@ if (~isempty(outfile))
                         'sourceModuleIndex', 'detectorModuleIndex'};
             for i = 1:length(forceint)
                 if (isfield(data.nirs.data.measurementList, forceint{i}))
+                    if (iscell(data.nirs.data.measurementList.(forceint{i})))
+                        data.nirs.data.measurementList.(forceint{i}) = cell2mat(data.nirs.data.measurementList.(forceint{i}));
+                    end
                     data.nirs.data.measurementList.(forceint{i}) = int32(data.nirs.data.measurementList.(forceint{i}));
                 end
             end
@@ -63,17 +70,42 @@ if (~isempty(outfile))
                 data.nirs.data.measurementList = soa2aos(data.nirs.data.measurementList);
             end
         end
-        force1d.probe = {'wavelengths', 'wavelengthsEmission', 'frequencies', ...
-                         'timeDelays', 'timeDelayWidths', 'momentOrders', 'correlationTimeDelays', ...
-                         'correlationTimeDelayWidths'};
-        force1d.data = {'time'};
-        force1d.aux = {'time'};
-        fields = fieldnames(force1d);
-        for i = 1:length(fields)
-            for j = 1:length(force1d.(fields{i}))
-                if (isfield(data.nirs.(fields{i}), force1d.(fields{i}){j}))
-                    data.nirs.(fields{i}).(force1d.(fields{i}){j}) = permute(data.nirs.(fields{i}).(force1d.(fields{i}){j})(:).', [3 1 2]);
+        if (opt.rowas1d)
+            force1d.probe = {'wavelengths', 'wavelengthsEmission', 'frequencies', ...
+                             'timeDelays', 'timeDelayWidths', 'momentOrders', 'correlationTimeDelays', ...
+                             'correlationTimeDelayWidths'};
+            force1d.data = {'time'};
+            force1d.aux = {'time', 'timeOffset'};
+            fields = fieldnames(force1d);
+            for i = 1:length(fields)
+                for j = 1:length(force1d.(fields{i}))
+                    if (isfield(data.nirs.(fields{i}), force1d.(fields{i}){j}))
+                        if (iscell(data.nirs.(fields{i}).(force1d.(fields{i}){j})))
+                            data.nirs.(fields{i}).(force1d.(fields{i}){j}) = cell2mat(data.nirs.(fields{i}).(force1d.(fields{i}){j}));
+                        end
+                        data.nirs.(fields{i}).(force1d.(fields{i}){j}) = timeseries(data.nirs.(fields{i}).(force1d.(fields{i}){j})(:).');
+                    end
                 end
+            end
+        end
+        if (isfield(data.nirs, 'probe'))
+            forcestrarray.probe = {'sourceLabels', 'detectorLabels', 'landmarkLabels'};
+            forcestrarray.stim = {'dataLabels'};
+            fields = fieldnames(forcestrarray);
+            for i = 1:length(fields)
+                for j = 1:length(forcestrarray.(fields{i}))
+                    if (isfield(data.nirs.(fields{i}), forcestrarray.(fields{i}){j}))
+                        if (iscell(data.nirs.(fields{i}).(forcestrarray.(fields{i}){j})))
+                            data.nirs.(fields{i}).(forcestrarray.(fields{i}){j}) = cell2mat(data.nirs.(fields{i}).(forcestrarray.(fields{i}){j}));
+                        end
+                        data.nirs.(fields{i}).(forcestrarray.(fields{i}){j}) = timeseries(string(data.nirs.(fields{i}).(forcestrarray.(fields{i}){j})(:).'));
+                    end
+                end
+            end
+        end
+        if (~isempty(regexp(data.formatVersion, '^1\.', 'once')))
+            if (length(data.nirs.data.measurementList) == 1 && length(data.nirs.data.measurementList.sourceIndex) > 1)
+                data.nirs.data.measurementList = soa2aos(data.nirs.data.measurementList);
             end
         end
         data.nirs.data = forceindex(data.nirs.data, 'measurementList');

@@ -477,12 +477,29 @@ if (opt.maxlinklevel > 0 && isfield(data, N_('_DataLink_')))
         end
         if (~isempty(ref.path))
             uripath = [ref.proto ref.path];
-            [newdata, fname] = jdlink(uripath);
-            if (exist(fname, 'file'))
-                opt.maxlinklevel = opt.maxlinklevel - 1;
-                if (~isempty(ref.jsonpath))
-                    newdata = jsonpath(newdata, ref.jsonpath);
-                end
+            [fpath, fname, fext] = fileparts(uripath);
+            opt.maxlinklevel = opt.maxlinklevel - 1;
+            switch (lower(fext))
+                case {'.json', '.jnii', '.jdt', '.jdat', '.jmsh', '.jnirs'}
+                    newdata = loadjson(uripath, opt);
+                case {'.bjd', '.bnii', '.jdb', '.jbat', '.bmsh', '.bnirs', '.pmat'}
+                    newdata = loadbj(uripath, opt, 'Base64', 0);
+                case {'.ubj'}
+                    newdata = loadubjson(uripath, opt, 'Base64', 0);
+                case {'.msgpack'}
+                    newdata = loadmsgpack(uripath, opt, 'Base64', 0);
+                case {'.h5', '.hdf5', '.snirf'}  % this requires EasyH5 toolbox
+                    newdata = loadh5(uripath, opt);
+                otherwise
+                    % _DataLink_ url does not specify type, assuming JSON format
+                    if (regexpi(datalink, '^\s*(http|https|ftp|file)://'))
+                        newdata = loadjson(uripath, opt);
+                    else
+                        warning('_DataLink_ url is not supported');
+                    end
+            end
+            if (~isempty(ref.jsonpath))
+                newdata = getfromjsonpath(newdata, ref.jsonpath);
             end
         end
     end

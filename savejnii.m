@@ -37,7 +37,7 @@ if (nargin < 2)
 end
 
 if (~exist('savejson', 'file'))
-    error('you must first install JSONLab from http://github.com/fangq/jsonlab/');
+    error('you must first install JSONLab from http://github.com/NeuroJSON/jsonlab/');
 end
 
 savejson('', jnii, 'FileName', filename, varargin{:});

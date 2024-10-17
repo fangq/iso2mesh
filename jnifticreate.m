@@ -76,13 +76,14 @@ jnii.NIFTIHeader.NIIFormat =      'jnifti';
 % jnii.NIFTIHeader.NIIExtender=    [0,0,0,0];
 
 datainfo.JNIFTIVersion = '0.5';
-datainfo.Comment = 'Created by the NeuroJSON Project (https://neurojson.org)';
-datainfo.AnnotationFormat = 'https://neurojson.org/jnifti/draft-1';
+datainfo.Comment = 'Created by JNIFTY Toolbox (https://github.com/NeuroJSON/jnifty)';
+datainfo.AnnotationFormat = 'https://github.com/NeuroJSON/jnifti/blob/master/JNIfTI_specification.md';
 datainfo.SerialFormat = 'http://json.org';
 datainfo.Parser = struct('Python', [], ...
                          'MATLAB', [], ...
                          'JavaScript', 'https://github.com/NeuroJSON/jsdata', ...
-                         'CPP', 'https://github.com/nlohmann/json');
+                         'CPP', 'https://github.com/NeuroJSON/json', ...
+                         'C', 'https://github.com/NeuroJSON/ubj');
 datainfo.Parser.Python = {'https://pypi.org/project/jdata', 'https://pypi.org/project/bjdata'};
 datainfo.Parser.MATLAB = {'https://github.com/NeuroJSON/jnifty', 'https://github.com/NeuroJSON/jsonlab'};
 jnii.(encodevarname('_DataInfo_')) = datainfo;
