@@ -1,0 +1,81 @@
+name: Iso2Mesh CI
+
+on: [push, pull_request]
+
+jobs:
+  octave_test:
+    name: Octave tests
+    strategy:
+      # provided octave versions: ubuntu-20.04 = 5.2, ubuntu-22.04 = 6.4, macos-12 = 8.1, windows-2019 = 7.3
+      matrix:
+        os: [ubuntu-20.04, ubuntu-22.04, macos-12, windows-2019]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+      - name: Install dependencies
+        run: |
+          [[ "$RUNNER_OS" == "Linux" ]] && sudo apt-get update && sudo apt-get install -y octave
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install octave
+          fi
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            curl --retry 3 -kL http://cdimage.debian.org/mirror/gnu.org/gnu/octave/windows/octave-7.3.0-w64-64.7z --output octave_7.3.0.7z
+            7z x octave_7.3.0.7z -ooctave -y
+            echo "$PWD/octave/octave-7.3.0-w64-64/mingw64/bin" >> $GITHUB_PATH
+          fi
+      - name: Run octave test
+        run: |
+          octave-cli --version
+          octave-cli --eval "addpath(pwd);cd sample; demo_vol2mesh_ex1; demo_vol2mesh_ex1b; demo_vol2mesh_ex1c"
+          octave-cli --eval "addpath(pwd);cd sample; demo_vol2mesh_ex2; demo_vol2mesh_ex3"
+          octave-cli --eval "addpath(pwd);cd sample; demo_surf2mesh_ex1"
+          octave-cli --eval "addpath(pwd);cd sample; demo_directplc_ex1"
+          octave-cli --eval "addpath(pwd);cd sample; demo_grayscale_ex1"
+          octave-cli --eval "addpath(pwd);cd sample; demo_shortcut_ex1"
+          octave-cli --eval "addpath(pwd);cd sample; demo_surf2vol_ex1"
+          octave-cli --eval "addpath(pwd);cd sample; demo_label_sizing"
+          octave-cli --eval "addpath(pwd);cd sample; demo_qmeshcut_ex1"
+
+  matlab_test:
+    name: MATLAB test
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, macos-12, windows-2019]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v1
+        with:
+          release: R2022a
+      - name: Run MATLAB test
+        uses: matlab-actions/run-command@v1
+        with:
+          command: addpath(pwd);cd sample; demo_vol2mesh_ex1; demo_vol2mesh_ex1b; demo_vol2mesh_ex1c
+      - name: Run MATLAB examples
+        uses: matlab-actions/run-command@v1
+        with:
+          command: addpath(pwd);cd sample; demo_vol2mesh_ex2; demo_vol2mesh_ex3
+      - name: Run MATLAB examples
+        uses: matlab-actions/run-command@v1
+        with:
+          command: addpath(pwd);cd sample; demo_surf2mesh_ex1; demo_directplc_ex1; demo_grayscale_ex1
+      - name: Run MATLAB examples
+        uses: matlab-actions/run-command@v1
+        with:
+          command: addpath(pwd);cd sample; demo_shortcut_ex1; demo_surf2vol_ex1; demo_label_sizing
+      - name: Run MATLAB examples
+        uses: matlab-actions/run-command@v1
+        with:
+          command: addpath(pwd);cd sample; demo_qmeshcut_ex1
+
