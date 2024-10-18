@@ -64,7 +64,7 @@ g1 = exp(sqrt(-1) * k * r1) ./ (4 * pi * r1); % calculate the Green's function
 g2 = exp(sqrt(-1) * k * r2) ./ (4 * pi * r2);
 g12 = g1 .* g2;  % this is the sensitivity map
 
-figure;
+%figure;
 plotmesh([node log10(abs(g12))], elem, 'facealpha', 0.5, 'linestyle', 'none'); % plot the mesh
 
 hold on;
