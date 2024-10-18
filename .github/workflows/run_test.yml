@@ -36,7 +36,7 @@ jobs:
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1; toc; demo_vol2mesh_ex1b; demo_vol2mesh_ex1c"
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex2; toc"
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_surf2mesh_ex1; toc"
-          octave-cli --eval "addpath(pwd);cd sample; disp(graphics_toolkit); graphics_toolkit('qt'); tic; demo_directplc_ex1; toc"
+          octave-cli --eval "addpath(pwd);cd sample; tic; demo_directplc_ex1; toc"
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_grayscale_ex1; toc"
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_shortcut_ex1; toc"
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_surf2vol_ex1; toc"
