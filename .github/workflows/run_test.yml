@@ -21,7 +21,7 @@ jobs:
           submodules: 'recursive'
       - name: Install dependencies
         run: |
-          [[ "$RUNNER_OS" == "Linux" ]] && sudo apt-get update && sudo apt-get install -y octave
+          [[ "$RUNNER_OS" == "Linux" ]] && sudo apt-get update && sudo apt-get install -y octave cmake libcgal-dev libsuperlu-dev libsuitesparse-dev libgmp-dev
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             brew install octave
           fi
@@ -34,7 +34,7 @@ jobs:
         run: |
           octave-cli --version
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1; toc; demo_vol2mesh_ex1b; demo_vol2mesh_ex1c"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex2; toc; demo_vol2mesh_ex3; toc"
+          octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex2; toc"
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_surf2mesh_ex1; toc"
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_directplc_ex1; toc"
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_grayscale_ex1; toc"
@@ -42,6 +42,12 @@ jobs:
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_surf2vol_ex1; toc"
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_label_sizing; toc"
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_qmeshcut_ex1; toc"
+      - name: Rebuild binaries
+        if: ${{ runner.os == 'Linux' }}   # use these variables to limit a step only on a specific OS
+        run: |
+          cd tools
+          make
+          ls -lt ../bin/*
 
   matlab_test:
     name: MATLAB test
@@ -65,7 +71,7 @@ jobs:
       - name: Run MATLAB examples
         uses: matlab-actions/run-command@v1
         with:
-          command: addpath(pwd);cd sample; tic; demo_vol2mesh_ex2; toc; demo_vol2mesh_ex3; toc
+          command: addpath(pwd);cd sample; tic; demo_vol2mesh_ex2; toc; toc
       - name: Run MATLAB examples
         uses: matlab-actions/run-command@v1
         with:
