@@ -22,7 +22,7 @@ load rat_head.mat;
 % element, as 'cgalsurf' promises.
 
 [node, elem, face] = vol2mesh(volimage > 0.05, 1:size(volimage, 1), 1:size(volimage, 2), ...
-                              1:size(volimage, 3), 0.1, 2, 1, 'simplify');
+                              1:size(volimage, 3), 0.08, 2, 1, 'simplify');
 
 %% visualize the resulting mesh
 
