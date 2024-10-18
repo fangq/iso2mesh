@@ -21,7 +21,7 @@ jobs:
           submodules: 'recursive'
       - name: Install dependencies
         run: |
-          [[ "$RUNNER_OS" == "Linux" ]] && sudo apt-get update && sudo apt-get install -y octave cmake libcgal-dev libsuperlu-dev libsuitesparse-dev libgmp-dev
+          [[ "$RUNNER_OS" == "Linux" ]] && sudo apt-get update && sudo apt-get install -y octave cmake libcgal-dev libsuperlu-dev libsuitesparse-dev libgmp-dev libtbb-dev
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             brew install octave
           fi
