@@ -30,6 +30,9 @@ jobs:
             7z x octave_5.2.0.7z -ooctave -y
             echo "$PWD/octave/octave-5.2.0-w64-64/mingw64/bin" >> $GITHUB_PATH
           fi
+      - name: Install octave-image (Windows only)
+        if: ${{ runner.os == 'Windows' }}
+        run: octave-cli --eval "pkg install -forge image"
       - name: Run octave test
         run: |
           octave-cli --version
