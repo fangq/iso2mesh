@@ -19,7 +19,7 @@ function [node, elem] = readoff(fname)
 
 node = [];
 elem = [];
-fid = fopen(fname, 'rt');
+fid = fopen(fname, 'rb');
 line = fgetl(fid);
 dim = sscanf(line, 'OFF %d %d %d');
 line = nonemptyline(fid);
