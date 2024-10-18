@@ -44,8 +44,9 @@ plot(bcutpos(bcutloop, 2) * (1 / dstep), bcutpos(bcutloop, 1) * (1 / dstep), 'w'
 
 if (isoctavemesh)
     if (~exist('bwfill'))
-        error('you need to install octave-image toolbox first');
+        pkg load image
     end
+
     img2 = zeros(size(img), 'uint8');
     for i = 1:size(img, 3)
         img2(:, :, i) = bwfill(img(:, :, i), 'holes');
