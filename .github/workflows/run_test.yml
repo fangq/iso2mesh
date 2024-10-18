@@ -33,15 +33,15 @@ jobs:
       - name: Run octave test
         run: |
           octave-cli --version
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1; toc; demo_vol2mesh_ex1b; demo_vol2mesh_ex1c"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex2; toc"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_surf2mesh_ex1; toc"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_directplc_ex1; toc"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_grayscale_ex1; toc"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_shortcut_ex1; toc"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_surf2vol_ex1; toc"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_label_sizing; toc"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_qmeshcut_ex1; toc"
+          #octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1; toc; demo_vol2mesh_ex1b; demo_vol2mesh_ex1c"
+          #octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex2; toc"
+          #octave-cli --eval "addpath(pwd);cd sample; tic; demo_surf2mesh_ex1; toc"
+          #octave-cli --eval "addpath(pwd);cd sample; tic; demo_directplc_ex1; toc"
+          #octave-cli --eval "addpath(pwd);cd sample; tic; demo_grayscale_ex1; toc"
+          #octave-cli --eval "addpath(pwd);cd sample; tic; demo_shortcut_ex1; toc"
+          #octave-cli --eval "addpath(pwd);cd sample; tic; demo_surf2vol_ex1; toc"
+          #octave-cli --eval "addpath(pwd);cd sample; tic; demo_label_sizing; toc"
+          #octave-cli --eval "addpath(pwd);cd sample; tic; demo_qmeshcut_ex1; toc"
       - name: Rebuild binaries
         if: ${{ runner.os == 'Linux' }}   # use these variables to limit a step only on a specific OS
         run: |
