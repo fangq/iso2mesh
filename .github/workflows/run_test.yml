@@ -67,9 +67,6 @@ jobs:
         uses: matlab-actions/setup-matlab@v1
         with:
           release: R2022a
-      - name: Install octave-image (Windows only)
-        if: ${{ runner.os == 'Windows' }}
-        run: octave-cli --eval "pkg install -forge image"
       - name: Run MATLAB test
         uses: matlab-actions/run-command@v1
         with:
@@ -83,9 +80,14 @@ jobs:
         with:
           command: addpath(pwd);cd sample; tic; demo_surf2mesh_ex1; demo_directplc_ex1; toc; demo_grayscale_ex1; toc
       - name: Run MATLAB examples
+        if: ${{ runner.os != 'Windows' }}
         uses: matlab-actions/run-command@v1
         with:
-          command: addpath(pwd);cd sample; tic; demo_shortcut_ex1; demo_surf2vol_ex1; toc; demo_label_sizing; toc
+          command: addpath(pwd);cd sample; tic; demo_surf2vol_ex1; toc
+      - name: Run MATLAB examples
+        uses: matlab-actions/run-command@v1
+        with:
+          command: addpath(pwd);cd sample; tic; demo_shortcut_ex1; toc; demo_label_sizing; toc
       - name: Run MATLAB examples
         uses: matlab-actions/run-command@v1
         with:
