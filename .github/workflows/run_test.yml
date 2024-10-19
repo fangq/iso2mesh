@@ -37,7 +37,7 @@ jobs:
       - name: Run Octave test - demo_vol2mesh_ex1
         run: |
           octave-cli --version
-          octave-cli --eval 'available_graphics_toolkits(); graphics_toolkits()'
+          octave-cli --eval 'available_graphics_toolkits(); graphics_toolkit()'
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1; toc"
       - name: Run Octave test - demo_vol2mesh_ex1b
         run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1b; toc"
