@@ -8,7 +8,7 @@ jobs:
     strategy:
       # provided octave versions: ubuntu-20.04 = 5.2, ubuntu-22.04 = 6.4, macos-12 = 8.1, windows-2019 = 7.3
       matrix:
-        os: [ubuntu-20.04, ubuntu-22.04, macos-12, windows-2019]
+        os: [ubuntu-20.04, ubuntu-22.04, macos-13, windows-2019]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -80,7 +80,7 @@ jobs:
         with:
           command: addpath(pwd);cd sample; tic; demo_surf2mesh_ex1; demo_directplc_ex1; toc; demo_grayscale_ex1; toc
       - name: Run MATLAB examples
-        if: ${{ runner.os != 'Windows' }}
+        if: ${{ runner.os == 'Linux' }}
         uses: matlab-actions/run-command@v1
         with:
           command: addpath(pwd);cd sample; tic; demo_surf2vol_ex1; toc
