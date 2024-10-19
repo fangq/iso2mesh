@@ -67,6 +67,9 @@ jobs:
         uses: matlab-actions/setup-matlab@v1
         with:
           release: R2022a
+      - name: Install octave-image (Windows only)
+        if: ${{ runner.os == 'Windows' }}
+        run: octave-cli --eval "pkg install -forge image"
       - name: Run MATLAB test
         uses: matlab-actions/run-command@v1
         with:
