@@ -34,30 +34,30 @@ jobs:
       - name: Install octave-image (Windows and MacOS)
         if: ${{ runner.os != 'Linux' }}
         run: octave-cli --eval "pkg install -forge image"
-      - name: Run octave test: demo_vol2mesh_ex1
+      - name: Run Octave test - demo_vol2mesh_ex1
         run: |
           octave-cli --version
           octave-cli --eval 'available_graphics_toolkits(); graphics_toolkits()'
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1; toc"
-      - name: Run octave test: demo_vol2mesh_ex1b
+      - name: Run Octave test - demo_vol2mesh_ex1b
         run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1b; toc"
-      - name: Run octave test: demo_vol2mesh_ex1c
+      - name: Run Octave test - demo_vol2mesh_ex1c
         run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1c; toc"
-      - name: Run octave test: demo_vol2mesh_ex2
+      - name: Run Octave test - demo_vol2mesh_ex2
         run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex2; toc"
-      - name: Run octave test: demo_surf2mesh_ex1
+      - name: Run Octave test - demo_surf2mesh_ex1
         run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_surf2mesh_ex1; toc"
-      - name: Run octave test: demo_directplc_ex1
+      - name: Run Octave test - demo_directplc_ex1
         run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_directplc_ex1; toc"
-      - name: Run octave test: demo_grayscale_ex1
+      - name: Run Octave test - demo_grayscale_ex1
         run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_grayscale_ex1; toc"
-      - name: Run octave test: demo_shortcut_ex1
+      - name: Run Octave test - demo_shortcut_ex1
         run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_shortcut_ex1; toc"
-      - name: Run octave test: demo_surf2vol_ex1
+      - name: Run Octave test - demo_surf2vol_ex1
         run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_surf2vol_ex1; toc"
-      - name: Run octave test: demo_label_sizing
+      - name: Run Octave test - demo_label_sizing
         run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_label_sizing; toc"
-      - name: Run octave test: demo_qmeshcut_ex1
+      - name: Run Octave test - demo_qmeshcut_ex1
         run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_qmeshcut_ex1; toc"
       - name: Rebuild binaries
         if: ${{ runner.os == 'Linux' }}   # use these variables to limit a step only on a specific OS
