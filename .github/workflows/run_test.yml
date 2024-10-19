@@ -8,7 +8,7 @@ jobs:
     strategy:
       # provided octave versions: ubuntu-20.04 = 5.2, ubuntu-22.04 = 6.4, macos-12 = 8.1, windows-2019 = 7.3
       matrix:
-        os: [ubuntu-20.04, ubuntu-22.04, macos-13, windows-2019]
+        os: [ubuntu-20.04, ubuntu-22.04, windows-2019]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -36,7 +36,7 @@ jobs:
       - name: Run octave test
         run: |
           octave-cli --version
-          octave-cli --eval "addpath(pwd);cd sample; disp(graphics_toolkit); tic; demo_vol2mesh_ex1; toc; demo_vol2mesh_ex1b; demo_vol2mesh_ex1c"
+          octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1; toc; demo_vol2mesh_ex1b; demo_vol2mesh_ex1c"
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex2; toc"
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_surf2mesh_ex1; toc"
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_directplc_ex1; toc"
