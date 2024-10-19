@@ -6,9 +6,9 @@ jobs:
   octave_test:
     name: Octave tests
     strategy:
-      # provided octave versions: ubuntu-20.04 = 5.2, ubuntu-22.04 = 6.4, macos-12 = 8.1, windows-2019 = 7.3
+      # provided octave versions: ubuntu-20.04 = 5.2, ubuntu-22.04 = 6.4, macos-13/14 = 9.2, windows-2019 = 5.2
       matrix:
-        os: [ubuntu-20.04, ubuntu-22.04, macos-13, windows-2019]
+        os: [ubuntu-20.04, ubuntu-22.04, macos-13, macos-14, windows-2019]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -21,31 +21,44 @@ jobs:
           submodules: 'recursive'
       - name: Install dependencies
         run: |
-          [[ "$RUNNER_OS" == "Linux" ]] && sudo apt-get update && sudo apt-get install -y octave cmake libcgal-dev libsuperlu-dev libsuitesparse-dev libgmp-dev libtbb-dev octave-image
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            sudo apt-get update && sudo apt-get install -y octave cmake libcgal-dev libsuperlu-dev libsuitesparse-dev libgmp-dev libtbb-dev octave-image
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
             brew install gnuplot
             brew install octave
-          fi
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
+          else
             curl --retry 3 -kL http://cdimage.debian.org/mirror/gnu.org/gnu/octave/windows/octave-5.2.0-w64-64.7z --output octave_5.2.0.7z
             7z x octave_5.2.0.7z -ooctave -y
             echo "$PWD/octave/octave-5.2.0-w64-64/mingw64/bin" >> $GITHUB_PATH
           fi
-      - name: Install octave-image (Windows only)
+      - name: Install octave-image (Windows and MacOS)
         if: ${{ runner.os != 'Linux' }}
         run: octave-cli --eval "pkg install -forge image"
-      - name: Run octave test
+      - name: Run octave test: demo_vol2mesh_ex1
         run: |
           octave-cli --version
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1; toc; demo_vol2mesh_ex1b; demo_vol2mesh_ex1c"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex2; toc"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_surf2mesh_ex1; toc"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_directplc_ex1; toc"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_grayscale_ex1; toc"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_shortcut_ex1; toc"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_surf2vol_ex1; toc"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_label_sizing; toc"
-          octave-cli --eval "addpath(pwd);cd sample; tic; demo_qmeshcut_ex1; toc"
+          octave-cli --eval 'available_graphics_toolkits(); graphics_toolkits()'
+          octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1; toc"
+      - name: Run octave test: demo_vol2mesh_ex1b
+        run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1b; toc"
+      - name: Run octave test: demo_vol2mesh_ex1c
+        run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1c; toc"
+      - name: Run octave test: demo_vol2mesh_ex2
+        run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex2; toc"
+      - name: Run octave test: demo_surf2mesh_ex1
+        run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_surf2mesh_ex1; toc"
+      - name: Run octave test: demo_directplc_ex1
+        run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_directplc_ex1; toc"
+      - name: Run octave test: demo_grayscale_ex1
+        run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_grayscale_ex1; toc"
+      - name: Run octave test: demo_shortcut_ex1
+        run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_shortcut_ex1; toc"
+      - name: Run octave test: demo_surf2vol_ex1
+        run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_surf2vol_ex1; toc"
+      - name: Run octave test: demo_label_sizing
+        run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_label_sizing; toc"
+      - name: Run octave test: demo_qmeshcut_ex1
+        run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_qmeshcut_ex1; toc"
       - name: Rebuild binaries
         if: ${{ runner.os == 'Linux' }}   # use these variables to limit a step only on a specific OS
         run: |
@@ -68,28 +81,48 @@ jobs:
         uses: matlab-actions/setup-matlab@v1
         with:
           release: R2022a
-      - name: Run MATLAB test
+      - name: Run MATLAB test - demo_vol2mesh_ex1
         uses: matlab-actions/run-command@v1
         with:
-          command: addpath(pwd);cd sample; tic; demo_vol2mesh_ex1; toc; demo_vol2mesh_ex1b; toc; demo_vol2mesh_ex1c; toc
-      - name: Run MATLAB examples
+          command: addpath(pwd);cd sample; tic; demo_vol2mesh_ex1; toc
+      - name: Run MATLAB test - demo_vol2mesh_ex1b
+        uses: matlab-actions/run-command@v1
+        with:
+          command: addpath(pwd);cd sample; tic; demo_vol2mesh_ex1b; toc
+      - name: Run MATLAB test - demo_vol2mesh_ex1c
+        uses: matlab-actions/run-command@v1
+        with:
+          command: addpath(pwd);cd sample; tic; demo_vol2mesh_ex1c; toc
+      - name: Run MATLAB test - demo_vol2mesh_ex2
         uses: matlab-actions/run-command@v1
         with:
           command: addpath(pwd);cd sample; tic; demo_vol2mesh_ex2; toc
-      - name: Run MATLAB examples
+      - name: Run MATLAB test - demo_surf2mesh_ex1
         uses: matlab-actions/run-command@v1
         with:
-          command: addpath(pwd);cd sample; tic; demo_surf2mesh_ex1; demo_directplc_ex1; toc; demo_grayscale_ex1; toc
-      - name: Run MATLAB examples
+          command: addpath(pwd);cd sample; tic; demo_surf2mesh_ex1; toc
+      - name: Run MATLAB test - demo_directplc_ex1
+        uses: matlab-actions/run-command@v1
+        with:
+          command: addpath(pwd);cd sample; tic; demo_directplc_ex1; toc
+      - name: Run MATLAB test - demo_grayscale_ex1
+        uses: matlab-actions/run-command@v1
+        with:
+          command: addpath(pwd);cd sample; tic; demo_grayscale_ex1; toc
+      - name: Run MATLAB test - demo_surf2vol_ex1 (Linux only)
         if: ${{ runner.os == 'Linux' }}
         uses: matlab-actions/run-command@v1
         with:
           command: addpath(pwd);cd sample; tic; demo_surf2vol_ex1; toc
-      - name: Run MATLAB examples
+      - name: Run MATLAB test - demo_shortcut_ex1
         uses: matlab-actions/run-command@v1
         with:
-          command: addpath(pwd);cd sample; tic; demo_shortcut_ex1; toc; demo_label_sizing; toc
-      - name: Run MATLAB examples
+          command: addpath(pwd);cd sample; tic; demo_shortcut_ex1; toc
+      - name: Run MATLAB test - demo_label_sizing
+        uses: matlab-actions/run-command@v1
+        with:
+          command: addpath(pwd);cd sample; tic; demo_label_sizing; toc
+      - name: Run MATLAB test - demo_qmeshcut_ex1
         uses: matlab-actions/run-command@v1
         with:
           command: addpath(pwd);cd sample; tic; demo_qmeshcut_ex1; toc
