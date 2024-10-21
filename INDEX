@@ -156,7 +156,6 @@ File I/O
  loadjd
  savejd
  loadjmesh
- readobjmesh
 JData functions
  savejmesh
  loadjnifti
