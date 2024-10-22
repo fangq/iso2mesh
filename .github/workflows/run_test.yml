@@ -8,7 +8,7 @@ jobs:
     strategy:
       # provided octave versions: ubuntu-20.04 = 5.2, ubuntu-22.04 = 6.4, macos-13/14 = 9.2, windows-2019 = 5.2
       matrix:
-        os: [ubuntu-20.04, ubuntu-22.04, macos-13, macos-14, windows-2019]
+        os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, macos-13, macos-14, windows-2019]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
