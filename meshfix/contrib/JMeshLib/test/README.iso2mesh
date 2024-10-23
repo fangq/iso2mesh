@@ -1,0 +1,32 @@
+===================================================================
+=   JMeshLib mesh cleaning utility modified for iso2mesh toolbox   =
+===================================================================
+
+Modified by Qianqian Fang <q.fang at neu.edu>
+
+Date: 2008/08
+
+== Summary ==
+The change is trivial, simply replace the input/outputs from
+WRL to OFF.
+
+However, if one want to compile JMeshLib on 64 bit linux,
+you will encounter the following error:
+
+ error: cast from 'const void*' to 'int' loses precision
+
+to get around this, you have to replace (int) to (long) 
+for most of the lines you get the error messages.
+
+== Compilation ==
+First, download the JMeshLib source code from 
+http://jmeshlib.sourceforge.net/
+
+Unzip the file, and compile it based on the README file.
+
+Replace the test/test.cpp and test/Makefile files by
+the ones from this package, and type "make".
+
+Rename the generated meshfix binary to meshfix.mex???
+where mex??? is the output for mexext from matlab.
+
