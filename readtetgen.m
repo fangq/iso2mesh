@@ -19,7 +19,7 @@ function [node, elem, face] = readtetgen(fstub)
 %
 
 % read node file
-fp = fopen([fstub, '.node'], 'rt');
+fp = fopen([fstub, '.node'], 'rb');
 if (fp == 0)
     error('node file is missing!');
 end
@@ -33,7 +33,7 @@ node = node(2:4, :)';
 fclose(fp);
 
 % read element file
-fp = fopen([fstub, '.ele'], 'rt');
+fp = fopen([fstub, '.ele'], 'rb');
 if (fp == 0)
     error('elem file is missing!');
 end
@@ -48,7 +48,7 @@ elem(:, 1:dim(2)) = elem(:, 1:dim(2)) + (1 - idx(1));
 fclose(fp);
 
 % read surface mesh file
-fp = fopen([fstub, '.face'], 'rt');
+fp = fopen([fstub, '.face'], 'rb');
 if (fp == 0)
     error('surface data file is missing!');
 end

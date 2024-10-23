@@ -20,7 +20,7 @@ function [node, elem, face] = readmedit(filename)
 node = [];
 elem = [];
 face = [];
-fid = fopen(filename, 'rt');
+fid = fopen(filename, 'rb');
 while (~feof(fid))
     key = fscanf(fid, '%s', 1);
     if (strcmp(key, 'End'))

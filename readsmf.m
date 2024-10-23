@@ -18,7 +18,7 @@ function [node, elem] = readsmf(fname)
 %
 node = [];
 elem = [];
-fid = fopen(fname, 'rt');
+fid = fopen(fname, 'rb');
 while (~feof(fid))
     line = fgetl(fid);
     if (line(1) == 'v')

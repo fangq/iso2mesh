@@ -22,7 +22,7 @@ function [node, elem, edges, edgemap] = readgts(fname)
 
 node = [];
 elem = [];
-fid = fopen(fname, 'rt');
+fid = fopen(fname, 'rb');
 line = fgetl(fid);
 dim = sscanf(line, '%d', 3);
 node   = fscanf(fid, '%f', [3, dim(1)])';

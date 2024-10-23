@@ -19,7 +19,7 @@ function [node, elem] = readasc(fname)
 
 node = [];
 elem = [];
-fid = fopen(fname, 'rt');
+fid = fopen(fname, 'rb');
 if (fid == -1)
     error(['can not read file ' fname]);
 end

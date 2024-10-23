@@ -58,7 +58,7 @@ if (exist(fullfile(pwd, fname), 'file'))
 end
 
 fname = [filestub, '.excoef'];
-fid = fopen(fname, 'rt');
+fid = fopen(fname, 'rb');
 if (fid >= 0)
     linenum = 0;
     textheader = {};
@@ -82,7 +82,7 @@ if (fid >= 0)
 end
 
 fname = [filestub, '.param'];
-fid = fopen(fname, 'rt');
+fid = fopen(fname, 'rb');
 if (fid >= 0)
     linenum = 0;
     params = [];

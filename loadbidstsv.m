@@ -46,7 +46,7 @@ if (~isempty(regexp(tsvfile, '\.[Gg][Zz]$', 'once')))
         fid = fid((endpos + 1):end);
     end
 else
-    fid = fopen(tsvfile, 'rt');
+    fid = fopen(tsvfile, 'rb');
     header = fgetl(fid);
     header = regexprep(header, '\s*$', '');
 end
