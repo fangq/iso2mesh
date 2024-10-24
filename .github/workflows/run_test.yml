@@ -42,9 +42,6 @@ jobs:
       - name: Test linux32 binaries
         if: ${{ matrix.os == 'ubuntu-24.04' }}
         run:  rm -rf bin/*.mexa64
-      - name: Test win32 binaries
-        if: ${{ matrix.os == 'windows-2019' }}
-        run:  rm -rf bin/*x86-64.exe
       - name: Run Octave test - demo_vol2mesh_ex1b
         run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1b; toc"
       - name: Run Octave test - demo_vol2mesh_ex1c
