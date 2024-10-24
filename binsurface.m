@@ -55,7 +55,7 @@ id2 = sub2ind(newdim, jx, jy);
 id3 = sub2ind(newdim, kx, ky);
 
 if (nargin == 2 && nface == 0)
-    elem = [id1 id2 id3];
+    elem = [id1; id2; id3];
     node = zeros(newdim);
     node(elem) = 1;
     node = node(2:end - 1, 2:end - 1, 2:end - 1) - 1;

@@ -34,6 +34,8 @@ jobs:
       - name: Install octave-image (Windows and MacOS)
         if: ${{ runner.os != 'Linux' }}
         run: octave-cli --eval "pkg install -forge image"
+      - name: Run Octave unit tests
+        run:  octave-cli --eval "addpath(pwd);cd test; tic; run_iso2mesh_test; toc"
       - name: Run Octave test - demo_vol2mesh_ex1
         run: |
           octave-cli --version
@@ -94,6 +96,10 @@ jobs:
       - name: Test win32 binaries
         if: ${{ matrix.os == 'windows-2019' }}
         run:  rm -rf bin/*x86-64.exe
+      - name: Run MATLAB unit tests
+        uses: matlab-actions/run-command@v1
+        with:
+          command: addpath(pwd);cd test; tic; run_iso2mesh_test; toc
       - name: Run MATLAB test - demo_vol2mesh_ex1
         uses: matlab-actions/run-command@v1
         with:
