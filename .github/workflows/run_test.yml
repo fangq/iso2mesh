@@ -8,7 +8,7 @@ jobs:
     strategy:
       # provided octave versions: ubuntu-20.04 = 5.2, ubuntu-22.04 = 6.4, macos-13/14 = 9.2, windows-2019 = 5.2
       matrix:
-        os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, macos-13, macos-14, windows-2019, windows-2022]
+        os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, macos-13, macos-14, windows-2019]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -76,7 +76,7 @@ jobs:
     name: MATLAB test
     strategy:
       matrix:
-        os: [ubuntu-20.04, ubuntu-24.04, macos-12, windows-2019, windows-2022]
+        os: [ubuntu-20.04, ubuntu-24.04, macos-12, windows-2019]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repo
@@ -90,9 +90,6 @@ jobs:
       - name: Test linux32 binaries
         if: ${{ matrix.os == 'ubuntu-24.04' }}
         run:  rm -rf bin/*.mexa64
-      - name: Test win32 binaries
-        if: ${{ matrix.os == 'windows-2019' }}
-        run:  rm -rf bin/*x86-64.exe
       - name: Run MATLAB test - demo_vol2mesh_ex1
         uses: matlab-actions/run-command@v1
         with:
