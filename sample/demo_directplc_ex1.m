@@ -54,7 +54,7 @@ fc{count} = {[1 + length(t) * 3:1 + length(t) * 4 - 1 nan fliplr(1 + length(t) *
 [node, elem, face] = surf2mesh(no, fc, min(no), max(no), 1, 50, [0 0 1], [], 0);
 
 plotmesh(no, fc, 'y>-0.1');
-%figure;
+% figure;
 plotmesh(node, elem, 'x>0 | y>0');
-%figure;
+% figure;
 plotmesh(node, face, 'x>0 | y>0');
