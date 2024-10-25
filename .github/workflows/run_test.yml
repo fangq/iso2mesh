@@ -27,13 +27,16 @@ jobs:
             brew install gnuplot
             brew install octave
           else
-            curl --retry 3 -kL http://cdimage.debian.org/mirror/gnu.org/gnu/octave/windows/octave-5.2.0-w64-64.7z --output octave_5.2.0.7z
-            7z x octave_5.2.0.7z -ooctave -y
-            echo "$PWD/octave/octave-5.2.0-w64-64/mingw64/bin" >> $GITHUB_PATH
+            curl --retry 3 -kL http://cdimage.debian.org/mirror/gnu.org/gnu/octave/windows/octave-8.4.0-w64-64.7z --output octave_8.4.0.7z
+            7z x octave_8.4.0.7z -ooctave -y
+            echo "$PWD/octave/octave-8.4.0-w64-64/mingw64/bin" >> $GITHUB_PATH
           fi
       - name: Install octave-image (Windows and MacOS)
         if: ${{ runner.os != 'Linux' }}
         run: octave-cli --eval "pkg install -forge image"
+      - name: Test linux32 binaries
+        if: ${{ matrix.os == 'ubuntu-24.04' }}
+        run:  rm -rf bin/*.mexa64
       - name: Run Octave unit tests
         run:  octave-cli --eval "addpath(pwd);cd test; tic; run_iso2mesh_test; toc"
       - name: Run Octave test - demo_vol2mesh_ex1
@@ -41,9 +44,6 @@ jobs:
           octave-cli --version
           octave-cli --eval 'available_graphics_toolkits(); graphics_toolkit()'
           octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1; toc"
-      - name: Test linux32 binaries
-        if: ${{ matrix.os == 'ubuntu-24.04' }}
-        run:  rm -rf bin/*.mexa64
       - name: Run Octave test - demo_vol2mesh_ex1b
         run:  octave-cli --eval "addpath(pwd);cd sample; tic; demo_vol2mesh_ex1b; toc"
       - name: Run Octave test - demo_vol2mesh_ex1c
