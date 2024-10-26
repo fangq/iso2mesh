@@ -34,8 +34,9 @@ jobs:
       - name: Install octave-image (Windows)
         if: ${{ runner.os == 'Windows' }}
         run: |
-          curl -v --retry 3 -kL https://mcx.space/wiki/upload/image-2.14.0.tar.gz --output image-2.14.0.tar.gz
-          octave-cli --eval "pkg install image-2.14.0.tar.gz"
+          curl --retry 3 -kL https://mcx.space/wiki/upload/image-2.14.0.tar.gz --output image-2.14.0.tar.gz
+          octave-cli --version
+          octave-cli --eval "pkg install -verbose image-2.14.0.tar.gz"
       - name: Install octave-image (MacOS)
         if: ${{ runner.os == 'MacOS' }}
         run: octave-cli --eval "pkg install -forge image"
