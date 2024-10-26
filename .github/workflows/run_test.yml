@@ -6,7 +6,7 @@ jobs:
   octave_test:
     name: Octave tests
     strategy:
-      # provided octave versions: ubuntu-20.04 = 5.2, ubuntu-22.04 = 6.4, macos-13/14 = 9.2, windows-2019 = 5.2
+      # provided octave versions: ubuntu-20.04 = 5.2, ubuntu-22.04 = 6.4, ubuntu-24.04 = 8.4, macos-13/14 = 9.2, windows-2019 = 7.3
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, macos-13, macos-14, windows-2019]
     runs-on: ${{ matrix.os }}
@@ -27,12 +27,17 @@ jobs:
             brew install gnuplot
             brew install octave
           else
-            curl --retry 3 -kL http://cdimage.debian.org/mirror/gnu.org/gnu/octave/windows/octave-4.4.0-w64.7z --output octave_4.4.0.7z
-            7z x octave_4.4.0.7z -ooctave -y
-            echo "$PWD/octave/octave-4.4.0-w64-64/mingw64/bin" >> $GITHUB_PATH
+            curl --retry 3 -kL http://cdimage.debian.org/mirror/gnu.org/gnu/octave/windows/octave-7.3.0-w64-64.7z --output octave_7.3.0.7z
+            7z x octave_7.3.0.7z -ooctave -y
+            echo "$PWD/octave/octave-7.3.0-w64-64/mingw64/bin" >> $GITHUB_PATH
           fi
-      - name: Install octave-image (Windows and MacOS)
-        if: ${{ runner.os != 'Linux' }}
+      - name: Install octave-image (Windows)
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          curl --retry 3 -kL https://mcx.space/wiki/upload/image-2.14.0.tar.gz --output image-2.14.0.tar.gz
+          octave-cli --eval "pkg install image-2.14.0.tar.gz"
+      - name: Install octave-image (MacOS)
+        if: ${{ runner.os == 'MacOS' }}
         run: octave-cli --eval "pkg install -forge image"
       - name: Test linux32 binaries
         if: ${{ matrix.os == 'ubuntu-24.04' }}
