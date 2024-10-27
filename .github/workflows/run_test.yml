@@ -27,9 +27,9 @@ jobs:
             brew install gnuplot
             brew install octave
           else
-            curl --retry 3 -kL http://cdimage.debian.org/mirror/gnu.org/gnu/octave/windows/octave-5.2.0-w64-64.7z --output octave_5.2.0.7z
-            7z x octave_5.2.0.7z -ooctave -y
-            echo "$PWD/octave/octave-5.2.0-w64-64/mingw64/bin" >> $GITHUB_PATH
+            curl --retry 3 -kL http://cdimage.debian.org/mirror/gnu.org/gnu/octave/windows/octave-6.2.0-w64-64.7z --output octave_6.2.0.7z
+            7z x octave_6.2.0.7z -ooctave -y
+            echo "$PWD/octave/octave-6.2.0-w64-64/mingw64/bin" >> $GITHUB_PATH
           fi
       - name: Install octave-image (Windows)
         if: ${{ runner.os == 'Windows' }}

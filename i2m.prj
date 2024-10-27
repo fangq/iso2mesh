@@ -3,11 +3,11 @@
     <param.appname>i2m</param.appname>
     <param.icon />
     <param.icons />
-    <param.version>0.8</param.version>
+    <param.version>0.9</param.version>
     <param.authnamewatermark>Qianqian Fang</param.authnamewatermark>
     <param.email>q.fang at neu.edu</param.email>
     <param.company>Northeastern University</param.company>
-    <param.summary>I2M is an integrated GUI for the 3D meshing toolbox Iso2Mesh developed by Qianqian Fang</param.summary>
+    <param.summary>I2M is an integrated graphical user interface (GUI) for the 3D meshing toolbox Iso2Mesh developed by Qianqian Fang</param.summary>
     <param.description>Iso2Mesh is a free matlab/octave-based mesh generation and processing toolbox. It can create 3D tetrahedral finite element (FE) mesh from surfaces, 3D binary and gray-scale volumetric images such as segmented MRI/CT scans.</param.description>
     <param.screenshot />
     <param.guid />
@@ -103,7 +103,6 @@
       <file>${PROJECT_ROOT}/fallbackexeext.m</file>
       <file>${PROJECT_ROOT}/finddisconnsurf.m</file>
       <file>${PROJECT_ROOT}/getexeext.m</file>
-      <file>${PROJECT_ROOT}/getoptkey.m</file>
       <file>${PROJECT_ROOT}/getplanefrom3pt.m</file>
       <file>${PROJECT_ROOT}/getvarfrom.m</file>
       <file>${PROJECT_ROOT}/img2mesh.fig</file>
@@ -140,7 +139,6 @@
       <file>${PROJECT_ROOT}/readinr.m</file>
       <file>${PROJECT_ROOT}/readmedit.m</file>
       <file>${PROJECT_ROOT}/readmptiff.m</file>
-      <file>${PROJECT_ROOT}/readnifti.m</file>
       <file>${PROJECT_ROOT}/readoff.m</file>
       <file>${PROJECT_ROOT}/readsmf.m</file>
       <file>${PROJECT_ROOT}/readtetgen.m</file>
@@ -152,7 +150,6 @@
       <file>${PROJECT_ROOT}/rotmat2vec.m</file>
       <file>${PROJECT_ROOT}/s2m.m</file>
       <file>${PROJECT_ROOT}/s2v.m</file>
-      <file>${PROJECT_ROOT}/savegts.m</file>
       <file>${PROJECT_ROOT}/saveinr.m</file>
       <file>${PROJECT_ROOT}/savejmesh.m</file>
       <file>${PROJECT_ROOT}/savejson.m</file>
@@ -178,6 +175,31 @@
       <file>${PROJECT_ROOT}/vol2restrictedtri.m</file>
       <file>${PROJECT_ROOT}/vol2surf.m</file>
       <file>${PROJECT_ROOT}/volface.m</file>
+      <file>${PROJECT_ROOT}/base64decode.m</file>
+      <file>${PROJECT_ROOT}/base64encode.m</file>
+      <file>${PROJECT_ROOT}/blosc2decode.m</file>
+      <file>${PROJECT_ROOT}/blosc2encode.m</file>
+      <file>${PROJECT_ROOT}/decodevarname.m</file>
+      <file>${PROJECT_ROOT}/encodevarname.m</file>
+      <file>${PROJECT_ROOT}/fast_match_bracket.m</file>
+      <file>${PROJECT_ROOT}/fillholes3d.m</file>
+      <file>${PROJECT_ROOT}/fillsurf.m</file>
+      <file>${PROJECT_ROOT}/filterjsonmmap.m</file>
+      <file>${PROJECT_ROOT}/getfromjsonpath.m</file>
+      <file>${PROJECT_ROOT}/jdatadecode.m</file>
+      <file>${PROJECT_ROOT}/jdataencode.m</file>
+      <file>${PROJECT_ROOT}/loadbj.m</file>
+      <file>${PROJECT_ROOT}/loadh5.m</file>
+      <file>${PROJECT_ROOT}/loadmsgpack.m</file>
+      <file>${PROJECT_ROOT}/match_bracket.m</file>
+      <file>${PROJECT_ROOT}/meshquality.m</file>
+      <file>${PROJECT_ROOT}/meshreorient.m</file>
+      <file>${PROJECT_ROOT}/nestbracket2dim.m</file>
+      <file>${PROJECT_ROOT}/regrouph5.m</file>
+      <file>${PROJECT_ROOT}/remeshsurf.m</file>
+      <file>${PROJECT_ROOT}/savebj.m</file>
+      <file>${PROJECT_ROOT}/surfreorient.m</file>
+      <file>${PROJECT_ROOT}/transposemat.m</file>
     </fileset.depfun>
     <build-deliverables>
       <file location="${PROJECT_ROOT}/i2m/for_testing" name="readme.txt" optional="true">${PROJECT_ROOT}/i2m/for_testing/readme.txt</file>
@@ -187,33 +209,6 @@
     </build-deliverables>
     <workflow />
     <matlab>
-      <root>/drives/hoyi1/users/shared/MATLAB/R2016a</root>
-      <toolboxes>
-        <toolbox name="fixedpoint" />
-        <toolbox name="matlabcoder" />
-        <toolbox name="matlabhdlcoder" />
-        <toolbox name="embeddedcoder" />
-      </toolboxes>
-      <toolbox>
-        <fixedpoint>
-          <enabled>true</enabled>
-        </fixedpoint>
-      </toolbox>
-      <toolbox>
-        <matlabcoder>
-          <enabled>true</enabled>
-        </matlabcoder>
-      </toolbox>
-      <toolbox>
-        <matlabhdlcoder>
-          <enabled>true</enabled>
-        </matlabhdlcoder>
-      </toolbox>
-      <toolbox>
-        <embeddedcoder>
-          <enabled>true</enabled>
-        </embeddedcoder>
-      </toolbox>
     </matlab>
     <platform>
       <unix>true</unix>

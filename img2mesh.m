@@ -35,6 +35,10 @@ if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
 
+if (isdeployed)
+    assignin('base', 'ISO2MESH_BIN', [pwd filesep 'bin']);
+end
+
 if nargout
     [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
 else
@@ -89,14 +93,28 @@ miv2s.Separator = 'on';
 mimeshing.Separator = 'on';
 mirefresh.Separator = 'on';
 
+hbackground = axes('units', 'normalized', 'position', [0 0 1 1]);
+uistack(hbackground, 'down');
+text(0.97, 0, 'Iso2Mesh', 'FontSize', 40, 'Color', [1 1 1], 'Parent', hbackground, ...
+     'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom', ...
+     'FontWeight', 'bold', 'FontName', 'sans', 'FontAngle', 'italic');
+hold(hbackground, 'on');
+text(0.972, 0.002, 'Iso2Mesh', 'FontSize', 40, 'Color', [1 1 1] * 0.8, 'Parent', hbackground, ...
+     'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom', ...
+     'FontWeight', 'bold', 'FontName', 'sans', 'FontAngle', 'italic');
+set(hbackground, 'handlevisibility', 'off', 'visible', 'off');
+
 root = get(handles.fgI2M, 'userdata');
 
 if (isempty(root))
     root = struct('graph', digraph, 'menu', cm);
 end
 set(handles.fgI2M, 'userdata', root);
-set(handles.axFlow, 'position', [0 0 1 1]);
-set(handles.axPreview, 'position', [0 0 1 1]);
+set(handles.fgI2M, 'color', [0.78, 0.91, 1.0]);
+set(handles.axFlow, 'position', [0.01 0.01 1 - 0.02 1 - 0.02]);
+
+set(handles.axPreview, 'position', [0.01 0.01 1 - 0.02 1 - 0.02]);
+set(handles.axPreview, 'color', get(handles.fgI2M, 'color'));
 
 set(handles.fgI2M, 'UIContextMenu', handles.meCreate);
 
@@ -135,21 +153,21 @@ try
                 [newdata, newtype] = v2sgui(nodedata);
                 prefix = 'Vol2Surf';
             else
-                error('no volume data found');
+                errordlg('no volume data found');
             end
         case 'Volume to mesh'
             if (nodetype.hasvol)
                 [newdata, newtype] = v2mgui(nodedata);
                 prefix = 'Vol2Mesh';
             else
-                error('no volume data found');
+                errordlg('no volume data found');
             end
         case 'Surface to mesh'
             if (nodetype.hasnode && nodetype.hasface)
                 [newdata, newtype] = s2mgui(nodedata);
                 prefix = 'Surf2Mesh';
             else
-                error('no surface data found');
+                errordlg('no surface data found');
             end
         case 'Surface to volume'
             if (nodetype.hasnode && nodetype.hasface)
@@ -158,20 +176,20 @@ try
                 if (isempty(ndiv))
                     return
                 end
-                newdata.vol = s2v(nodedata.node, nodedata.face, str2num(ndiv{1}));
+                newdata.vol = s2v(nodedata.node, nodedata.face, str2double(ndiv{1}));
                 newtype.hasvol = 1;
                 prefix = 'Surf2Vol';
             else
-                error('no surface data found');
+                errordlg('no surface data found');
             end
         case 'Close and fill volume'
             if (nodetype.hasvol)
                 rad = inputdlg('maximum gap length in voxel (scalar)', 'Close and fill a volume', 1, {'1'});
-                newdata.vol = fillholes3d(nodedata.vol, str2num(rad{1}));
+                newdata.vol = fillholes3d(nodedata.vol, str2double(rad{1}));
                 newtype = nodetype;
                 prefix = 'FillVol';
             else
-                error('no volume data found');
+                errordlg('no volume data found');
             end
         case 'Extract surface'
             if (isstruct(nodetype) && isfield(nodetype, 'hasvol') && nodetype.hasvol)
@@ -194,7 +212,7 @@ try
                 newtype = nodetype;
                 prefix = 'CleanSurf';
             else
-                error('no surface data found');
+                errordlg('no surface data found');
             end
         case 'Repair surface'
             if (nodetype.hasnode && nodetype.hasface)
@@ -202,7 +220,7 @@ try
                 newtype = nodetype;
                 prefix = 'RepairSurf';
             else
-                error('no surface data found');
+                errordlg('no surface data found');
             end
         case 'Smooth surface'
             if (nodetype.hasnode && nodetype.hasface)
@@ -213,23 +231,23 @@ try
                 end
                 newdata = nodedata;
                 newtype = nodetype;
-                newdata.node = sms(nodedata.node, nodedata.face, str2num(res{2}), str2num(res{3}), res{1});
+                newdata.node = sms(nodedata.node, nodedata.face, str2double(res{2}), str2double(res{3}), res{1});
                 prefix = 'SmoothSurf';
             else
-                error('no surface data found');
+                errordlg('no surface data found');
             end
         case 'Simplify surface'
             if (nodetype.hasnode && nodetype.hasface)
                 res = inputdlg('Percentage of edges to keep (0-1):', ...
-                               'Simplify mesh', [1], {'1'});
+                               'Simplify mesh', 1, {'1'});
                 if (isempty(res))
                     return
                 end
-                [newdata.node, newdata.face] = meshresample(nodedata.node, nodedata.face, str2num(res{1}));
+                [newdata.node, newdata.face] = meshresample(nodedata.node, nodedata.face, str2double(res{1}));
                 newtype = nodetype;
                 prefix = 'SimplifySurf';
             else
-                error('no surface data found');
+                errordlg('no surface data found');
             end
         case 'Remesh surface'
             if (nodetype.hasnode && nodetype.hasface)
@@ -238,15 +256,15 @@ try
                 if (isempty(res))
                     return
                 end
-                opt.gridsize = str2num(res{1});
-                opt.closesize = str2num(res{2});
-                opt.elemsize = str2num(res{3});
+                opt.gridsize = str2double(res{1});
+                opt.closesize = str2double(res{2});
+                opt.elemsize = str2double(res{3});
                 [newdata.node, newdata.face] = remeshsurf(nodedata.node, nodedata.face, opt);
                 newtype.hasnode = 1;
                 newtype.hasface = 1;
                 prefix = 'RemeshSurf';
             else
-                error('no surface data found');
+                errordlg('no surface data found');
             end
         case 'Tessellate surface'
             if (nodetype.hasnode && nodetype.hasface)
@@ -256,7 +274,7 @@ try
                 newtype.haselem = 1;
                 prefix = 'TessMesh';
             else
-                error('no surface data found');
+                errordlg('no surface data found');
             end
         case 'Reorient mesh elements'
             if (nodetype.hasnode && nodetype.haselem)
@@ -268,7 +286,7 @@ try
                 newtype = nodetype;
                 prefix = 'ReorientSurf';
             else
-                error('no surface or tetrahedral mesh data found');
+                errordlg('no surface or tetrahedral mesh data found');
             end
         case 'Mesh quality histogram'
             if (nodetype.hasnode && nodetype.haselem)
@@ -342,7 +360,7 @@ try
                         if (nodetype2.hasnode && nodetype2.haselem)
                             nodedata2.face = volface(nodedata2.elem);
                         else
-                            error('Second operand does not contain a surface');
+                            errordlg('Second operand does not contain a surface');
                         end
                     end
                     op = source.Label;
@@ -369,21 +387,20 @@ try
             updategraph(root, handles);
         case 'Rename'
             newname = inputdlg('Define a new name:', ...
-                               'Rename', 1, {root.graph.Nodes.Name{nodeid}});
+                               'Rename', 1, root.graph.Nodes.Name(nodeid));
             if (isempty(newname))
                 return
             end
             if (isempty(newname{1}) || ~isempty(cell2mat(regexp(root.graph.Nodes.Name, ['^' newname{1} '$']))))
-                error('empty or duplicated node name');
+                errordlg('empty or duplicated node name');
             end
             root.graph.Nodes.Name{nodeid} = newname{1};
             updategraph(root, handles);
         case 'Save as'
             if (~nodetype.haselem && ~nodetype.hasnode)
-                error('selected data does not have a mesh');
-                return
+                errordlg('selected data does not have a mesh');
             end
-            filter = {'*.jmesh'; '*.*'};
+            filter = {'*.jmsh'; '*.*'};
             [file, path] = uiputfile(filter, 'Export mesh');
             if ~isequal(file, 0) && ~isequal(path, 0)
                 if (nodetype.haselem)
@@ -397,11 +414,11 @@ try
     if (exist('newdata', 'var') && exist('newtype', 'var'))
         cla(handles.axPreview);
         cla(handles.axFlow);
-        newdata.preview = getpreview(newdata, newtype, [400, 400]);
+        newdata.preview = getpreview(newdata, newtype, [800, 800]);
         [newkey, root.graph] = addnodewithdata(handles, newdata, newtype, prefix);
-        root.graph = addedge(root.graph, {root.graph.Nodes.Name{nodeid}}, {newkey});
+        root.graph = addedge(root.graph, root.graph.Nodes.Name(nodeid), {newkey});
         if (strcmp(source.Parent.Type, 'uimenu') && strcmp(source.Parent.Label, 'Surface boolean'))
-            root.graph = addedge(root.graph, {root.graph.Nodes.Name{nodeid2}}, {newkey});
+            root.graph = addedge(root.graph, root.graph.Nodes.Name(nodeid2), {newkey});
         end
         updategraph(root, handles);
     end
@@ -483,7 +500,7 @@ if (isempty(res))
     return
 end
 
-opt = struct('radbound', str2num(res{2}), 'distbound', str2num(res{3}));
+opt = struct('radbound', str2double(res{2}), 'distbound', str2double(res{3}));
 [newdata.node, newdata.face] = v2s(data.vol, eval(res{1}), opt, res{4});
 newtype.hasnode = 1;
 newtype.hasface = 1;
@@ -505,7 +522,7 @@ if (isempty(res))
     return
 end
 
-opt = struct('radbound', str2num(res{2}), 'distbound', str2num(res{3}));
+opt = struct('radbound', str2double(res{2}), 'distbound', str2double(res{3}));
 [newdata.node, newdata.elem, newdata.face] = v2m(data.vol, eval(res{1}), ...
                                                  opt, res{4});
 newtype.hasnode = 1;
@@ -514,7 +531,7 @@ newtype.haselem = 1;
 
 % ----------------------------------------------------------------
 function img = getpreview(nodedata, nodetype, imsize)
-hfpreview = figure('visible', 'off');
+hfpreview = figure('visible', 'off', 'position', [0, 0, imsize(1), imsize(2)]);
 ax = axes('parent', hfpreview, 'Units', 'pixels', 'position', [1, 1, imsize(1), imsize(2)]);
 if (isfield(nodetype, 'haselem') && nodetype.haselem)
     plotmesh(nodedata.node, [], nodedata.elem, 'linestyle', ':', 'edgealpha', 0.3, 'parent', ax);
@@ -552,8 +569,8 @@ if (isempty(res))
 end
 
 [newdata.node, newdata.elem, newdata.face] = ...
-   s2m(data.node, data.face, str2num(res{1}), ...
-       str2num(res{2}), res{3}, eval(res{4}), eval(res{5}));
+   s2m(data.node, data.face, str2double(res{1}), ...
+       str2double(res{2}), res{3}, eval(res{4}), eval(res{5}));
 newtype.hasnode = 1;
 newtype.hasface = 1;
 newtype.haselem = 1;
@@ -582,14 +599,14 @@ function miAbout_Callback(hObject, eventdata, handles)
 helpmsg = {
            '\bf\fontsize{12}I2M: An Integrated GUI for Iso2Mesh Meshing Toolbox\rm\fontsize{10}'
            ''
-           'Copyright (c) 2018 Qianqian Fang <q.fang at neu.edu>'
+           'Copyright (c) 2018-2024 Qianqian Fang <q.fang at neu.edu>'
            ''
            'Computational Optics&Translational Imaging Lab (http://fanglab.org)'
            'Department of Bioengineering'
            'Northeastern University'
            '360 Huntington Ave, Boston, MA 02115, USA'
            ''
-           'URL:    http://iso2mesh.sourceforge.net'
+           'URL:    http://iso2mesh.sf.net'
            ''};
 
 opt.Interpreter = 'tex';
@@ -610,20 +627,20 @@ if (isempty(res))
     return
 end
 newtype = dummytype;
-opt = str2num(res{3});
-if (str2num(res{4}) == 0)
+opt = str2double(res{3});
+if (str2double(res{4}) == 0)
     [newdata.node, newdata.face] = meshasphere(eval(res{1}), ...
-                                               str2num(res{2}), opt);
+                                               str2double(res{2}), opt);
 else
     [newdata.node, newdata.face, newdata.elem] = meshasphere(eval(res{1}), ...
-                                                             str2num(res{2}), opt, str2num(res{4}));
+                                                             str2double(res{2}), opt, str2double(res{4}));
     newtype.haselem = 1;
 end
 newtype.hasnode = 1;
 newtype.hasface = 1;
 
 if (exist('newdata', 'var') && exist('newtype', 'var'))
-    newkey = addnodewithdata(handles, newdata, newtype, 'Sphere');
+    addnodewithdata(handles, newdata, newtype, 'Sphere');
 end
 
 % --------------------------------------------------------------------
@@ -639,19 +656,19 @@ if (isempty(res))
     return
 end
 newtype = dummytype;
-opt = str2num(res{3});
-if (str2num(res{4}) == 0)
+opt = str2double(res{3});
+if (str2double(res{4}) == 0)
     [newdata.node, newdata.face] = meshabox(eval(res{1}), eval(res{2}), opt);
 else
     [newdata.node, newdata.face, newdata.elem] = meshabox(eval(res{1}), ...
-                                                          eval(res{2}), opt, str2num(res{4}));
+                                                          eval(res{2}), opt, str2double(res{4}));
     newtype.haselem = 1;
 end
 newtype.hasnode = 1;
 newtype.hasface = 1;
 
 if (exist('newdata', 'var') && exist('newtype', 'var'))
-    newkey = addnodewithdata(handles, newdata, newtype, 'Box');
+    addnodewithdata(handles, newdata, newtype, 'Box');
 end
 
 % --------------------------------------------------------------------
@@ -668,22 +685,22 @@ if (isempty(res))
     return
 end
 newtype = dummytype;
-opt = str2num(res{4});
-maxvol = str2num(res{5});
+opt = str2double(res{4});
+maxvol = str2double(res{5});
 
 if (maxvol == 0)
     [newdata.node, newdata.face] = meshacylinder(eval(res{1}), eval(res{2}), ...
-                                                 str2num(res{3}), opt);
+                                                 str2double(res{3}), opt);
 else
     [newdata.node, newdata.face, newdata.elem] = meshacylinder(eval(res{1}), eval(res{2}), ...
-                                                               str2num(res{3}), opt, maxvol);
+                                                               str2double(res{3}), opt, maxvol);
     newtype.haselem = 1;
 end
 newtype.hasnode = 1;
 newtype.hasface = 1;
 
 if (exist('newdata', 'var') && exist('newtype', 'var'))
-    newkey = addnodewithdata(handles, newdata, newtype, 'Cyl');
+    addnodewithdata(handles, newdata, newtype, 'Cyl');
 end
 
 % --------------------------------------------------------------------
@@ -691,33 +708,38 @@ function miLoadVol_Callback(hObject, eventdata, handles)
 
 nodedata = struct;
 nodetype = dummytype;
-filters = {'*.nii;*.hdr;*.img;*.tif;*.tiff;*.inr;*.bin;*.ubj', '3D volume file (*.nii;*.hdr;*.img;*.tif;*.tiff;*.inr;*.bin;*.ubj)'; ...
-           '*.nii', 'Nifti file (*.nii)'; ...
+filters = {'*.jnii;*.nii;*.hdr;*.img;*.tif;*.tiff;*.inr;*.bin;*.ubj', '3D volume file (*.jnii;*.nii;*.hdr;*.img;*.tif;*.tiff;*.inr;*.bin;*.ubj)'; ...
+           '*.jnii', 'JNIFTI file (*.jnii)'; ...
+           '*.nii', 'NIFTI file (*.nii)'; ...
            '*.hdr;*.img', 'Analyze 7.5 file (*.hdr;*.img)'; ...
            '*.tif;*.tiff', 'Multipage TIFF file (*.tif)'; ...
            '*.inr', 'INR image (*.inr)'; ...
            '*.bin', 'Binary file (*.bin)'; ...
-           '*.ubj', 'Universal JSON (*.ubj)'; ...
+           '*.jdb', 'Binary JSON (*.jdb)'; ...
            '*.*', 'All (*.*)'};
-[file, path, idx] = uigetfile(filters);
+[file, path] = uigetfile(filters);
 if isequal(file, 0)
     return
 else
-    if (regexp(file, '\.[Nn][Ii][Ii]$'))
-        im = readnifti(fullfile(path, file));
+    if (~isempty(regexpi(file, '\.j*nii(\.gz)*$', 'once')))
+        im = loadnifti(fullfile(path, file));
+        if (isfield(im, 'NIFTIData'))
+            nodedata.vol = im.NIFTIData;
+        else
+            nodedata.vol = im.img;
+        end
+        nodetype.hasvol = 1;
+    elseif (~isempty(regexpi(file, '(\.hdr$|\.[img$)', 'once')))
+        im = loadnifti(fullfile(path, file));
         nodedata.vol = im.img;
         nodetype.hasvol = 1;
-    elseif (regexp(file, '(\.[Hh][Dd][Rr]$|\.[Ii][Mm][Gg]$)'))
-        im = readnifti(fullfile(path, file));
-        nodedata.vol = im.img;
-        nodetype.hasvol = 1;
-    elseif (regexp(file, '\.[Tt][Ii][Ff][Ff]*$'))
+    elseif (~isempty(regexpi(file, '\.tiff*$', 'once')))
         nodedata.vol = readmptiff(fullfile(path, file));
         nodetype.hasvol = 1;
-    elseif (regexp(file, '\.[Ii][Nn][Rr]$'))
+    elseif (~isempty(regexpi(file, '\.inr$', 'once')))
         nodedata.vol = readinr(fullfile(path, file));
         nodetype.hasvol = 1;
-    elseif (regexp(file, '\.[Bb][Ii][Nn]$'))
+    elseif (~isempty(regexpi(file, '\.bin$', 'once')))
         prompt = {'Dimension (1x3 vector):', ...
                   'Datatype (short,float,double,integer,...):'};
         title = 'Load generic binary file';
@@ -727,10 +749,15 @@ else
         if (isok == 0)
             return
         end
-        nodedata.vol = loadmc2(fullfile(path, file), eval(res{1}), res{2});
+        fid = fopen(fullfile(path, file), 'rb');
+        if (fid == 0)
+            errordlg('can not open the specified file');
+        end
+        nodedata.vol = fread(fid, eval(res{1}), res{2});
+        fclose(fid);
         nodetype.hasvol = 1;
-    elseif (regexp(file, '\.[Uu][Bb][Jj]$'))
-        nodedata = loadbj(fullfile(path, file));
+    elseif (~isempty(regexpi(file, '\.jdb$', 'once')))
+        nodedata = loadjd(fullfile(path, file));
         if (isstruct(nodedata) && isfield(nodedata, 'vol'))
             nodetype.hasvol = 1;
         end
@@ -751,27 +778,28 @@ function miLoadMesh_Callback(hObject, eventdata, handles)
 
 nodedata = struct;
 nodetype = dummytype;
-filters = {'*.jmesh;*.off;*.medit;*.smf;*.json', '3D Mesh files (*.jmesh;*.off;*.medit;*.smf;*.json)'; ...
-           '*.jmesh', 'JSON mesh (*.jmesh)'; ...
+filters = {'*.jmsh;*.bmsh,*.off;*.medit;*.smf;*.json', '3D Mesh files (*.jmsh;*.bmsh;*.off;*.medit;*.smf;*.json)'; ...
+           '*.jmsh', 'JSON mesh (*.jmsh)'; ...
+           '*.bmsh', 'Binary JSON mesh (*.bmsh)'; ...
            '*.off', 'OFF file (*.off)'; ...
            '*.medit', 'Medit file (*.medit)'; ...
            '*.ele', 'Tetgen element mesh file (*.ele)'; ...
            '*.json', 'JSON file (*.json)'; '*.*', 'All (*.*)'};
-[file, path, idx] = uigetfile(filters);
+[file, path] = uigetfile(filters);
 if isequal(file, 0)
     return
 else
-    if (regexp(file, '\.[Oo][Ff][Ff]$'))
+    if (~isempty(regexpi(file, '\.off$', 'once')))
         [nodedata.node, nodedata.face] = readoff(fullfile(path, file));
-    elseif (regexp(file, '\.[Mm][Ee][Dd][Ii][Tt]$'))
+    elseif (~isempty(regexpi(file, '\.medit$', 'once')))
         [nodedata.node, nodedata.elem] = readmedit(fullfile(path, file));
-    elseif (regexp(file, '\.[Ee][Ll][Ee]$'))
-        [pathstr, name, ext] = fileparts(fullfile(path, file));
+    elseif (~isempty(regexpi(file, '\.ele$', 'once')))
+        [pathstr, name] = fileparts(fullfile(path, file));
         [nodedata.node, nodedata.elem] = readtetgen(fullfile(pathstr, name));
-    elseif (regexp(file, '\.[Jj][Mm][Ee][Ss][Hh]$'))
+    elseif (~isempty(regexpi(file, '\.[bj]me*sh$', 'once')))
         nodedata = importjmesh(fullfile(path, file));
-    elseif (regexp(file, '\.[Jj][Ss][Oo][Nn]$'))
-        nodedata = loadjson(fullfile(path, file));
+    elseif (~isempty(regexpi(file, '\.json$', 'once')))
+        nodedata = loadjd(fullfile(path, file));
     end
 end
 if (exist('nodedata', 'var'))
@@ -784,29 +812,30 @@ end
 function miLoadSurf_Callback(hObject, eventdata, handles)
 nodedata = struct;
 nodetype = dummytype;
-filters = {'*.jmesh;*.off;*.asc;*.smf;*.smf;*.json', '3D Mesh files (*.jmesh;*.off;*.asc;*.smf;*.smf;*.json)'; ...
-           '*.jmesh', 'JSON mesh (*.jmesh)'; ...
+filters = {'*.jmsh;*.bmsh;*.off;*.asc;*.smf;*.smf;*.json', '3D Mesh files (*.jmsh;*.bmsh;*.off;*.asc;*.smf;*.smf;*.json)'; ...
+           '*.jmsh', 'JSON mesh (*.jmsh)'; ...
+           '*.bmsh', 'Binary JSON mesh (*.bmsh)'; ...
            '*.off', 'OFF file (*.off)'; ...
            '*.asc', 'ASC file (*.asc)'; ...
            '*.gts', 'GNU Trangulated Surface file (*.gts)'; ...
            '*.smf', 'Simple Model Format (*.smf)'; ...
            '*.json', 'JSON file (*.json)'; '*.*', 'All (*.*)'};
-[file, path, idx] = uigetfile(filters);
+[file, path] = uigetfile(filters);
 if isequal(file, 0)
     return
 else
-    if (regexp(file, '\.[Oo][Ff][Ff]$'))
+    if (~isempty(regexpi(file, '\.off$', 'once')))
         [nodedata.node, nodedata.face] = readoff(fullfile(path, file));
-    elseif (regexp(file, '\.[Aa][Ss][Cc]$'))
+    elseif (~isempty(regexpi(file, '\.asc$', 'once')))
         [nodedata.node, nodedata.face] = readasc(fullfile(path, file));
-    elseif (regexp(file, '\.[Gg][Tt][Ss]$'))
+    elseif (~isempty(regexpi(file, '\.gts$', 'once')))
         [nodedata.node, nodedata.face] = readgts(fullfile(path, file));
-    elseif (regexp(file, '\.[Ss][Mm][Ff]$'))
+    elseif (~isempty(regexpi(file, '\.smf$', 'once')))
         [nodedata.node, nodedata.face] = readsmf(fullfile(path, file));
-    elseif (regexp(file, '\.[Jj][Mm][Ee][Ss][Hh]$'))
+    elseif (~isempty(regexpi(file, '\.[bj]me*sh$', 'once')))
         nodedata = importjmesh(fullfile(path, file));
-    elseif (regexp(file, '\.[Jj][Ss][Oo][Nn]$'))
-        nodedata = loadjson(fullfile(path, file));
+    elseif (~isempty(regexpi(file, '\.json$', 'once')))
+        nodedata = loadjd(fullfile(path, file));
     end
 end
 if (exist('nodedata', 'var'))
@@ -817,7 +846,7 @@ end
 
 % --------------------------------------------------------------------
 function nodedata = importjmesh(filename)
-data = loadjson(filename);
+data = loadjd(filename);
 nodedata = struct;
 if (isfield(data, 'MeshNode'))
     nodedata.node = data.MeshNode;
@@ -908,7 +937,7 @@ key = sprintf('%s%d', name, id);
 
 cla(handles.axPreview);
 cla(handles.axFlow);
-nodedata.preview = getpreview(nodedata, nodetype, [400, 400]);
+nodedata.preview = getpreview(nodedata, nodetype, [800, 800]);
 
 nodeprop = table({key}, {nodedata}, {nodetype}, 'VariableNames', {'Name', 'Data', 'Type'});
 root.graph = addnode(root.graph, nodeprop);
@@ -938,8 +967,9 @@ hfig = hfig * dim(1);
 
 for i = 1:nn
     if (isfield(root.graph.Nodes.Data{i}, 'preview'))
-        hobj(i) = imagesc(nx(i) + [-2 * wd 0], ny(i) + [-wd wd] * (wfig / hfig), imresize(root.graph.Nodes.Data{i}.preview, 0.25), ...
-                          'parent', handles.axPreview);
+        previewdata = imresize(root.graph.Nodes.Data{i}.preview, 0.5);
+        hobj(i) = imagesc(nx(i) + [-1.8 0] * wd, ny(i) + 0.9 * [-wd wd] * (wfig / hfig), previewdata, ...
+                          'parent', handles.axPreview, 'AlphaData', sum(previewdata, 3) < (240 * 3));
     end
 end
 set(hobj, 'userdata', obj);
@@ -981,8 +1011,8 @@ if (isempty(res))
     return
 end
 newtype = dummytype;
-opt = str2num(res{3});
-maxvol = str2num(res{4});
+opt = str2double(res{3});
+maxvol = str2double(res{4});
 
 if (maxvol == 0)
     [newdata.node, newdata.face] = meshanellip(eval(res{1}), eval(res{2}), opt);
@@ -995,7 +1025,7 @@ newtype.hasnode = 1;
 newtype.hasface = 1;
 
 if (exist('newdata', 'var') && exist('newtype', 'var'))
-    newkey = addnodewithdata(handles, newdata, newtype, 'Cyl');
+    addnodewithdata(handles, newdata, newtype, 'Cyl');
 end
 
 % --------------------------------------------------------------------
@@ -1012,7 +1042,7 @@ if (isempty(res))
     return
 end
 newtype = dummytype;
-maxvol = str2num(res{4});
+maxvol = str2double(res{4});
 if (maxvol == 0)
     [newdata.node, newdata.face] = latticegrid(eval(res{1}), eval(res{2}), eval(res{3}));
 else
@@ -1024,7 +1054,7 @@ newtype.hasnode = 1;
 newtype.hasface = 1;
 
 if (exist('newdata', 'var') && exist('newtype', 'var'))
-    newkey = addnodewithdata(handles, newdata, newtype, 'Lattice');
+    addnodewithdata(handles, newdata, newtype, 'Lattice');
 end
 
 % --------------------------------------------------------------------
@@ -1048,7 +1078,7 @@ newtype.hasface = 1;
 newtype.haselem = 1;
 
 if (exist('newdata', 'var') && exist('newtype', 'var'))
-    newkey = addnodewithdata(handles, newdata, newtype, 'Meshgrid5_');
+    addnodewithdata(handles, newdata, newtype, 'Meshgrid5_');
 end
 
 % --------------------------------------------------------------------
@@ -1072,7 +1102,7 @@ newtype.hasface = 1;
 newtype.haselem = 1;
 
 if (exist('newdata', 'var') && exist('newtype', 'var'))
-    newkey = addnodewithdata(handles, newdata, newtype, 'Meshgrid6_');
+    addnodewithdata(handles, newdata, newtype, 'Meshgrid6_');
 end
 
 % --------------------------------------------------------------------
