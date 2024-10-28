@@ -1,7 +1,7 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
   <configuration build-checksum="3172910529" file="${PROJECT_ROOT}/i2m.prj" location="${PROJECT_ROOT}" name="i2m" preferred-package-location="${PROJECT_ROOT}/i2m/for_redistribution" preferred-package-type="package.type.install" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>i2m</param.appname>
-    <param.icon />
+    <param.icon>${PROJECT_ROOT}/i2m.png</param.icon>
     <param.icons />
     <param.version>0.9</param.version>
     <param.authnamewatermark>Qianqian Fang</param.authnamewatermark>
@@ -9,10 +9,10 @@
     <param.company>Northeastern University</param.company>
     <param.summary>I2M is an integrated graphical user interface (GUI) for the 3D meshing toolbox Iso2Mesh developed by Qianqian Fang</param.summary>
     <param.description>Iso2Mesh is a free matlab/octave-based mesh generation and processing toolbox. It can create 3D tetrahedral finite element (FE) mesh from surfaces, 3D binary and gray-scale volumetric images such as segmented MRI/CT scans.</param.description>
-    <param.screenshot />
+    <param.screenshot>${PROJECT_ROOT}/i2m.png</param.screenshot>
     <param.guid />
-    <param.installpath.string>/local/i2m/</param.installpath.string>
-    <param.installpath.combo>option.installpath.user</param.installpath.combo>
+    <param.installpath.string>iso2mesh/i2m/</param.installpath.string>
+    <param.installpath.combo>option.installpath.appdata</param.installpath.combo>
     <param.logo>${PROJECT_ROOT}/i2m.png</param.logo>
     <param.install.notes>In the following directions, replace MCR_ROOT by the directory where the MATLAB Runtime is installed on the target machine.
 
@@ -158,7 +158,6 @@
       <file>${PROJECT_ROOT}/smoothsurf.m</file>
       <file>${PROJECT_ROOT}/sms.m</file>
       <file>${PROJECT_ROOT}/sortmesh.m</file>
-      <file>${PROJECT_ROOT}/struct2jdata.m</file>
       <file>${PROJECT_ROOT}/surf2mesh.m</file>
       <file>${PROJECT_ROOT}/surf2vol.m</file>
       <file>${PROJECT_ROOT}/surf2volz.m</file>

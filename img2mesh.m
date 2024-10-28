@@ -69,7 +69,6 @@ uimenu(mirepair, 'Label', 'Repair surface', 'CallBack', {@processdata, handles})
 uimenu(mirepair, 'Label', 'Smooth surface', 'CallBack', {@processdata, handles});
 uimenu(mirepair, 'Label', 'Simplify surface', 'CallBack', {@processdata, handles});
 uimenu(mirepair, 'Label', 'Remesh surface', 'CallBack', {@processdata, handles});
-uimenu(mirepair, 'Label', 'Simplify surface', 'CallBack', {@processdata, handles});
 uimenu(mirepair, 'Label', 'Reorient mesh elements', 'CallBack', {@processdata, handles});
 
 mibool = uimenu(cm, 'Label', 'Surface boolean');
@@ -94,7 +93,7 @@ mimeshing.Separator = 'on';
 mirefresh.Separator = 'on';
 
 hbackground = axes('units', 'normalized', 'position', [0 0 1 1]);
-uistack(hbackground, 'down');
+uistack(hbackground, 'bottom');
 text(0.97, 0, 'Iso2Mesh', 'FontSize', 40, 'Color', [1 1 1], 'Parent', hbackground, ...
      'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom', ...
      'FontWeight', 'bold', 'FontName', 'sans', 'FontAngle', 'italic');
@@ -340,14 +339,14 @@ try
         case 'Plot'
             if (isstruct(nodetype) && isfield(nodetype, 'hasnode') && nodetype.hasnode)
                 if (isfield(nodetype, 'haselem') && nodetype.haselem)
-                    figure('keypressfcn', @plotfigevent, 'userdata', struct('node', nodedata.node, 'face', [], 'elem', nodedata.elem));
+                    figure('keypressfcn', @plotfigevent, 'name', 'Shortcut:left/right:crop Y;up/down:crop X;pgup/pgdown:crop Z', 'userdata', struct('node', nodedata.node, 'face', [], 'elem', nodedata.elem));
                     plotmesh(nodedata.node, [], nodedata.elem);
                 else
-                    figure('keypressfcn', @plotfigevent, 'userdata', struct('node', nodedata.node, 'elem', [], 'face', nodedata.face));
+                    figure('keypressfcn', @plotfigevent, 'name', 'Shortcut:left/right:crop Y;up/down:crop X;pgup/pgdown:crop Z', 'userdata', struct('node', nodedata.node, 'elem', [], 'face', nodedata.face));
                     plotmesh(nodedata.node, nodedata.face);
                 end
             else
-                figure('keypressfcn', @plotfigevent, 'userdata', struct('vol', nodedata.vol));
+                figure('keypressfcn', @plotfigevent, 'name', 'Shortcut:left/right:crop Y;up/down:crop X;pgup/pgdown:crop Z', 'userdata', struct('vol', nodedata.vol));
                 hs = slice(double(nodedata.vol), [], [ceil(size(nodedata.vol, 2) * 0.5)], ceil(size(nodedata.vol, 3) * 0.5));
                 set(hs, 'linestyle', 'none');
             end
@@ -400,7 +399,7 @@ try
             if (~nodetype.haselem && ~nodetype.hasnode)
                 errordlg('selected data does not have a mesh');
             end
-            filter = {'*.jmsh'; '*.*'};
+            filter = {'*.bmsh'; '*.jmsh'; '*.*'};
             [file, path] = uiputfile(filter, 'Export mesh');
             if ~isequal(file, 0) && ~isequal(path, 0)
                 if (nodetype.haselem)
@@ -440,6 +439,8 @@ if (isfield(data, 'plotpos'))
 end
 if (isempty(plotpos))
     switch event.Key
+        case {'pageup', 'pagedown'}
+            plotpos = 9;
         case {'rightarrow', 'uparrow'}
             plotpos = 0;
         case {'leftarrow', 'downarrow'}
@@ -464,6 +465,12 @@ if (isfield(data, 'node'))
         case 'downarrow'
             plotpos = max(plotpos - 1, 0);
             plotmesh(data.node, data.face, data.elem, sprintf('y>%f', (pmax(2) - pmin(2)) * plotpos * 0.1 + pmin(2)));
+        case 'pageup'
+            plotpos = min(plotpos + 1, 10);
+            plotmesh(data.node, data.face, data.elem, sprintf('z<%f', (pmax(3) - pmin(3)) * plotpos * 0.1 + pmin(3)));
+        case 'pagedown'
+            plotpos = max(plotpos - 1, 1);
+            plotmesh(data.node, data.face, data.elem, sprintf('z<%f', (pmax(3) - pmin(3)) * plotpos * 0.1 + pmin(3)));
         otherwise
     end
 end
@@ -501,12 +508,16 @@ if (isempty(res))
 end
 
 opt = struct('radbound', str2double(res{2}), 'distbound', str2double(res{3}));
-[newdata.node, newdata.face] = v2s(data.vol, eval(res{1}), opt, res{4});
+try
+    [newdata.node, newdata.face] = v2s(data.vol, eval(res{1}), opt, res{4});
+catch err
+    errdlg(err.message, 'v2sgui');
+end
 newtype.hasnode = 1;
 newtype.hasface = 1;
 
 % ----------------------------------------------------------------
-function [newdata, newtype] = v2mgui(data)
+function [newdata, newtype] = v2mgui(data, varargin)
 prompt = {'Threshold (scalar or []):', ...
           'Surface element radius bound (scalar):', ...
           'Surface element distance bound (scalar)', ...
@@ -523,8 +534,13 @@ if (isempty(res))
 end
 
 opt = struct('radbound', str2double(res{2}), 'distbound', str2double(res{3}));
-[newdata.node, newdata.elem, newdata.face] = v2m(data.vol, eval(res{1}), ...
-                                                 opt, res{4});
+
+try
+    [newdata.node, newdata.elem, newdata.face] = v2m(data.vol, eval(res{1}), ...
+                                                     opt, res{4}, varargin{:});
+catch err
+    errdlg(err.message, 'v2mgui');
+end
 newtype.hasnode = 1;
 newtype.hasface = 1;
 newtype.haselem = 1;
@@ -567,10 +583,13 @@ newtype = dummytype;
 if (isempty(res))
     return
 end
-
-[newdata.node, newdata.elem, newdata.face] = ...
-   s2m(data.node, data.face, str2double(res{1}), ...
-       str2double(res{2}), res{3}, eval(res{4}), eval(res{5}));
+try
+    [newdata.node, newdata.elem, newdata.face] = ...
+       s2m(data.node, data.face, str2double(res{1}), ...
+           str2double(res{2}), res{3}, eval(res{4}), eval(res{5}));
+catch err
+    errdlg(err.message, 's2mgui');
+end
 newtype.hasnode = 1;
 newtype.hasface = 1;
 newtype.haselem = 1;
@@ -628,13 +647,17 @@ if (isempty(res))
 end
 newtype = dummytype;
 opt = str2double(res{3});
-if (str2double(res{4}) == 0)
-    [newdata.node, newdata.face] = meshasphere(eval(res{1}), ...
-                                               str2double(res{2}), opt);
-else
-    [newdata.node, newdata.face, newdata.elem] = meshasphere(eval(res{1}), ...
-                                                             str2double(res{2}), opt, str2double(res{4}));
-    newtype.haselem = 1;
+try
+    if (str2double(res{4}) == 0)
+        [newdata.node, newdata.face] = meshasphere(eval(res{1}), ...
+                                                   str2double(res{2}), opt);
+    else
+        [newdata.node, newdata.face, newdata.elem] = meshasphere(eval(res{1}), ...
+                                                                 str2double(res{2}), opt, str2double(res{4}));
+        newtype.haselem = 1;
+    end
+catch err
+    errdlg(err.message, 'meshasphere');
 end
 newtype.hasnode = 1;
 newtype.hasface = 1;
@@ -657,13 +680,18 @@ if (isempty(res))
 end
 newtype = dummytype;
 opt = str2double(res{3});
-if (str2double(res{4}) == 0)
-    [newdata.node, newdata.face] = meshabox(eval(res{1}), eval(res{2}), opt);
-else
-    [newdata.node, newdata.face, newdata.elem] = meshabox(eval(res{1}), ...
-                                                          eval(res{2}), opt, str2double(res{4}));
-    newtype.haselem = 1;
+try
+    if (str2double(res{4}) == 0)
+        [newdata.node, newdata.face] = meshabox(eval(res{1}), eval(res{2}), opt);
+    else
+        [newdata.node, newdata.face, newdata.elem] = meshabox(eval(res{1}), ...
+                                                              eval(res{2}), opt, str2double(res{4}));
+        newtype.haselem = 1;
+    end
+catch err
+    errdlg(err.message, 'meshabox');
 end
+
 newtype.hasnode = 1;
 newtype.hasface = 1;
 
@@ -687,14 +715,17 @@ end
 newtype = dummytype;
 opt = str2double(res{4});
 maxvol = str2double(res{5});
-
-if (maxvol == 0)
-    [newdata.node, newdata.face] = meshacylinder(eval(res{1}), eval(res{2}), ...
-                                                 str2double(res{3}), opt);
-else
-    [newdata.node, newdata.face, newdata.elem] = meshacylinder(eval(res{1}), eval(res{2}), ...
-                                                               str2double(res{3}), opt, maxvol);
-    newtype.haselem = 1;
+try
+    if (maxvol == 0)
+        [newdata.node, newdata.face] = meshacylinder(eval(res{1}), eval(res{2}), ...
+                                                     str2double(res{3}), opt);
+    else
+        [newdata.node, newdata.face, newdata.elem] = meshacylinder(eval(res{1}), eval(res{2}), ...
+                                                                   str2double(res{3}), opt, maxvol);
+        newtype.haselem = 1;
+    end
+catch err
+    errdlg(err.message, 'meshacylinder');
 end
 newtype.hasnode = 1;
 newtype.hasface = 1;
@@ -705,63 +736,66 @@ end
 
 % --------------------------------------------------------------------
 function miLoadVol_Callback(hObject, eventdata, handles)
-
-nodedata = struct;
-nodetype = dummytype;
-filters = {'*.jnii;*.nii;*.hdr;*.img;*.tif;*.tiff;*.inr;*.bin;*.ubj', '3D volume file (*.jnii;*.nii;*.hdr;*.img;*.tif;*.tiff;*.inr;*.bin;*.ubj)'; ...
-           '*.jnii', 'JNIFTI file (*.jnii)'; ...
-           '*.nii', 'NIFTI file (*.nii)'; ...
-           '*.hdr;*.img', 'Analyze 7.5 file (*.hdr;*.img)'; ...
-           '*.tif;*.tiff', 'Multipage TIFF file (*.tif)'; ...
-           '*.inr', 'INR image (*.inr)'; ...
-           '*.bin', 'Binary file (*.bin)'; ...
-           '*.jdb', 'Binary JSON (*.jdb)'; ...
-           '*.*', 'All (*.*)'};
-[file, path] = uigetfile(filters);
-if isequal(file, 0)
-    return
-else
-    if (~isempty(regexpi(file, '\.j*nii(\.gz)*$', 'once')))
-        im = loadnifti(fullfile(path, file));
-        if (isfield(im, 'NIFTIData'))
-            nodedata.vol = im.NIFTIData;
-        else
-            nodedata.vol = im.img;
-        end
-        nodetype.hasvol = 1;
-    elseif (~isempty(regexpi(file, '(\.hdr$|\.[img$)', 'once')))
-        im = loadnifti(fullfile(path, file));
-        nodedata.vol = im.img;
-        nodetype.hasvol = 1;
-    elseif (~isempty(regexpi(file, '\.tiff*$', 'once')))
-        nodedata.vol = readmptiff(fullfile(path, file));
-        nodetype.hasvol = 1;
-    elseif (~isempty(regexpi(file, '\.inr$', 'once')))
-        nodedata.vol = readinr(fullfile(path, file));
-        nodetype.hasvol = 1;
-    elseif (~isempty(regexpi(file, '\.bin$', 'once')))
-        prompt = {'Dimension (1x3 vector):', ...
-                  'Datatype (short,float,double,integer,...):'};
-        title = 'Load generic binary file';
-        dims = [1 1];
-        definput = {'[]', 'short'};
-        [res, isok] = inputdlg(prompt, title, dims, definput);
-        if (isok == 0)
-            return
-        end
-        fid = fopen(fullfile(path, file), 'rb');
-        if (fid == 0)
-            errordlg('can not open the specified file');
-        end
-        nodedata.vol = fread(fid, eval(res{1}), res{2});
-        fclose(fid);
-        nodetype.hasvol = 1;
-    elseif (~isempty(regexpi(file, '\.jdb$', 'once')))
-        nodedata = loadjd(fullfile(path, file));
-        if (isstruct(nodedata) && isfield(nodedata, 'vol'))
+try
+    nodedata = struct;
+    nodetype = dummytype;
+    filters = {'*.jnii;*.nii;*.hdr;*.img;*.tif;*.tiff;*.inr;*.bin;*.ubj', '3D volume file (*.jnii;*.nii;*.hdr;*.img;*.tif;*.tiff;*.inr;*.bin;*.ubj)'; ...
+               '*.jnii', 'JNIFTI file (*.jnii)'; ...
+               '*.nii', 'NIFTI file (*.nii)'; ...
+               '*.hdr;*.img', 'Analyze 7.5 file (*.hdr;*.img)'; ...
+               '*.tif;*.tiff', 'Multipage TIFF file (*.tif)'; ...
+               '*.inr', 'INR image (*.inr)'; ...
+               '*.bin', 'Binary file (*.bin)'; ...
+               '*.jdb', 'Binary JSON (*.jdb)'; ...
+               '*.*', 'All (*.*)'};
+    [file, path] = uigetfile(filters);
+    if isequal(file, 0)
+        return
+    else
+        if (~isempty(regexpi(file, '\.j*nii(\.gz)*$', 'once')))
+            im = loadnifti(fullfile(path, file));
+            if (isfield(im, 'NIFTIData'))
+                nodedata.vol = im.NIFTIData;
+            else
+                nodedata.vol = im.img;
+            end
             nodetype.hasvol = 1;
+        elseif (~isempty(regexpi(file, '(\.hdr$|\.[img$)', 'once')))
+            im = loadnifti(fullfile(path, file));
+            nodedata.vol = im.img;
+            nodetype.hasvol = 1;
+        elseif (~isempty(regexpi(file, '\.tiff*$', 'once')))
+            nodedata.vol = readmptiff(fullfile(path, file));
+            nodetype.hasvol = 1;
+        elseif (~isempty(regexpi(file, '\.inr$', 'once')))
+            nodedata.vol = readinr(fullfile(path, file));
+            nodetype.hasvol = 1;
+        elseif (~isempty(regexpi(file, '\.bin$', 'once')))
+            prompt = {'Dimension (1x3 vector):', ...
+                      'Datatype (short,float,double,integer,...):'};
+            title = 'Load generic binary file';
+            dims = [1 1];
+            definput = {'[]', 'short'};
+            [res, isok] = inputdlg(prompt, title, dims, definput);
+            if (isok == 0)
+                return
+            end
+            fid = fopen(fullfile(path, file), 'rb');
+            if (fid == 0)
+                errordlg('can not open the specified file');
+            end
+            nodedata.vol = fread(fid, eval(res{1}), res{2});
+            fclose(fid);
+            nodetype.hasvol = 1;
+        elseif (~isempty(regexpi(file, '\.jdb$', 'once')))
+            nodedata = loadjd(fullfile(path, file));
+            if (isstruct(nodedata) && isfield(nodedata, 'vol'))
+                nodetype.hasvol = 1;
+            end
         end
     end
+catch err
+    errdlg(err.message, 'LoadVol');
 end
 
 if (exist('nodedata', 'var'))
@@ -775,33 +809,37 @@ end
 
 % --------------------------------------------------------------------
 function miLoadMesh_Callback(hObject, eventdata, handles)
-
-nodedata = struct;
-nodetype = dummytype;
-filters = {'*.jmsh;*.bmsh,*.off;*.medit;*.smf;*.json', '3D Mesh files (*.jmsh;*.bmsh;*.off;*.medit;*.smf;*.json)'; ...
-           '*.jmsh', 'JSON mesh (*.jmsh)'; ...
-           '*.bmsh', 'Binary JSON mesh (*.bmsh)'; ...
-           '*.off', 'OFF file (*.off)'; ...
-           '*.medit', 'Medit file (*.medit)'; ...
-           '*.ele', 'Tetgen element mesh file (*.ele)'; ...
-           '*.json', 'JSON file (*.json)'; '*.*', 'All (*.*)'};
-[file, path] = uigetfile(filters);
-if isequal(file, 0)
-    return
-else
-    if (~isempty(regexpi(file, '\.off$', 'once')))
-        [nodedata.node, nodedata.face] = readoff(fullfile(path, file));
-    elseif (~isempty(regexpi(file, '\.medit$', 'once')))
-        [nodedata.node, nodedata.elem] = readmedit(fullfile(path, file));
-    elseif (~isempty(regexpi(file, '\.ele$', 'once')))
-        [pathstr, name] = fileparts(fullfile(path, file));
-        [nodedata.node, nodedata.elem] = readtetgen(fullfile(pathstr, name));
-    elseif (~isempty(regexpi(file, '\.[bj]me*sh$', 'once')))
-        nodedata = importjmesh(fullfile(path, file));
-    elseif (~isempty(regexpi(file, '\.json$', 'once')))
-        nodedata = loadjd(fullfile(path, file));
+try
+    nodedata = struct;
+    nodetype = dummytype;
+    filters = {'*.jmsh;*.bmsh,*.off;*.medit;*.smf;*.json', '3D Mesh files (*.jmsh;*.bmsh;*.off;*.medit;*.smf;*.json)'; ...
+               '*.jmsh', 'JSON mesh (*.jmsh)'; ...
+               '*.bmsh', 'Binary JSON mesh (*.bmsh)'; ...
+               '*.off', 'OFF file (*.off)'; ...
+               '*.medit', 'Medit file (*.medit)'; ...
+               '*.ele', 'Tetgen element mesh file (*.ele)'; ...
+               '*.json', 'JSON file (*.json)'; '*.*', 'All (*.*)'};
+    [file, path] = uigetfile(filters);
+    if isequal(file, 0)
+        return
+    else
+        if (~isempty(regexpi(file, '\.off$', 'once')))
+            [nodedata.node, nodedata.face] = readoff(fullfile(path, file));
+        elseif (~isempty(regexpi(file, '\.medit$', 'once')))
+            [nodedata.node, nodedata.elem] = readmedit(fullfile(path, file));
+        elseif (~isempty(regexpi(file, '\.ele$', 'once')))
+            [pathstr, name] = fileparts(fullfile(path, file));
+            [nodedata.node, nodedata.elem] = readtetgen(fullfile(pathstr, name));
+        elseif (~isempty(regexpi(file, '\.[bj]me*sh$', 'once')))
+            nodedata = importjmesh(fullfile(path, file));
+        elseif (~isempty(regexpi(file, '\.json$', 'once')))
+            nodedata = loadjd(fullfile(path, file));
+        end
     end
+catch err
+    errdlg(err.message, 'LoadMesh');
 end
+
 if (exist('nodedata', 'var'))
     adddatatograph(handles, nodedata);
 else
@@ -810,33 +848,37 @@ end
 
 % --------------------------------------------------------------------
 function miLoadSurf_Callback(hObject, eventdata, handles)
-nodedata = struct;
-nodetype = dummytype;
-filters = {'*.jmsh;*.bmsh;*.off;*.asc;*.smf;*.smf;*.json', '3D Mesh files (*.jmsh;*.bmsh;*.off;*.asc;*.smf;*.smf;*.json)'; ...
-           '*.jmsh', 'JSON mesh (*.jmsh)'; ...
-           '*.bmsh', 'Binary JSON mesh (*.bmsh)'; ...
-           '*.off', 'OFF file (*.off)'; ...
-           '*.asc', 'ASC file (*.asc)'; ...
-           '*.gts', 'GNU Trangulated Surface file (*.gts)'; ...
-           '*.smf', 'Simple Model Format (*.smf)'; ...
-           '*.json', 'JSON file (*.json)'; '*.*', 'All (*.*)'};
-[file, path] = uigetfile(filters);
-if isequal(file, 0)
-    return
-else
-    if (~isempty(regexpi(file, '\.off$', 'once')))
-        [nodedata.node, nodedata.face] = readoff(fullfile(path, file));
-    elseif (~isempty(regexpi(file, '\.asc$', 'once')))
-        [nodedata.node, nodedata.face] = readasc(fullfile(path, file));
-    elseif (~isempty(regexpi(file, '\.gts$', 'once')))
-        [nodedata.node, nodedata.face] = readgts(fullfile(path, file));
-    elseif (~isempty(regexpi(file, '\.smf$', 'once')))
-        [nodedata.node, nodedata.face] = readsmf(fullfile(path, file));
-    elseif (~isempty(regexpi(file, '\.[bj]me*sh$', 'once')))
-        nodedata = importjmesh(fullfile(path, file));
-    elseif (~isempty(regexpi(file, '\.json$', 'once')))
-        nodedata = loadjd(fullfile(path, file));
+try
+    nodedata = struct;
+    nodetype = dummytype;
+    filters = {'*.jmsh;*.bmsh;*.off;*.asc;*.smf;*.smf;*.json', '3D Mesh files (*.jmsh;*.bmsh;*.off;*.asc;*.smf;*.smf;*.json)'; ...
+               '*.jmsh', 'JSON mesh (*.jmsh)'; ...
+               '*.bmsh', 'Binary JSON mesh (*.bmsh)'; ...
+               '*.off', 'OFF file (*.off)'; ...
+               '*.asc', 'ASC file (*.asc)'; ...
+               '*.gts', 'GNU Trangulated Surface file (*.gts)'; ...
+               '*.smf', 'Simple Model Format (*.smf)'; ...
+               '*.json', 'JSON file (*.json)'; '*.*', 'All (*.*)'};
+    [file, path] = uigetfile(filters);
+    if isequal(file, 0)
+        return
+    else
+        if (~isempty(regexpi(file, '\.off$', 'once')))
+            [nodedata.node, nodedata.face] = readoff(fullfile(path, file));
+        elseif (~isempty(regexpi(file, '\.asc$', 'once')))
+            [nodedata.node, nodedata.face] = readasc(fullfile(path, file));
+        elseif (~isempty(regexpi(file, '\.gts$', 'once')))
+            [nodedata.node, nodedata.face] = readgts(fullfile(path, file));
+        elseif (~isempty(regexpi(file, '\.smf$', 'once')))
+            [nodedata.node, nodedata.face] = readsmf(fullfile(path, file));
+        elseif (~isempty(regexpi(file, '\.[bj]me*sh$', 'once')))
+            nodedata = importjmesh(fullfile(path, file));
+        elseif (~isempty(regexpi(file, '\.json$', 'once')))
+            nodedata = loadjd(fullfile(path, file));
+        end
     end
+catch err
+    errdlg(err.message, 'LoadSurf');
 end
 if (exist('nodedata', 'var'))
     adddatatograph(handles, nodedata);
