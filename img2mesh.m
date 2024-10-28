@@ -511,7 +511,7 @@ opt = struct('radbound', str2double(res{2}), 'distbound', str2double(res{3}));
 try
     [newdata.node, newdata.face] = v2s(data.vol, eval(res{1}), opt, res{4});
 catch err
-    errdlg(err.message, 'v2sgui');
+    errordlg(err.message, 'v2sgui');
 end
 newtype.hasnode = 1;
 newtype.hasface = 1;
@@ -539,7 +539,7 @@ try
     [newdata.node, newdata.elem, newdata.face] = v2m(data.vol, eval(res{1}), ...
                                                      opt, res{4}, varargin{:});
 catch err
-    errdlg(err.message, 'v2mgui');
+    errordlg(err.message, 'v2mgui');
 end
 newtype.hasnode = 1;
 newtype.hasface = 1;
@@ -588,7 +588,7 @@ try
        s2m(data.node, data.face, str2double(res{1}), ...
            str2double(res{2}), res{3}, eval(res{4}), eval(res{5}));
 catch err
-    errdlg(err.message, 's2mgui');
+    errordlg(err.message, 's2mgui');
 end
 newtype.hasnode = 1;
 newtype.hasface = 1;
@@ -657,7 +657,7 @@ try
         newtype.haselem = 1;
     end
 catch err
-    errdlg(err.message, 'meshasphere');
+    errordlg(err.message, 'meshasphere');
 end
 newtype.hasnode = 1;
 newtype.hasface = 1;
@@ -689,7 +689,7 @@ try
         newtype.haselem = 1;
     end
 catch err
-    errdlg(err.message, 'meshabox');
+    errordlg(err.message, 'meshabox');
 end
 
 newtype.hasnode = 1;
@@ -725,7 +725,7 @@ try
         newtype.haselem = 1;
     end
 catch err
-    errdlg(err.message, 'meshacylinder');
+    errordlg(err.message, 'meshacylinder');
 end
 newtype.hasnode = 1;
 newtype.hasface = 1;
@@ -795,7 +795,7 @@ try
         end
     end
 catch err
-    errdlg(err.message, 'LoadVol');
+    errordlg(err.message, 'LoadVol');
 end
 
 if (exist('nodedata', 'var'))
@@ -837,7 +837,7 @@ try
         end
     end
 catch err
-    errdlg(err.message, 'LoadMesh');
+    errordlg(err.message, 'LoadMesh');
 end
 
 if (exist('nodedata', 'var'))
@@ -878,7 +878,7 @@ try
         end
     end
 catch err
-    errdlg(err.message, 'LoadSurf');
+    errordlg(err.message, 'LoadSurf');
 end
 if (exist('nodedata', 'var'))
     adddatatograph(handles, nodedata);
