@@ -64,7 +64,7 @@ if (nargin > 1)
     hasopt = 0;
     for i = 1:length(varargin)
         if (ischar(varargin{i}))
-            if (~isempty(regexp(varargin{i}, '[x-zX-Z]')) && ~isempty(regexp(varargin{i}, '[><=&|]')))
+            if (~isempty(regexp(varargin{i}, '[x-zX-Z]', 'once')) && ~isempty(regexp(varargin{i}, '[><=&|]', 'once')))
                 selector = varargin{i};
                 if (nargin >= i + 1)
                     opt = varargin(i + 1:end);
@@ -84,7 +84,7 @@ if (nargin > 1)
                     if (length(faceid) == 1)
                         face = varargin{1};
                         elem = [];
-                    elseif (any(hist(varargin{1}(:, 4), unique(varargin{1}(:, 4))) > 50))
+                    elseif (any(hist(varargin{1}(:, 4), double(unique(varargin{1}(:, 4)))) > 50))
                         face = varargin{1};
                         elem = [];
                     else
@@ -118,7 +118,7 @@ if (nargin > 1)
             if (length(faceid) == 1)
                 face = varargin{1};
                 elem = [];
-            elseif (any(hist(varargin{1}(:, 4), unique(varargin{1}(:, 4))) > 50))
+            elseif (any(hist(varargin{1}(:, 4), double(unique(varargin{1}(:, 4)))) > 50))
                 face = varargin{1};
                 elem = [];
             else
