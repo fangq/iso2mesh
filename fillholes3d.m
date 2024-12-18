@@ -1,4 +1,4 @@
-function resimg = fillholes3d(img, maxgap)
+function resimg = fillholes3d(img, maxgap, varargin)
 %
 % resimg=fillholes3d(img,maxgap)
 %
@@ -18,19 +18,41 @@ function resimg = fillholes3d(img, maxgap)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-if (maxgap)
-    resimg = imclose(img, strel(ones(maxgap, maxgap, maxgap)));
+if (nargin > 1 && maxgap)
+    resimg = volclose(img, maxgap);
 else
     resimg = img;
 end
 
-if (isoctavemesh)
-    if (~exist('bwfill'))
-        error('you need to install octave-image toolbox first');
-    end
-    for i = 1:size(resimg, 3)
-        resimg(:, :, i) = bwfill(resimg(:, :, i), 'holes');
-    end
+% if (exist('imfill', 'file'))
+%     resimg = imfill(resimg, 'holes');
+%     return;
+% end
+
+newimg = ones(size(resimg) + 2);
+
+oldimg = zeros(size(newimg));
+if (ndims(resimg) == 3)
+    oldimg(2:end - 1, 2:end - 1, 2:end - 1) = resimg;
+    newimg(2:end - 1, 2:end - 1, 2:end - 1) = 0;
 else
-    resimg = imfill(resimg, 'holes');
+    oldimg(2:end - 1, 2:end - 1) = resimg;
+    newimg(2:end - 1, 2:end - 1) = 0;
 end
+
+newsum = sum(newimg(:));
+oldsum = -1;
+
+while (newsum ~= oldsum)
+    newimg = (volgrow(newimg, 1, varargin{:}) & ~(oldimg > 0));
+    oldsum = newsum;
+    newsum = sum(newimg(:));
+end
+
+if (ndims(resimg) == 3)
+    resimg = newimg(2:end - 1, 2:end - 1, 2:end - 1);
+else
+    resimg = newimg(2:end - 1, 2:end - 1);
+end
+
+resimg = double(~resimg);

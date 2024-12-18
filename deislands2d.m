@@ -26,11 +26,11 @@ islands = {};
 
 cleanimg = zeros(size(img));
 if (sum(img(:)))
-    img = imclose(img, strel('disk', 3));
+    img = volclose(img, 1, true(5, 5));
     islands = bwislands(img);
 end
 
-if (length(islands))
+if (~isempty(islands))
     % remove small islands of the foreground
     maxblock = -1;
     maxblockid = -1;

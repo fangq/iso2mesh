@@ -1,4 +1,4 @@
-function vol = thickenbinvol(vol, layer)
+function vol = thickenbinvol(varargin)
 %
 % vol=thickenbinvol(vol,layer)
 %
@@ -19,16 +19,4 @@ function vol = thickenbinvol(vol, layer)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-dim = size(vol);
-dxy = dim(1) * dim(2);
-fulllen = prod(dim);
-
-offs = [1, -1, dim(1), -dim(1), dxy, -dxy];
-for i = 1:layer
-    idx = find(vol);
-    for j = 1:6
-        idxnew = idx + offs(j);
-        idxnew = idxnew(find(idxnew > 0 & idxnew < fulllen));
-        vol(idxnew) = 1;
-    end
-end
+vol = volgrow(varargin{:});
