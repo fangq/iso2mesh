@@ -21,18 +21,18 @@ function resimg = fillholes3d(img, maxgap, varargin)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-if (nargin > 1 && numel(maxgap) == 1)
+if (nargin > 1 && numel(maxgap) == 1 && maxgap > 0)
     resimg = volclose(img, maxgap);
 else
     resimg = img;
 end
 
-if (exist('imfill', 'file'))
+if (exist('imfill', 'file') && nargin < 3)
     resimg = imfill(resimg, 'holes');
     return
 end
 
-if (nargin > 1 && numel(maxgap) > 1)
+if (nargin > 1 && ~ischar(maxgap) && numel(maxgap) > 1)
     newimg = zeros(size(resimg) + 2);
 else
     newimg = ones(size(resimg) + 2);
@@ -48,7 +48,7 @@ else
 end
 
 isseeded = false;
-if (nargin > 1 && numel(maxgap) > 1)
+if (nargin > 1 && ~ischar(maxgap) && numel(maxgap) > 1)
     if (size(maxgap, 2) == 3)
         newimg(sub2ind(size(newimg), maxgap(:, 1) + 1, maxgap(:, 2) + 1, maxgap(:, 3) + 1)) = 1;
     else

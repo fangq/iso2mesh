@@ -23,7 +23,7 @@ if (nargin < 2)
     layer = 1;
 end
 
-if (nargin < 3)
+if (nargin < 3 || isempty(mask))
     if (ndims(vol) == 3)
         mask = zeros(3, 3, 3);
         mask(2, 2, :) = 1;

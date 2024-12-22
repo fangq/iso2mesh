@@ -23,7 +23,7 @@ if (nargin < 2)
     layer = 1;
 end
 
-if (nargin < 3)
+if (nargin < 3 || isempty(mask))
     if (ndims(vol) == 3)
         mask = zeros(3, 3, 3);
         mask(2, 2, :) = 1;
@@ -37,7 +37,7 @@ end
 newvol = vol;
 
 for i = 1:layer
-    newvol = (convn(newvol, mask, 'same') > 0);
+    newvol = (convn(single(newvol), single(mask), 'same') > 0);
 end
 
 newvol = double(newvol);
