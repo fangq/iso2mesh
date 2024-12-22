@@ -66,7 +66,7 @@ for i = 1:length(elabel)
     % but the affine output is not correct in this case
 
     if (jsonopt('fill', 0, opt) || label)
-        im = imfill(im, 'holes');
+        im = fillholes3d(im);
         if (label)
             im = cast(im, class(elabel)) * elabel(i);
         end

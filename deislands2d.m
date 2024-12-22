@@ -54,5 +54,5 @@ if (~isempty(islands))
 
     % remote small islands of the background
 
-    cleanimg = imfill(cleanimg, 'holes');
+    cleanimg = fillholes3d(cleanimg);
 end

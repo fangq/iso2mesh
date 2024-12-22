@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           if [[ "$RUNNER_OS" == "Linux" ]]; then
-            sudo apt-get update && sudo apt-get install -y octave cmake libcgal-dev libsuperlu-dev libsuitesparse-dev libgmp-dev libtbb-dev octave-image
+            sudo apt-get update && sudo apt-get install -y octave cmake libcgal-dev libsuperlu-dev libsuitesparse-dev libgmp-dev libtbb-dev
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
             brew install gnuplot
             brew install octave
@@ -31,12 +31,6 @@ jobs:
             7z x octave_5.2.0.7z -ooctave -y
             echo "$PWD/octave/octave-5.2.0-w64-64/mingw64/bin" >> $GITHUB_PATH
           fi
-      - name: Install octave-image (Windows)
-        if: ${{ runner.os == 'Windows' }}
-        run: octave-cli --eval "pkg install -forge image"
-      - name: Install octave-image (MacOS)
-        if: ${{ runner.os == 'MacOS' }}
-        run: octave-cli --eval "pkg install -forge image"
       - name: Test linux32 binaries
         if: ${{ matrix.os == 'ubuntu-24.04' }}
         run:  rm -rf bin/*.mexa64

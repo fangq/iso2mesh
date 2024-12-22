@@ -42,19 +42,8 @@ bcutloop = extractloops(bcutedges);
 bcutloop(isnan(bcutloop)) = []; % there can be multiple loops, remove the separators
 plot(bcutpos(bcutloop, 2) * (1 / dstep), bcutpos(bcutloop, 1) * (1 / dstep), 'w');
 
-if (isoctavemesh)
-    if (~exist('bwfill'))
-        pkg load image;
-    end
+img2 = fillholes3d(img);
 
-    img2 = zeros(size(img), 'uint8');
-    for i = 1:size(img, 3)
-        img2(:, :, i) = bwfill(img(:, :, i), 'holes');
-    end
-    img2 = img2 + img;
-else
-    img2 = imfill(img, 'holes') + img;
-end
 figure;
 imagesc(squeeze(img2(:, :, zslice))); % z=10
 hold on;
