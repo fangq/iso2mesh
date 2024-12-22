@@ -124,7 +124,7 @@ if (isstruct(opt) && isfield(opt, 'reratio'))
     setquality = 1;
 end
 if (isstruct(opt) && isfield(opt, 'maxvol'))
-    moreopt = [moreopt sprintf(' -a %.10f ', opt.maxvol)];
+    moreopt = [moreopt sprintf(' -a%.10f ', opt.maxvol)];
 end
 
 externalpt = [];

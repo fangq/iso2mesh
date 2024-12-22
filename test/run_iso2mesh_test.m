@@ -3,7 +3,7 @@ function run_iso2mesh_test(tests)
 % run_iso2mesh_test
 %   or
 % run_iso2mesh_test(tests)
-% run_iso2mesh_test({'prim', 'utils', 'core', 'surf'})
+% run_iso2mesh_test({'prim', 'utils', 'core', 'surf','vol'})
 %
 % Unit testing for Iso2Mesh
 %
@@ -16,6 +16,7 @@ function run_iso2mesh_test(tests)
 %         'utils': utilities
 %         'core':  core functions
 %         'surf': surface processing
+%         'vol': volume processing
 %         'bugs': test specific bug fixes
 %
 % license:
@@ -133,4 +134,74 @@ if (ismember('utils', tests))
     test_iso2mesh('elemvolume', @savejson, unique(round_to_digits(elemvolume(no, el), 6)), '[0.083333]');
     test_iso2mesh('surfvolume', @savejson, surfvolume(no, fc), '[1]');
     test_iso2mesh('insurface', @savejson, insurface(no, fc, [1.5, -0.9, 2.1; 1, 0, 2; -1, 0 2; 1.2, -0, 2.5])', '[1,1,0,1]');
+end
+
+%%
+if (ismember('surf', tests))
+    fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
+    fprintf('Test surface processing\n');
+    fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
+
+    [no, fc, el] = meshacylinder([1 1 1], [2 3 4], [0.5, 0.7], 1, 100, 8);
+
+    test_iso2mesh('removeisolatednode', @savejson, round_to_digits(mean(removeisolatednode(no, fc)), 4), '[1.44,1.8799,2.3198]');
+    test_iso2mesh('meshreorient', @savejson, all(meshreorient(no, el(:, [1, 2, 4, 3])) == el(:, 1:4)), '[1,1,1,1]');
+
+    el1 = el;
+    el1(el(:, 1:4) < 2) = size(no, 1) + el1(el(:, 1:4) < 2);
+
+    test_iso2mesh('removedupnodes', @savejson, round_to_digits(mean(removedupnodes([no; no(1:2, :)], el1(:, 1:4))), 6), '[1.43802,1.875757,2.31368]');
+    test_iso2mesh('removedupelem', @savejson, removedupelem([el(:, 1:4); el(1:end - 5, 1:4)]), '[[47,34,53,45],[47,45,53,25],[25,45,53,46],[34,43,53,32],[32,43,53,28]]');
+
+    [no1, fc1] = surfreorient(no, fc);
+
+    test_iso2mesh('surfreorient', @savejson, size(no1), '[50,3]');
+    test_iso2mesh('surfreorient face', @savejson, any(elemvolume(no1, fc1) <= 0), '[false]');
+
+    [no1, fc1] = meshcheckrepair(no, fc, 'deep');
+
+    test_iso2mesh('meshcheckrepair deep node', @savejson, size(no1), '[50,3]');
+    test_iso2mesh('meshcheckrepair deep face', @savejson, any(elemvolume(no1, fc1) <= 0), '[false]');
+
+    [no2, fc2] = meshcheckrepair(no1, fc1(5:end, :), 'meshfix');
+
+    test_iso2mesh('meshcheckrepair face', @savejson, abs(sum(elemvolume(no1, fc1)) - sum(elemvolume(no2, fc2))) < 1e-8, '[true]');
+
+    [no2, fc2] = meshresample(no1, fc1, 0.1);
+    [no1, el1] = s2m(no2, fc2, 1, 100);
+
+    test_iso2mesh('meshresample', @savejson, round_to_digits(no2, 4), '[[1.1117,1.4493,1.6014],[1.3361,2.0362,3.1131],[1.4063,0.9737,1.7567],[1.5912,2.6982,2.5875],[1.9841,2.9862,4.0145],[2.1211,2.1574,2.7713]]');
+    test_iso2mesh('meshresample with s2m node', @savejson, round_to_digits(no1, 4), '[[1.1117,1.4493,1.6014],[1.3361,2.0362,3.1131],[1.4063,0.9737,1.7567],[1.5912,2.6982,2.5875],[1.9841,2.9862,4.0145],[2.1211,2.1574,2.7713],[1.7636,1.5654,2.2639],[1.6164,1.8033,2.1864],[1.3516,2.0742,2.0948]]');
+    test_iso2mesh('meshresample with s2m elem', @savejson, el1, '[[8,6,7,2,0],[1,2,9,8,0],[2,6,5,4,0],[3,1,7,2,0],[2,8,4,9,0],[6,8,4,2,0],[2,8,1,7,0]]');
+
+    [no1, el1] = meshrefine(no, el, fc, [0, 0, 0; 2, 3, 5]);
+
+    test_iso2mesh('meshrefine insert node outside', @savejson, size(no1) == size(no), '[1,1]');
+    test_iso2mesh('meshrefine insert node outside elem', @savejson, size(el1) == size(el), '[1,1]');
+
+    [no2, el2] = mergemesh(no, el, no1, el1);
+    [no1, el1] = removedupnodes(no2, el2(:, 1:4), 1e-6);
+    el2 = unique(sort(el1')', 'rows');
+    test_iso2mesh('mergemesh removedupnodes', @savejson, size(no1) == size(no), '[1,1]');
+    test_iso2mesh('mergemesh removedupelem', @savejson, size(el2, 1) == size(el, 1), '[true]');
+
+    [no1, el1, fc1] = meshrefine(no, el, fc, [[1 1 1] + 0.01; [2, 3, 4] - 0.01]);
+    test_iso2mesh('meshrefine insert node', @savejson, size(no1) - size(no), '[2,0]');
+    test_iso2mesh('meshrefine insert node elem', @savejson, size(el1) - size(el), '[16,0]');
+    test_iso2mesh('meshrefine insert node face', @savejson, size(fc1) - size(fc), '[0,1]');
+
+    [no1, el1, fc1] = meshrefine(no, el, fc, ones(size(no, 1)) * 0.5);
+    test_iso2mesh('meshrefine node sizefield node', @savejson, size(no1) - size(no), '[24,0]');
+    test_iso2mesh('meshrefine node sizefield elem', @savejson, size(el1) - size(el), '[76,0]');
+    test_iso2mesh('meshrefine node sizefield face', @savejson, size(fc1) - size(fc), '[48,1]');
+
+    [no1, el1, fc1] = meshrefine(no, el, ones(size(el, 1)) * 0.02);
+    test_iso2mesh('meshrefine elem sizefield node', @savejson, size(no1) - size(no), '[34,0]');
+    test_iso2mesh('meshrefine elem sizefield elem', @savejson, size(el1) - size(el), '[105,0]');
+    test_iso2mesh('meshrefine elem sizefield face', @savejson, size(fc1) - size(fc), '[64,1]');
+
+    [no1, el1, fc1] = meshrefine(no, el, struct('maxvol', 0.02));
+    test_iso2mesh('meshrefine elem sizefield node', @savejson, size(no1) - size(no), '[34,0]');
+    test_iso2mesh('meshrefine elem sizefield elem', @savejson, size(el1) - size(el), '[105,0]');
+    test_iso2mesh('meshrefine elem sizefield face', @savejson, size(fc1) - size(fc), '[64,1]');
 end

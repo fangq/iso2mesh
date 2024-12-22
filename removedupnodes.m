@@ -1,6 +1,6 @@
 function [newnode, newelem] = removedupnodes(node, elem, tol)
 %
-% [newnode,newelem]=removedupnodes(node,elem)
+% [newnode,newelem]=removedupnodes(node,elem,tol)
 %
 % removing the duplicated nodes from a mesh
 %
@@ -10,6 +10,7 @@ function [newnode, newelem] = removedupnodes(node, elem, tol)
 %   elem: integer array with dimensions of NE x 4, each row contains
 %         the indices of all the nodes for each tetrahedron
 %   node: node coordinates, 3 columns for x, y and z respectively
+%   tol: tolerance for testing duplication of nodes, default is 0.
 %
 % output:
 %   newnode: nodes without duplicates
