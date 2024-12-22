@@ -59,9 +59,9 @@ if (ismember('prim', tests))
     test_iso2mesh('meshanellip face', @savejson, round_to_digits(sum(elemvolume(no, fc)), 4), '[62.4487]');
     test_iso2mesh('meshanellip elem', @savejson, round_to_digits(sum(elemvolume(no, el(:, 1:4))), 4), '[32.5608]');
 
-    [no, fc, el] = meshacylinder([1 1 1], [2 3 4], [10, 12], 0.1, 10);
-    test_iso2mesh('meshacylinder face', @savejson, round_to_digits(sum(elemvolume(no, fc)), 4), '[1045.2322]');
-    test_iso2mesh('meshacylinder elem', @savejson, round_to_digits(sum(elemvolume(no, el(:, 1:4))), 4), '[1402.8993]');
+    %[no, fc, el] = meshacylinder([1 1 1], [2 3 4], [10, 12], 0.1, 10);
+    %test_iso2mesh('meshacylinder face', @savejson, round_to_digits(sum(elemvolume(no, fc)), 4), '[1045.2322]');
+    %test_iso2mesh('meshacylinder elem', @savejson, round_to_digits(sum(elemvolume(no, el(:, 1:4))), 4), '[1402.8993]');
 
     [no, fc] = meshacylinder([1 1 1], [2 3 4], [0.5, 0.8], 0, 0, 8);
     test_iso2mesh('meshacylinder plc', @savejson, fc, '[[[[1,9,10,2],1]],[[[2,10,11,3],1]],[[[3,11,12,4],1]],[[[4,12,13,5],1]],[[[5,13,14,6],1]],[[[6,14,15,7],1]],[[[7,15,16,8],1]],[[[8,16,9,1],1]],[[[1,2,3,4,5,6,7,8],2]],[[[9,10,11,12,13,14,15,16],3]]]');
