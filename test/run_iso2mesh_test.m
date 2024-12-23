@@ -225,7 +225,7 @@ if (ismember('surf', tests))
 end
 
 %%
-if (ismember('boolean', tests))
+if (ismember('bool', tests))
     [no1, el1] = meshgrid5(1:2, 1:2, 1:2);
     el1 = volface(el1);
     [no1, el1] = removeisolatednode(no1, el1);
