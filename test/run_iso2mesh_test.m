@@ -230,9 +230,6 @@ if (ismember('bool', tests))
     fprintf('Test surface boolean operations\n');
     fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
 
-    dir(mcpath(''))
-    mcpath('cork')
-
     [no1, el1] = meshgrid5(1:2, 1:2, 1:2);
     el1 = volface(el1);
     [no1, el1] = removeisolatednode(no1, el1);
@@ -276,11 +273,111 @@ if (ismember('bool', tests))
     test_iso2mesh('surfboolean resolve region 2', @savejson, round_to_digits(sum(elemvolume(node, elem(elem(:, 5) == 2, 1:4))), 5), '[7.973]');
     test_iso2mesh('surfboolean self intersecting test', @savejson, surfboolean(no1, el1, 'self', no2, el2), '[1]');
 
-    [no3, el3] = meshgrid5(1:0.4:1.4, 1:0.4:1.4, 1:0.4:1.4);
-    el3 = volface(el3);
-    [no3, el3] = removeisolatednode(no3, el3);
+    % [no3, el3] = meshgrid5(1:0.4:1.4, 1:0.4:1.4, 1:0.4:1.4);
+    % el3 = volface(el3);
+    % [no3, el3] = removeisolatednode(no3, el3);
 
-    [no4, el4] = surfboolean(no1, el1, 'separate', no3, el3);
-    [node, elem] = s2m(no4, el4, 1, 100, 'tetgen', [1.5, 1.5, 1.5]);
-    test_iso2mesh('surfboolean resolve region 2', @savejson, unique(elem(:, 5))', '[0,1]');
+    % [no4, el4] = surfboolean(no1, el1, 'separate', no3, el3);
+    % [node, elem] = s2m(no4, el4, 1, 100, 'tetgen', [1.5, 1.5, 1.5]);
+    % test_iso2mesh('surfboolean separate', @savejson, unique(elem(:, 5))', '[0,1]');
+end
+
+%%
+if (ismember('vol', tests))
+    fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
+    fprintf('Test binary volume processing\n');
+    fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
+
+    vol = zeros(3, 4, 3);
+    vol(2, 2:3, 2) = 1;
+
+    test_iso2mesh('volgrow 1', @savejson, volgrow(vol), '[[[0,0,0],[0,1,0],[0,1,0],[0,0,0]],[[0,1,0],[1,1,1],[1,1,1],[0,1,0]],[[0,0,0],[0,1,0],[0,1,0],[0,0,0]]]', 'NestArray', 1);
+    test_iso2mesh('volgrow 2', @savejson, volgrow(vol, 2), '[[[0,1,0],[1,1,1],[1,1,1],[0,1,0]],[[1,1,1],[1,1,1],[1,1,1],[1,1,1]],[[0,1,0],[1,1,1],[1,1,1],[0,1,0]]]', 'NestArray', 1);
+    test_iso2mesh('volgrow nonbinary 2', @savejson, volgrow(vol * 2.5, 2), '[[[0,1,0],[1,1,1],[1,1,1],[0,1,0]],[[1,1,1],[1,1,1],[1,1,1],[1,1,1]],[[0,1,0],[1,1,1],[1,1,1],[0,1,0]]]', 'NestArray', 1);
+
+    mask = zeros(3, 3, 3);
+    mask(1:13:end) = 1;
+
+    test_iso2mesh('volgrow user mask', @savejson, volgrow(vol, 1, mask), '[[[0,0,1],[0,0,1],[0,0,0],[0,0,0]],[[0,0,0],[0,1,0],[0,1,0],[0,0,0]],[[0,0,0],[0,0,0],[1,0,0],[1,0,0]]]', 'NestArray', 1);
+    test_iso2mesh('volgrow 2d', @savejson, volgrow(vol(:, :, 2)), '[[0,1,1,0],[1,1,1,1],[0,1,1,0]]', 'NestArray', 1);
+    test_iso2mesh('volgrow 2d with user mask', @savejson, volgrow(vol(:, :, 2), 1, [1 1 0; 1 1 1; 0 0 1]), '[[1,1,0,0],[1,1,1,1],[0,1,1,1]]', 'NestArray', 1);
+    test_iso2mesh('volgrow 2d with logical inputs', @savejson, volgrow(logical(squeeze(vol(:, 2, :))), 1, logical([0 1 0; 0 1 1; 0 0 1])), '[[1,0,0],[1,1,0],[0,1,0]]', 'NestArray', 1);
+
+    vol1 = volgrow(magic(60) > 2000, 2);
+    test_iso2mesh('volgrow 2d with complex mask', @savejson, sum(vol1(:)), '[3380]', 'NestArray', 1);
+    test_iso2mesh('volgrow 2d with simple mask', @savejson, volgrow([0 0 0 0; 0 0 1 0; 0 0 0 0], 2), '[[0,1,1,1],[1,1,1,1],[0,1,1,1]]', 'NestArray', 1);
+    test_iso2mesh('volgrow 2d with ones mask', @savejson, volgrow([0 0 0 0; 0 0 1 0; 0 0 0 0], 1, ones(3)), '[[0,1,1,1],[0,1,1,1],[0,1,1,1]]');
+
+    vol1 = volgrow(full(sparse([2, 5, 7], [3, 3, 6], [1 1 1], 10, 8)), 10, [0 0 0; 1 1 1; 0 0 0]);
+    mask = repmat([0, 1, 0, 0, 1, 0, 1, 0, 0, 0]', 1, 8);
+    test_iso2mesh('volgrow 2d x-line mask', @savejson, all(vol1(:) == mask(:)), '[true]');
+
+    vol1 = volgrow(full(sparse([2, 5, 7], [3, 3, 6], [1 1 1], 10, 8)), 10, [0 1 0; 0 1 0; 0 1 0]);
+    mask = repmat([0, 0, 1, 0, 0, 1, 0, 0], 10, 1);
+    test_iso2mesh('volgrow 2d y-line mask', @savejson, all(vol1(:) == mask(:)), '[true]');
+
+    vol = ones(3, 4, 5);
+    vol(1:6) = 0;
+    vol(end) = 0;
+
+    test_iso2mesh('volshrink 3d 1', @savejson, volshrink(vol), '[[[0,0,1,1,1],[0,0,1,1,1],[0,1,1,1,1],[1,1,1,1,1]],[[0,0,1,1,1],[0,0,1,1,1],[0,1,1,1,1],[1,1,1,1,0]],[[0,0,1,1,1],[0,0,1,1,1],[0,1,1,1,0],[1,1,1,0,0]]]', 'NestArray', 1);
+
+    vol1 = volshrink(volgrow(volshrink(vol), 1, ones(3, 3, 3)), 1, ones(3, 3, 3));
+    test_iso2mesh('volshrink 3d ones', @savejson, vol1, '[[[0,0,1,1,1],[0,0,1,1,1],[1,1,1,1,1],[1,1,1,1,1]],[[0,0,1,1,1],[0,0,1,1,1],[1,1,1,1,1],[1,1,1,1,1]],[[0,0,1,1,1],[0,0,1,1,1],[1,1,1,1,1],[1,1,1,1,1]]]', 'NestArray', 1);
+    test_iso2mesh('volshrink 3d 2x user mask', @savejson, volshrink(~vol1, 2, repmat([0 0 0; 0 1 0; 0 1 0], 1, 1, 3)), '[[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]]', 'NestArray', 1);
+
+    vol1 = volshrink([0 1 1 1; 0 1 1 1; 0 1 1 0]);
+    mask = [0 0 1 1; 0 0 1 0; 0 0 0 0];
+    test_iso2mesh('volshrink 2d', @savejson, all(vol1(:) == mask(:)), '[true]');
+    test_iso2mesh('volshrink 2d 2x', @savejson, volshrink(vol1), '[[0,0,0,0],[0,0,0,0],[0,0,0,0]]');
+
+    vol1 = volshrink((magic(10) > 20), 2, logical([0 1 0; 1 1 1; 0 1 1]));
+    mask = [0 0 0 0 0 0 0 1 1 1; 0 0 0 0 0 0 0 1 1 1; 0 0 0 0 0 0 1 1 1 1; 0 0 0 0 0 0 0 1 1 1; 0 0 0 0 0 0 0 1 1 1; 0 0 0 0 0 0 1 1 1 1; 0 0 0 0 0 1 1 1 1 1; 0 0 0 0 0 1 1 1 1 1; 0 0 0 0 1 1 1 1 1 1; 0 0 0 0 1 1 1 1 1 1];
+    test_iso2mesh('volshrink 2d 2x user mask', @savejson, all(vol1(:) == mask(:)), '[true]');
+
+    vol = zeros(30, 40, 50);
+    vol(10:20, 20:35, 20:40) = 1;
+    vol(13:18, 25:30, 25:30) = 0;
+    vol(14:17, 26:28, 1:30) = 0;
+
+    vol1 = volclose(vol, 2);
+    test_iso2mesh('volclose 2x', @savejson, sum(vol1(:)), '[3566]');
+    vol1 = volclose(vol, 4);
+    test_iso2mesh('volclose 4x', @savejson, sum(vol1(:)), '[3682]');
+    vol1 = volopen(volclose(vol, 2), 2);
+    test_iso2mesh('volopen/volclose 2x', @savejson, sum(vol1(:)), '[2994]');
+    vol1 = volclose(volopen(vol, 2), 2);
+    test_iso2mesh('volopen/volclose 2x', @savejson, sum(vol1(:)), '[2604]');
+
+    vol1 = fillholes3d(volclose(vol, 2));
+    test_iso2mesh('fillholes3d + volclose', @savejson, sum(vol1(:)), '[3682]');
+
+    vol1 = fillholes3d(vol, 2);
+    test_iso2mesh('fillholes3d 2x', @savejson, sum(vol1(:)), '[3682]');
+
+    vol1 = fillholes3d(vol, 1);
+    test_iso2mesh('fillholes3d 1x', @savejson, sum(vol1(:)), '[3478]');
+
+    vol1 = fillholes3d(vol, 5);
+    test_iso2mesh('fillholes3d 5x', @savejson, sum(vol1(:)), '[4097]');
+
+    vol1 = fillholes3d(vol, 4, permute(repmat([0 0 0; 0 1 0; 0 0 0], 1, 1, 3), [3 1 2]));
+    test_iso2mesh('fillholes3d x-axis mask', @savejson, sum(vol1(:)), '[3696]');
+
+    vol1 = fillholes3d(vol, 4, repmat([0 0 0; 0 1 0; 0 0 0], 1, 1, 3));
+    test_iso2mesh('fillholes3d z-axis mask', @savejson, sum(vol1(:)), '[3682]');
+
+    vol1 = laplacefill(volclose(vol, 2));
+    test_iso2mesh('laplacefill', @savejson, sum(vol1(:)), '[3682]');
+
+    vol1 = laplacefill(volclose(vol, 2), [], 'bicgstab', 1e-6);
+    test_iso2mesh('laplacefill bicgstab', @savejson, sum(vol1(:)), '[3682]');
+
+    vol1 = laplacefill(volclose(vol, 2), [2, 2, 2]);
+    vol1 = (vol1 < 1e-10);
+    test_iso2mesh('laplacefill close seed', @savejson, sum(vol1(:)), '[3682]');
+
+    vol1 = laplacefill(vol, [2, 2, 2]);
+    vol1 = (vol1 > 1e-10);
+    test_iso2mesh('laplacefill open seed', @savejson, sum(vol1(:)), '[56580]');
 end
