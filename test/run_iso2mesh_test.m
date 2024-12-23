@@ -134,6 +134,9 @@ if (ismember('utils', tests))
     test_iso2mesh('elemvolume', @savejson, unique(round_to_digits(elemvolume(no, el), 6)), '[0.083333]');
     test_iso2mesh('surfvolume', @savejson, surfvolume(no, fc), '[1]');
     test_iso2mesh('insurface', @savejson, insurface(no, fc, [1.5, -0.9, 2.1; 1, 0, 2; -1, 0 2; 1.2, -0, 2.5])', '[1,1,0,1]');
+
+    [no1, fc1] = highordertet(no, el);
+    test_iso2mesh('highordertet', @savejson, fc1, '[[1,7,3,10,8,14],[15,21,17,24,22,28],[2,3,7,11,13,14],[16,17,21,25,27,28],[1,5,7,9,10,22],[15,19,21,23,24,32],[4,7,5,17,15,22],[18,21,19,31,29,32],[2,7,6,13,12,25],[16,21,20,27,26,33],[4,6,7,16,17,25],[18,20,21,30,31,33]]');
 end
 
 %%
@@ -204,4 +207,72 @@ if (ismember('surf', tests))
     test_iso2mesh('meshrefine elem sizefield node', @savejson, size(no1) - size(no), '[34,0]');
     test_iso2mesh('meshrefine elem sizefield elem', @savejson, size(el1) - size(el), '[105,0]');
     test_iso2mesh('meshrefine elem sizefield face', @savejson, size(fc1) - size(fc), '[64,1]');
+
+    [no, el] = meshgrid5(1:2, -1:0, 2:0.5:3);
+    [no, el] = removeisolatednode(no, volface(el));
+    no1 = sms(no, el, 10);
+    [no2, el2] = s2m(no1, el, 1, 100);
+    test_iso2mesh('sms laplacianhc', @savejson, sum(elemvolume(no2, el2(:, 1:4))) > 0.8, '[true]');
+
+    no1 = sms(no, el, 10, 0.5, 'laplacian');
+    [no2, el2] = s2m(no1, el, 1, 100);
+    test_iso2mesh('sms laplacian', @savejson, sum(elemvolume(no2, el2(:, 1:4))) < 0.1, '[true]');
+
+    no1 = sms(no, el, 10, 0.5, 'lowpass');
+    [no2, el2] = s2m(no1, el, 1, 100);
+    test_iso2mesh('sms lowpass', @savejson, sum(elemvolume(no2, el2(:, 1:4))) > 0.55, '[true]');
+end
+
+%%
+if (ismember('boolean', tests))
+    [no1, el1] = meshgrid5(1:2, 1:2, 1:2);
+    el1 = volface(el1);
+    [no1, el1] = removeisolatednode(no1, el1);
+    [no2, el2] = meshgrid6(1.7:4, 1.7:4, 1.7:4);
+    el2 = volface(el2);
+    [no2, el2] = removeisolatednode(no2, el2);
+
+    [no3, el3] = surfboolean(no1, el1, 'and', no2, el2);
+    [no3, el3] = meshcheckrepair(no3, el3, 'dup', 'tolerance', 1e-4);
+    [node, elem] = s2m(no3, el3, 1, 100);
+
+    test_iso2mesh('surfboolean and', @savejson, round_to_digits(sum(elemvolume(node, elem(:, 1:4))), 5), '[0.027]');
+
+    [no3, el3] = surfboolean(no1, el1, 'or', no2, el2);
+    [no3, el3] = meshcheckrepair(no3, el3, 'dup', 'tolerance', 1e-4);
+    [node, elem] = s2m(no3, el3, 1, 100);
+    test_iso2mesh('surfboolean or', @savejson, round(sum(elemvolume(node, elem(:, 1:4))) * 1000), '[8973]');
+
+    [no3, el3] = surfboolean(no1, el1, 'diff', no2, el2);
+    [no3, el3] = meshcheckrepair(no3, el3, 'dup', 'tolerance', 1e-4);
+    [node, elem] = s2m(no3, el3, 1, 100);
+    test_iso2mesh('surfboolean diff', @savejson, round_to_digits(sum(elemvolume(node, elem(:, 1:4))), 5), '[0.973]');
+
+    [no3, el3] = surfboolean(no1, el1, 'first', no2, el2);
+    [no3, el3] = meshcheckrepair(no3, el3, 'dup', 'tolerance', 1e-4);
+    [node, elem] = s2m(no3, el3, 1, 100, 'tetgen', [1.5, 1.5, 1.5]);
+    test_iso2mesh('surfboolean first region 1', @savejson, round_to_digits(sum(elemvolume(node, elem(elem(:, 5) == 1, 1:4))), 5), '[0.973]');
+    test_iso2mesh('surfboolean first region 0', @savejson, round_to_digits(sum(elemvolume(node, elem(elem(:, 5) == 0, 1:4))), 5), '[0.027]');
+
+    [no3, el3] = surfboolean(no1, el1, 'second', no2, el2);
+    [no3, el3] = meshcheckrepair(no3, el3, 'dup', 'tolerance', 1e-4);
+    [node, elem] = s2m(no3, el3, 1, 100, 'tetgen', [2.6, 2.6, 2.6]);
+    test_iso2mesh('surfboolean second region 1', @savejson, round_to_digits(sum(elemvolume(node, elem(elem(:, 5) == 1, 1:4))), 5), '[7.973]');
+    test_iso2mesh('surfboolean second region 0', @savejson, round_to_digits(sum(elemvolume(node, elem(elem(:, 5) == 0, 1:4))), 5), '[0.027]');
+
+    [no3, el3] = surfboolean(no1, el1, 'resolve', no2, el2);
+    [no3, el3] = meshcheckrepair(no3, el3, 'dup', 'tolerance', 1e-4);
+    [node, elem] = s2m(no3, el3, 1, 100, 'tetgen', [1.5, 1.5, 1.5; 2.6, 2.6, 2.6]);
+    test_iso2mesh('surfboolean resolve region 0', @savejson, round_to_digits(sum(elemvolume(node, elem(elem(:, 5) == 0, 1:4))), 5), '[0.027]');
+    test_iso2mesh('surfboolean resolve region 1', @savejson, round_to_digits(sum(elemvolume(node, elem(elem(:, 5) == 1, 1:4))), 5), '[0.973]');
+    test_iso2mesh('surfboolean resolve region 2', @savejson, round_to_digits(sum(elemvolume(node, elem(elem(:, 5) == 2, 1:4))), 5), '[7.973]');
+    test_iso2mesh('surfboolean self intersecting test', @savejson, surfboolean(no1, el1, 'self', no2, el2), '[1]');
+
+    [no3, el3] = meshgrid5(1:0.4:1.4, 1:0.4:1.4, 1:0.4:1.4);
+    el3 = volface(el3);
+    [no3, el3] = removeisolatednode(no3, el3);
+
+    [no4, el4] = surfboolean(no1, el1, 'separate', no3, el3);
+    [node, elem] = s2m(no4, el4, 1, 100, 'tetgen', [1.5, 1.5, 1.5]);
+    test_iso2mesh('surfboolean resolve region 2', @savejson, unique(elem(:, 5))', '[0,1]');
 end

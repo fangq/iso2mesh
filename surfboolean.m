@@ -118,7 +118,7 @@ for i = 1:3:len
             newnode(:, 4) = 1;
             newelem(:, 4) = 1;
         end
-        opstr = ' --decouple-inin 1 --shells 2'; % -q
+        opstr = ' --decouple-inin 1e-3 --shells 2'; % -q
         saveoff(node1(:, 1:3), elem1(:, 1:3), mwpath('pre_decouple1.off'));
         if (size(no, 2) ~= 3)
             opstr = ['-q --shells ' num2str(no)];
@@ -136,7 +136,7 @@ for i = 1:3:len
             newnode(:, 4) = 1;
             newelem(:, 4) = 1;
         end
-        opstr = [' --decouple-outout 1 --shells 2']; % -q
+        opstr = [' --decouple-outout 1e-3 --shells 2']; % -q
         saveoff(node1(:, 1:3), elem1(:, 1:3), mwpath('pre_decouple1.off'));
         if (size(no, 2) ~= 3)
             opstr = ['-q --shells ' num2str(no)];
