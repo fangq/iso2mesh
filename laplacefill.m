@@ -87,18 +87,18 @@ if (nargin < 5)
 end
 
 if (nargin > 2)
-    mysolver = str2fun(solver);
+    mysolver = str2func(solver);
     [newvol, flag] = mysolver(Amat, b, tol, maxiter, varargin{:});
 else
     [newvol, flag] = bicgstab(Amat, b, tol, maxiter, varargin{:});
 end
 
 if (flag)
-    newvol = gmres(Amat, b, 100, tol, maxiter, varargin{:});
+    newvol = gmres(Amat, b, 28, tol, maxiter, varargin{:});
 end
 
 newvol = reshape(full(newvol), size(vol));
 
 if (isempty(seedidx))
-    newvol = ~newvol;
+    newvol = ~(newvol > tol);
 end

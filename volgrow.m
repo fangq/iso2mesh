@@ -34,6 +34,7 @@ if (nargin < 3 || isempty(mask))
     end
 end
 
+mask = rot90(mask, 2);
 newvol = vol;
 
 for i = 1:layer

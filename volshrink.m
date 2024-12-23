@@ -33,12 +33,19 @@ if (nargin < 3 || isempty(mask))
         mask = [0 1 0; 1 1 1; 0 1 0];
     end
 end
-
+mask = rot90(mask, 2);
 totalmask = sum(mask(:));
-newvol = vol;
-
-for i = 1:layer
-    newvol = (convn(logical(newvol), logical(mask), 'same') == totalmask);
+newvol = ones(size(vol) + 2);
+if (ndims(vol) == 3)
+    newvol(2:end - 1, 2:end - 1, 2:end - 1) = (vol ~= 0);
+    for i = 1:layer
+        newvol(2:end - 1, 2:end - 1, 2:end - 1) = (convn(logical(newvol), logical(mask), 'valid') == totalmask);
+    end
+    newvol = double(newvol(2:end - 1, 2:end - 1, 2:end - 1));
+else
+    newvol(2:end - 1, 2:end - 1) = (vol ~= 0);
+    for i = 1:layer
+        newvol(2:end - 1, 2:end - 1) = (convn(logical(newvol), logical(mask), 'valid') == totalmask);
+    end
+    newvol = double(newvol(2:end - 1, 2:end - 1));
 end
-
-newvol = double(newvol);
