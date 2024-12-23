@@ -31,9 +31,6 @@ jobs:
             7z x octave_5.2.0.7z -ooctave -y
             echo "$PWD/octave/octave-5.2.0-w64-64/mingw64/bin" >> $GITHUB_PATH
           fi
-      - name: Test linux32 binaries
-        if: false && ${{ matrix.os == 'ubuntu-24.04' }}
-        run:  rm -rf bin/*.mexa64
       - name: Run Octave unit tests
         run:  octave-cli --eval "addpath(pwd);cd test; tic; run_iso2mesh_test; toc"
       - name: Run Octave test - demo_vol2mesh_ex1
@@ -87,9 +84,6 @@ jobs:
         uses: matlab-actions/setup-matlab@v1
         with:
           release: R2022a
-      - name: Test linux32 binaries
-        if: false && ${{ matrix.os == 'ubuntu-24.04' }}
-        run:  rm -rf bin/*.mexa64
       - name: Test win32 binaries
         if: ${{ matrix.os == 'windows-2019' }}
         run:  rm -rf bin/*x86-64.exe
