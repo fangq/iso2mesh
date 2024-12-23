@@ -226,6 +226,13 @@ end
 
 %%
 if (ismember('bool', tests))
+    fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
+    fprintf('Test surface boolean operations\n');
+    fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
+
+    dir(mcpath(''))
+    mcpath('cork')
+
     [no1, el1] = meshgrid5(1:2, 1:2, 1:2);
     el1 = volface(el1);
     [no1, el1] = removeisolatednode(no1, el1);
