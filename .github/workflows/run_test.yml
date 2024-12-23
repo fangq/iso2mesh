@@ -32,8 +32,7 @@ jobs:
             echo "$PWD/octave/octave-5.2.0-w64-64/mingw64/bin" >> $GITHUB_PATH
           fi
       - name: Test linux32 binaries
-        if: false
-        if: ${{ matrix.os == 'ubuntu-24.04' }}
+        if: false && ${{ matrix.os == 'ubuntu-24.04' }}
         run:  rm -rf bin/*.mexa64
       - name: Run Octave unit tests
         run:  octave-cli --eval "addpath(pwd);cd test; tic; run_iso2mesh_test; toc"
@@ -89,8 +88,7 @@ jobs:
         with:
           release: R2022a
       - name: Test linux32 binaries
-        if: false
-        if: ${{ matrix.os == 'ubuntu-24.04' }}
+        if: false && ${{ matrix.os == 'ubuntu-24.04' }}
         run:  rm -rf bin/*.mexa64
       - name: Test win32 binaries
         if: ${{ matrix.os == 'windows-2019' }}
