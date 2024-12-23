@@ -3,7 +3,7 @@ function run_iso2mesh_test(tests)
 % run_iso2mesh_test
 %   or
 % run_iso2mesh_test(tests)
-% run_iso2mesh_test({'prim', 'utils', 'core', 'surf','vol'})
+% run_iso2mesh_test({'prim', 'utils', 'core', 'surf','bool','vol'})
 %
 % Unit testing for Iso2Mesh
 %
@@ -16,6 +16,7 @@ function run_iso2mesh_test(tests)
 %         'utils': utilities
 %         'core':  core functions
 %         'surf': surface processing
+%         'bool': surface boolean operations
 %         'vol': volume processing
 %         'bugs': test specific bug fixes
 %
@@ -26,7 +27,7 @@ function run_iso2mesh_test(tests)
 %
 
 if (nargin == 0)
-    tests = {'prim', 'utils', 'core', 'surf'};
+    tests = {'prim', 'utils', 'core', 'surf', 'bool', 'vol'};
 end
 
 %%
