@@ -42,13 +42,13 @@ if (ismember('prim', tests))
     [no, fc] = meshabox([0 10 5], [10 20 30], 1);
     test_iso2mesh('meshabox offset', @savejson, round_to_digits(sum(elemvolume(no, fc)), 2), '[1200]');
 
-    [no, fc, el] = meshunitsphere(0.1, 100);
-    test_iso2mesh('meshunitsphere face', @savejson, round_to_digits(sum(elemvolume(no, fc)), 4), '[12.5119]');
-    test_iso2mesh('meshunitsphere elem', @savejson, round_to_digits(sum(elemvolume(no, el)), 4), '[4.1547]');
+    [no, fc, el] = meshunitsphere(0.05, 100);
+    test_iso2mesh('meshunitsphere face', @savejson, round_to_digits(sum(elemvolume(no, fc)), 4), '[12.5527]');
+    test_iso2mesh('meshunitsphere elem', @savejson, round_to_digits(sum(elemvolume(no, el)), 4), '[4.1802]');
 
-    [no, fc, el] = meshasphere([1, 1, 1], 2, 0.2, 100);
-    test_iso2mesh('meshasphere face', @savejson, round_to_digits(sum(elemvolume(no, fc)), 4), '[50.0476]');
-    test_iso2mesh('meshasphere elem', @savejson, round_to_digits(sum(elemvolume(no, el)), 4), '[33.2376]');
+    [no, fc, el] = meshasphere([1, 1, 1], 2, 0.05, 100);
+    test_iso2mesh('meshasphere face', @savejson, round_to_digits(sum(elemvolume(no, fc)), 4), '[50.2519]');
+    test_iso2mesh('meshasphere elem', @savejson, round_to_digits(sum(elemvolume(no, el)), 4), '[33.4933]');
 
     [no, el] = meshgrid5(1:2, -1:0, 2:3);
     test_iso2mesh('meshgrid5 elem', @savejson, sum(el), '[545,577,532,586]');
@@ -57,9 +57,9 @@ if (ismember('prim', tests))
     [no, el] = meshgrid6(1:2, -1:0, 2:0.5:3);
     test_iso2mesh('meshgrid6', @savejson, el, '[[1,2,8,4],[5,6,12,8],[1,3,4,8],[5,7,8,12],[1,2,6,8],[5,6,10,12],[1,5,8,6],[5,9,12,10],[1,3,8,7],[5,7,12,11],[1,5,7,8],[5,9,11,12]]');
 
-    [no, fc, el] = meshanellip([1, 1, 1], [2, 4, 1], 0.2, 100);
-    test_iso2mesh('meshanellip face', @savejson, round_to_digits(sum(elemvolume(no, fc)), 4), '[62.4487]');
-    test_iso2mesh('meshanellip elem', @savejson, round_to_digits(sum(elemvolume(no, el(:, 1:4))), 4), '[32.5608]');
+    [no, fc, el] = meshanellip([1, 1, 1], [2, 4, 1], 0.05, 100);
+    test_iso2mesh('meshanellip face', @savejson, round_to_digits(sum(elemvolume(no, fc)), 4), '[63.4078]');
+    test_iso2mesh('meshanellip elem', @savejson, round_to_digits(sum(elemvolume(no, el(:, 1:4))), 4), '[33.4419]');
 
     % [no, fc, el] = meshacylinder([1 1 1], [2 3 4], [10, 12], 0.1, 10);
     % test_iso2mesh('meshacylinder face', @savejson, round_to_digits(sum(elemvolume(no, fc)), 4), '[1045.2322]');
