@@ -177,7 +177,7 @@ type2str = {
             'uint8'    0   % unknown                       %
             'uint8'    0   % binary (1 bit/voxel)          %
             'uint8'    1   % unsigned char (8 bits/voxel)  %
-            'uint16'   1   % signed short (16 bits/voxel)  %
+            'int16'   1   % signed short (16 bits/voxel)  %
             'int32'    1   % signed int (32 bits/voxel)    %
             'single'   1   % float (32 bits/voxel)         %
             'single'   2   % complex (64 bits/voxel)       %
