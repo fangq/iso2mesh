@@ -107,6 +107,8 @@ if (~isempty(img))
                 else
                     regions = seeds;
                 end
+            else
+                regions(end + 1, :) = mean(levelno);
             end
         end
     end

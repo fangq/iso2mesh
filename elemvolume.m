@@ -27,7 +27,9 @@ edge1 = v2 - v1;
 edge2 = v3 - v1;
 
 if (size(elem, 2) == size(node, 2))
-    vol = 0.5 * vecnorm(cross(edge1, edge2, 2), 2, 2);
+    det12 = cross(edge1, edge2);
+    det12 = sum(det12 .* det12, 2);
+    vol = 0.5 * sqrt(det12);
     return
 end
 
