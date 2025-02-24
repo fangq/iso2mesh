@@ -89,7 +89,12 @@ if (~isempty(img))
         else
             levelmask = int8(newimg >= isovalues(i));
         end
-        [levelel, levelno] = isosurface(levelmask, 0.5);
+        [isoct, octver] = isoctavemesh;
+        if (~isoct || sscanf(octver, '%d') > 5)
+            [levelel, levelno] = isosurface(levelmask, 0.5);
+        else
+            [levelno, levelel] = binsurface(levelmask);
+        end
         if (~isempty(levelel))
             if (isstruct(opt) && isfield(opt, 'autoregion'))
                 if (opt.autoregion)
