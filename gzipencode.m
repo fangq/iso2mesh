@@ -35,20 +35,28 @@ if (nargin == 0)
     error('you must provide at least 1 input');
 end
 
-if (exist('zmat', 'file') == 2 || exist('zmat', 'file') == 3)
+nozmat = getvarfrom({'caller', 'base'}, 'NO_ZMAT');
+
+if ((exist('zmat', 'file') == 2 || exist('zmat', 'file') == 3) && (isempty(nozmat) || nozmat == 0))
     [varargout{1:nargout}] = zmat(varargin{1}, 1, 'gzip');
     return
 elseif (isoctavemesh)
-    error('You must install the ZMat toolbox (http://github.com/NeuroJSON/zmat) to use this function in Octave');
+    [varargout{1:nargout}] = octavezmat(varargin{1}, 1, 'gzip');
+    return
 end
 
 error(javachk('jvm'));
 
-if (ischar(varargin{1}))
-    varargin{1} = uint8(varargin{1});
+input = varargin{1}(:)';
+if (ischar(input))
+    input = uint8(input);
+elseif (isa(input, 'string'))
+    input = uint8(char(input));
+else
+    input = typecast(input, 'uint8');
 end
 
-input = typecast(varargin{1}(:)', 'uint8');
+input = typecast(input, 'uint8');
 
 buffer = java.io.ByteArrayOutputStream();
 gzip = java.util.zip.GZIPOutputStream(buffer);

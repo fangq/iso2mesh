@@ -101,13 +101,15 @@ function newitem = obj2jd(item, varargin)
 
 if (iscell(item))
     newitem = cell2jd(item, varargin{:});
+elseif (isa(item, 'jdict'))
+    newitem = obj2jd(item(), varargin{:});
 elseif (isstruct(item))
     newitem = struct2jd(item, varargin{:});
-elseif (isnumeric(item) || islogical(item))
+elseif (isnumeric(item) || islogical(item) || isa(item, 'timeseries'))
     newitem = mat2jd(item, varargin{:});
 elseif (ischar(item) || isa(item, 'string'))
     newitem = mat2jd(item, varargin{:});
-elseif (isa(item, 'containers.Map'))
+elseif (isa(item, 'containers.Map') || isa(item, 'dictionary'))
     newitem = map2jd(item, varargin{:});
 elseif (isa(item, 'categorical'))
     newitem = cell2jd(cellstr(item), varargin{:});
@@ -166,13 +168,21 @@ if (varargin{1}.mapasstruct)  % convert a map to struct
         end
     end
 else   % keep as a map and only encode its values
-    if (strcmp(item.KeyType, 'char'))
+    if (isa(item, 'dictionary'))
+        newitem = dictionary();
+    elseif (strcmp(item.KeyType, 'char'))
         newitem = containers.Map();
     else
         newitem = containers.Map('KeyType', item.KeyType, 'ValueType', 'any');
     end
-    for i = 1:length(names)
-        newitem(names{i}) = obj2jd(item(names{i}), varargin{:});
+    if (isa(item, 'dictionary'))
+        for i = 1:length(names)
+            newitem(names(i)) = obj2jd(item(names(i)), varargin{:});
+        end
+    else
+        for i = 1:length(names)
+            newitem(names{i}) = obj2jd(item(names{i}), varargin{:});
+        end
     end
 end
 
@@ -184,6 +194,18 @@ newitem = struct(N('_ArrayType_'), class(item), N('_ArraySize_'), size(item));
 
 zipmethod = varargin{1}.compression;
 minsize = varargin{1}.compressarraysize;
+
+if (isa(item, 'timeseries'))
+    if (item.TimeInfo.isUniform && item.TimeInfo.Increment == 1)
+        if (ndims(item.Data) == 3 && size(item.Data, 1) == 1 && size(item.Data, 2) == 1)
+            item = permute(item.Data, [2 3 1]);
+        else
+            item = squeeze(item.Data);
+        end
+    else
+        item = [item.Time squeeze(item.Data)];
+    end
+end
 
 % 2d numerical (real/complex/sparse) arrays with _ArrayShape_ encoding enabled
 if (varargin{1}.usearrayshape && ndims(item) == 2 && ~isvector(item))
@@ -394,12 +416,15 @@ end
 
 %% -------------------------------------------------------------------------
 function newitem = any2jd(item, varargin)
-
-N = @(x) N_(x, varargin{:});
-newitem.(N('_DataInfo_')) = struct('MATLABObjectClass', class(item), 'MATLABObjectSize', size(item));
-newitem.(N('_ByteStream_')) = getByteStreamFromArray(item);  % use undocumented matlab function
-if (varargin{1}.base64)
-    newitem.(N('_ByteStream_')) = char(base64encode(newitem.(N('_ByteStream_'))));
+try
+    N = @(x) N_(x, varargin{:});
+    newitem.(N('_DataInfo_')) = struct('MATLABObjectClass', class(item), 'MATLABObjectSize', size(item));
+    newitem.(N('_ByteStream_')) = getByteStreamFromArray(item);  % use undocumented matlab function
+    if (varargin{1}.base64)
+        newitem.(N('_ByteStream_')) = char(base64encode(newitem.(N('_ByteStream_'))));
+    end
+catch
+    error('any2jd: failed to convert object of type %s', class(item));
 end
 
 %% -------------------------------------------------------------------------

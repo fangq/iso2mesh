@@ -107,7 +107,7 @@ elseif (all(fname < 128) && ~isempty(regexpi(fname, '^\s*(http|https|ftp|file):/
     else
         string = urlread(fname);
     end
-elseif (~isempty(fname) && any(fname(1) == '[{SCHiUIulmLMhdDTFZN'))
+elseif (~isempty(fname) && any(fname(1) == '[{SCBHiUIulmLMhdDTFZN'))
     string = fname;
 else
     error('input file does not exist or buffer is invalid');
@@ -166,10 +166,10 @@ while pos <= inputlen
             else
                 [data{jsoncount}, pos] = parse_array(inputstr, pos, opt);
             end
-        case {'S', 'C', 'H', 'i', 'U', 'I', 'u', 'l', 'm', 'L', 'M', 'h', 'd', 'D', 'T', 'F', 'Z', 'N'}
+        case {'S', 'C', 'B', 'H', 'i', 'U', 'I', 'u', 'l', 'm', 'L', 'M', 'h', 'd', 'D', 'T', 'F', 'Z', 'N'}
             [data{jsoncount}, pos] = parse_value(inputstr, pos, [], opt);
         otherwise
-            error_pos('Root level structure must start with a valid marker "{[SCHiUIulmLMhdDTFZN"', inputstr, pos);
+            error_pos('Root level structure must start with a valid marker "{[SCBHiUIulmLMhdDTFZN"', inputstr, pos);
     end
     if (jsoncount >= maxobjid)
         break
@@ -219,8 +219,8 @@ if (count >= 0 && ~isempty(type) && isempty(strfind('iUIulmLMdDh', type)))
                 [data{i}, pos] = parse_value(inputstr, pos, type, varargin{:});
             end
             adv = pos - adv;
-        case 'C'
-            data = inputstr(pos:pos + count);
+        case {'C', 'B'}
+            data = inputstr(pos:pos + count - 1);
             adv = count;
         case {'T', 'F', 'N'}
             error_pos(sprintf('For security reasons, optimized type %c is disabled at position %%d', type), inputstr, pos);
@@ -247,6 +247,7 @@ end
 pos = parse_char(inputstr, pos, '[');
 object = cell(0, 1);
 dim = [];
+iscolumn = 0;
 type = '';
 count = -1;
 [cc, pos] = next_char(inputstr, pos);
@@ -263,6 +264,9 @@ if (cc == '#')
             error_pos('ND array size specifier does not support embedding', inputstr, pos);
         end
         varargin{1}.noembedding_ = 1;
+        if (pos + 1 < length(inputstr) && inputstr(pos + 1) == '[')
+            iscolumn = 1;
+        end
         [dim, pos] = parse_array(inputstr, pos, varargin{:});
         count = prod(double(dim));
         varargin{1}.noembedding_ = 0;
@@ -274,8 +278,12 @@ end
 if (~isempty(type))
     if (count >= 0)
         [object, adv] = parse_block(inputstr, pos, type, count, varargin{:});
-        if (~isempty(dim))
-            object = permute(reshape(object, fliplr(dim(:)')), length(dim):-1:1);
+        if (~isempty(dim) && length(dim) > 1)
+            if (iscolumn == 0)
+                object = permute(reshape(object, fliplr(dim(:)')), length(dim):-1:1);
+            else
+                object = reshape(object, dim);
+            end
         end
         pos = pos + adv;
         return
@@ -302,9 +310,13 @@ if cc ~= ']'
             [val, pos] = parse_value(inputstr, pos, [], varargin{:});
         end
         object{end + 1} = val;
-        [cc, pos] = next_char(inputstr, pos);
-        if cc == ']'
+        if count > 0 && length(object) >= count
             break
+        else
+            [cc, pos] = next_char(inputstr, pos);
+            if cc == ']' || (count > 0 && length(object) >= count)
+                break
+            end
         end
     end
 end
@@ -374,14 +386,14 @@ end
 function [str, pos] = parseStr(inputstr, pos, type, varargin)
 if (isempty(type))
     type = inputstr(pos);
-    if type ~= 'S' && type ~= 'C' && type ~= 'H'
+    if type ~= 'S' && type ~= 'C' && type ~= 'B' && type ~= 'H'
         error_pos('String starting with S expected at position %d', inputstr, pos);
     else
         pos = pos + 1;
     end
 end
 
-if (type == 'C')
+if (type == 'C' || type == 'B')
     str = inputstr(pos);
     pos = pos + 1;
     return
@@ -428,7 +440,7 @@ if (nargout > 2)
     varargout{3} = {};
 end
 switch (cc)
-    case {'S', 'C', 'H'}
+    case {'S', 'C', 'B', 'H'}
         [varargout{1:2}] = parseStr(inputstr, varargout{2}, type, varargin{:});
         return
     case '['
@@ -484,8 +496,10 @@ else
     object = [];
 end
 count = -1;
+type = [];
 [cc, pos] = next_char(inputstr, pos);
 if (cc == '$')
+    type = inputstr(pos + 1);
     pos = pos + 2;
 end
 [cc, pos] = next_char(inputstr, pos);
@@ -518,7 +532,7 @@ if cc ~= '}'
             mmap{end}{2} = [mmap{end}{2}, pos - mmap{end}{2}];
             mmap = [mmap(:); newmmap(:)];
         else
-            [val, pos] = parse_value(inputstr, pos, [], varargin{:});
+            [val, pos] = parse_value(inputstr, pos, type, varargin{:});
         end
         num = num + 1;
         if (usemap)
@@ -533,7 +547,7 @@ if cc ~= '}'
             object.(str) = val;
         end
         [cc, pos] = next_char(inputstr, pos);
-        if (count >= 0 && num >= count) || cc == '}'
+        if ((count >= 0 && num >= count) || (~isempty(cc) && cc == '}'))
             break
         end
     end
