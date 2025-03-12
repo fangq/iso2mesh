@@ -11,6 +11,8 @@ function [node, elem] = binsurface(img, nface)
 %   nface: nface=3 or ignored - for triangular faces,
 %          nface=4 - square faces
 %          nface=0 - return a boundary mask image via node
+%          nface='iso' - call isosurface() function to return a
+%                    marching-cube based isosurface
 %
 % output:
 %   elem: integer array with dimensions of NE x nface, each row represents
@@ -21,6 +23,12 @@ function [node, elem] = binsurface(img, nface)
 %
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
+
+if (nargin > 1 && ischar(nface) && strcmp(nface, 'iso'))
+    [elem, node] = isosurface(img);
+    node = node(:, [2, 1, 3]) - 0.5;
+    return
+end
 
 dim = size(img);
 if (length(dim) < 3)
