@@ -92,6 +92,7 @@ if (~isempty(img))
         [isoct, octver] = isoctavemesh;
         if (~isoct || sscanf(octver, '%d') > 5)
             [levelel, levelno] = isosurface(levelmask, 0.5);
+            levelno = levelno(:, [2 1 3]) - 0.5;
         else
             [levelno, levelel] = binsurface(levelmask);
         end
