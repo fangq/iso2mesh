@@ -6,7 +6,7 @@ function jnirs = loadjsnirf(filename, varargin)
 %
 %    Load a text (.jnirs or .json) or binary (.bnirs) based JSNIRF
 %    file defined in the JSNIRF specification:
-%    https://github.com/NeuroJSON/jsnirf or a .snirf/.h5 SNIRF data defined in
+%    https://github.com/NeuroJSON/jsnirfy or a .snirf/.h5 SNIRF data defined in
 %    the SNIRF specification https://github.com/fNIRS/snirf
 %
 %    author: Qianqian Fang (q.fang <at> neu.edu)
@@ -32,7 +32,7 @@ function jnirs = loadjsnirf(filename, varargin)
 %
 %    this file is part of JSNIRF specification: https://github.com/NeuroJSON/jsnirf
 %
-%    License: GPLv3 or Apache 2.0, see https://github.com/NeuroJSON/jsnirf for details
+%    License: GPLv3 or Apache 2.0, see https://github.com/NeuroJSON/jsnirfy for details
 %
 
 if (nargin < 1)

@@ -29,8 +29,8 @@ function data = savejsnirf(jnirs, filename, varargin)
 %          toolbox at http://github.com/NeuroJSON/jsonlab
 %        - if data compression is specified by 'compression','zlib' param/value
 %          pairs, ZMat toolbox will be needed, http://github.com/fangq/zmat
-%        - the saveh5 function is provided by the eazyh5 toolbox at
-%          http://github.com/fangq/eazyh5
+%        - the saveh5 function is provided by the EasyH5 toolbox at
+%          http://github.com/NeuroJSON/easyh5
 %
 %    example:
 %        jnirs=jsnirfcreate('aux',struct('name','pO2','dataTimeSeries',1:10,'time',1:10));
@@ -39,7 +39,7 @@ function data = savejsnirf(jnirs, filename, varargin)
 %
 %    this file is part of JSNIRF specification: https://github.com/NeuroJSON/jsnirf
 %
-%    License: GPLv3 or Apache 2.0, see https://github.com/NeuroJSON/jsnirf for details
+%    License: GPLv3 or Apache 2.0, see https://github.com/NeuroJSON/jsnirfy for details
 %
 
 if (nargin < 2)

@@ -20,7 +20,7 @@ function st = aos2soa(starray)
 %
 %    this file is part of JSNIRF specification: https://github.com/NeuroJSON/jsnirf
 %
-%    License: GPLv3 or Apache 2.0, see https://github.com/NeuroJSON/jsnirf for details
+%    License: GPLv3 or Apache 2.0, see https://github.com/NeuroJSON/jsnirfy for details
 %
 
 if (nargin < 1 || ~isstruct(starray))

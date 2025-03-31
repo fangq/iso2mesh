@@ -6,7 +6,7 @@ function savesnirf(data, outfile, varargin)
 %
 %    Load an HDF5 based SNIRF file, and optionally convert it to a JSON
 %    file based on the JSNIRF specification:
-%    https://github.com/NeuroJSON/jsnirf
+%    https://github.com/NeuroJSON/jsnirfy
 %
 %    author: Qianqian Fang (q.fang <at> neu.edu)
 %
@@ -24,7 +24,7 @@ function savesnirf(data, outfile, varargin)
 %
 %    this file is part of JSNIRF specification: https://github.com/NeuroJSON/jsnirf
 %
-%    License: GPLv3 or Apache 2.0, see https://github.com/NeuroJSON/jsnirf for details
+%    License: GPLv3 or Apache 2.0, see https://github.com/NeuroJSON/jsnirfy for details
 %
 
 if (nargin < 2 || ~ischar(outfile))
@@ -57,18 +57,23 @@ if (~isempty(outfile))
             forceint = {'sourceIndex', 'detectorIndex', 'wavelengthIndex', ...
                         'dataType', 'dataTypeIndex', 'moduleIndex', ...
                         'sourceModuleIndex', 'detectorModuleIndex'};
-            for i = 1:length(forceint)
-                if (isfield(data.nirs.data.measurementList, forceint{i}))
-                    if (iscell(data.nirs.data.measurementList.(forceint{i})))
-                        data.nirs.data.measurementList.(forceint{i}) = cell2mat(data.nirs.data.measurementList.(forceint{i}));
-                    end
-                    data.nirs.data.measurementList.(forceint{i}) = int32(data.nirs.data.measurementList.(forceint{i}));
-                end
-            end
             if (length(data.nirs.data.measurementList) == 1 && ...
                 length(data.nirs.data.measurementList.sourceIndex) > 1)
                 data.nirs.data.measurementList = soa2aos(data.nirs.data.measurementList);
             end
+
+            for i = 1:length(forceint)
+                if (isfield(data.nirs.data.measurementList, forceint{i}))
+
+                    for j = 1:length(data.nirs.data.measurementList)
+                        if (iscell(data.nirs.data.measurementList(j).(forceint{i})))
+                            data.nirs.data.measurementList(j).(forceint{i}) = cell2mat(data.nirs.data.measurementList(j).(forceint{i}));
+                        end
+                        data.nirs.data.measurementList(j).(forceint{i}) = int32(data.nirs.data.measurementList(j).(forceint{i}));
+                    end
+                end
+            end
+
         end
         if (opt.rowas1d)
             force1d.probe = {'wavelengths', 'wavelengthsEmission', 'frequencies', ...
@@ -83,22 +88,25 @@ if (~isempty(outfile))
                         if (iscell(data.nirs.(fields{i}).(force1d.(fields{i}){j})))
                             data.nirs.(fields{i}).(force1d.(fields{i}){j}) = cell2mat(data.nirs.(fields{i}).(force1d.(fields{i}){j}));
                         end
-                        data.nirs.(fields{i}).(force1d.(fields{i}){j}) = timeseries(data.nirs.(fields{i}).(force1d.(fields{i}){j})(:).');
+                        if(exist('timeseries', 'file'))
+                            data.nirs.(fields{i}).(force1d.(fields{i}){j}) = timeseries(data.nirs.(fields{i}).(force1d.(fields{i}){j})(:).');
+                        end
                     end
                 end
             end
         end
-        if (isfield(data.nirs, 'probe'))
+        if (isfield(data.nirs, 'probe') && exist('string'))
             forcestrarray.probe = {'sourceLabels', 'detectorLabels', 'landmarkLabels'};
             forcestrarray.stim = {'dataLabels'};
             fields = fieldnames(forcestrarray);
             for i = 1:length(fields)
                 for j = 1:length(forcestrarray.(fields{i}))
                     if (isfield(data.nirs.(fields{i}), forcestrarray.(fields{i}){j}))
-                        if (iscell(data.nirs.(fields{i}).(forcestrarray.(fields{i}){j})))
-                            data.nirs.(fields{i}).(forcestrarray.(fields{i}){j}) = cell2mat(data.nirs.(fields{i}).(forcestrarray.(fields{i}){j}));
+                        if(exist('timeseries', 'file'))
+                            data.nirs.(fields{i}).(forcestrarray.(fields{i}){j}) = timeseries(string(data.nirs.(fields{i}).(forcestrarray.(fields{i}){j})(:).'));
+                        else
+                            data.nirs.(fields{i}).(forcestrarray.(fields{i}){j}) = string(data.nirs.(fields{i}).(forcestrarray.(fields{i}){j})(:).');
                         end
-                        data.nirs.(fields{i}).(forcestrarray.(fields{i}){j}) = timeseries(string(data.nirs.(fields{i}).(forcestrarray.(fields{i}){j})(:).'));
                     end
                 end
             end

@@ -7,7 +7,7 @@ function jsn = jsnirfcreate(varargin)
 %
 %    Create an empty JSNIRF data structure defined in the JSNIRF
 %    specification: https://github.com/NeuroJSON/jsnirf or a SNIRF data structure
-%    based on https://github.com/fNIRS/snirf
+%    based on the SNIRF specification at https://github.com/fNIRS/snirf
 %
 %    author: Qianqian Fang (q.fang <at> neu.edu)
 %
@@ -27,7 +27,7 @@ function jsn = jsnirfcreate(varargin)
 %
 %    this file is part of JSNIRF specification: https://github.com/NeuroJSON/jsnirf
 %
-%    License: GPLv3 or Apache 2.0, see https://github.com/NeuroJSON/jsnirf for details
+%    License: GPLv3 or Apache 2.0, see https://github.com/NeuroJSON/jsnirfy for details
 %
 
 % define empty SNIRF data structure with all required fields

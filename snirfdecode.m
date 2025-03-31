@@ -22,12 +22,12 @@ function data = snirfdecode(root, varargin)
 %              enclosed inside a 'SNIRFData' subfield or cell array.
 %
 %    example:
-%        rawdata=loadh5('mydata.snirf');
+%        rawdata=loadh5('mydata.snirf', 'stringarray', 1);
 %        data=snirfdecode(rawdata);
 %
 %    this file is part of JSNIRF specification: https://github.com/NeuroJSON/jsnirf
 %
-%    License: Apache 2.0, see https://github.com/NeuroJSON/jsnirf for details
+%    License: Apache 2.0, see https://github.com/NeuroJSON/jsnirfy for details
 %
 
 if (nargin < 1)
