@@ -82,11 +82,24 @@ opt.variablelengthstring = jsonopt('VariableLengthString', 0, opt);
 opt.scalar = jsonopt('Scalar', 1, opt);
 
 opt.releaseid = 0;
+opt.isoctave = 0;
 vers = ver('MATLAB');
 if (~isempty(vers))
     opt.releaseid = datenum(vers(1).Date);
+    opt.skipempty = (opt.releaseid < datenum('1-Jan-2015'));
+else
+    opt.isoctave = 1;
+    opt.skipempty = 0;
 end
-opt.skipempty = (opt.releaseid < datenum('1-Jan-2015'));
+
+if (exist('OCTAVE_VERSION', 'builtin') ~= 0 && exist('h5info') == 0)
+    try
+        pkg load oct-hdf5;
+    catch
+        error(['To use EasyH5 in Octave, one must install oct-hdf5 first using\n\t' ...
+               'pkg install https://github.com/fangq/oct-hdf5/archive/refs/heads/main.zip\n%s'], '');
+    end
+end
 
 if (isfield(opt, 'rootname'))
     rootname = ['/' opt.rootname];
@@ -98,11 +111,6 @@ end
 
 if (jsonopt('JData', 0, opt))
     data = jdataencode(data, 'Base64', 0, 'UseArrayZipSize', 0, opt);
-end
-
-if (exist('OCTAVE_VERSION', 'builtin') ~= 0)
-    save(fname, 'data', '-hdf5');
-    return
 end
 
 try
@@ -132,6 +140,8 @@ function oid = obj2h5(name, item, handle, level, varargin)
 
 if (iscell(item))
     oid = cell2h5(name, item, handle, level, varargin{:});
+elseif (isa(item, 'jdict'))
+    oid = obj2h5(name, item.v(), handle, level, varargin{:});
 elseif (isstruct(item))
     oid = struct2h5(name, item, handle, level, varargin{:});
 elseif (ischar(item) || isa(item, 'string'))
@@ -174,7 +184,9 @@ else
     tracked = H5ML.get_constant_value('H5P_CRT_ORDER_TRACKED');
     indexed = H5ML.get_constant_value('H5P_CRT_ORDER_INDEXED');
     order = bitor(tracked, indexed);
-    H5P.set_link_creation_order(gcpl, order);
+    if (~varargin{1}.isoctave)
+        H5P.set_link_creation_order(gcpl, order);
+    end
     if (varargin{1}.unpackhex)
         name = decodevarname(name);
     end
@@ -204,7 +216,9 @@ gcpl = H5P.create('H5P_GROUP_CREATE');
 tracked = H5ML.get_constant_value('H5P_CRT_ORDER_TRACKED');
 indexed = H5ML.get_constant_value('H5P_CRT_ORDER_INDEXED');
 order = bitor(tracked, indexed);
-H5P.set_link_creation_order(gcpl, order);
+if (~varargin{1}.isoctave)
+    H5P.set_link_creation_order(gcpl, order);
+end
 try
     if (varargin{1}.unpackhex)
         name = decodevarname(name);
@@ -234,7 +248,9 @@ opt = varargin{1};
 is1dvector = 0;
 
 if (isa(item, 'timeseries'))
-    if (item.TimeInfo.Length == 1 || (item.TimeInfo.isUniform && item.TimeInfo.Increment == 1 && ndims(item.Data) == 3 && size(item.Data, 1) == 1 && size(item.Data, 2) == 1))
+    if (item.TimeInfo.Length == 1 || ...
+        (item.TimeInfo.isUniform && item.TimeInfo.Increment == 1 && ndims(item.Data) == 3 && size(item.Data, 1) == 1 && size(item.Data, 2) == 1) || ...
+        (isempty(item.Time) && isempty(item.Data) && size(item.Time, 2) == 1))
         is1dvector = 1;
         item = squeeze(item.Data);
     else
@@ -251,7 +267,9 @@ gcpl = H5P.create('H5P_GROUP_CREATE');
 tracked = H5ML.get_constant_value('H5P_CRT_ORDER_TRACKED');
 indexed = H5ML.get_constant_value('H5P_CRT_ORDER_INDEXED');
 order = bitor(tracked, indexed);
-H5P.set_link_creation_order(gcpl, order);
+if (~varargin{1}.isoctave)
+    H5P.set_link_creation_order(gcpl, order);
+end
 
 if (~(isfield(opt, 'complexformat') && iscellstr(opt.complexformat) && numel(opt.complexformat) == 2) || strcmp(opt.complexformat{1}, opt.complexformat{2}))
     opt.complexformat = {'Real', 'Imag'};
