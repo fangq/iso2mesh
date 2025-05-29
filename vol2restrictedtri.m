@@ -48,9 +48,14 @@ if (~isempty(getvarfrom({'caller', 'base'}, 'ISO2MESH_INITSIZE')))
     initnum = getvarfrom({'caller', 'base'}, 'ISO2MESH_INITSIZE');
 end
 
-system([' "' mcpath('cgalsurf') exesuff '" "' mwpath('pre_extract.inr') ...
+status = system([' "' mcpath('cgalsurf') exesuff '" "' mwpath('pre_extract.inr') ...
         '" ' sprintf('%.16f %.16f %.16f %.16f %.16f %.16f %.16f %.16f %d ', thres, cent, brad, ang, radbound, distbound, maxnode) ...
         ' "' mwpath('post_extract.off') '" ' sprintf('%.0f %d', randseed, initnum)]);
+
+if(status)
+    error('cgalsurf failed to extract surfaces');
+end
+
 [node, elem] = readoff(mwpath('post_extract.off'));
 
 [node, elem] = meshcheckrepair(node, elem);
