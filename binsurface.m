@@ -25,7 +25,7 @@ function [node, elem] = binsurface(img, nface)
 %
 
 if (nargin > 1 && ischar(nface) && strcmp(nface, 'iso'))
-    [elem, node] = isosurface(img);
+    [elem, node] = isosurface(img, 0.5);
     node = node(:, [2, 1, 3]) - 0.5;
     return
 end
