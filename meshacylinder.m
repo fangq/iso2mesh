@@ -13,6 +13,8 @@ function [node, face, elem] = meshacylinder(c0, c1, r, tsize, maxvol, ndiv)
 %   c0, c1:  cylinder axis end points
 %   r:   radius of the cylinder; if r contains two elements, it outputs
 %        a cone trunk, with each r value specifying the radius on each end
+%        if r is a 2x2 matrix, the first row defines an elliptic cylinder's
+%        major axis on both ends; the 2nd row defines the minor axes
 %   tsize: maximum surface triangle size on the sphere
 %   maxvol: maximu volume of the tetrahedral elements
 %
@@ -37,10 +39,15 @@ if (nargin < 3)
     error('you must at least provide c0, c1, and r');
 end
 
-if (length(r) == 1)
+if (numel(r) == 1)
     r = [r, r];
 end
-if (any(r <= 0) || all(c0 == c1))
+
+if (size(r, 1) == 1)
+    r(2, :) = r(1, :);
+end
+
+if (any(r(:) <= 0) || all(c0(:) == c1(:)))
     error('invalid cylinder parameters');
 end
 c0 = c0(:);
@@ -50,7 +57,7 @@ len = sqrt(sum((c0 - c1) .* (c0 - c1)));
 v0 = c1 - c0;
 
 if (nargin < 4)
-    tsize = min([r, len]) / 10;
+    tsize = min([r(:)', len]) / 10;
 end
 
 if (nargin < 5)
@@ -64,8 +71,8 @@ end
 
 dt = 2 * pi / ndiv;
 theta = dt:dt:2 * pi;
-cx = r(:) * cos(theta);
-cy = r(:) * sin(theta);
+cx = bsxfun(@times, r(1, :)', cos(theta));
+cy = bsxfun(@times, r(2, :)', sin(theta));
 cx = cx';
 cy = cy';
 p0 = [cx(:, 1) cy(:, 1) zeros(ndiv, 1)];
