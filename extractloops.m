@@ -23,6 +23,9 @@ function loops = extractloops(edges)
 %
 
 loops = [];
+if (isempty(edges))
+    return
+end
 edges(edges(:, 1) == edges(:, 2), :) = []; % remove degenerated edges
 loops = [loops, edges(1, :)];
 loophead = edges(1, 1);

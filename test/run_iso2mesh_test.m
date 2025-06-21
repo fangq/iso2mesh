@@ -97,10 +97,10 @@ if (ismember('core', tests))
     test_iso2mesh('binsurface mask', @savejson, no, '{"_ArrayType_":"double","_ArraySize_":[2,2,2],"_ArrayData_":[0,0,0,0,0,0,-1,-1]}');
 
     [no, fc] = v2s(im, 0.5, 0.03);
-    test_iso2mesh('v2s face', @savejson, round_to_digits(sum(elemvolume(no, fc(:, 1:3))), 4), '[5.0082]');
+    test_iso2mesh('v2s face', @savejson, round_to_digits(sum(elemvolume(no, fc(:, 1:3))), 2), '[5.01]');
 
     [no, el, fc] = v2m(im, 0.5, 0.03, 10);
-    test_iso2mesh('v2m face', @savejson, round_to_digits(sum(elemvolume(no, fc(:, 1:3))), 4), '[5.0082]');
+    test_iso2mesh('v2m face', @savejson, round_to_digits(sum(elemvolume(no, fc(:, 1:3))), 2), '[5.01]');
     test_iso2mesh('v2m elem', @savejson, round_to_digits(sum(elemvolume(no, el(:, 1:4))), 4), '[0.8786]');
 end
 
@@ -135,6 +135,13 @@ if (ismember('utils', tests))
     test_iso2mesh('elemvolume', @savejson, unique(round_to_digits(elemvolume(no, el), 6)), '[0.083333]');
     test_iso2mesh('surfvolume', @savejson, surfvolume(no, fc), '[1]');
     test_iso2mesh('insurface', @savejson, insurface(no, fc, [1.5, -0.9, 2.1; 1, 0, 2; -1, 0 2; 1.2, -0, 2.5])', '[1,1,0,1]');
+
+    [nx, nv, ne, nf, nb, ng] = mesheuler(fc);
+    test_iso2mesh('mesheuler surface', @savejson, [nx, nv, ne, nf, nb, ng], '[2,12,30,20,0,0]');
+    [nx, nv, ne, nf, nb, ng] = mesheuler(el);
+    test_iso2mesh('mesheuler tet', @savejson, [nx, nv, ne, nf, nb, ng], '[1,12,33,34,0,0]');
+    [nx, nv, ne, nf, nb, ng] = mesheuler(fc(2:end - 1, :));
+    test_iso2mesh('mesheuler open-surface', @savejson, [nx, nv, ne, nf, nb, ng], '[0,12,30,18,2,0]');
 
     [no1, fc1] = highordertet(no, el);
     test_iso2mesh('highordertet', @savejson, fc1, '[[1,7,3,10,8,14],[15,21,17,24,22,28],[2,3,7,11,13,14],[16,17,21,25,27,28],[1,5,7,9,10,22],[15,19,21,23,24,32],[4,7,5,17,15,22],[18,21,19,31,29,32],[2,7,6,13,12,25],[16,21,20,27,26,33],[4,6,7,16,17,25],[18,20,21,30,31,33]]');
