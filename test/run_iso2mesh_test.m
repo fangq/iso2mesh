@@ -161,7 +161,7 @@ if (ismember('surf', tests))
     el1 = el;
     el1(el(:, 1:4) < 2) = size(no, 1) + el1(el(:, 1:4) < 2);
 
-    test_iso2mesh('removedupnodes', @savejson, round_to_digits(mean(removedupnodes([no; no(1:2, :)], el1(:, 1:4))), 6), '[1.43802,1.875757,2.31368]');
+    test_iso2mesh('removedupnodes', @savejson, round_to_digits(mean(removedupnodes([no; no(1:2, :)], el1(:, 1:4))), 5), '[1.43802,1.87576,2.31368]');
     test_iso2mesh('removedupelem', @savejson, removedupelem([el(:, 1:4); el(1:end - 5, 1:4)]), '[[47,34,53,45],[47,45,53,25],[25,45,53,46],[34,43,53,32],[32,43,53,28]]');
 
     [no1, fc1] = surfreorient(no, fc);

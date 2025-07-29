@@ -1,4 +1,4 @@
-function [mask, weight] = mesh2mask(node, face, xi, yi, hf)
+function [mask, weight] = mesh2mask(node, face, xi, yi, hf, varargin)
 %
 % [mask weight]=mesh2mask(node,face,Nxy)
 %   or
@@ -38,6 +38,8 @@ function [mask, weight] = mesh2mask(node, face, xi, yi, hf)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
+opt = varargin2struct(varargin{:})
+
 if (nargin == 3 && length(xi) == 1 && xi > 0)
     mn = min(node);
     mx = max(node);
@@ -62,6 +64,14 @@ if (nargin < 5)
 else
     clf(hf);
 end
+
+if(jsonopt('edge', 0, opt))
+    try
+        set(gcf, 'GraphicsSmoothing', 'off')
+    catch
+    end
+end
+
 patch('Vertices', node, 'Faces', face, 'linestyle', 'none', 'FaceColor', 'flat', ...
       'FaceVertexCData', (1:size(face, 1))', 'CDataMapping', 'scaled');
 set(gca, 'Position', [0 0 1 1]);
