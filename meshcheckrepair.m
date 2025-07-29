@@ -70,6 +70,7 @@ if (nargin < 3 || strcmp(opt, 'deep'))
         error(['jmeshlib command failed: ' output]);
     end
     [node, elem] = readoff(mwpath('post_sclean.off'));
+    elem = flipud(elem);
 end
 
 exesuff = fallbackexeext(getexeext, 'meshfix');

@@ -86,7 +86,7 @@ if (ismember('core', tests))
     im(2, 2, 2:3) = 1;
     [no, fc] = binsurface(im);
 
-    test_iso2mesh('binsurface face', @savejson, fc, '[[10,4,1],[7,10,1],[12,6,5],[2,3,9],[11,5,4],[1,2,8],[11,12,5],[2,9,8],[10,11,4],[1,8,7],[8,9,12],[6,3,2],[7,8,11],[5,2,1],[8,12,11],[5,6,2],[7,11,10],[4,5,1]]');
+    test_iso2mesh('binsurface face', @savejson, fc, '[[4,5,1],[7,11,10],[5,6,2],[8,12,11],[5,2,1],[7,8,11],[6,3,2],[8,9,12],[1,8,7],[10,11,4],[2,9,8],[11,12,5],[1,2,8],[11,5,4],[2,3,9],[12,6,5],[7,10,1],[10,4,1]]');
     test_iso2mesh('binsurface node', @savejson, sum(no'), '[3,4,5,4,5,6,4,5,6,5,6,7]');
     test_iso2mesh('surfedge', @savejson, surfedge(fc), '[[6,3],[3,9],[12,6],[9,12]]');
 
@@ -181,9 +181,9 @@ if (ismember('surf', tests))
     [no2, fc2] = meshresample(no1, fc1, 0.1);
     [no1, el1] = s2m(no2, fc2, 1, 100);
 
-    test_iso2mesh('meshresample', @savejson, round_to_digits(no2, 4), '[[1.1117,1.4493,1.6014],[1.3361,2.0362,3.1131],[1.4063,0.9737,1.7567],[1.5912,2.6982,2.5875],[1.9841,2.9862,4.0145],[2.1211,2.1574,2.7713]]');
-    test_iso2mesh('meshresample with s2m node', @savejson, round_to_digits(no1, 4), '[[1.1117,1.4493,1.6014],[1.3361,2.0362,3.1131],[1.4063,0.9737,1.7567],[1.5912,2.6982,2.5875],[1.9841,2.9862,4.0145],[2.1211,2.1574,2.7713],[1.7636,1.5654,2.2639],[1.6164,1.8033,2.1864],[1.3516,2.0742,2.0948]]');
-    test_iso2mesh('meshresample with s2m elem', @savejson, el1, '[[8,6,7,2,0],[1,2,9,8,0],[2,6,5,4,0],[3,1,7,2,0],[2,8,4,9,0],[6,8,4,2,0],[2,8,1,7,0]]');
+    test_iso2mesh('meshresample', @savejson, round_to_digits(no2, 4), '[[1.1003,1.12,2.0523],[1.2139,2.26,3.0045],[1.2466,1.5028,1.5301],[1.7892,3.1657,3.9598],[1.7951,2.6816,2.5312],[2.0394,1.9501,2.9362]]');
+    test_iso2mesh('meshresample with s2m node', @savejson, round_to_digits(no1, 4), '[[1.1003,1.12,2.0523],[1.2139,2.26,3.0045],[1.2466,1.5028,1.5301],[1.7892,3.1657,3.9598],[1.7951,2.6816,2.5312],[2.0394,1.9501,2.9362]]');
+    test_iso2mesh('meshresample with s2m elem', @savejson, el1, '[[6,2,1,3,0],[5,2,4,6,0],[2,6,5,3,0]]');
 
     [no1, el1] = meshrefine(no, el, fc, [0, 0, 0; 2, 3, 5]);
 
@@ -201,12 +201,12 @@ if (ismember('surf', tests))
     test_iso2mesh('meshrefine insert node elem', @savejson, size(el1) - size(el), '[16,0]');
     test_iso2mesh('meshrefine insert node face', @savejson, size(fc1) - size(fc), '[0,1]');
 
-    [no1, el1, fc1] = meshrefine(no, el, fc, ones(size(no, 1)) * 0.5);
+    [no1, el1, fc1] = meshrefine(no, el, fc, ones(size(no, 1), 1) * 0.5);
     test_iso2mesh('meshrefine node sizefield node', @savejson, size(no1) - size(no), '[24,0]');
     test_iso2mesh('meshrefine node sizefield elem', @savejson, size(el1) - size(el), '[76,0]');
     test_iso2mesh('meshrefine node sizefield face', @savejson, size(fc1) - size(fc), '[48,1]');
 
-    [no1, el1, fc1] = meshrefine(no, el, ones(size(el, 1)) * 0.02);
+    [no1, el1, fc1] = meshrefine(no, el, ones(size(el, 1), 1) * 0.02);
     test_iso2mesh('meshrefine elem sizefield node', @savejson, size(no1) - size(no), '[34,0]');
     test_iso2mesh('meshrefine elem sizefield elem', @savejson, size(el1) - size(el), '[105,0]');
     test_iso2mesh('meshrefine elem sizefield face', @savejson, size(fc1) - size(fc), '[64,1]');

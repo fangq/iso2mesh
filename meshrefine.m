@@ -154,7 +154,7 @@ if (~isempty(sizefield))
         fprintf(fid, '%d\n', size(sizefield, 1));
         fprintf(fid, '%d\t%.16f\n', [(1:size(sizefield, 1))' sizefield]');
         fclose(fid);
-        moreopt = [moreopt ' -qma '];
+        moreopt = [moreopt ' -qra '];
     end
 end
 
