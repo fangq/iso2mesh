@@ -88,52 +88,52 @@ jobs:
         if: ${{ matrix.os == 'windows-2019' }}
         run:  rm -rf bin/*x86-64.exe
       - name: Run MATLAB unit tests
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: addpath(pwd);cd test; tic; run_iso2mesh_test; toc
       - name: Run MATLAB test - demo_vol2mesh_ex1
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: addpath(pwd);cd sample; tic; demo_vol2mesh_ex1; toc
       - name: Run MATLAB test - demo_vol2mesh_ex1b
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: addpath(pwd);cd sample; tic; demo_vol2mesh_ex1b; toc
       - name: Run MATLAB test - demo_vol2mesh_ex1c
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: addpath(pwd);cd sample; tic; demo_vol2mesh_ex1c; toc
       - name: Run MATLAB test - demo_vol2mesh_ex2
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: addpath(pwd);cd sample; tic; demo_vol2mesh_ex2; toc
       - name: Run MATLAB test - demo_surf2mesh_ex1
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: addpath(pwd);cd sample; tic; demo_surf2mesh_ex1; toc
       - name: Run MATLAB test - demo_directplc_ex1
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: addpath(pwd);cd sample; tic; demo_directplc_ex1; toc
       - name: Run MATLAB test - demo_grayscale_ex1
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: addpath(pwd);cd sample; tic; demo_grayscale_ex1; toc
       - name: Run MATLAB test - demo_surf2vol_ex1 (Linux only)
         if: ${{ runner.os == 'Linux' }}
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: addpath(pwd);cd sample; tic; demo_surf2vol_ex1; toc
       - name: Run MATLAB test - demo_shortcut_ex1
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: addpath(pwd);cd sample; tic; demo_shortcut_ex1; toc
       - name: Run MATLAB test - demo_label_sizing
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: addpath(pwd);cd sample; tic; demo_label_sizing; toc
       - name: Run MATLAB test - demo_qmeshcut_ex1
-        uses: matlab-actions/run-command@v1
+        uses: matlab-actions/run-command@v2
         with:
           command: addpath(pwd);cd sample; tic; demo_qmeshcut_ex1; toc
 
