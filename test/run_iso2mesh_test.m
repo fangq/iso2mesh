@@ -101,7 +101,7 @@ if (ismember('core', tests))
 
     [no, el, fc] = v2m(im, 0.5, 0.03, 10);
     test_iso2mesh('v2m face', @savejson, round_to_digits(sum(elemvolume(no, fc(:, 1:3))), 2), '[5.01]');
-    test_iso2mesh('v2m elem', @savejson, round_to_digits(sum(elemvolume(no, el(:, 1:4))), 4), '[0.8786]');
+    test_iso2mesh('v2m elem', @savejson, round_to_digits(sum(elemvolume(no, el(:, 1:4))), 4), '[0.8787]');
 end
 
 %%

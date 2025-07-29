@@ -73,7 +73,7 @@ end
 % populate all the triangles
 xy = newdim(1) * newdim(2);
 
-if (nargin == 1 || nface == 3)  % create triangular elements
+if (nargin == 1 || abs(nface) == 3)  % create triangular elements
     elem = [id1 id1 + newdim(1) id1 + newdim(1) + xy; id1 id1 + newdim(1) + xy id1 + xy];
     elem = [elem; id2 id2 + 1 id2 + 1 + xy; id2 id2 + 1 + xy id2 + xy];
     elem = [elem; id3 id3 + 1 id3 + 1 + newdim(1); id3 id3 + 1 + newdim(1) id3 + newdim(1)];

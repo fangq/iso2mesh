@@ -89,12 +89,7 @@ if (~isempty(img))
         else
             levelmask = int8(newimg >= isovalues(i));
         end
-        [isoct, octver] = isoctavemesh;
-        if (~isoct || sscanf(octver, '%d') > 5)
-            [levelno, levelel] = binsurface(levelmask, 'iso');
-        else
-            [levelno, levelel] = binsurface(levelmask);
-        end
+        [levelno, levelel] = binsurface(levelmask, -3);
         if (~isempty(levelel))
             if (isstruct(opt) && isfield(opt, 'autoregion'))
                 if (opt.autoregion)
@@ -146,7 +141,7 @@ if (~isempty(img))
             f0 = removeisolatedsurf(v0, f0, 3);
 
             if (dofix)
-                [v0, f0] = meshcheckrepair(v0, f0);
+                [v0, f0] = meshcheckrepair(v0, f0, 'meshfix');
             end
 
         elseif (nargin < 7 || strcmp(method, 'cgalsurf') || strcmp(method, 'cgalpoly'))
