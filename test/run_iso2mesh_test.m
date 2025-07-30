@@ -244,6 +244,11 @@ if (ismember('bool', tests))
     el2 = volface(el2);
     [no2, el2] = removeisolatednode(no2, el2);
 
+    getexeext
+    computer
+    fallbackexeext(getexeext, 'cork')
+    mcpath('cork', fallbackexeext(getexeext, 'cork'))
+
     [no3, el3] = surfboolean(no1, el1, 'and', no2, el2);
     [no3, el3] = meshcheckrepair(no3, el3, 'dup', 'tolerance', 1e-4);
     [node, elem] = s2m(no3, el3, 1, 100);
