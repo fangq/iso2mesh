@@ -81,9 +81,15 @@ jobs:
         with:
           submodules: 'recursive'
       - name: Set up MATLAB
+        if: ${{ matrix.os != 'macos-14' }}
         uses: matlab-actions/setup-matlab@v2
         with:
           release: R2022a
+      - name: Set up MATLAB (Apple silicon)
+        if: ${{ matrix.os == 'macos-14' }}
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: R2023b
       - name: Test win32 binaries
         if: ${{ matrix.os == 'windows-2019' }}
         run:  rm -rf bin/*x86-64.exe
