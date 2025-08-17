@@ -200,7 +200,7 @@ tripatch = reshape(tripatch(find(tripatch)), [3, length(tricut)])';
 % convhulln)
 
 quadpatch = emap(quadcut, :)';
-quadpatch = reshape(quadpatch(find(quadpatch)), [4, length(quadpatch)])';
+quadpatch = reshape(quadpatch(find(quadpatch)), [4, length(quadcut)])';
 
 % combine the two sets to create the final facedata
 % using the matching-tetrahedra algorithm as shown in
