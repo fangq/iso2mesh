@@ -6,7 +6,11 @@ function newdata = jdatadecode(data, varargin)
 % (accepts JData objects loaded from either loadjson/loadubjson or
 % jsondecode for MATLAB R2016b or later)
 %
-% This function implements the JData Specification Draft 3 (Jun. 2020)
+% This function implements the JData Specification Draft 3 (Jun. 2020) and
+% select keywords from Draft 4 (Apr. 2026): _ArrayShape_ types range/identity/zero/
+% circulant/hankel, _ArrayFillValue_, _ArrayCoords_, _ArrayUnits_, _TableIndex_,
+% _TableSortOrder_, _DataSchema_, _EnumKey_/_EnumValue_/_EnumOrdered_,
+% _ArrayChunks_, and ArrayType aliases float16/32/64.
 % see http://github.com/NeuroJSON/jdata for details
 %
 % authors:Qianqian Fang (q.fang <at> neu.edu)
@@ -55,18 +59,89 @@ function newdata = jdatadecode(data, varargin)
 % license:
 %     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details
 %
-% -- this function is part of JSONLab toolbox (http://iso2mesh.sf.net/cgi-bin/index.cgi?jsonlab)
+% -- this function is part of JSONLab toolbox (http://neurojson.org/jsonlab)
 %
 
 newdata = data;
-opt = struct;
-if (nargin == 2)
+if (nargin == 2 && isstruct(varargin{1}))
     opt = varargin{1};
 elseif (nargin > 2)
     opt = varargin2struct(varargin{:});
+else
+    opt = struct;
 end
-opt.fullarrayshape = jsonopt('FullArrayShape', 0, opt);
-opt.maxlinklevel = jsonopt('MaxLinkLevel', 0, opt);
+
+% Cache options to avoid repeated jsonopt calls
+if ~isfield(opt, 'fullarrayshape_')
+    opt.fullarrayshape_ = jsonopt('FullArrayShape', 0, opt);
+    opt.maxlinklevel_ = jsonopt('MaxLinkLevel', 0, opt);
+    opt.needbase64_ = jsonopt('Base64', 0, opt);
+    opt.format_ = jsonopt('FormatVersion', 2, opt);
+    opt.recursive_ = jsonopt('Recursive', 1, opt);
+
+    % Determine prefix once and cache prefixed field names
+    persistent isaliasaliased
+    if isempty(isaliasaliased)
+        isaliasaliased = isoctavemesh;
+    end
+    if isaliasaliased
+        prefix = jsonopt('Prefix', '', opt);
+    else
+        prefix = jsonopt('Prefix', 'x0x5F', opt);
+    end
+
+    % Auto-detect prefix from struct field names when the user has not explicitly
+    % specified one.  This handles cross-platform structs, e.g. a struct built with
+    % x0x5F_-prefixed names in MATLAB and then decoded by Octave's jdatadecode
+    % (or the reverse direction).
+    if ~isfield(opt, 'Prefix') && ~isfield(opt, 'prefix') && isstruct(data) && numel(data) >= 1
+        fnames = fieldnames(data(1));
+        if ~isempty(fnames)
+            has_x0x5F = any(cellfun(@(f) numel(f) > 6 && strncmp(f, 'x0x5F_', 6) && f(end) == '_', fnames));
+            has_empty  = any(cellfun(@(f) numel(f) > 2  && f(1) == '_'           && f(end) == '_', fnames));
+            if has_x0x5F
+                prefix = 'x0x5F';
+            elseif has_empty
+                prefix = '';
+            end
+        end
+    end
+    opt.prefix_ = prefix;
+
+    % Pre-compute all prefixed field names
+    opt.N_ArrayType_ = [prefix '_ArrayType_'];
+    opt.N_ArraySize_ = [prefix '_ArraySize_'];
+    opt.N_ArrayData_ = [prefix '_ArrayData_'];
+    opt.N_ArrayZipSize_ = [prefix '_ArrayZipSize_'];
+    opt.N_ArrayZipData_ = [prefix '_ArrayZipData_'];
+    opt.N_ArrayZipType_ = [prefix '_ArrayZipType_'];
+    opt.N_ArrayIsComplex_ = [prefix '_ArrayIsComplex_'];
+    opt.N_ArrayIsSparse_ = [prefix '_ArrayIsSparse_'];
+    opt.N_ArrayShape_ = [prefix '_ArrayShape_'];
+    opt.N_ArrayOrder_ = [prefix '_ArrayOrder_'];
+    opt.N_ArrayLabel_ = [prefix '_ArrayLabel_'];
+    opt.N_TableRecords_ = [prefix '_TableRecords_'];
+    opt.N_TableRows_ = [prefix '_TableRows_'];
+    opt.N_TableCols_ = [prefix '_TableCols_'];
+    opt.N_MapData_ = [prefix '_MapData_'];
+    opt.N_GraphNodes_ = [prefix '_GraphNodes_'];
+    opt.N_GraphEdges_ = [prefix '_GraphEdges_'];
+    opt.N_GraphEdges0_ = [prefix '_GraphEdges0_'];
+    opt.N_GraphMatrix_ = [prefix '_GraphMatrix_'];
+    opt.N_ByteStream_ = [prefix '_ByteStream_'];
+    opt.N_DataInfo_ = [prefix '_DataInfo_'];
+    opt.N_DataLink_ = [prefix '_DataLink_'];
+    opt.N_ArrayCoords_ = [prefix '_ArrayCoords_'];
+    opt.N_ArrayUnits_ = [prefix '_ArrayUnits_'];
+    opt.N_ArrayFillValue_ = [prefix '_ArrayFillValue_'];
+    opt.N_ArrayChunks_ = [prefix '_ArrayChunks_'];
+    opt.N_TableIndex_ = [prefix '_TableIndex_'];
+    opt.N_TableSortOrder_ = [prefix '_TableSortOrder_'];
+    opt.N_DataSchema_ = [prefix '_DataSchema_'];
+    opt.N_EnumKey_ = [prefix '_EnumKey_'];
+    opt.N_EnumValue_ = [prefix '_EnumValue_'];
+    opt.N_EnumOrdered_ = [prefix '_EnumOrdered_'];
+end
 
 %% process non-structure inputs
 if (~isstruct(data))
@@ -85,20 +160,40 @@ end
 %% assume the input is a struct below
 fn = fieldnames(data);
 len = length(data);
-needbase64 = jsonopt('Base64', 0, opt);
-format = jsonopt('FormatVersion', 2, opt);
-if (isoctavemesh)
-    prefix = jsonopt('Prefix', '', opt);
-else
-    prefix = jsonopt('Prefix', 'x0x5F', opt);
-end
-if (~isfield(data, N_('_ArrayType_')) && isfield(data, 'x_ArrayType_'))
+prefix = opt.prefix_;
+needbase64 = opt.needbase64_;
+format = opt.format_;
+
+% Check for alternate prefix
+if (~isfield(data, opt.N_ArrayType_) && isfield(data, 'x_ArrayType_'))
     prefix = 'x';
-    opt.prefix = 'x';
+    opt.prefix_ = 'x';
+    % Update cached field names
+    opt.N_ArrayType_ = 'x_ArrayType_';
+    opt.N_ArraySize_ = 'x_ArraySize_';
+    opt.N_ArrayData_ = 'x_ArrayData_';
+    opt.N_ArrayZipSize_ = 'x_ArrayZipSize_';
+    opt.N_ArrayZipData_ = 'x_ArrayZipData_';
+    opt.N_ArrayZipType_ = 'x_ArrayZipType_';
+    opt.N_ArrayIsComplex_ = 'x_ArrayIsComplex_';
+    opt.N_ArrayIsSparse_ = 'x_ArrayIsSparse_';
+    opt.N_ArrayShape_ = 'x_ArrayShape_';
+    opt.N_ArrayOrder_ = 'x_ArrayOrder_';
+    opt.N_ArrayLabel_ = 'x_ArrayLabel_';
+    opt.N_ArrayCoords_ = 'x_ArrayCoords_';
+    opt.N_ArrayUnits_ = 'x_ArrayUnits_';
+    opt.N_ArrayFillValue_ = 'x_ArrayFillValue_';
+    opt.N_ArrayChunks_ = 'x_ArrayChunks_';
+    opt.N_TableIndex_ = 'x_TableIndex_';
+    opt.N_TableSortOrder_ = 'x_TableSortOrder_';
+    opt.N_DataSchema_ = 'x_DataSchema_';
+    opt.N_EnumKey_ = 'x_EnumKey_';
+    opt.N_EnumValue_ = 'x_EnumValue_';
+    opt.N_EnumOrdered_ = 'x_EnumOrdered_';
 end
 
 %% recursively process subfields
-if (jsonopt('Recursive', 1, opt) == 1)
+if (opt.recursive_ == 1)
     for i = 1:length(fn) % depth-first
         for j = 1:len
             if (isstruct(data(j).(fn{i})) || isa(data(j).(fn{i}), 'containers.Map'))
@@ -110,21 +205,40 @@ if (jsonopt('Recursive', 1, opt) == 1)
     end
 end
 
+% Use cached field names
+N_ArrayType = opt.N_ArrayType_;
+N_ArrayData = opt.N_ArrayData_;
+N_ArrayZipData = opt.N_ArrayZipData_;
+N_ArrayZipSize = opt.N_ArrayZipSize_;
+N_ArrayZipType = opt.N_ArrayZipType_;
+N_ArraySize = opt.N_ArraySize_;
+N_ArrayIsComplex = opt.N_ArrayIsComplex_;
+N_ArrayIsSparse = opt.N_ArrayIsSparse_;
+N_ArrayShape = opt.N_ArrayShape_;
+N_ArrayOrder = opt.N_ArrayOrder_;
+N_ArrayLabel = opt.N_ArrayLabel_;
+N_ArrayFillValue = opt.N_ArrayFillValue_;
+N_ArrayCoords = opt.N_ArrayCoords_;
+N_ArrayUnits = opt.N_ArrayUnits_;
+N_ArrayChunks = opt.N_ArrayChunks_;
+N_TableIndex = opt.N_TableIndex_;
+N_TableSortOrder = opt.N_TableSortOrder_;
+
 %% handle array data
-if (isfield(data, N_('_ArrayType_')) && (isfield(data, N_('_ArrayData_')) || (isfield(data, N_('_ArrayZipData_')) && ~isstruct(data.(N_('_ArrayZipData_'))))))
+if (isfield(data, N_ArrayType) && (isfield(data, N_ArrayData) || (isfield(data, N_ArrayZipData) && ~isstruct(data.(N_ArrayZipData)))))
     newdata = cell(len, 1);
     for j = 1:len
-        if (isfield(data, N_('_ArrayZipSize_')) && isfield(data, N_('_ArrayZipData_')))
+        if (isfield(data, N_ArrayZipSize) && isfield(data, N_ArrayZipData))
             zipmethod = 'zip';
-            if (isstruct(data(j).(N_('_ArrayZipSize_'))))
-                data(j).(N_('_ArrayZipSize_')) = jdatadecode(data(j).(N_('_ArrayZipSize_')), opt);
+            if (isstruct(data(j).(N_ArrayZipSize)))
+                data(j).(N_ArrayZipSize) = jdatadecode(data(j).(N_ArrayZipSize), opt);
             end
-            dims = data(j).(N_('_ArrayZipSize_'))(:)';
+            dims = data(j).(N_ArrayZipSize)(:)';
             if (length(dims) == 1)
                 dims = [1 dims];
             end
-            if (isfield(data, N_('_ArrayZipType_')))
-                zipmethod = data(j).(N_('_ArrayZipType_'));
+            if (isfield(data, N_ArrayZipType))
+                zipmethod = data(j).(N_ArrayZipType);
             end
             if (ismember(zipmethod, {'zlib', 'gzip', 'lzma', 'lzip', 'lz4', 'lz4hc', 'base64'}) || ~isempty(regexp(zipmethod, '^blosc2', 'once')))
                 decodeparam = {};
@@ -134,16 +248,129 @@ if (isfield(data, N_('_ArrayType_')) && (isfield(data, N_('_ArrayData_')) || (is
                 else
                     decompfun = str2func([zipmethod 'decode']);
                 end
-                arraytype = data(j).(N_('_ArrayType_'));
+                arraytype = char(data(j).(N_ArrayType));
+                switch arraytype  % normalize float16/32/64 aliases (JData spec)
+                    case 'float16'
+                        arraytype = 'half';
+                    case 'float32'
+                        arraytype = 'single';
+                    case 'float64'
+                        arraytype = 'double';
+                end
                 chartype = 0;
                 if (strcmp(arraytype, 'char') || strcmp(arraytype, 'logical'))
                     chartype = 1;
                     arraytype = 'uint8';
                 end
-                if (needbase64 && strcmp(zipmethod, 'base64') == 0)
-                    ndata = reshape(typecast(decompfun(base64decode(data(j).(N_('_ArrayZipData_'))), decodeparam{:}), arraytype), dims);
+                if (isfield(data, N_ArrayChunks) && iscell(data(j).(N_ArrayZipData)))
+                    chunks_cell = data(j).(N_ArrayZipData);
+                    chunkshape = double(data(j).(N_ArrayChunks));
+                    if (numel(chunkshape) == 1)
+                        % 1-D chunked decode: concatenate flat byte buffers
+                        nchunks = numel(chunks_cell);
+                        allbytes = uint8([]);
+                        for ci = 1:nchunks
+                            chunkblob = uint8(chunks_cell{ci}(:)');
+                            if (needbase64 && ~strcmp(zipmethod, 'base64'))
+                                chunkblob = base64decode(chunkblob);
+                            end
+                            tmpchunk = decompfun(chunkblob, decodeparam{:});
+                            allbytes = [allbytes, tmpchunk(:)'];
+                        end
+                        ndata = typecast(allbytes, arraytype);
+                    else
+                        % N-D chunked decode: two modes depending on array type.
+                        % Dense: _ArrayChunks_ is in _ArraySize_ (original) order;
+                        %   tiles the row-major permuted intermediate.
+                        % Non-dense (sparse/shaped): _ArrayChunks_ is in _ArrayZipSize_ order;
+                        %   tiles the logical processed array.
+                        isdense_chunk = ~(isfield(data, N_ArrayIsSparse) && data(j).(N_ArrayIsSparse)) && ~isfield(data, N_ArrayShape);
+                        if (isdense_chunk)
+                            origsize = double(data(j).(N_ArraySize)(:)');  % e.g. [3,4,5]
+                            ndim = numel(origsize);
+                            chunkshape_perm = fliplr(chunkshape);          % permuted-space chunk
+                            arrsize_perm = fliplr(origsize);               % e.g. [5,4,3]
+                            chunkshape_perm(end + 1:ndim) = arrsize_perm(numel(chunkshape_perm) + 1:end);
+                            chunkshape_perm = min(chunkshape_perm, arrsize_perm);
+                            nchunks_nd = ceil(arrsize_perm ./ chunkshape_perm);
+                            ntiles = prod(nchunks_nd);
+                            iscpx_arr = isfield(data, N_ArrayIsComplex) && data(j).(N_ArrayIsComplex);
+                            if (iscpx_arr)
+                                ndata = complex(cast(zeros(arrsize_perm), arraytype));
+                            else
+                                ndata = cast(zeros(arrsize_perm), arraytype);
+                            end
+                            tidx = cell(1, ndim);
+                            for ci = 1:ntiles
+                                [tidx{:}] = ind2sub(nchunks_nd, ci);
+                                chunkblob = uint8(chunks_cell{ci}(:)');
+                                if (needbase64 && ~strcmp(zipmethod, 'base64'))
+                                    chunkblob = base64decode(chunkblob);
+                                end
+                                rawchunk = typecast(decompfun(chunkblob, decodeparam{:}), arraytype);
+                                ranges = cell(1, ndim);
+                                tilesize = zeros(1, ndim);
+                                for d = 1:ndim
+                                    r1 = (tidx{d} - 1) * chunkshape_perm(d) + 1;
+                                    r2 = min(tidx{d} * chunkshape_perm(d), arrsize_perm(d));
+                                    ranges{d} = r1:r2;
+                                    tilesize(d) = r2 - r1 + 1;
+                                end
+                                if (iscpx_arr)
+                                    half = numel(rawchunk) / 2;
+                                    ndata(ranges{:}) = complex(reshape(rawchunk(1:half), tilesize), ...
+                                                               reshape(rawchunk(half + 1:end), tilesize));
+                                else
+                                    ndata(ranges{:}) = reshape(rawchunk, tilesize);
+                                end
+                            end
+                            % Flatten assembled permuted array to row for downstream processing
+                            if (iscpx_arr)
+                                ndata = [real(ndata(:))', imag(ndata(:))'];
+                                data(j).(N_ArrayZipSize) = [2, numel(ndata) / 2];
+                            else
+                                ndata = ndata(:).';
+                                data(j).(N_ArrayZipSize) = [1, numel(ndata)];
+                            end
+                            dims = data(j).(N_ArrayZipSize);
+                        else
+                            % Non-dense: tile logical _ArrayZipSize_ shape; keep ZipSize unchanged.
+                            zipsize = double(data(j).(N_ArrayZipSize)(:)');  % e.g. [3,K] sparse
+                            ndim = numel(zipsize);
+                            chunkshape_nd = chunkshape;
+                            chunkshape_nd(end + 1:ndim) = zipsize(numel(chunkshape_nd) + 1:end);
+                            chunkshape_nd = min(chunkshape_nd, zipsize);
+                            nchunks_nd = ceil(zipsize ./ chunkshape_nd);
+                            ntiles = prod(nchunks_nd);
+                            ndata = cast(zeros(zipsize), arraytype);
+                            tidx = cell(1, ndim);
+                            for ci = 1:ntiles
+                                [tidx{:}] = ind2sub(nchunks_nd, ci);
+                                chunkblob = uint8(chunks_cell{ci}(:)');
+                                if (needbase64 && ~strcmp(zipmethod, 'base64'))
+                                    chunkblob = base64decode(chunkblob);
+                                end
+                                rawchunk = typecast(decompfun(chunkblob, decodeparam{:}), arraytype);
+                                ranges = cell(1, ndim);
+                                tilesize = zeros(1, ndim);
+                                for d = 1:ndim
+                                    r1 = (tidx{d} - 1) * chunkshape_nd(d) + 1;
+                                    r2 = min(tidx{d} * chunkshape_nd(d), zipsize(d));
+                                    ranges{d} = r1:r2;
+                                    tilesize(d) = r2 - r1 + 1;
+                                end
+                                ndata(ranges{:}) = reshape(rawchunk, tilesize);
+                            end
+                            % Re-flatten to "rows-concatenated" format for downstream ZipSize block
+                            ndata = permute(ndata, ndim:-1:1);
+                            ndata = ndata(:)';
+                            % _ArrayZipSize_ stays unchanged; dims already set from line 236
+                        end
+                    end
+                elseif (needbase64 && strcmp(zipmethod, 'base64') == 0)
+                    ndata = reshape(typecast(decompfun(base64decode(data(j).(N_ArrayZipData)), decodeparam{:}), arraytype), dims);
                 else
-                    ndata = reshape(typecast(decompfun(data(j).(N_('_ArrayZipData_')), decodeparam{:}), arraytype), dims);
+                    ndata = reshape(typecast(decompfun(data(j).(N_ArrayZipData), decodeparam{:}), arraytype), dims);
                 end
                 if (chartype)
                     ndata = char(ndata);
@@ -152,22 +379,31 @@ if (isfield(data, N_('_ArrayType_')) && (isfield(data, N_('_ArrayData_')) || (is
                 error('compression method is not supported');
             end
         else
-            if (isstruct(data(j).(N_('_ArrayData_'))))
-                data(j).(N_('_ArrayData_')) = jdatadecode(data(j).(N_('_ArrayData_')), opt);
+            if (isstruct(data(j).(N_ArrayData)))
+                data(j).(N_ArrayData) = jdatadecode(data(j).(N_ArrayData), opt);
             end
-            if (isstruct(data(j).(N_('_ArrayData_'))) && isfield(data(j).(N_('_ArrayData_')), N_('_ArrayType_')))
-                data(j).(N_('_ArrayData_')) = jdatadecode(data(j).(N_('_ArrayData_')), varargin{:});
+            if (isstruct(data(j).(N_ArrayData)) && isfield(data(j).(N_ArrayData), N_ArrayType))
+                data(j).(N_ArrayData) = jdatadecode(data(j).(N_ArrayData), opt);
             end
-            if (iscell(data(j).(N_('_ArrayData_'))))
-                data(j).(N_('_ArrayData_')) = cell2mat(cellfun(@(x) double(x(:)), data(j).(N_('_ArrayData_')), 'uniformoutput', 0)).';
+            if (iscell(data(j).(N_ArrayData)))
+                data(j).(N_ArrayData) = cell2mat(cellfun(@(x) double(x(:)), data(j).(N_ArrayData), 'uniformoutput', 0)).';
             end
-            ndata = cast(data(j).(N_('_ArrayData_')), char(data(j).(N_('_ArrayType_'))));
+            arrtype = char(data(j).(N_ArrayType));
+            switch arrtype  % normalize float16/32/64 aliases (JData spec)
+                case 'float16'
+                    arrtype = 'half';
+                case 'float32'
+                    arrtype = 'single';
+                case 'float64'
+                    arrtype = 'double';
+            end
+            ndata = cast(data(j).(N_ArrayData), arrtype);
         end
-        if (isfield(data, N_('_ArrayZipSize_')))
-            if (isstruct(data(j).(N_('_ArrayZipSize_'))))
-                data(j).(N_('_ArrayZipSize_')) = jdatadecode(data(j).(N_('_ArrayZipSize_')), opt);
+        if (isfield(data, N_ArrayZipSize))
+            if (isstruct(data(j).(N_ArrayZipSize)))
+                data(j).(N_ArrayZipSize) = jdatadecode(data(j).(N_ArrayZipSize), opt);
             end
-            dims = data(j).(N_('_ArrayZipSize_'))(:)';
+            dims = data(j).(N_ArrayZipSize)(:)';
             if (iscell(dims))
                 dims = cell2mat(dims);
             end
@@ -178,28 +414,28 @@ if (isfield(data, N_('_ArrayType_')) && (isfield(data, N_('_ArrayData_')) || (is
             ndata = permute(ndata, ndims(ndata):-1:1);
         end
         iscpx = 0;
-        if (isfield(data, N_('_ArrayIsComplex_')) && isstruct(data(j).(N_('_ArrayIsComplex_'))))
-            data(j).(N_('_ArrayIsComplex_')) = jdatadecode(data(j).(N_('_ArrayIsComplex_')), opt);
+        if (isfield(data, N_ArrayIsComplex) && isstruct(data(j).(N_ArrayIsComplex)))
+            data(j).(N_ArrayIsComplex) = jdatadecode(data(j).(N_ArrayIsComplex), opt);
         end
-        if (isfield(data, N_('_ArrayIsComplex_')) && data(j).(N_('_ArrayIsComplex_')))
+        if (isfield(data, N_ArrayIsComplex) && data(j).(N_ArrayIsComplex))
             iscpx = 1;
         end
         iscol = 0;
-        if (isfield(data, N_('_ArrayOrder_')))
-            arrayorder = data(j).(N_('_ArrayOrder_'));
+        if (isfield(data, N_ArrayOrder))
+            arrayorder = data(j).(N_ArrayOrder);
             if (~isempty(arrayorder) && (arrayorder(1) == 'c' || arrayorder(1) == 'C'))
                 iscol = 1;
             end
         end
-        if (isfield(data, N_('_ArrayIsSparse_')) && isstruct(data(j).(N_('_ArrayIsSparse_'))))
-            data(j).(N_('_ArrayIsSparse_')) = jdatadecode(data(j).(N_('_ArrayIsSparse_')), opt);
+        if (isfield(data, N_ArrayIsSparse) && isstruct(data(j).(N_ArrayIsSparse)))
+            data(j).(N_ArrayIsSparse) = jdatadecode(data(j).(N_ArrayIsSparse), opt);
         end
-        if (isfield(data, N_('_ArrayIsSparse_')) && data(j).(N_('_ArrayIsSparse_')))
-            if (isfield(data, N_('_ArraySize_')))
-                if (isstruct(data(j).(N_('_ArraySize_'))))
-                    data(j).(N_('_ArraySize_')) = jdatadecode(data(j).(N_('_ArraySize_')), opt);
+        if (isfield(data, N_ArrayIsSparse) && data(j).(N_ArrayIsSparse))
+            if (isfield(data, N_ArraySize))
+                if (isstruct(data(j).(N_ArraySize)))
+                    data(j).(N_ArraySize) = jdatadecode(data(j).(N_ArraySize), opt);
                 end
-                dim = data(j).(N_('_ArraySize_'))(:)';
+                dim = data(j).(N_ArraySize)(:)';
                 if (iscell(dim))
                     dim = cell2mat(dim);
                 end
@@ -229,9 +465,9 @@ if (isfield(data, N_('_ArrayType_')) && (isfield(data, N_('_ArrayData_')) || (is
                 end
                 ndata = sparse(ndata(1, :), ndata(2, :), ndata(3, :));
             end
-        elseif (isfield(data, N_('_ArrayShape_')))
-            if (isstruct(data(j).(N_('_ArrayShape_'))))
-                data(j).(N_('_ArrayShape_')) = jdatadecode(data(j).(N_('_ArrayShape_')), opt);
+        elseif (isfield(data, N_ArrayShape))
+            if (isstruct(data(j).(N_ArrayShape)))
+                data(j).(N_ArrayShape) = jdatadecode(data(j).(N_ArrayShape), opt);
             end
             if (iscpx)
                 if (size(ndata, 1) == 2)
@@ -242,11 +478,11 @@ if (isfield(data, N_('_ArrayType_')) && (isfield(data, N_('_ArrayData_')) || (is
                     error('The first dimension must be 2 for complex-valued arrays');
                 end
             else
-                arraydata = data.(N_('_ArrayData_'));
+                arraydata = data.(N_ArrayData);
             end
-            shapeid = data.(N_('_ArrayShape_'));
-            if (isfield(data, N_('_ArrayZipSize_')))
-                datasize = data.(N_('_ArrayZipSize_'));
+            shapeid = data.(N_ArrayShape);
+            if (isfield(data, N_ArrayZipSize))
+                datasize = data.(N_ArrayZipSize);
                 if (iscell(datasize))
                     datasize = cell2mat(datasize);
                 end
@@ -257,10 +493,10 @@ if (isfield(data, N_('_ArrayType_')) && (isfield(data, N_('_ArrayData_')) || (is
             else
                 datasize = size(arraydata);
             end
-            if (isstruct(data(j).(N_('_ArraySize_'))))
-                data(j).(N_('_ArraySize_')) = jdatadecode(data(j).(N_('_ArraySize_')), opt);
+            if (isstruct(data(j).(N_ArraySize)))
+                data(j).(N_ArraySize) = jdatadecode(data(j).(N_ArraySize), opt);
             end
-            arraysize = data.(N_('_ArraySize_'));
+            arraysize = data.(N_ArraySize);
 
             if (iscell(arraysize))
                 arraysize = cell2mat(arraysize);
@@ -270,6 +506,15 @@ if (isfield(data, N_('_ArrayType_')) && (isfield(data, N_('_ArrayData_')) || (is
                 shapeid = {shapeid};
             end
             arraydata = double(arraydata).';
+            arraytypestr = char(data(j).(N_ArrayType));
+            switch arraytypestr  % normalize float16/32/64 aliases (JData spec)
+                case 'float16'
+                    arraytypestr = 'half';
+                case 'float32'
+                    arraytypestr = 'single';
+                case 'float64'
+                    arraytypestr = 'double';
+            end
             if (strcmpi(shapeid{1}, 'diag'))
                 ndata = spdiags(arraydata(:), 0, arraysize(1), arraysize(2));
             elseif (strcmpi(shapeid{1}, 'upper') || strcmpi(shapeid{1}, 'uppersymm'))
@@ -314,21 +559,56 @@ if (isfield(data, N_('_ArrayType_')) && (isfield(data, N_('_ArrayData_')) || (is
             elseif (strcmpi(shapeid{1}, 'toeplitz'))
                 arraydata = reshape(arraydata, flipud(datasize(:))');
                 ndata = toeplitz(arraydata(1:arraysize(1), 2), arraydata(1:arraysize(2), 1));
+            elseif (strcmpi(shapeid{1}, 'identity'))
+                ndata = cast(double(arraydata(1)) * eye(arraysize(1)), arraytypestr);
+            elseif (strcmpi(shapeid{1}, 'zero'))
+                ndata = cast(zeros(arraysize), arraytypestr);
+            elseif (strcmpi(shapeid{1}, 'circulant'))
+                c = arraydata(:);
+                n = length(c);
+                if (n > 1)
+                    colidx = [1; (n:-1:2)'];  % first-column index: [1, n, n-1, ..., 2]
+                    ndata = cast(toeplitz(c(colidx), c.'), arraytypestr);
+                else
+                    ndata = cast(c(1), arraytypestr);
+                end
+            elseif (strcmpi(shapeid{1}, 'hankel'))
+                m = arraysize(1);
+                n = arraysize(2);
+                first_row = arraydata(1:n, 1).';
+                last_col  = arraydata(1:m, 2).';
+                h = [first_row, last_col(2:end)];
+                hc = h(1:m);
+                hr = h(m:m + n - 1);
+                ndata = cast(hankel(hc, hr), arraytypestr);
+            elseif (strcmpi(shapeid{1}, 'range'))
+                if (size(arraydata, 2) == 1)
+                    % 1-D range: _ArrayData_ = [start; end] (2x1 after .')
+                    ndata = cast(reshape(linspace(double(arraydata(1)), double(arraydata(2)), prod(arraysize)), arraysize), arraytypestr);
+                else
+                    % N-D separable grid: _ArrayData_ is 2 x ndim after .'
+                    ndim = length(arraysize);
+                    axes = cell(1, ndim);
+                    for idim = 1:ndim
+                        axes{idim} = cast(linspace(double(arraydata(1, idim)), double(arraydata(2, idim)), arraysize(idim)), arraytypestr);
+                    end
+                    ndata = axes;
+                end
             end
-            if (opt.fullarrayshape && issparse(ndata))
-                ndata = cast(full(ndata), data(j).(N_('_ArrayType_')));
+            if (opt.fullarrayshape_ && issparse(ndata))
+                ndata = cast(full(ndata), arraytypestr);
             end
-        elseif (isfield(data, N_('_ArraySize_')))
-            if (isstruct(data(j).(N_('_ArraySize_'))))
-                data(j).(N_('_ArraySize_')) = jdatadecode(data(j).(N_('_ArraySize_')), opt);
+        elseif (isfield(data, N_ArraySize))
+            if (isstruct(data(j).(N_ArraySize)))
+                data(j).(N_ArraySize) = jdatadecode(data(j).(N_ArraySize), opt);
             end
             if (iscpx)
                 ndata = complex(ndata(1, :), ndata(2, :));
             end
             if (format > 1.9 && iscol == 0)
-                data(j).(N_('_ArraySize_')) = data(j).(N_('_ArraySize_'))(end:-1:1);
+                data(j).(N_ArraySize) = data(j).(N_ArraySize)(end:-1:1);
             end
-            dims = data(j).(N_('_ArraySize_'))(:)';
+            dims = data(j).(N_ArraySize)(:)';
             if (iscell(dims))
                 dims = cell2mat(dims);
             end
@@ -340,18 +620,42 @@ if (isfield(data, N_('_ArrayType_')) && (isfield(data, N_('_ArrayData_')) || (is
                 ndata = permute(ndata, ndims(ndata):-1:1);
             end
         end
+        if (isfield(data, N_ArrayFillValue) && ~isempty(data(j).(N_ArrayFillValue)) && isnumeric(ndata))
+            fillval = double(data(j).(N_ArrayFillValue));
+            if (isfloat(ndata))
+                ndata(ndata == fillval) = NaN;
+            end
+        end
         newdata{j} = ndata;
     end
     if (len == 1)
         newdata = newdata{1};
     end
+    if (isfield(data, N_ArrayLabel))
+        newdata = jdict(newdata);
+        newdata.setattr('dims', data(j).(N_ArrayLabel));
+    end
+    if (isfield(data, N_ArrayCoords) || isfield(data, N_ArrayUnits))
+        if (~isa(newdata, 'jdict'))
+            newdata = jdict(newdata);
+        end
+        if (isfield(data, N_ArrayCoords))
+            newdata.setattr('coords', data(j).(N_ArrayCoords));
+        end
+        if (isfield(data, N_ArrayUnits))
+            newdata.setattr('units', data(j).(N_ArrayUnits));
+        end
+    end
 end
 
 %% handle table data
-if (isfield(data, N_('_TableRecords_')))
+N_TableRecords = opt.N_TableRecords_;
+if (isfield(data, N_TableRecords))
     newdata = cell(len, 1);
+    N_TableRows = opt.N_TableRows_;
+    N_TableCols = opt.N_TableCols_;
     for j = 1:len
-        ndata = data(j).(N_('_TableRecords_'));
+        ndata = data(j).(N_TableRecords);
         if (iscell(ndata))
             if (iscell(ndata{1}))
                 rownum = length(ndata);
@@ -369,11 +673,23 @@ if (isfield(data, N_('_TableRecords_')))
         else
             newdata{j} = array2table(ndata);
         end
-        if (isfield(data(j), N_('_TableRows_')) && ~isempty(data(j).(N_('_TableRows_'))))
-            newdata{j}.Properties.RowNames = data(j).(N_('_TableRows_'))(:);
+        if (isfield(data(j), N_TableRows) && ~isempty(data(j).(N_TableRows)))
+            newdata{j}.Properties.RowNames = data(j).(N_TableRows)(:);
         end
-        if (isfield(data(j), N_('_TableCols_')) && ~isempty(data(j).(N_('_TableCols_'))))
-            newdata{j}.Properties.VariableNames = data(j).(N_('_TableCols_'));
+        if (isfield(data(j), N_TableCols) && ~isempty(data(j).(N_TableCols)))
+            newdata{j}.Properties.VariableNames = data(j).(N_TableCols);
+        end
+        if (isfield(data(j), N_TableIndex) && ~isempty(data(j).(N_TableIndex)))
+            if (isempty(newdata{j}.Properties.UserData))
+                newdata{j}.Properties.UserData = struct;
+            end
+            newdata{j}.Properties.UserData.TableIndex = data(j).(N_TableIndex);
+        end
+        if (isfield(data(j), N_TableSortOrder) && ~isempty(data(j).(N_TableSortOrder)))
+            if (isempty(newdata{j}.Properties.UserData))
+                newdata{j}.Properties.UserData = struct;
+            end
+            newdata{j}.Properties.UserData.TableSortOrder = data(j).(N_TableSortOrder);
         end
     end
     if (len == 1)
@@ -382,14 +698,15 @@ if (isfield(data, N_('_TableRecords_')))
 end
 
 %% handle map data
-if (isfield(data, N_('_MapData_')))
+N_MapData = opt.N_MapData_;
+if (isfield(data, N_MapData))
     newdata = cell(len, 1);
     for j = 1:len
-        key = cell(1, length(data(j).(N_('_MapData_'))));
+        key = cell(1, length(data(j).(N_MapData)));
         val = cell(size(key));
-        for k = 1:length(data(j).(N_('_MapData_')))
-            key{k} = data(j).(N_('_MapData_')){k}{1};
-            val{k} = jdatadecode(data(j).(N_('_MapData_')){k}{2}, opt);
+        for k = 1:length(data(j).(N_MapData))
+            key{k} = data(j).(N_MapData){k}{1};
+            val{k} = jdatadecode(data(j).(N_MapData){k}{2}, opt);
         end
         ndata = containers.Map(key, val);
         newdata{j} = ndata;
@@ -399,12 +716,54 @@ if (isfield(data, N_('_MapData_')))
     end
 end
 
+%% handle enum data (_EnumKey_ / _EnumValue_ / _EnumOrdered_)
+N_EnumKey = opt.N_EnumKey_;
+N_EnumValue = opt.N_EnumValue_;
+if (isfield(data, N_EnumKey) && isfield(data, N_EnumValue))
+    newdata = cell(len, 1);
+    N_EnumOrdered = opt.N_EnumOrdered_;
+    for j = 1:len
+        enumkeys = data(j).(N_EnumKey);
+        if (~iscell(enumkeys))
+            enumkeys = num2cell(enumkeys);
+        end
+        % ensure all keys are char strings (categorical requires string categories)
+        for ki = 1:numel(enumkeys)
+            ek = enumkeys{ki};
+            if (iscell(ek) && numel(ek) == 1)
+                ek = ek{1};
+            end
+            if (ischar(ek) || isa(ek, 'string'))
+                enumkeys{ki} = char(ek);
+            else
+                enumkeys{ki} = num2str(ek);
+            end
+        end
+        enumvals = double(data(j).(N_EnumValue));
+        origsize = size(enumvals);
+        valueset = 1:numel(enumkeys);
+        isordered = isfield(data, N_EnumOrdered) && data(j).(N_EnumOrdered);
+        if (isordered)
+            newdata{j} = reshape(categorical(enumvals(:)', valueset, enumkeys, 'Ordinal', true), origsize);
+        else
+            newdata{j} = reshape(categorical(enumvals(:)', valueset, enumkeys), origsize);
+        end
+    end
+    if (len == 1)
+        newdata = newdata{1};
+    end
+end
+
 %% handle graph data
-if (isfield(data, N_('_GraphNodes_')) && exist('graph', 'file') && exist('digraph', 'file'))
+N_GraphNodes = opt.N_GraphNodes_;
+if (isfield(data, N_GraphNodes) && exist('graph', 'file') && exist('digraph', 'file'))
     newdata = cell(len, 1);
     isdirected = 1;
+    N_GraphEdges = opt.N_GraphEdges_;
+    N_GraphEdges0 = opt.N_GraphEdges0_;
+    N_GraphMatrix = opt.N_GraphMatrix_;
     for j = 1:len
-        nodedata = data(j).(N_('_GraphNodes_'));
+        nodedata = data(j).(N_GraphNodes);
         if (isstruct(nodedata))
             nodetable = struct2table(nodedata);
         elseif (isa(nodedata, 'containers.Map'))
@@ -418,13 +777,13 @@ if (isfield(data, N_('_GraphNodes_')) && exist('graph', 'file') && exist('digrap
             nodetable = table;
         end
 
-        if (isfield(data, N_('_GraphEdges_')))
-            edgedata = data(j).(N_('_GraphEdges_'));
-        elseif (isfield(data, N_('_GraphEdges0_')))
-            edgedata = data(j).(N_('_GraphEdges0_'));
+        if (isfield(data, N_GraphEdges))
+            edgedata = data(j).(N_GraphEdges);
+        elseif (isfield(data, N_GraphEdges0))
+            edgedata = data(j).(N_GraphEdges0);
             isdirected = 0;
-        elseif (isfield(data, N_('_GraphMatrix_')))
-            edgedata = jdatadecode(data(j).(N_('_GraphMatrix_')), varargin{:});
+        elseif (isfield(data, N_GraphMatrix))
+            edgedata = jdatadecode(data(j).(N_GraphMatrix), opt);
         end
 
         if (exist('edgedata', 'var'))
@@ -450,14 +809,16 @@ if (isfield(data, N_('_GraphNodes_')) && exist('graph', 'file') && exist('digrap
 end
 
 %% handle bytestream and arbitrary matlab objects
-if (isfield(data, N_('_ByteStream_')) && isfield(data, N_('_DataInfo_')))
+N_ByteStream = opt.N_ByteStream_;
+N_DataInfo = opt.N_DataInfo_;
+if (isfield(data, N_ByteStream) && isfield(data, N_DataInfo))
     newdata = cell(len, 1);
     for j = 1:len
-        if (isfield(data(j).(N_('_DataInfo_')), 'MATLABObjectClass'))
+        if (isfield(data(j).(N_DataInfo), 'MATLABObjectClass'))
             if (needbase64)
-                newdata{j} = getArrayFromByteStream(base64decode(data(j).(N_('_ByteStream_'))));
+                newdata{j} = getArrayFromByteStream(base64decode(data(j).(N_ByteStream)));
             else
-                newdata{j} = getArrayFromByteStream(data(j).(N_('_ByteStream_')));
+                newdata{j} = getArrayFromByteStream(data(j).(N_ByteStream));
             end
         end
     end
@@ -467,9 +828,10 @@ if (isfield(data, N_('_ByteStream_')) && isfield(data, N_('_DataInfo_')))
 end
 
 %% handle data link
-if (opt.maxlinklevel > 0 && isfield(data, N_('_DataLink_')))
-    if (ischar(data.(N_('_DataLink_'))))
-        datalink = data.(N_('_DataLink_'));
+N_DataLink = opt.N_DataLink_;
+if (opt.maxlinklevel_ > 0 && isfield(data, N_DataLink))
+    if (ischar(data.(N_DataLink)))
+        datalink = data.(N_DataLink);
         if (regexp(datalink, '\:\$'))
             ref = regexp(datalink, '^(?<proto>[a-zA-Z]+://)*(?<path>.+)(?<delim>\:)()*(?<jsonpath>(?<=:)\$\d*\.*.*)*', 'names');
         else
@@ -479,7 +841,7 @@ if (opt.maxlinklevel > 0 && isfield(data, N_('_DataLink_')))
             uripath = [ref.proto ref.path];
             [newdata, fname] = jdlink(uripath);
             if (exist(fname, 'file'))
-                opt.maxlinklevel = opt.maxlinklevel - 1;
+                opt.maxlinklevel_ = opt.maxlinklevel_ - 1;
                 if (~isempty(ref.jsonpath))
                     newdata = jsonpath(newdata, ref.jsonpath);
                 end
@@ -488,9 +850,13 @@ if (opt.maxlinklevel > 0 && isfield(data, N_('_DataLink_')))
     end
 end
 
-%% subfunctions
-function escaped = N_(str)
-    escaped = [prefix str];
+%% handle data schema
+N_DataSchema = opt.N_DataSchema_;
+if (isfield(data, N_DataSchema) && ~isempty(data.(N_DataSchema)))
+    if (~isa(newdata, 'jdict'))
+        newdata = jdict(newdata);
+    end
+    newdata.setschema(data.(N_DataSchema));
 end
 
 end

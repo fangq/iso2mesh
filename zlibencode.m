@@ -28,41 +28,66 @@ function varargout = zlibencode(varargin)
 % license:
 %     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details
 %
-% -- this function is part of JSONLab toolbox (http://iso2mesh.sf.net/cgi-bin/index.cgi?jsonlab)
+% -- this function is part of JSONLab toolbox (http://neurojson.org/jsonlab)
 %
 
 if (nargin == 0)
     error('you must provide at least 1 input');
 end
 
+inputinfo = struct('type', class(varargin{1}), 'size', size(varargin{1}), 'method', 'zlib', 'status', 0);
+
+% Try built-in JVM-based zlib first when Java is available
+if (usejava('jvm'))
+    try
+        input = varargin{1}(:)';
+        if (ischar(input))
+            input = uint8(input);
+        elseif (isa(input, 'string'))
+            input = uint8(char(input));
+        else
+            input = typecast(input, 'uint8');
+        end
+
+        if (isoctavemesh)
+            % Octave with Java: write bytes one at a time
+            baos = javaObject('java.io.ByteArrayOutputStream');
+            dos = javaObject('java.util.zip.DeflaterOutputStream', baos);
+            for i = 1:numel(input)
+                dos.write(int32(input(i)));
+            end
+            dos.finish();
+            dos.close();
+            varargout{1} = typecast(baos.toByteArray(), 'uint8')';
+        else
+            % MATLAB with Java: direct array write
+            buffer = java.io.ByteArrayOutputStream();
+            zlib = java.util.zip.DeflaterOutputStream(buffer);
+            zlib.write(input, 0, numel(input));
+            zlib.close();
+            varargout{1} = typecast(buffer.toByteArray(), 'uint8')';
+        end
+        if (nargout > 1)
+            varargout{2} = inputinfo;
+        end
+        return
+    catch
+        % JVM-based zlib failed; fall through to zmat/octavezmat
+    end
+end
+
+% Fall back to ZMat toolbox when available
 nozmat = getvarfrom({'caller', 'base'}, 'NO_ZMAT');
 
 if ((exist('zmat', 'file') == 2 || exist('zmat', 'file') == 3) && (isempty(nozmat) || nozmat == 0))
-    [varargout{1:nargout}] = zmat(varargin{1}, 1, 'zlib');
-    return
-elseif (isoctavemesh)
-    [varargout{1:nargout}] = octavezmat(varargin{1}, 1, 'zlib');
-    return
+    try
+        [varargout{1:nargout}] = zmat(varargin{1}, 1, 'zlib');
+        return
+    catch
+        % zmat is on path but its zipmat MEX is missing or failed;
+        % fall through to the pure-MATLAB/Octave fallback
+    end
 end
 
-error(javachk('jvm'));
-
-input = varargin{1}(:)';
-if (ischar(input))
-    input = uint8(input);
-elseif (isa(input, 'string'))
-    input = uint8(char(input));
-else
-    input = typecast(input, 'uint8');
-end
-
-buffer = java.io.ByteArrayOutputStream();
-zlib = java.util.zip.DeflaterOutputStream(buffer);
-zlib.write(input, 0, numel(input));
-zlib.close();
-
-varargout{1} = typecast(buffer.toByteArray(), 'uint8')';
-
-if (nargout > 1)
-    varargout{2} = struct('type', class(varargin{1}), 'size', size(varargin{1}), 'method', 'zlib', 'status', 0);
-end
+% Final fallback: pure-MATLAB/Octave implementation
+[varargout{1:nargout}] = octavezmat(varargin{1}, 1, 'zlib');

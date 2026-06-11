@@ -12,7 +12,7 @@ function jnii = jnifticreate(varargin)
 %    input:
 %        img: set the jnii.NIFTIData section
 %        'header_i': the header subfield name defined in the JNIfTI
-%                    specification, see https://github.com/NeuroJSON/jnifti
+%                    specification, see https://github.com/NeuroJSON/jnifty
 %        value_i: set the value for the specified JNIfTI header field
 %
 %    output:
@@ -20,9 +20,9 @@ function jnii = jnifticreate(varargin)
 %              if img is given, jnii also includes the NIFTIData field
 %
 %
-%    this file is part of JNIfTI specification: https://github.com/NeuroJSON/jnifti
+%    this file is part of JNIfTI specification: https://github.com/NeuroJSON/jnifty
 %
-%    License: Apache 2.0, see https://github.com/NeuroJSON/jnifti for details
+%    License: Apache 2.0, see https://github.com/NeuroJSON/jnifty for details
 %
 
 jnii = struct(encodevarname('_DataInfo_'), struct(), 'NIFTIHeader', struct(), 'NIFTIData', []);
@@ -59,9 +59,9 @@ jnii.NIFTIHeader.TimeOffset =     0;
 % jnii.NIFTIHeader.A75GlobalMax=  255;
 % jnii.NIFTIHeader.A75GlobalMin=   0;
 jnii.NIFTIHeader.Description =    '';
-% jnii.NIFTIHeader.AuxFile=        '';
-jnii.NIFTIHeader.QForm =          0;
-jnii.NIFTIHeader.SForm =          1;
+% jnii.NIFTIHeader.AuxFile=       '';
+jnii.NIFTIHeader.QForm =          '';
+jnii.NIFTIHeader.SForm =          'scanner_anat';
 jnii.NIFTIHeader.Quatern.b =      0;
 jnii.NIFTIHeader.Quatern.c =      0;
 jnii.NIFTIHeader.Quatern.d =      0;
@@ -77,8 +77,8 @@ jnii.NIFTIHeader.NIIFormat =      'jnifti';
 
 datainfo.JNIFTIVersion = '0.5';
 datainfo.Comment = 'Created by JNIFTY Toolbox (https://github.com/NeuroJSON/jnifty)';
-datainfo.AnnotationFormat = 'https://github.com/NeuroJSON/jnifti/blob/master/JNIfTI_specification.md';
-datainfo.SerialFormat = 'http://json.org';
+datainfo.AnnotationFormat = 'https://neurojson.org/jnifti/draft2';
+datainfo.SerialFormat = 'https://json.org';
 datainfo.Parser = struct('Python', [], ...
                          'MATLAB', [], ...
                          'JavaScript', 'https://github.com/NeuroJSON/jsdata', ...

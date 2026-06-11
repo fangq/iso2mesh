@@ -88,7 +88,7 @@ for i = 1:nz
     end
     if (nargout > 1 || ~isempty(nodeval))
         [maskz, weightz] = mesh2mask(cutpos, facedata, xi, yi, hf);
-        weight(:, :, :, i) = weightz;
+        weight(:, :, :, i) = permute(weightz, [1, 3, 2]);
     else
         maskz = mesh2mask(cutpos, facedata, xi, yi, hf);
     end
@@ -100,6 +100,6 @@ for i = 1:nz
     else
         maskz(idx) = elemid(maskz(idx));
     end
-    mask(:, :, i) = maskz;
+    mask(:, :, i) = maskz';
 end
 close(hf);

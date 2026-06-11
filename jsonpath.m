@@ -1,14 +1,18 @@
 function obj = jsonpath(root, jpath, varargin)
 %
 %    obj=jsonpath(root, jpath)
+%    obj=jsonpath(root, jpath, newvalue)
 %
-%    Query and retrieve elements from matlab data structures using JSONPath
+%    Getting or setting data elements from matlab data structures using
+%    JSONPath
 %
 %    author: Qianqian Fang (q.fang <at> neu.edu)
 %
 %    input:
 %        root: a matlab data structure like an array, cell, struct, etc
 %        jpath: a string in the format of JSONPath, see loadjson help
+%        newvalue: if present, the data specified at the path jpath will be
+%               replaced by newvalue
 %
 %    output:
 %        obj: if the specified element exist, obj returns the result
@@ -19,7 +23,7 @@ function obj = jsonpath(root, jpath, varargin)
 % license:
 %     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details
 %
-% -- this function is part of JSONLab toolbox (http://iso2mesh.sf.net/cgi-bin/index.cgi?jsonlab)
+% -- this function is part of JSONLab toolbox (http://neurojson.org/jsonlab)
 %
 
 obj = root;
@@ -34,11 +38,29 @@ if (~isempty(pat) && ~isempty(paths))
     if (strcmp(paths{1}, '$'))
         paths(1) = [];
     end
-    for i = 1:length(paths)
-        [obj, isfound] = getonelevel(obj, paths, i, varargin{:});
-        if (~isfound)
-            return
+    if (isempty(varargin))
+        for i = 1:length(paths)
+            [obj, isfound] = getonelevel(obj, paths, i, varargin{:});
+            if (~isfound)
+                return
+            end
         end
+    else
+        datastack = cell(1, length(paths) + 1);
+        datastack{1} = obj;
+        for i = 1:length(paths)
+            [datastack{i + 1}, isfound] = getonelevel(datastack{i}, paths, i, varargin{:});
+            if (~isfound)
+                error(['data with a jsonpath ' jpath ' does not exist']);
+            end
+        end
+        fieldname = paths{end}{1}(2:end);
+        datastack{end - 1} = setfield_safe(datastack{end - 1}, fieldname, varargin{1});
+        for i = length(paths) - 1:-1:1
+            fieldname = paths{i}{1}(2:end);
+            datastack{i} = setfield_safe(datastack{i}, fieldname, datastack{i + 1});
+        end
+        obj = datastack{1};
     end
 end
 
@@ -118,7 +140,7 @@ elseif (~isempty(regexp(pathname, '^\[[-0-9\*:]+\]$', 'once')) || iscell(input))
     else
         obj = input(arrayrange.start:arrayrange.end);
     end
-elseif (isstruct(input) || isa(input, 'containers.Map') || isa(input, 'table'))
+elseif (isstruct(input) || isa(input, 'containers.Map') || isa(input, 'table') || isa(input, 'jdict'))
     pathname = regexprep(pathname, '^\[(.*)\]$', '$1');
     stpath = encodevarname(pathname);
     if (isstruct(input))
@@ -179,4 +201,25 @@ if (~exist('obj', 'var'))
     obj = [];
 elseif (nargout > 1)
     isfound = true;
+end
+
+function data = setfield_safe(data, fieldname, value)
+if (isa(value, 'jdict') && ~isempty(value{'kind'}) && strcmp(value{'kind'}, '_deleted_'))
+    if isstruct(data) && isfield(data, fieldname)
+        data = rmfield(data, fieldname);
+    elseif (isa(data, 'containers.Map') || isa(data, 'dictionary')) && isKey(data, fieldname)
+        data = remove(data, fieldname);
+    else
+        idx = struct('type', '.', 'subs', fieldname);
+        data = subsasgn(data, idx, []);
+    end
+else
+    if isstruct(data)
+        data.(fieldname) = value;
+    elseif isa(data, 'containers.Map') || isa(data, 'dictionary')
+        data(fieldname) = value;
+    else
+        idx = struct('type', '.', 'subs', fieldname);
+        data = subsasgn(data, idx, value);
+    end
 end

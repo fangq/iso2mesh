@@ -45,12 +45,12 @@ function nii = jnii2nii(jnii, varargin)
 %    dependency:
 %
 %          To load a JNIfTI file with compression or niifile ends with (.nii.gz/.hdr.gz/.img.gz),
-%          one must install the ZMat Toolbox (http://github.com/NeuroJSON/zmat) and
-%          JSONLab Toolbox (http://github.com/NeuroJSON/jsonlab);
+%          one must install the ZMat Toolbox (https://github.com/NeuroJSON/zmat) and
+%          JSONLab Toolbox (https://github.com/NeuroJSON/jsonlab);
 %
-%    this file is part of JNIfTI specification: https://github.com/NeuroJSON/jnifti
+%    this file is part of JNIfTI specification: https://github.com/NeuroJSON/jnifty
 %
-%    License: Apache 2.0, see https://github.com/NeuroJSON/jnifti for details
+%    License: Apache 2.0, see https://github.com/NeuroJSON/jnifty for details
 %
 
 if (nargin <= 0)
@@ -96,11 +96,11 @@ nii.hdr.intent_p1   = bytematch(jnii.NIFTIHeader, 'Param1', nii.hdr.intent_p1);
 nii.hdr.intent_p2   = bytematch(jnii.NIFTIHeader, 'Param2', nii.hdr.intent_p2);
 nii.hdr.intent_p3   = bytematch(jnii.NIFTIHeader, 'Param3', nii.hdr.intent_p3);
 
-if (ischar(jnii.NIFTIHeader.Intent))
+if (isfield(jnii.NIFTIHeader, 'Intent') && ischar(jnii.NIFTIHeader.Intent))
     jnii.NIFTIHeader.Intent = niicodemap('intent', jnii.NIFTIHeader.Intent);
 end
 nii.hdr.intent_code = bytematch(jnii.NIFTIHeader, 'Intent', nii.hdr.intent_code);
-if (ischar(jnii.NIFTIHeader.DataType))
+if (isfield(jnii.NIFTIHeader, 'DataType') && ischar(jnii.NIFTIHeader.DataType))
     jnii.NIFTIHeader.DataType = niicodemap('datatype', jnii.NIFTIHeader.DataType);
 end
 
@@ -114,14 +114,14 @@ nii.hdr.scl_slope   = bytematch(jnii.NIFTIHeader, 'ScaleSlope', nii.hdr.scl_slop
 nii.hdr.scl_inter   = bytematch(jnii.NIFTIHeader, 'ScaleOffset', nii.hdr.scl_inter);
 nii.hdr.slice_end   = bytematch(jnii.NIFTIHeader, 'LastSliceID', nii.hdr.slice_end);
 
-if (ischar(jnii.NIFTIHeader.SliceType))
+if (isfield(jnii.NIFTIHeader, 'SliceType') && ischar(jnii.NIFTIHeader.SliceType))
     jnii.NIFTIHeader.SliceType = niicodemap('slicetype', jnii.NIFTIHeader.SliceType);
 end
 nii.hdr.slice_code  = bytematch(jnii.NIFTIHeader, 'SliceType', nii.hdr.slice_code);
-if (ischar(jnii.NIFTIHeader.Unit.L))
+if (isfield(jnii.NIFTIHeader, 'Unit') && isfield(jnii.NIFTIHeader.Unit, 'L') && ischar(jnii.NIFTIHeader.Unit.L))
     jnii.NIFTIHeader.Unit.L = niicodemap('unit', jnii.NIFTIHeader.Unit.L);
 end
-if (ischar(jnii.NIFTIHeader.Unit.T))
+if (isfield(jnii.NIFTIHeader, 'Unit') && isfield(jnii.NIFTIHeader.Unit, 'T') && ischar(jnii.NIFTIHeader.Unit.T))
     jnii.NIFTIHeader.Unit.T = niicodemap('unit', jnii.NIFTIHeader.Unit.T);
 end
 
@@ -139,6 +139,13 @@ end
 
 nii.hdr.descrip = bytematch(jnii.NIFTIHeader, 'Description', nii.hdr.descrip);
 nii.hdr.aux_file    = bytematch(jnii.NIFTIHeader, 'AuxFile', nii.hdr.aux_file);
+
+if (isfield(jnii.NIFTIHeader, 'QForm') && ischar(jnii.NIFTIHeader.QForm))
+    jnii.NIFTIHeader.QForm = niicodemap('qform_code', jnii.NIFTIHeader.QForm);
+end
+if (isfield(jnii.NIFTIHeader, 'SForm') && ischar(jnii.NIFTIHeader.SForm))
+    jnii.NIFTIHeader.SForm = niicodemap('sform_code', jnii.NIFTIHeader.SForm);
+end
 
 nii.hdr.qform_code  = bytematch(jnii.NIFTIHeader, 'QForm', nii.hdr.qform_code);
 nii.hdr.sform_code  = bytematch(jnii.NIFTIHeader, 'SForm', nii.hdr.sform_code);
@@ -181,7 +188,6 @@ end
 
 function dat = bytematch(jobj, key, orig)
 dtype = class(orig);
-dat = orig;
 if (isfield(jobj, key))
     dat = cast(jobj.(key), dtype);
 else

@@ -88,7 +88,7 @@ function output = savejson(rootname, obj, varargin)
 %                            array dimensions, and
 %                         "_ArrayZipData_": the "base64" encoded
 %                             compressed binary array data.
-%           CompressArraySize [100|int]: only to compress an array if the total
+%           CompressArraySize [300|int]: only to compress an array if the total
 %                         element count is larger than this number.
 %           CompressStringSize [inf|int]: only to compress a string if the total
 %                         element count is larger than this number.
@@ -108,6 +108,16 @@ function output = savejson(rootname, obj, varargin)
 %                         jsonencode, if presents (MATLAB R2016b or Octave
 %                         6) first. If jsonencode does not exist or failed,
 %                         this function falls back to the jsonlab savejson
+%           Whitespaces_: a struct customizing delimiters, including
+%                           tab: sprintf('\t')        indentation
+%                           newline: sprintf('\n')    newline between items
+%                           sep: ','                  delim. between items
+%                           quote: '"'                quotes for obj name
+%                           array: '[]'               start/end of array
+%                           obj: '{}'                 start/end of object
+%                         for example, when printing a compact JSON string,
+%                         the savejson function internally use
+%                           struct('tab', '', 'newline', '', 'sep', ',')
 %
 %        opt can be replaced by a list of ('param',value) pairs. The param
 %        string is equivalent to a field in opt and is case sensitive.
@@ -127,7 +137,7 @@ function output = savejson(rootname, obj, varargin)
 % license:
 %     BSD or GPL version 3, see LICENSE_{BSD,GPLv3}.txt files for details
 %
-% -- this function is part of JSONLab toolbox (http://iso2mesh.sf.net/cgi-bin/index.cgi?jsonlab)
+% -- this function is part of JSONLab toolbox (http://neurojson.org/jsonlab)
 %
 
 if (nargin == 1)
@@ -145,13 +155,13 @@ end
 
 opt.isoctave = isoctavemesh;
 
-opt.compression = jsonopt('Compression', '', opt);
+opt.compression = jsonopt('Compression', 'zlib', opt);
 opt.nestarray = jsonopt('NestArray', 0, opt);
 opt.compact = jsonopt('Compact', 0, opt);
 opt.singletcell = jsonopt('SingletCell', 1, opt);
 opt.singletarray = jsonopt('SingletArray', 0, opt);
 opt.formatversion = jsonopt('FormatVersion', 3, opt);
-opt.compressarraysize = jsonopt('CompressArraySize', 100, opt);
+opt.compressarraysize = jsonopt('CompressArraySize', 300, opt);
 opt.compressstringsize = jsonopt('CompressStringSize', inf, opt);
 opt.intformat = jsonopt('IntFormat', '%.0f', opt);
 opt.floatformat = jsonopt('FloatFormat', '%.16g', opt);
@@ -164,6 +174,10 @@ opt.inf = jsonopt('Inf', '"$1_Inf_"', opt);
 opt.nan = jsonopt('NaN', '"_NaN_"', opt);
 opt.num2cell_ = 0;
 opt.nosubstruct_ = 0;
+
+% Pre-compute commonly used format strings for sprintf
+opt.floatformat_sep = [opt.floatformat ','];
+opt.intformat_sep = [opt.intformat ','];
 
 if (jsonopt('BuiltinJSON', 0, opt) && exist('jsonencode', 'builtin'))
     try
@@ -194,19 +208,6 @@ if (~isempty(dozip))
     if (~ismember(dozip, {'zlib', 'gzip', 'lzma', 'lzip', 'lz4', 'lz4hc'}) && isempty(regexp(dozip, '^blosc2', 'once')))
         error('compression method "%s" is not supported', dozip);
     end
-    if (exist('zmat', 'file') ~= 2 && exist('zmat', 'file') ~= 3)
-        try
-            error(javachk('jvm'));
-            try
-                base64decode('test');
-            catch
-                matlab.net.base64decode('test');
-            end
-        catch
-            error('java-based compression is not supported');
-        end
-    end
-    opt.Compression = dozip;
 end
 
 rootisarray = 0;
@@ -228,27 +229,32 @@ if ((isstruct(obj) || iscell(obj)) && isempty(rootname) && forceroot)
     rootname = 'root';
 end
 
-whitespaces = struct('tab', sprintf('\t'), 'newline', sprintf('\n'), 'sep', sprintf(',\n'));
+whitespaces = struct('tab', sprintf('\t'), 'newline', sprintf('\n'), 'sep', sprintf(',\n'), 'quote', '"', 'array', '[]', 'obj', '{}');
 if (opt.compact == 1)
-    whitespaces = struct('tab', '', 'newline', '', 'sep', ',');
+    whitespaces = struct('tab', '', 'newline', '', 'sep', ',', 'quote', '"', 'array', '[]', 'obj', '{}');
 end
 if (~isfield(opt, 'whitespaces_'))
     opt.whitespaces_ = whitespaces;
+else
+    opt.whitespaces_ = mergestruct(whitespaces, opt.whitespaces_);
 end
+
+% Pre-compute whitespace strings for performance
+opt.ws_ = opt.whitespaces_;
 
 nl = whitespaces.newline;
 
 json = obj2json(rootname, obj, rootlevel, opt);
 
 if (rootisarray)
-    json = sprintf('%s%s', json, nl);
+    json = [json, nl];
 else
-    json = sprintf('{%s%s%s}\n', nl, json, nl);
+    json = ['{', nl, json, nl, '}', sprintf('\n')];
 end
 
 jsonp = jsonopt('JSONP', '', opt);
 if (~isempty(jsonp))
-    json = sprintf('%s(%s);%s', jsonp, json, nl);
+    json = [jsonp, '(', json, ');', nl];
 end
 
 % save to a file if FileName is set, suggested by Patrick Rapin
@@ -288,44 +294,48 @@ end
 
 %% -------------------------------------------------------------------------
 function txt = obj2json(name, item, level, varargin)
-
-if (iscell(item) || (isa(item, 'string') && numel(item) > 1))
-    txt = cell2json(name, item, level, varargin{:});
-elseif (isa(item, 'jdict'))
-    txt = obj2json(name, item, level, varargin{:});
+% Inline type checking for most common types to reduce function call overhead
+opt = varargin{1};
+if (iscell(item))
+    txt = cell2json(name, item, level, opt);
 elseif (isstruct(item))
-    txt = struct2json(name, item, level, varargin{:});
-elseif (isnumeric(item) || islogical(item) || isa(item, 'timeseries'))
-    txt = mat2json(name, item, level, varargin{:});
+    txt = struct2json(name, item, level, opt);
 elseif (ischar(item))
-    if (~isempty(varargin{1}.compression) && numel(item) >= varargin{1}.compressstringsize)
-        txt = mat2json(name, item, level, varargin{:});
+    if (~isempty(opt.compression) && numel(item) >= opt.compressstringsize)
+        txt = mat2json(name, item, level, opt);
     else
-        txt = str2json(name, item, level, varargin{:});
+        txt = str2json(name, item, level, opt);
     end
+elseif (isnumeric(item) || islogical(item))
+    txt = mat2json(name, item, level, opt);
+elseif (isa(item, 'string') && numel(item) > 1)
+    txt = cell2json(name, item, level, opt);
+elseif (isa(item, 'jdict'))
+    txt = obj2json(name, item.v(), level, opt);
+elseif (isa(item, 'timeseries'))
+    txt = mat2json(name, item, level, opt);
 elseif (isa(item, 'function_handle'))
-    txt = struct2json(name, functions(item), level, varargin{:});
+    txt = struct2json(name, functions(item), level, opt);
 elseif (isa(item, 'containers.Map') || isa(item, 'dictionary'))
-    txt = map2json(name, item, level, varargin{:});
+    txt = map2json(name, item, level, opt);
 elseif (isa(item, 'categorical'))
-    txt = cell2json(name, cellstr(item), level, varargin{:});
+    txt = cell2json(name, cellstr(item), level, opt);
 elseif (isa(item, 'table'))
-    txt = matlabtable2json(name, item, level, varargin{:});
+    txt = matlabtable2json(name, item, level, opt);
 elseif (isa(item, 'graph') || isa(item, 'digraph'))
-    txt = struct2json(name, jdataencode(item), level, varargin{:});
+    txt = struct2json(name, jdataencode(item), level, opt);
 elseif (isobject(item))
-    txt = matlabobject2json(name, item, level, varargin{:});
+    txt = matlabobject2json(name, item, level, opt);
 else
-    txt = any2json(name, item, level, varargin{:});
+    txt = any2json(name, item, level, opt);
 end
 
 %% -------------------------------------------------------------------------
-function txt = cell2json(name, item, level, varargin)
-txt = {};
+function txt = cell2json(name, item, level, opt)
 if (~iscell(item) && ~isa(item, 'string'))
     error('input is not a cell or string array');
 end
-isnum2cell = varargin{1}.num2cell_;
+isnum2cell = opt.num2cell_;
 
 if (isnum2cell)
     item = squeeze(item);
@@ -336,42 +346,66 @@ end
 
 dim = size(item);
 len = numel(item);
-ws = varargin{1}.whitespaces_;
-padding0 = repmat(ws.tab, 1, level);
+ws = opt.ws_;
 nl = ws.newline;
-bracketlevel = ~varargin{1}.singletcell;
+bracketlevel = ~opt.singletcell;
+
 if (len > bracketlevel)
+    padding0 = repmat(ws.tab, 1, level);
     if (~isempty(name))
-        txt = {padding0, '"', decodevarname(name, varargin{1}.unpackhex), '":[', nl};
+        txt = {[padding0, ws.quote, decodevarname(name, opt.unpackhex), ws.quote, ':', ws.array(1), nl]};
         name = '';
     else
-        txt = {padding0, '[', nl};
+        txt = {[padding0, ws.array(1), nl]};
     end
 elseif (len == 0)
+    padding0 = repmat(ws.tab, 1, level);
     if (~isempty(name))
-        txt = {padding0, '"' decodevarname(name, varargin{1}.unpackhex) '":[]'};
-        name = '';
+        txt = [padding0, ws.quote, decodevarname(name, opt.unpackhex), ws.quote, ':', ws.array];
     else
-        txt = {padding0, '[]'};
+        txt = [padding0, ws.array];
     end
-    txt = sprintf('%s', txt{:});
     return
+else
+    txt = cell(1, len * 2);
 end
+
 if (size(item, 1) > 1)
     item = num2cell(item, 2:ndims(item))';
 end
-idx = num2cell(1:length(item));
-sep = {[',' nl], ''};
-txt = [txt{:}, cellfun(@(x, id) [obj2json(name, x, level + (dim(1) > 1) + (len > bracketlevel), varargin{:}), sep{(id == length(item)) + 1}], item, idx, 'UniformOutput', false)];
+
+itemlen = length(item);
+nextlevel = level + (dim(1) > 1) + (len > bracketlevel);
+
+% Pre-allocate output cell array
+if (len > bracketlevel)
+    outcell = cell(1, itemlen * 2 + 2);
+    outcell{1} = txt{1};
+    idx = 2;
+else
+    outcell = cell(1, itemlen * 2);
+    idx = 1;
+end
+
+sep1 = [',', nl];
+for i = 1:itemlen
+    outcell{idx} = obj2json(name, item{i}, nextlevel, opt);
+    idx = idx + 1;
+    if (i < itemlen)
+        outcell{idx} = sep1;
+        idx = idx + 1;
+    end
+end
 
 if (len > bracketlevel)
-    txt(end + 1:end + 3) = {nl, padding0, ']'};
+    padding0 = repmat(ws.tab, 1, level);
+    outcell{idx} = [nl, padding0, ws.array(2)];
+    idx = idx + 1;
 end
-txt = sprintf('%s', txt{:});
+txt = [outcell{1:idx - 1}];
 
 %% -------------------------------------------------------------------------
-function txt = struct2json(name, item, level, varargin)
-txt = {};
+function txt = struct2json(name, item, level, opt)
 if (~isstruct(item))
     error('input is not a struct');
 end
@@ -381,81 +415,115 @@ if (ndims(squeeze(item)) > 2) % for 3D or higher dimensions, flatten to 2D for n
     dim = size(item);
 end
 len = numel(item);
-forcearray = (len > 1 || (varargin{1}.singletarray == 1 && level > 0));
-ws = varargin{1}.whitespaces_;
-padding0 = repmat(ws.tab, 1, level);
-padding2 = repmat(ws.tab, 1, level + 1);
-padding1 = repmat(ws.tab, 1, level + (dim(1) > 1) + forcearray);
+forcearray = (len > 1 || (opt.singletarray == 1 && level > 0));
+ws = opt.ws_;
 nl = ws.newline;
-if (isfield(item, encodevarname('_ArrayType_', varargin{1}.unpackhex)))
-    varargin{1}.nosubstruct_ = 1;
+tab = ws.tab;
+
+% Pre-compute padding strings once
+padding0 = repmat(tab, 1, level);
+padding2 = repmat(tab, 1, level + 1);
+padding1 = repmat(tab, 1, level + (dim(1) > 1) + forcearray);
+
+% Check for ArrayType annotation once
+arrayTypeField = encodevarname('_ArrayType_', opt.unpackhex);
+if (isfield(item, arrayTypeField))
+    opt.nosubstruct_ = 1;
 end
 
 if (isempty(item))
     if (~isempty(name))
-        txt = {padding0, '"', decodevarname(name, varargin{1}.unpackhex), '":[]'};
+        txt = [padding0, ws.quote, decodevarname(name, opt.unpackhex), ws.quote, ':', ws.array];
     else
-        txt = {padding0, '[]'};
+        txt = [padding0, ws.array];
     end
-    txt = sprintf('%s', txt{:});
     return
 end
+
+% Get field names once for all elements (assumes uniform struct array)
+names = fieldnames(item);
+numfields = length(names);
+
+% Pre-encode field names and check ByteStream once
+byteStreamField = encodevarname('_ByteStream_', opt.unpackhex);
+decodedName = decodevarname(name, opt.unpackhex);
+
+% Estimate output size and pre-allocate
+estsize = len * (numfields * 4 + 10) + 20;
+outcell = cell(1, estsize);
+idx = 1;
+
 if (~isempty(name))
     if (forcearray)
-        txt = {padding0, '"', decodevarname(name, varargin{1}.unpackhex), '":[', nl};
+        outcell{idx} = [padding0, ws.quote, decodedName, ws.quote, ':', ws.array(1), nl];
+        idx = idx + 1;
     end
 else
     if (forcearray)
-        txt = {padding0, '[', nl};
+        outcell{idx} = [padding0, ws.array(1), nl];
+        idx = idx + 1;
     end
 end
+
+levelInner = level + (dim(1) > 1) + 1 + forcearray;
+commaNl = [',', nl];
+
 for j = 1:dim(2)
     if (dim(1) > 1)
-        txt(end + 1:end + 3) = {padding2, '[', nl};
+        outcell{idx} = [padding2, ws.array(1), nl];
+        idx = idx + 1;
     end
     for i = 1:dim(1)
-        names = fieldnames(item(i, j));
         if (~isempty(name) && len == 1 && ~forcearray)
-            txt(end + 1:end + 5) = {padding1, '"', decodevarname(name, varargin{1}.unpackhex), '":{', nl};
+            outcell{idx} = [padding1, ws.quote, decodedName, ws.quote, ':', ws.obj(1), nl];
         else
-            txt(end + 1:end + 3) = {padding1, '{', nl};
+            outcell{idx} = [padding1, ws.obj(1), nl];
         end
-        if (~isempty(names))
-            for e = 1:length(names)
-                if (varargin{1}.nosubstruct_ && ischar(item(i, j).(names{e})) || ...
-                    strcmp(names{e}, encodevarname('_ByteStream_')))
-                    txt{end + 1} = str2json(names{e}, item(i, j).(names{e}), ...
-                                            level + (dim(1) > 1) + 1 + forcearray, varargin{:});
+        idx = idx + 1;
+
+        if (numfields > 0)
+            itemij = item(i, j);
+            for e = 1:numfields
+                fname = names{e};
+                fval = itemij.(fname);
+                if (opt.nosubstruct_ && ischar(fval)) || strcmp(fname, byteStreamField)
+                    outcell{idx} = str2json(fname, fval, levelInner, opt);
                 else
-                    txt{end + 1} = obj2json(names{e}, item(i, j).(names{e}), ...
-                                            level + (dim(1) > 1) + 1 + forcearray, varargin{:});
+                    outcell{idx} = obj2json(fname, fval, levelInner, opt);
                 end
-                if (e < length(names))
-                    txt{end + 1} = ',';
+                idx = idx + 1;
+                if (e < numfields)
+                    outcell{idx} = ',';
+                    idx = idx + 1;
                 end
-                txt{end + 1} = nl;
+                outcell{idx} = nl;
+                idx = idx + 1;
             end
         end
-        txt(end + 1:end + 2) = {padding1, '}'};
+        outcell{idx} = [padding1, ws.obj(2)];
+        idx = idx + 1;
         if (i < dim(1))
-            txt(end + 1:end + 2) = {',' nl};
+            outcell{idx} = commaNl;
+            idx = idx + 1;
         end
     end
     if (dim(1) > 1)
-        txt(end + 1:end + 3) = {nl, padding2, ']'};
+        outcell{idx} = [nl, padding2, ws.array(2)];
+        idx = idx + 1;
     end
     if (j < dim(2))
-        txt(end + 1:end + 2) = {',' nl};
+        outcell{idx} = commaNl;
+        idx = idx + 1;
     end
 end
 if (forcearray)
-    txt(end + 1:end + 3) = {nl, padding0, ']'};
+    outcell{idx} = [nl, padding0, ws.array(2)];
+    idx = idx + 1;
 end
-txt = sprintf('%s', txt{:});
+txt = [outcell{1:idx - 1}];
 
 %% -------------------------------------------------------------------------
-function txt = map2json(name, item, level, varargin)
-txt = {};
+function txt = map2json(name, item, level, opt)
 itemtype = isa(item, 'containers.Map');
 dim = size(item);
 
@@ -483,109 +551,140 @@ if ((itemtype == 1 && ~strcmp(item.KeyType, 'char')) || (itemtype == 2 && ~strcm
         mm{i} = {names{i}, val{i}};
     end
     if (isempty(name))
-        txt = obj2json('_MapData_', mm, level + 1, varargin{:});
+        txt = obj2json('_MapData_', mm, level + 1, opt);
     else
         temp = struct(name, struct());
-        if (varargin{1}.isoctave)
+        if (opt.isoctave)
             temp.(name).('_MapData_') = mm;
         else
             temp.(name).('x0x5F_MapData_') = mm;
         end
-        txt = obj2json(name, temp.(name), level, varargin{:});
+        txt = obj2json(name, temp.(name), level, opt);
     end
     return
 end
 
-ws = varargin{1}.whitespaces_;
+ws = opt.ws_;
 padding0 = repmat(ws.tab, 1, level);
 nl = ws.newline;
 
 if (isempty(item))
     if (~isempty(name))
-        txt = {padding0, '"', decodevarname(name, varargin{1}.unpackhex), '":[]'};
+        txt = [padding0, ws.quote, decodevarname(name, opt.unpackhex), ws.quote, ':', ws.array];
     else
-        txt = {padding0, '[]'};
+        txt = [padding0, ws.array];
     end
-    txt = sprintf('%s', txt{:});
     return
 end
+
+% Pre-allocate
+maxlen = dim(1) * 3 + 10;
+outcell = cell(1, maxlen);
+idx = 1;
+
 if (~isempty(name))
-    txt = {padding0, '"', decodevarname(name, varargin{1}.unpackhex), '":{', nl};
+    outcell{idx} = [padding0, ws.quote, decodevarname(name, opt.unpackhex), ws.quote, ':', ws.obj(1), nl];
 else
-    txt = {padding0, '{', nl};
+    outcell{idx} = [padding0, ws.obj(1), nl];
 end
+idx = idx + 1;
 
 for i = 1:dim(1)
     if (isempty(names{i}))
-        txt{end + 1} = obj2json('x0x0_', val{i}, level + 1, varargin{:});
+        outcell{idx} = obj2json('x0x0_', val{i}, level + 1, opt);
     else
-        txt{end + 1} = obj2json(names{i}, val{i}, level + 1, varargin{:});
+        outcell{idx} = obj2json(char(names{i}), val{i}, level + 1, opt);
     end
+    idx = idx + 1;
     if (i < length(names))
-        txt{end + 1} = ',';
+        outcell{idx} = ',';
+        idx = idx + 1;
     end
     if (i < dim(1))
-        txt{end + 1} = nl;
+        outcell{idx} = nl;
+        idx = idx + 1;
     end
 end
-txt(end + 1:end + 3) = {nl, padding0, '}'};
-txt = sprintf('%s', txt{:});
+outcell{idx} = nl;
+idx = idx + 1;
+outcell{idx} = padding0;
+idx = idx + 1;
+outcell{idx} = ws.obj(2);
+idx = idx + 1;
+txt = [outcell{1:idx - 1}];
 
 %% -------------------------------------------------------------------------
-function txt = str2json(name, item, level, varargin)
-txt = {};
+function txt = str2json(name, item, level, opt)
 if (~ischar(item))
     error('input is not a string');
 end
 item = reshape(item, max(size(item), [1 0]));
 len = size(item, 1);
-ws = varargin{1}.whitespaces_;
+ws = opt.ws_;
 padding1 = repmat(ws.tab, 1, level);
-padding0 = repmat(ws.tab, 1, level + 1);
 nl = ws.newline;
+quote = ws.quote;
+
+decodedname = decodevarname(name, opt.unpackhex);
+isArrayZipData = strcmp('_ArrayZipData_', decodedname);
+
+% Fast path for single-row strings (most common case)
+if (len == 1)
+    if (~isArrayZipData)
+        val = escapejsonstring(item, opt);
+    else
+        val = item;
+    end
+    if (isempty(name))
+        txt = [padding1, quote, val, quote];
+    else
+        txt = [padding1, quote, decodedname, quote, ':', quote, val, quote];
+    end
+    return
+end
+
+% Multi-row string handling
+padding0 = repmat(ws.tab, 1, level + 1);
 sep = ws.sep;
 
+% Pre-allocate for multi-row
+outcell = cell(1, len * 2 + 4);
+idx = 1;
+
 if (~isempty(name))
-    if (len > 1)
-        txt = {padding1, '"', decodevarname(name, varargin{1}.unpackhex), '":[', nl};
-    end
+    outcell{idx} = [padding1, quote, decodedname, quote, ':', ws.array(1), nl];
 else
-    if (len > 1)
-        txt = {padding1, '[', nl};
-    end
+    outcell{idx} = [padding1, ws.array(1), nl];
 end
+idx = idx + 1;
+
 for e = 1:len
-    if (strcmp('_ArrayZipData_', decodevarname(name, varargin{1}.unpackhex)) == 0)
-        val = escapejsonstring(item(e, :), varargin{:});
+    if (~isArrayZipData)
+        val = escapejsonstring(item(e, :), opt);
     else
         val = item(e, :);
     end
-    if (len == 1)
-        obj = ['"' decodevarname(name, varargin{1}.unpackhex) '":' '"', val, '"'];
-        if (isempty(name))
-            obj = ['"', val, '"'];
-        end
-        txt(end + 1:end + 2) = {padding1, obj};
-    else
-        txt(end + 1:end + 4) = {padding0, '"', val, '"'};
+    outcell{idx} = [padding0, quote, val, quote];
+    idx = idx + 1;
+    if (e < len)
+        outcell{idx} = sep;
+        idx = idx + 1;
     end
-    if (e == len)
-        sep = '';
-    end
-    txt{end + 1} = sep;
 end
-if (len > 1)
-    txt(end + 1:end + 3) = {nl, padding1, ']'};
-end
-txt = sprintf('%s', txt{:});
+outcell{idx} = nl;
+idx = idx + 1;
+outcell{idx} = padding1;
+idx = idx + 1;
+outcell{idx} = ws.array(2);
+idx = idx + 1;
+txt = [outcell{1:idx - 1}];
 
 %% -------------------------------------------------------------------------
-function txt = mat2json(name, item, level, varargin)
+function txt = mat2json(name, item, level, opt)
 if (~isnumeric(item) && ~islogical(item) && ~ischar(item))
     error('input is not an array');
 end
-opt = varargin{1};
-ws = opt.whitespaces_;
+ws = opt.ws_;
 padding1 = repmat(ws.tab, 1, level);
 padding0 = repmat(ws.tab, 1, level + 1);
 nl = ws.newline;
@@ -610,23 +709,21 @@ end
 
 if (~opt.nosubstruct_ && (((isnest == 0) && length(size(item)) > 2) || issparse(item) || ~isreal(item) || ...
                           (isempty(item) && any(size(item))) || opt.arraytostruct || (~isempty(dozip) && numel(item) > zipsize)))
+    % Build header using cell array concatenation instead of sprintf
+    sizestr = regexprep(mat2str(size(item)), '\s+', ',');
+    classname = class(item);
+
     if (isempty(name))
-        txt = sprintf('%s{%s%s"_ArrayType_":"%s",%s%s"_ArraySize_":%s,%s', ...
-                      padding1, nl, padding0, class(item), nl, padding0, regexprep(mat2str(size(item)), '\s+', ','), nl);
+        txt = [padding1, '{', nl, padding0, '"_ArrayType_":"', classname, '",', nl, padding0, '"_ArraySize_":', sizestr, ',', nl];
     else
-        txt = sprintf('%s"%s":{%s%s"_ArrayType_":"%s",%s%s"_ArraySize_":%s,%s', ...
-                      padding1, decodevarname(name, opt.unpackhex), nl, padding0, class(item), nl, padding0, regexprep(mat2str(size(item)), '\s+', ','), nl);
+        txt = [padding1, '"', decodevarname(name, opt.unpackhex), '":{', nl, padding0, '"_ArrayType_":"', classname, '",', nl, padding0, '"_ArraySize_":', sizestr, ',', nl];
     end
 else
-    numtxt = matdata2json(item, level + 1, varargin{:});
+    numtxt = matdata2json(item, level + 1, opt);
     if (isempty(name))
-        txt = sprintf('%s%s', padding1, numtxt);
+        txt = [padding1, numtxt];
     else
-        if (numel(item) == 1 && varargin{1}.singletarray == 0)
-            txt = sprintf('%s"%s":%s', padding1, decodevarname(name, opt.unpackhex), numtxt);
-        else
-            txt = sprintf('%s"%s":%s', padding1, decodevarname(name, opt.unpackhex), numtxt);
-        end
+        txt = [padding1, ws.quote, decodevarname(name, opt.unpackhex), ws.quote, ':', numtxt];
     end
     return
 end
@@ -643,9 +740,9 @@ if (issparse(item))
             % (Necessary for complex row vector handling below.)
             data = data';
         end
-        txt = sprintf(dataformat, txt, padding0, '"_ArrayIsComplex_":', 'true', sep);
+        txt = [txt, padding0, '"_ArrayIsComplex_":true', sep];
     end
-    txt = sprintf(dataformat, txt, padding0, '"_ArrayIsSparse_":', 'true', sep);
+    txt = [txt, padding0, '"_ArrayIsSparse_":true', sep];
     if (~isempty(dozip) && numel(data * 2) > zipsize)
         if (size(item, 1) == 1)
             % Row vector, store only column indices.
@@ -657,10 +754,11 @@ if (issparse(item))
             % General case, store row and column indices.
             fulldata = [ix, iy, data];
         end
-        txt = sprintf(dataformat, txt, padding0, '"_ArrayZipSize_":', regexprep(mat2str(size(fulldata)), '\s+', ','), sep);
-        txt = sprintf(dataformat, txt, padding0, '"_ArrayZipType_":"', dozip, ['"' sep]);
+        sizestr = regexprep(mat2str(size(fulldata)), '\s+', ',');
+        txt = [txt, padding0, '"_ArrayZipSize_":', sizestr, sep];
+        txt = [txt, padding0, '"_ArrayZipType_":"', dozip, '"', sep];
         compfun = str2func([dozip 'encode']);
-        txt = sprintf(dataformat, txt, padding0, '"_ArrayZipData_":"', base64encode(compfun(typecast(fulldata(:), 'uint8'))), ['"' nl]);
+        txt = [txt, padding0, '"_ArrayZipData_":"', base64encode(compfun(typecast(fulldata(:), 'uint8'))), '"', nl];
     else
         if (size(item, 1) == 1)
             % Row vector, store only column indices.
@@ -672,8 +770,7 @@ if (issparse(item))
             % General case, store row and column indices.
             fulldata = [ix, iy, data];
         end
-        txt = sprintf(dataformat, txt, padding0, '"_ArrayData_":', ...
-                      matdata2json(fulldata', level + 2, varargin{:}), nl);
+        txt = [txt, padding0, '"_ArrayData_":', matdata2json(fulldata', level + 2, opt), nl];
     end
 else
     if (format > 1.9)
@@ -686,11 +783,12 @@ else
                 fulldata = uint8(fulldata);
             end
         else
-            txt = sprintf(dataformat, txt, padding0, '"_ArrayIsComplex_":', 'true', sep);
+            txt = [txt, padding0, '"_ArrayIsComplex_":true', sep];
             fulldata = [real(item(:)) imag(item(:))]';
         end
-        txt = sprintf(dataformat, txt, padding0, '"_ArrayZipSize_":', regexprep(mat2str(size(fulldata)), '\s+', ','), sep);
-        txt = sprintf(dataformat, txt, padding0, '"_ArrayZipType_":"', dozip, ['"' sep]);
+        sizestr = regexprep(mat2str(size(fulldata)), '\s+', ',');
+        txt = [txt, padding0, '"_ArrayZipSize_":', sizestr, sep];
+        txt = [txt, padding0, '"_ArrayZipType_":"', dozip, '"', sep];
         encodeparam = {};
         if (~isempty(regexp(dozip, '^blosc2', 'once')))
             compfun = @blosc2encode;
@@ -698,28 +796,26 @@ else
         else
             compfun = str2func([dozip 'encode']);
         end
-        txt = sprintf(dataformat, txt, padding0, '"_ArrayZipData_":"', char(base64encode(compfun(typecast(fulldata(:), 'uint8'), encodeparam{:}))), ['"' nl]);
+        txt = [txt, padding0, '"_ArrayZipData_":"', char(base64encode(compfun(typecast(fulldata(:), 'uint8'), encodeparam{:}))), '"', nl];
     else
         if (isreal(item))
-            txt = sprintf(dataformat, txt, padding0, '"_ArrayData_":', ...
-                          matdata2json(item(:)', level + 2, varargin{:}), nl);
+            txt = [txt, padding0, '"_ArrayData_":', matdata2json(item(:)', level + 2, opt), nl];
         else
-            txt = sprintf(dataformat, txt, padding0, '"_ArrayIsComplex_":', 'true', sep);
-            txt = sprintf(dataformat, txt, padding0, '"_ArrayData_":', ...
-                          matdata2json([real(item(:)) imag(item(:))]', level + 2, varargin{:}), nl);
+            txt = [txt, padding0, '"_ArrayIsComplex_":true', sep];
+            txt = [txt, padding0, '"_ArrayData_":', matdata2json([real(item(:)) imag(item(:))]', level + 2, opt), nl];
         end
     end
 end
 
-txt = sprintf('%s%s%s', txt, padding1, '}');
+txt = [txt, padding1, ws.obj(2)];
 
 %% -------------------------------------------------------------------------
-function txt = matlabobject2json(name, item, level, varargin)
+function txt = matlabobject2json(name, item, level, opt)
 try
     if numel(item) == 0 % empty object
         st = struct();
     elseif numel(item) == 1 %
-        txt = str2json(name, char(item), level, varargin{:});
+        txt = str2json(name, char(item), level, opt);
         return
     else
         propertynames = properties(item);
@@ -729,42 +825,42 @@ try
             end
         end
     end
-    txt = struct2json(name, st, level, varargin{:});
+    txt = struct2json(name, st, level, opt);
 catch
-    txt = any2json(name, item, level, varargin{:});
+    txt = any2json(name, item, level, opt);
 end
 
 %% -------------------------------------------------------------------------
-function txt = matlabtable2json(name, item, level, varargin)
+function txt = matlabtable2json(name, item, level, opt)
 st = containers.Map();
 st('_TableRecords_') = table2cell(item);
 st('_TableRows_') = item.Properties.RowNames';
 st('_TableCols_') = item.Properties.VariableNames;
 if (isempty(name))
-    txt = map2json(name, st, level, varargin{:});
+    txt = map2json(name, st, level, opt);
 else
     temp = struct(name, struct());
     temp.(name) = st;
-    txt = map2json(name, temp.(name), level, varargin{:});
+    txt = map2json(name, temp.(name), level, opt);
 end
 
 %% -------------------------------------------------------------------------
-function txt = matdata2json(mat, level, varargin)
+function txt = matdata2json(mat, level, opt)
 
-ws = varargin{1}.whitespaces_;
+ws = opt.ws_;
 tab = ws.tab;
 nl = ws.newline;
-isnest = varargin{1}.nestarray;
-format = varargin{1}.formatversion;
-isnum2cell = varargin{1}.num2cell_;
+isnest = opt.nestarray;
+format = opt.formatversion;
+isnum2cell = opt.num2cell_;
 
 if (~isvector(mat) && isnest == 1)
     if (format > 1.9 && isnum2cell == 0)
         mat = permute(mat, ndims(mat):-1:1);
     end
-    varargin{1}.num2cell_ = 1;
-    varargin{1}.singletcell = 0;
-    txt = cell2json('', num2cell(mat, 1), level - 1, varargin{:});
+    opt.num2cell_ = 1;
+    opt.singletcell = 0;
+    txt = cell2json('', num2cell(mat, 1), level - 1, opt);
     return
 elseif (isvector(mat) && isnum2cell == 1)
     mat = mat(:).';
@@ -775,85 +871,166 @@ if (size(mat, 1) == 1)
     post = '';
     level = level - 1;
 else
-    pre = sprintf('[%s', nl);
-    post = sprintf('%s%s]', nl, repmat(tab, 1, level - 1));
+    pre = [ws.array(1), nl];
+    post = [nl, repmat(tab, 1, level - 1), ws.array(2)];
 end
 
 if (isempty(mat))
-    if (varargin{1}.emptyarrayasnull)
+    if (opt.emptyarrayasnull)
         txt = 'null';
     else
-        txt = '[]';
+        txt = ws.array;
     end
     return
 end
+
+% Pre-check for special values to avoid unnecessary regexprep later
+hasInf = any(isinf(mat(:)));
+hasNaN = any(isnan(mat(:)));
+
 if (isinteger(mat))
-    floatformat = varargin{1}.intformat;
+    floatformat = opt.intformat;
 else
-    floatformat = varargin{1}.floatformat;
+    floatformat = opt.floatformat;
 end
-if (numel(mat) == 1 && varargin{1}.singletarray == 0 && level > 0)
-    formatstr = [repmat([floatformat ','], 1, size(mat, 2) - 1) [floatformat sprintf(',%s', nl)]];
+
+ncols = size(mat, 2);
+if (numel(mat) == 1 && opt.singletarray == 0 && level > 0)
+    formatstr = [repmat([floatformat ','], 1, ncols - 1), floatformat, sprintf(',%s', nl)];
 else
-    formatstr = ['[' repmat([floatformat ','], 1, size(mat, 2) - 1) [floatformat sprintf('],%s', nl)]];
+    formatstr = [ws.array(1), repmat([floatformat ','], 1, ncols - 1), floatformat, ws.array(2), ',', nl];
 end
-if (nargin >= 2 && size(mat, 1) > 1 && varargin{1}.arrayindent == 1)
-    formatstr = [repmat(tab, 1, level) formatstr];
+if (size(mat, 1) > 1 && opt.arrayindent == 1)
+    formatstr = [repmat(tab, 1, level), formatstr];
 end
 
 txt = sprintf(formatstr, permute(mat, ndims(mat):-1:1));
 txt(end - length(nl):end) = [];
-if (islogical(mat) && (numel(mat) == 1 || varargin{1}.parselogical == 1))
-    txt = regexprep(txt, '1', 'true');
-    txt = regexprep(txt, '0', 'false');
+
+if (islogical(mat) && (numel(mat) == 1 || opt.parselogical == 1))
+    txt = strrep(strrep(txt, '1', 'true'), '0', 'false');
 end
 
-txt = [pre txt post];
-if (any(isinf(mat(:))))
-    txt = regexprep(txt, '([-+]*)Inf', varargin{1}.inf);
+txt = [pre, txt, post];
+
+% Only run replacement if special values exist
+if (hasInf)
+    txt = regexprep(txt, '([-+]*)Inf', opt.inf);
 end
-if (any(isnan(mat(:))))
-    txt = regexprep(txt, 'NaN', varargin{1}.nan);
+if (hasNaN)
+    txt = strrep(txt, 'NaN', opt.nan);
 end
 
 %% -------------------------------------------------------------------------
-function txt = any2json(name, item, level, varargin)
+function txt = any2json(name, item, level, opt)
 st = containers.Map();
 st('_DataInfo_') = struct('MATLABObjectName', name, 'MATLABObjectClass', class(item), 'MATLABObjectSize', size(item));
 st('_ByteStream_') = char(base64encode(getByteStreamFromArray(item)));
 
 if (isempty(name))
-    txt = map2json(name, st, level, varargin{:});
+    txt = map2json(name, st, level, opt);
 else
     temp = struct(name, struct());
     temp.(name) = st;
-    txt = map2json(name, temp.(name), level, varargin{:});
+    txt = map2json(name, temp.(name), level, opt);
 end
 
 %% -------------------------------------------------------------------------
+%  Optimized escapejsonstring - use strrep instead of regexprep when possible
+%% -------------------------------------------------------------------------
 function newstr = escapejsonstring(str, varargin)
 newstr = str;
-if (isempty(str) || isempty(regexp(str, '\W', 'once')))
+if (isempty(str))
     return
 end
-isoct = varargin{1}.isoctave;
-if (isoct)
-    vv = sscanf(OCTAVE_VERSION, '%f');
-    if (vv(1) >= 3.8)
-        isoct = 0;
+
+% Quick ASCII check - if all printable ASCII and no special chars, return early
+% This is the fast path for most strings
+byteval = uint8(str);
+if (all(byteval >= 32 & byteval <= 126))
+    % Check for characters that need escaping
+    if (~any(byteval == 34 | byteval == 92))  % 34 = '"', 92 = '\'
+        return
     end
 end
-if (isoct)
-    escapechars = {'\\', '\"', '\a', '\f', '\n', '\r', '\t', '\v'};
-    for i = 1:length(escapechars)
-        newstr = regexprep(newstr, escapechars{i}, escapechars{i});
-    end
-    newstr = regexprep(newstr, '\\\\(u[0-9a-fA-F]{4}[^0-9a-fA-F]*)', '\$1');
-else
-    escapechars = {'\\', '\"', '\a', '\b', '\f', '\n', '\r', '\t', '\v'};
-    esc = {'\\\\', '\\"', '\\a', '\\b', '\\f', '\\n', '\\r', '\\t', '\\v'};
-    for i = 1:length(escapechars)
-        newstr = regexprep(newstr, escapechars{i}, esc{i});
-    end
-    newstr = regexprep(newstr, '\\\\(u[0-9a-fA-F]{4}[^0-9a-fA-F]*)', '\\$1');
+
+% Use strrep for common cases (much faster than regexprep)
+% Order matters: escape backslash first
+newstr = strrep(newstr, '\', '\\');
+newstr = strrep(newstr, '"', '\"');
+newstr = strrep(newstr, sprintf('\a'), '\a');
+newstr = strrep(newstr, sprintf('\b'), '\b');
+newstr = strrep(newstr, sprintf('\f'), '\f');
+newstr = strrep(newstr, sprintf('\n'), '\n');
+newstr = strrep(newstr, sprintf('\r'), '\r');
+newstr = strrep(newstr, sprintf('\t'), '\t');
+newstr = strrep(newstr, sprintf('\v'), '\v');
+
+% Handle unicode escape sequences - restore \\uXXXX to \uXXXX
+% Only process if string is long enough and contains backslashes
+len = length(newstr);
+if (len < 6)
+    return
 end
+
+% Check if there's any potential unicode escape sequence
+if (~any(newstr == '\'))
+    return
+end
+
+% Try fast path first (works in MATLAB and newer Octave with valid UTF-8)
+try
+    idx = strfind(newstr, '\\u');
+    if (~isempty(idx))
+        newstr = regexprep(newstr, '\\\\(u[0-9a-fA-F]{4})', '\\$1');
+    end
+catch
+    % Fallback for Octave with invalid UTF-8: use vectorized byte operations
+    newstr = escapejsonstring_unicode_fix(newstr);
+end
+
+%% -------------------------------------------------------------------------
+%  Vectorized unicode escape fix for non-UTF8 safe strings (Octave compatibility)
+%% -------------------------------------------------------------------------
+function newstr = escapejsonstring_unicode_fix(str)
+% Replace \\uXXXX with \uXXXX using vectorized operations
+bytes = uint8(str);
+len = length(bytes);
+
+if (len < 6)
+    newstr = str;
+    return
+end
+
+% Find all positions where '\\u' occurs (bytes: 92 92 117)
+% Use vectorized comparison
+matches = (bytes(1:end - 2) == 92) & (bytes(2:end - 1) == 92) & (bytes(3:end) == 117);
+positions = find(matches);
+
+if (isempty(positions))
+    newstr = str;
+    return
+end
+
+% Filter positions that have valid hex digits following
+hexchars = uint8('0123456789abcdefABCDEF');
+validpos = [];
+for i = 1:length(positions)
+    p = positions(i);
+    if (p + 6 <= len)
+        if (all(ismember(bytes(p + 3:p + 6), hexchars)))
+            validpos(end + 1) = p; %#ok<AGROW>
+        end
+    end
+end
+
+if (isempty(validpos))
+    newstr = str;
+    return
+end
+
+% Build result by removing extra backslashes at valid positions
+% Create mask of bytes to keep (remove first backslash of each \\uXXXX)
+keep = true(1, len);
+keep(validpos) = false;
+newstr = char(bytes(keep));

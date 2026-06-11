@@ -4,7 +4,7 @@ function str = encodevarname(str, varargin)
 %
 %    Encode an invalid variable name using a hex-format for bi-directional
 %    conversions.
-
+%
 %    This function is sensitive to the default charset
 %    settings in MATLAB, please call feature('DefaultCharacterSet','utf8')
 %    to set the encoding to UTF-8 before calling this function.
@@ -37,22 +37,54 @@ function str = encodevarname(str, varargin)
 %    License: GPLv3 or 3-clause BSD license, see https://github.com/NeuroJSON/easyh5 for details
 %
 
-if (~isvarname(str(1)))
-    if (exist('unicode2native', 'builtin'))
-        str = sprintf('x0x%s_%s', sprintf('%X', unicode2native(str(1))), str(2:end));
-    else
-        str = sprintf('x0x%X_%s', char(str(1)) + 0, str(2:end));
+% Check first character - use isvarname for the first char check to maintain
+% Octave compatibility (Octave allows underscore as first character)
+c1 = str(1);
+firstcharvalid = (c1 >= 'a' && c1 <= 'z') || (c1 >= 'A' && c1 <= 'Z');
+
+% In Octave, underscore is valid as first character; check this case
+if ~firstcharvalid && c1 == '_'
+    persistent isaliasaliased
+    if isempty(isaliasaliased)
+        isaliasaliased = exist('OCTAVE_VERSION', 'builtin') ~= 0;
+    end
+    if isaliasaliased
+        firstcharvalid = true;
     end
 end
-if (isvarname(str))
-    return
+
+if ~firstcharvalid
+    % First char is not valid - need to encode it
+    if exist('unicode2native', 'builtin')
+        str = sprintf('x0x%s_%s', sprintf('%X', unicode2native(c1)), str(2:end));
+    else
+        str = sprintf('x0x%X_%s', c1 + 0, str(2:end));
+    end
 end
-if (exist('unicode2native', 'builtin'))
+
+% Fast validation: check if all remaining chars are valid (alphanumeric or underscore)
+% This is faster than calling isvarname for simple cases
+len = length(str);
+if len <= 63
+    isvalid = true;
+    for i = 1:len
+        c = str(i);
+        if ~((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
+            isvalid = false;
+            break
+        end
+    end
+    if isvalid
+        return
+    end
+end
+
+% Slow path: has invalid characters, need full encoding
+if exist('unicode2native', 'builtin')
     str = regexprep(str, '([^0-9A-Za-z_])', '_0x${sprintf(''%X'',unicode2native($1))}_');
 else
     cpos = find(~ismember(str, ['0':'9', 'A':'Z', 'a':'z', '_']));
-    % cpos=regexp(str,'[^0-9A-Za-z_]');
-    if (isempty(cpos))
+    if isempty(cpos)
         return
     end
     str0 = str;
@@ -61,7 +93,7 @@ else
     for i = 1:length(cpos)
         str = [str str0(pos0(i) + 1:cpos(i) - 1) sprintf('_0x%X_', str0(cpos(i)) + 0)];
     end
-    if (cpos(end) ~= length(str))
+    if cpos(end) ~= length(str)
         str = [str str0(pos0(end - 1) + 1:pos0(end))];
     end
 end

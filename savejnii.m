@@ -5,7 +5,7 @@ function savejnii(jnii, filename, varargin)
 %    savejnii(jniidata, jniifile, 'Param1',value1, 'Param2',value2,...)
 %
 %    Save an in-memory JNIfTI structure into a text-JNIfTI file with format
-%    defined in JNIfTI specification: https://github.com/NeuroJSON/jnifti
+%    defined in JNIfTI specification: https://github.com/NeuroJSON/jnifty
 %
 %    author: Qianqian Fang (q.fang <at> neu.edu)
 %
@@ -27,9 +27,9 @@ function savejnii(jnii, filename, varargin)
 %        savejnii(jnii, 'magic10.jnii')
 %        savejnii(jnii, 'magic10_compact.jnii','Compact',1)
 %
-%    this file is part of JNIfTI specification: https://github.com/NeuroJSON/jnifti
+%    this file is part of JNIfTI specification: https://github.com/NeuroJSON/jnifty
 %
-%    License: Apache 2.0, see https://github.com/NeuroJSON/jnifti for details
+%    License: Apache 2.0, see https://github.com/NeuroJSON/jnifty for details
 %
 
 if (nargin < 2)
@@ -37,7 +37,7 @@ if (nargin < 2)
 end
 
 if (~exist('savejson', 'file'))
-    error('you must first install JSONLab from http://github.com/NeuroJSON/jsonlab/');
+    error('you must first install JSONLab from https://github.com/NeuroJSON/jsonlab/');
 end
 
 savejson('', jnii, 'FileName', filename, varargin{:});

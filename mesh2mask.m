@@ -125,7 +125,7 @@ if (nargout >= 2)
 end
 
 function weight = barycentricgrid(node, face, xi, yi, mask)
-[xx, yy] = meshgrid(xi, yi);
+[xx, yy] = ndgrid(xi, yi);
 idx = find(~isnan(mask));
 eid = mask(idx);
 t1 = node(face(:, 1), :);

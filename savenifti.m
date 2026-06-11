@@ -14,7 +14,7 @@ function bytestream = savenifti(img, filename, varargin)
 %        img: this is a numerical array to be stored in the NIfTI file
 %        filename: output file name, can have a suffix of '.nii' or '.nii.gz'
 %                 if a .gz suffix is used, this function needs the JSONLab
-%                 (http://gitlab.com/NeuroJSON/jsonlab) and ZMat (http://gitlab.com/NeuroJSON/zmat)
+%                 (https://github.com/NeuroJSON/jsonlab) and ZMat (https://github.com/NeuroJSON/zmat)
 %                 to perform the compression.
 %        rawhdr (optional): a struct, as a pre-created/loaded NIfTI header data structure
 %                if rawhdr is 'nifti1' or 'nifti2', this function calls
@@ -29,9 +29,9 @@ function bytestream = savenifti(img, filename, varargin)
 %        savenifti(a,'randnii2.nii.gz','nifti2'); % needs zmat
 %
 %
-%    this file is part of JNIfTI specification: https://github.com/NeuroJSON/jnifti
+%    this file is part of JNIfTI specification: https://github.com/NeuroJSON/jnifty
 %
-%    License: Apache 2.0, see https://github.com/NeuroJSON/jnifti for details
+%    License: Apache 2.0, see https://github.com/NeuroJSON/jnifty for details
 %
 
 if (~isempty(varargin))

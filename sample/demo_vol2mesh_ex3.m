@@ -50,4 +50,4 @@ h = slice(cleanimgfull, [], [120], [120 180]);
 set(h, 'linestyle', 'none');
 hold on;
 
-plotmesh(node(:, [2 1 3]), face, 'facealpha', 0.7);
+plotmesh(node(:, [2 1 3]) + 0.5, face, 'facealpha', 0.7);
