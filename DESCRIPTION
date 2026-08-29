@@ -1,6 +1,6 @@
 Name: iso2mesh
 Version: 1.9.8
-Date: 2024-17-10
+Date: 2024-10-17
 Title: A 3D surface and volumetric mesh generator for MATLAB/Octave
 Author: Qianqian Fang <fangqq@gmail.com>
 Maintainer: Qianqian Fang <fangqq@gmail.com>
@@ -17,5 +17,6 @@ Description: Iso2Mesh is a MATLAB/Octave-based mesh generation toolbox,
  Iso2Mesh is cross-platform and is compatible with both MATLAB
  and GNU Octave.
 URL: http://iso2mesh.sf.net
-Depends: jnifti, jsonlab, zmat
+License: GPL-3.0-or-later
+Depends: octave (>= 5.2.0)
 Categories: Mesh
