@@ -781,8 +781,9 @@ try
                 return
             end
             fid = fopen(fullfile(path, file), 'rb');
-            if (fid == 0)
+            if (fid == -1)
                 errordlg('can not open the specified file');
+                return
             end
             nodedata.vol = fread(fid, eval(res{1}), res{2});
             fclose(fid);

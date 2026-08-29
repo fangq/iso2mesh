@@ -23,8 +23,19 @@ u1 = u(:) / norm(u(:));
 v1 = v(:) / norm(v(:));
 
 k = cross(u1, v1);
-if (~any(k)) % u and v are parallel
-    R = eye(3);
+if (~any(k)) % u and v are parallel or anti-parallel
+    if (dot(u1, v1) > 0)
+        R = eye(3);
+    else
+        % u and v point in opposite directions: rotate by 180 degrees about
+        % any axis perpendicular to u, otherwise R*u*s=v is not satisfied
+        [minval, minidx] = min(abs(u1));
+        w = zeros(3, 1);
+        w(minidx) = 1;
+        w = cross(u1, w);
+        w = w / norm(w);
+        R = 2 * (w * w') - eye(3);
+    end
     return
 end
 % Rodrigues's formula:

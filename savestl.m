@@ -37,8 +37,16 @@ if (~isempty(elem))
         elem(:, 5:end) = [];
     end
     if (size(elem, 2) == 4)
-        elem = meshreorient(node, elem);
-        elem = volface(elem);
+        % a 4-column elem is either a tetrahedral mesh or a labeled triangular
+        % surface ([n1 n2 n3 label]) as returned by vol2surf/v2s; the test below
+        % is the same one used by plotmesh to tell the two apart
+        faceid = double(unique(elem(:, 4)));
+        if (length(faceid) == 1 || any(hist(double(elem(:, 4)), faceid) > 50))
+            elem(:, 4) = [];
+        else
+            elem = meshreorient(node, elem);
+            elem = volface(elem);
+        end
     end
     ev = surfplane(node, elem);
     ev = ev(:, 1:3) ./ repmat(sqrt(sum(ev(:, 1:3) .* ev(:, 1:3), 2)), 1, 3);

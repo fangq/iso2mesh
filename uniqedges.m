@@ -18,9 +18,9 @@ function [edges, idx, edgemap] = uniqedges(elem)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-if (size(elem) == 2)
+if (size(elem, 2) == 2)
     edges = elem;
-elseif (size(elem) >= 3)
+elseif (size(elem, 2) >= 3)
     edges = meshedge(elem);
 else
     error('invalid input');

@@ -18,9 +18,9 @@ function [faces, idx, facemap] = uniqfaces(elem)
 % -- this function is part of iso2mesh toolbox (http://iso2mesh.sf.net)
 %
 
-if (size(elem) == 3)
+if (size(elem, 2) == 3)
     faces = elem;
-elseif (size(elem) >= 4)
+elseif (size(elem, 2) >= 4)
     faces = meshface(elem);
 else
     error('invalid input');

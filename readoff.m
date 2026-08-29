@@ -60,7 +60,7 @@ end
 
 function str = nonemptyline(fid)
 str = '';
-if (fid == 0)
+if (fid == -1)
     error('invalid file');
 end
 while ((isempty(regexp(str, '\S')) || ~isempty(regexp(str, '^#')))  && ~feof(fid))

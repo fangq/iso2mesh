@@ -71,6 +71,10 @@ if (nargin < 5)
     maxvol = tsize * tsize * tsize;
 end
 
-centroid = cumsum([0 len(1:end - 1)]) + len / 2;   % define the centroids of each cylinder segment
+% define the centroids of each cylinder segment; len is cumulative at this
+% point, so the mid-point of segment i is (len(i-1)+len(i))/2 - applying
+% cumsum a second time here would push the seeds outside of uneven segments
+lenrow = len(:)';
+centroid = ([0, lenrow(1:end - 1)] + lenrow) / 2;
 seeds = repmat(c0(:)', length(len), 1) + repmat(v(:)', length(len), 1) .* repmat(centroid(:), 1, 3);
 [node, elem, face] = surf2mesh(ncyl, fcyl, [], [], 1, maxvol, seeds, [], 0);

@@ -55,7 +55,9 @@ for i = 1:length(len)
         if (idx(i) == length(cumlen))
             idx(i) = idx(i) - 1;
             weight(i) = 1;
-            newnodes(i, :) = nodes(end, :);
+            if (nargin >= 3 && nargout >= 3)
+                newnodes(i, :) = nodes(end, :);
+            end
         elseif (idx(i) <= length(polylen))
             weight(i) = (len(i) - cumlen(idx(i))) / polylen(idx(i));
             if (nargin >= 3 && nargout >= 3)

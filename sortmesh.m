@@ -45,7 +45,8 @@ end
 el(:, ecol) = sort(nidx(elem(:, ecol)), 2);
 el = sortrows(el, ecol);
 
-if (nargin >= 5 && nargout == 3)
+fc = [];
+if (nargin >= 5 && nargout >= 3)
     if (nargin < 6)
         fcol = 1:size(face, 2);
     end

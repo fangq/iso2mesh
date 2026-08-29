@@ -79,7 +79,7 @@ elseif (strcmp(method, 'laplacianhc'))
         end
         b = p - (alpha * node + ialpha * q);
         for i = 1:nn
-            p(idx(i), :) = p(idx(i), :) - (beta * b(i, :) + ibeta * mean(b(conn{idx(i)}, :)));
+            p(idx(i), :) = p(idx(i), :) - (beta * b(idx(i), :) + ibeta * mean(b(conn{idx(i)}, :)));
         end
     end
 elseif (strcmp(method, 'lowpass'))

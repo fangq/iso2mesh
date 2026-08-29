@@ -21,6 +21,16 @@ function seeds = surfseeds(node, face)
 fc = finddisconnsurf(face(:, 1:3));
 len = length(fc);
 seeds = zeros(len, 3);
+isfound = zeros(len, 1);
 for i = 1:len
-    seeds(i, :) = surfinterior(node, fc{i});
+    % surfinterior returns [] for an open or degenerate component; such a
+    % component is skipped instead of aborting the whole seed search
+    seed = surfinterior(node, fc{i});
+    if (~isempty(seed))
+        seeds(i, :) = seed;
+        isfound(i) = 1;
+    else
+        warning('no interior point was found for surface component %d, skipped', i);
+    end
 end
+seeds = seeds(isfound == 1, :);

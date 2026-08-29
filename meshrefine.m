@@ -97,7 +97,7 @@ elseif (length(varargin) >= 2)
     if (isstruct(varargin{2}))
         opt = varargin{2};
     else
-        if (length(varargin{2}) == size(node, 1) || length(varargin{1}) == size(elem, 1))
+        if (length(varargin{2}) == size(node, 1) || length(varargin{2}) == size(elem, 1))
             sizefield = varargin{2};
         else
             newpt = varargin{2};
@@ -139,7 +139,8 @@ if (~isempty(newpt))
         newpt = [newpt; repmat(newpt(1, :), 4 - size(newpt, 1), 1)];
     end
     savetetgennode(newpt, mwpath('pre_refine.1.a.node'));
-    moreopt = ' -i ';
+    % append, so that any -q/-a flags requested via opt are not discarded
+    moreopt = [moreopt ' -i '];
 end
 
 if (~isempty(sizefield))

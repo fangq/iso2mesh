@@ -1,7 +1,8 @@
 function ang = facedihedral(node, face, varargin)
 %
 % ang = facedihedral(node, face)
-% ang = facedihedral(node, face)
+%   or
+% ang = facedihedral(node, face, 'general')
 %
 % for every triangle in a triangular mesh, compute its dihedral angle
 % with its edge neighbor
@@ -24,7 +25,12 @@ if (length(varargin) == 1)
     opt.type = 'general';
 end
 
-edgenb = edgeneighbors(face(:, 1:3), opt.type);
+% edgeneighbors only accepts a 2nd input when it is 'general'
+if (isempty(opt.type))
+    edgenb = edgeneighbors(face(:, 1:3));
+else
+    edgenb = edgeneighbors(face(:, 1:3), opt.type);
+end
 surfnorm = surfacenorm(node, face(:, 1:3));
 ang = nan(size(face, 1), 3);
 if (~iscell(edgenb))

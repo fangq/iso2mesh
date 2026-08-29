@@ -20,7 +20,7 @@ attrstr = '';
 markers = '';
 
 fid = fopen(fname, 'wt');
-if (fid == 0)
+if (fid == -1)
     error(['can not write to file ' fname]);
 end
 if (size(node, 2) >= 5)

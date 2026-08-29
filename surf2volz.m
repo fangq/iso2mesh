@@ -53,8 +53,13 @@ for i = 1:length(iz)
         pos = [posx, posy];
         pos(find(posx > length(xi) | posy > length(yi) | posx <= 0 | posy <= 0), :) = [];
 
-        if (length(pos) > 0)
+        if (size(pos, 1) > 0)
             zz = floor(((zi(iz(i)) - zi(1))) / dz0);
+            if (zz < 1)
+                % the slice sits on zi(1); floor() gives 0, which is not a
+                % valid subscript - clamp it to the first slice of the output
+                zz = 1;
+            end
             for k = 1:size(pos, 1)
                 img(pos(k, 1), pos(k, 2), zz) = 1;
             end

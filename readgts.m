@@ -23,8 +23,15 @@ function [node, elem, edges, edgemap] = readgts(fname)
 node = [];
 elem = [];
 fid = fopen(fname, 'rb');
+if (fid == -1)
+    error('can not open GTS file %s', fname);
+end
 line = fgetl(fid);
 dim = sscanf(line, '%d', 3);
+if (numel(dim) < 3)
+    fclose(fid);
+    error('%s is not a valid GTS file, it may be empty or truncated', fname);
+end
 node   = fscanf(fid, '%f', [3, dim(1)])';
 edges  = fscanf(fid, '%d', [2, dim(2)])';
 edgemap = fscanf(fid, '%d', [3, dim(3)])';
@@ -38,6 +45,6 @@ try
         elem(i, 1:3) = unique(elem(i, :));
     end
 catch
-    error(sprint('invalid GTS face, id=%d\n', i));
+    error(sprintf('invalid GTS face, id=%d\n', i));
 end
 elem = elem(:, 1:3);

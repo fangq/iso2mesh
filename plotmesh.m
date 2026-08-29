@@ -208,7 +208,9 @@ if (~isempty(elem))
         x = cent(:, 1);
         y = cent(:, 2);
         z = cent(:, 3);
-        if (regexp(selector, '='))
+        % only a stand-alone '=' requests a cross-section; the comparison
+        % operators >=, <=, ~= and == select elements instead
+        if (~isempty(regexp(selector, '(?<![<>~=])=(?!=)', 'once')))
             if (size(node, 2) == 4)
                 [cutpos, cutvalue, facedata] = qmeshcut(elem, node(:, 1:3), node(:, 4), selector);
             elseif (size(node, 2) == 3)

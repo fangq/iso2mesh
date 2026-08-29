@@ -27,7 +27,7 @@ function run_iso2mesh_test(tests)
 %
 
 if (nargin == 0)
-    tests = {'prim', 'utils', 'core', 'surf', 'bool', 'vol'};
+    tests = {'prim', 'utils', 'core', 'surf', 'bool', 'vol', 'bugs'};
 end
 
 %%
@@ -387,4 +387,72 @@ if (ismember('vol', tests))
     vol1 = laplacefill(vol, [2, 2, 2]);
     vol1 = (vol1 > 1e-10);
     test_iso2mesh('laplacefill open seed', @savejson, sum(vol1(:)), '[56580]');
+end
+
+%%
+if (ismember('bugs', tests))
+    fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
+    fprintf('Test specific bug fixes\n');
+    fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
+
+    % meshreorient must swap node columns only, not a trailing region label
+    no = [0 0 0; 1 0 0; 0 1 0; 0 0 1];
+    negel = [1 2 3 4];
+    if (elemvolume(no, negel, 'signed') > 0)
+        negel = [1 3 2 4];
+    end
+    el1 = meshreorient(no, [negel 7]);
+    test_iso2mesh('meshreorient keeps region label', @savejson, el1(5), '[7]');
+    test_iso2mesh('meshreorient labeled elem is positive', @savejson, ...
+                  elemvolume(no, el1(1:4), 'signed') > 0, '[true]');
+    test_iso2mesh('meshreorient unlabeled elem is positive', @savejson, ...
+                  elemvolume(no, meshreorient(no, negel), 'signed') > 0, '[true]');
+
+    % uniqfaces/uniqedges must accept a plain triangle/edge list
+    [no, fc, el] = meshabox([0 0 0], [1 1 1], 1);
+    test_iso2mesh('uniqfaces of a triangle list', @savejson, ...
+                  size(uniqfaces(fc(:, 1:3))), sprintf('[%d,3]', size(fc, 1)));
+    test_iso2mesh('uniqedges of an edge list', @savejson, ...
+                  uniqedges([1 2; 2 3; 3 1]), '[[1,2],[3,1],[2,3]]');
+
+    % facedihedral's 2-input form must not error inside edgeneighbors
+    test_iso2mesh('facedihedral 2-input form', @savejson, ...
+                  size(facedihedral(no, fc(:, 1:3))), sprintf('[%d,3]', size(fc, 1)));
+
+    % polylineinterp must not touch nodes when only 2 outputs are requested
+    [pidx, pweight] = polylineinterp([2, 2, 1], 5);
+    test_iso2mesh('polylineinterp at polyline end', @savejson, [pidx pweight], '[3,1]');
+
+    % rotmat2vec must satisfy R*u*s=v for anti-parallel vectors
+    [rmat, rs] = rotmat2vec([0 0 1], [0 0 -1]);
+    test_iso2mesh('rotmat2vec anti-parallel', @savejson, ...
+                  round_to_digits((rmat * [0; 0; 1] * rs)', 6), '[0,0,-1]');
+    test_iso2mesh('rotmat2vec anti-parallel is a rotation', @savejson, ...
+                  round_to_digits(det(rmat), 6), '[1]');
+    test_iso2mesh('rotmat2vec parallel', @savejson, rotmat2vec([0 0 2], [0 0 5]), ...
+                  '[[1,0,0],[0,1,0],[0,0,1]]');
+
+    % sortmesh must return the face list together with nodemap
+    [sno, sel, sfc, snodemap] = sortmesh([0 0 0], no, el(:, 1:4), 1:4, fc(:, 1:3), 1:3);
+    test_iso2mesh('sortmesh 4-output form', @savejson, ...
+                  [size(sfc, 1) length(snodemap)], sprintf('[%d,%d]', size(fc, 1), size(no, 1)));
+
+    % savestl must not treat a labeled triangular surface as a tet mesh
+    stlfile = mwpath('post_savestl_test.stl');
+    deletemeshfile(stlfile);
+    savestl(no, [fc(:, 1:3) ones(size(fc, 1), 1)], stlfile);
+    test_iso2mesh('savestl of a labeled surface', @savejson, ...
+                  length(strfind(fileread(stlfile), 'facet normal')), ...
+                  sprintf('[%d]', size(fc, 1)));
+    deletemeshfile(stlfile);
+
+    % smoothsurf 'laplacianhc' must keep masked nodes fixed
+    nconn = meshconn(fc(:, 1:3), size(no, 1));
+    nmask = zeros(size(no, 1), 1);
+    nmask(1:2:end) = 1;
+    psm = smoothsurf(no, nmask, nconn, 3, 0.5, 'laplacianhc', 0.5);
+    test_iso2mesh('smoothsurf laplacianhc honors mask', @savejson, ...
+                  isequal(psm(nmask == 1, :), no(nmask == 1, :)), '[true]');
+    test_iso2mesh('smoothsurf laplacianhc moves free nodes', @savejson, ...
+                  any(any(abs(psm(nmask == 0, :) - no(nmask == 0, :)) > 1e-12)), '[true]');
 end

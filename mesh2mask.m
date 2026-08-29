@@ -76,6 +76,18 @@ patch('Vertices', node, 'Faces', face, 'linestyle', 'none', 'FaceColor', 'flat',
       'FaceVertexCData', (1:size(face, 1))', 'CDataMapping', 'scaled');
 set(gca, 'Position', [0 0 1 1]);
 cm = jet(size(face, 1));
+
+% the triangle index is recovered below by matching the rendered 8-bit RGB
+% values against this colormap; jet() quantized to 8 bits yields only ~1000
+% distinct colors, so beyond that two triangles share a color and ismember()
+% would silently return the index of the first one
+if (size(unique(floor(cm * 255), 'rows'), 1) < size(face, 1))
+    error(['this triangle list has %d faces, more than the number of colors ' ...
+           'that can be distinguished in the rasterized image; please ' ...
+           'rasterize a coarser mesh, or split the triangle list and call ' ...
+           'mesh2mask on each part'], size(face, 1));
+end
+
 colormap(cm);
 axis off;
 set(gca, 'xlim', [mn(1) mx(1)]);

@@ -23,7 +23,11 @@ function [newelem, evol, idx] = meshreorient(node, elem)
 % calculate the canonical volume of the element (can be a 2D or 3D)
 evol = elemvolume(node, elem, 'signed');
 
+% number of columns in elem storing node indices; any trailing column, such
+% as a region label, must not take part in the node swap below
+dim = min(size(node, 2) + 1, size(elem, 2));
+
 % make sure all elements are positive in volume
 idx = find(evol < 0);
-elem(idx, [end - 1, end]) = elem(idx, [end, end - 1]);
+elem(idx, [dim - 1, dim]) = elem(idx, [dim, dim - 1]);
 newelem = elem;

@@ -257,7 +257,8 @@ end  % if not isempty(img)
 if (isstruct(opt) && isfield(opt, 'surf'))
     for i = 1:length(opt.surf)
         opt.surf(i).elem(:, 4) = maxlevel + i;
-        el = [el; opt.surf(i).elem + length(no)];
+        % only the node index columns are offset; column 4 holds the label
+        el = [el; [opt.surf(i).elem(:, 1:3) + size(no, 1), opt.surf(i).elem(:, 4)]];
         no = [no; opt.surf(i).node];
     end
 end
