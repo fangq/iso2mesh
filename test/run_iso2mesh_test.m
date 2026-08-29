@@ -30,6 +30,8 @@ if (nargin == 0)
     tests = {'prim', 'utils', 'core', 'surf', 'bool', 'vol', 'bugs'};
 end
 
+test_iso2mesh('reset');
+
 %%
 if (ismember('prim', tests))
     fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
@@ -455,4 +457,20 @@ if (ismember('bugs', tests))
                   isequal(psm(nmask == 1, :), no(nmask == 1, :)), '[true]');
     test_iso2mesh('smoothsurf laplacianhc moves free nodes', @savejson, ...
                   any(any(abs(psm(nmask == 0, :) - no(nmask == 0, :)) > 1e-12)), '[true]');
+end
+
+%%
+[total, failed, faillist] = test_iso2mesh('summary');
+
+fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
+fprintf('Totals: %d passed, %d failed, %d total\n', total - failed, failed, total);
+fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
+
+if (total == 0)
+    error('no unit test was executed, please check the requested test categories');
+end
+
+if (failed > 0)
+    failnames = sprintf('\n\t%s', faillist{:});
+    error('%d of %d unit tests failed:%s', failed, total, failnames);
 end

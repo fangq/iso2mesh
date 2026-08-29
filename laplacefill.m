@@ -94,7 +94,17 @@ else
 end
 
 if (flag)
-    newvol = gmres(Amat, b, 28, tol, maxiter, varargin{:});
+    [newvol, flag] = gmres(Amat, b, 28, tol, maxiter, varargin{:});
+end
+
+if (flag)
+    % neither iterative solver converged - this happens on the seeded system,
+    % where the seed row has a zero diagonal because its +1 entry cancels the
+    % -1 interior entry. the previous code ignored gmres's flag and silently
+    % returned the stagnated (all-zero) iterate, so fall back to a direct
+    % sparse solve instead, which is exact but needs more memory
+    warning('iterative solver did not converge (flag %d), using a direct solve', flag);
+    newvol = Amat \ b;
 end
 
 newvol = reshape(full(newvol), size(vol));
