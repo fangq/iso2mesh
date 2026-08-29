@@ -132,6 +132,9 @@ File I/O
  savemedit
  savejson
  loadjson
+ saveyaml
+ loadyaml
+ yaml2json
  saveubjson
  loadubjson
  loadmsgpack
@@ -144,7 +147,6 @@ File I/O
  saveabaqus
  savenirfast
  readnirfast
- readnifti
  readmptiff
  loadjsnirf
  savejsnirf
@@ -180,6 +182,7 @@ JData functions
  savejnii
  jsonpath
  jsonset
+ jsonschema
  jsoncache
  json2couch
  filterjsonmmap
@@ -200,7 +203,7 @@ Data compression
  base64encode
  blosc2encode
  blosc2decode
- zstdeecode
+ zstdencode
  zstddecode
  octavezmat
 Volumetric image pre-processing
