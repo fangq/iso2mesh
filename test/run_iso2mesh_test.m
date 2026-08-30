@@ -18,6 +18,8 @@ function run_iso2mesh_test(tests)
 %         'surf': surface processing
 %         'bool': surface boolean operations
 %         'vol': volume processing
+%         'io': mesh file writers and readers, tested as round trips
+%         'invariant': properties a mesh operation must preserve
 %         'bugs': test specific bug fixes
 %
 % license:
@@ -27,7 +29,7 @@ function run_iso2mesh_test(tests)
 %
 
 if (nargin == 0)
-    tests = {'prim', 'utils', 'core', 'surf', 'bool', 'vol', 'bugs'};
+    tests = {'prim', 'utils', 'core', 'surf', 'bool', 'vol', 'io', 'invariant', 'bugs'};
 end
 
 test_iso2mesh('reset');
@@ -457,6 +459,168 @@ if (ismember('bugs', tests))
                   isequal(psm(nmask == 1, :), no(nmask == 1, :)), '[true]');
     test_iso2mesh('smoothsurf laplacianhc moves free nodes', @savejson, ...
                   any(any(abs(psm(nmask == 0, :) - no(nmask == 0, :)) > 1e-12)), '[true]');
+end
+
+%%
+if (ismember('io', tests))
+    fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
+    fprintf('Test mesh file writers and readers\n');
+    fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
+
+    % a save/load round trip needs no external binary and checks the writer and
+    % the reader against each other rather than against a stored byte pattern,
+    % so unlike the golden values elsewhere in this file it does not have to be
+    % updated when a mesher binary is rebuilt
+    [no, fc, el] = meshabox([0 0 0], [1 1 1], 1);
+    no = no(:, 1:3);
+    fc = fc(:, 1:3);
+    el = el(:, 1:4);
+
+    fname = mwpath('post_iotest.off');
+    deletemeshfile(fname);
+    saveoff(no, fc, fname);
+    [no2, fc2] = readoff(fname);
+    test_iso2mesh('off round trip node', @savejson, round_to_digits(no2, 6), savejson('', round_to_digits(no, 6), 'compact', 1));
+    test_iso2mesh('off round trip face', @savejson, fc2, savejson('', fc, 'compact', 1));
+    deletemeshfile(fname);
+
+    fname = mwpath('post_iotest.smf');
+    deletemeshfile(fname);
+    savesmf(no, fc, fname);
+    [no2, fc2] = readsmf(fname);
+    test_iso2mesh('smf round trip node', @savejson, round_to_digits(no2, 6), savejson('', round_to_digits(no, 6), 'compact', 1));
+    test_iso2mesh('smf round trip face', @savejson, fc2, savejson('', fc, 'compact', 1));
+    deletemeshfile(fname);
+
+    fname = mwpath('post_iotest.asc');
+    deletemeshfile(fname);
+    saveasc(no, fc, fname);
+    [no2, fc2] = readasc(fname);
+    test_iso2mesh('asc round trip node', @savejson, round_to_digits(no2, 6), savejson('', round_to_digits(no, 6), 'compact', 1));
+    test_iso2mesh('asc round trip face', @savejson, fc2, savejson('', fc, 'compact', 1));
+    deletemeshfile(fname);
+
+    % gts stores the surface as edges, so the triangles come back in a
+    % different vertex order; compare them as unordered node sets
+    fname = mwpath('post_iotest.gts');
+    deletemeshfile(fname);
+    savegts(no, fc, fname);
+    [no2, fc2] = readgts(fname);
+    test_iso2mesh('gts round trip node', @savejson, round_to_digits(no2, 6), savejson('', round_to_digits(no, 6), 'compact', 1));
+    test_iso2mesh('gts round trip face', @savejson, sortrows(sort(fc2, 2)), savejson('', sortrows(sort(fc, 2)), 'compact', 1));
+    deletemeshfile(fname);
+
+    fname = mwpath('post_iotest.mesh');
+    deletemeshfile(fname);
+    savemedit(no, fc, el, fname);
+    [no2, el2, fc2] = readmedit(fname);
+    test_iso2mesh('medit round trip node', @savejson, round_to_digits(no2(:, 1:3), 6), savejson('', round_to_digits(no, 6), 'compact', 1));
+    test_iso2mesh('medit round trip elem', @savejson, el2(:, 1:4), savejson('', el, 'compact', 1));
+    test_iso2mesh('medit round trip face', @savejson, size(fc2, 1), sprintf('[%d]', size(fc, 1)));
+    deletemeshfile(fname);
+
+    fname = mwpath('post_iotest.jmsh');
+    deletemeshfile(fname);
+    savejmesh(no, fc, el, fname);
+    jmsh = loadjmesh(fname);
+    test_iso2mesh('jmesh round trip node', @savejson, round_to_digits(jmsh.MeshVertex3, 6), savejson('', round_to_digits(no, 6), 'compact', 1));
+    test_iso2mesh('jmesh round trip tri', @savejson, jmsh.MeshTri3, savejson('', fc, 'compact', 1));
+    test_iso2mesh('jmesh round trip tet', @savejson, jmsh.MeshTet4, savejson('', el, 'compact', 1));
+    deletemeshfile(fname);
+
+    % tetgen splits a mesh over .node/.ele/.face
+    fstub = mwpath('post_iotest.1');
+    deletemeshfile([fstub '.*']);
+    savetetgennode(no, [fstub '.node']);
+    savetetgenele([el ones(size(el, 1), 1)], [fstub '.ele']);
+    savetetgenele([fc ones(size(fc, 1), 1)], [fstub '.face']);
+    [no2, el2, fc2] = readtetgen(fstub);
+    test_iso2mesh('tetgen round trip node', @savejson, round_to_digits(no2(:, 1:3), 6), savejson('', round_to_digits(no, 6), 'compact', 1));
+    test_iso2mesh('tetgen round trip elem', @savejson, el2(:, 1:4), savejson('', el, 'compact', 1));
+    test_iso2mesh('tetgen round trip face', @savejson, size(fc2, 1), sprintf('[%d]', size(fc, 1)));
+    deletemeshfile([fstub '.*']);
+
+    % nirfast writes a group of files sharing one stub
+    fstub = mwpath('post_iotest_nirfast');
+    deletemeshfile([fstub '.*']);
+    savenirfast(no, el, fstub);
+    nirfast = readnirfast(fstub);
+    test_iso2mesh('nirfast round trip node', @savejson, round_to_digits(nirfast.nodes, 6), savejson('', round_to_digits(no, 6), 'compact', 1));
+    test_iso2mesh('nirfast round trip elem', @savejson, nirfast.elements(:, 1:4), savejson('', el, 'compact', 1));
+    deletemeshfile([fstub '.*']);
+
+    % the writers without a matching reader must still produce a non-empty file
+    fname = mwpath('post_iotest.stl');
+    deletemeshfile(fname);
+    savestl(no, fc, fname);
+    stlinfo = dir(fname);
+    test_iso2mesh('stl file is written', @savejson, stlinfo.bytes > 0, '[true]');
+    test_iso2mesh('stl facet count', @savejson, length(strfind(fileread(fname), 'facet normal')), sprintf('[%d]', size(fc, 1)));
+    deletemeshfile(fname);
+end
+
+%%
+if (ismember('invariant', tests))
+    fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
+    fprintf('Test properties preserved by mesh operations\n');
+    fprintf(sprintf('%s\n', char(ones(1, 79) * 61)));
+
+    % these assert relationships rather than stored values, so they keep their
+    % meaning when a mesher binary is rebuilt and its output shifts slightly
+    [no, fc, el] = meshabox([0 0 0], [1 1 1], 1);
+    no = no(:, 1:3);
+    fc = fc(:, 1:3);
+    el = el(:, 1:4);
+    vol0 = sum(elemvolume(no, el));
+
+    % the boundary of a tetrahedral mesh encloses the same volume as the sum of
+    % its elements; this cross-checks surfvolume against elemvolume
+    test_iso2mesh('boundary encloses element volume', @savejson, ...
+                  abs(surfvolume(no, volface(el)) - vol0) < 1e-8, '[true]');
+
+    % renumbering nodes must not change the geometry
+    [no2, el2] = removedupnodes(no, el);
+    test_iso2mesh('removedupnodes keeps volume', @savejson, ...
+                  abs(sum(elemvolume(no2, el2)) - vol0) < 1e-8, '[true]');
+    [no3, el3] = sortmesh([0 0 0], no, el, 1:4);
+    test_iso2mesh('sortmesh keeps volume', @savejson, ...
+                  abs(sum(elemvolume(no3, el3)) - vol0) < 1e-8, '[true]');
+    test_iso2mesh('sortmesh keeps node count', @savejson, size(no3, 1), sprintf('[%d]', size(no, 1)));
+
+    % reorientation must leave every element positive, and must be idempotent
+    elflip = el;
+    elflip(1:2:end, [3 4]) = elflip(1:2:end, [4 3]);
+    elfix = meshreorient(no, elflip);
+    test_iso2mesh('meshreorient makes volumes positive', @savejson, ...
+                  all(elemvolume(no, elfix, 'signed') > 0), '[true]');
+    test_iso2mesh('meshreorient is idempotent', @savejson, ...
+                  isequal(meshreorient(no, elfix), elfix), '[true]');
+    test_iso2mesh('meshreorient keeps volume', @savejson, ...
+                  abs(sum(elemvolume(no, elfix)) - vol0) < 1e-8, '[true]');
+
+    % a closed genus zero surface has Euler characteristic 2
+    test_iso2mesh('box surface euler number', @savejson, mesheuler(fc), '[2]');
+    [nos, fcs] = meshunitsphere(0.1);
+    test_iso2mesh('sphere surface euler number', @savejson, mesheuler(fcs(:, 1:3)), '[2]');
+
+    % every face of a closed surface is shared by exactly two triangles, so it
+    % has no open edge
+    test_iso2mesh('box surface has no open edge', @savejson, isempty(surfedge(fc)), '[true]');
+    test_iso2mesh('tet mesh boundary has no open edge', @savejson, isempty(surfedge(volface(el))), '[true]');
+
+    % the extracted boundary is exactly the surface it was built from
+    test_iso2mesh('volface matches the input surface', @savejson, ...
+                  isequal(sortrows(sort(volface(el), 2)), sortrows(sort(fc, 2))), '[true]');
+
+    % scaling a mesh scales its volume by the cube of the factor
+    test_iso2mesh('volume scales cubically', @savejson, ...
+                  abs(sum(elemvolume(no * 2, el)) - 8 * vol0) < 1e-8, '[true]');
+
+    % dropping unused nodes must not change the surface area
+    area0 = sum(elemvolume(no, fc));
+    [nor, fcr] = removeisolatednode(no, fc);
+    test_iso2mesh('removeisolatednode keeps area', @savejson, ...
+                  abs(sum(elemvolume(nor, fcr)) - area0) < 1e-8, '[true]');
 end
 
 %%

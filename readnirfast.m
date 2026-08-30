@@ -37,7 +37,7 @@ function nirfastmesh = readnirfast(filestub)
 %
 
 fname = [filestub, '.node'];
-if (~exist(fullfile(pwd, fname), 'file'))
+if (~exist(fname, 'file'))
     error([fname ' could not be found']);
 end
 nirfastmesh.nodes = load(fname);
@@ -46,14 +46,14 @@ nirfastmesh.bndvtx = nirfastmesh.nodes(:, 1);
 nirfastmesh.nodes(:, 1) = [];
 
 fname = [filestub, '.elem'];
-if (~exist(fullfile(pwd, fname), 'file'))
+if (~exist(fname, 'file'))
     error([fname ' could not be found']);
 end
 nirfastmesh.elements = load(fname);
 nirfastmesh.dimension = size(nirfastmesh.elements, 2) - 1;
 
 fname = [filestub, '.region'];
-if (exist(fullfile(pwd, fname), 'file'))
+if (exist(fname, 'file'))
     nirfastmesh.region = load(fname);
 end
 
