@@ -26,7 +26,7 @@ else
     error('invalid input');
 end
 
-[uedges, idx, jdx] = unique(sort(edges, 2), 'rows');
+[uedges, idx, jdx] = unique(sort(edges, 2), 'rows', 'first');
 edges = edges(idx, :);
 if (nargout > 2)
     edgemap = reshape(jdx, [size(elem, 1) nchoosek(size(elem, 2), 2)]);

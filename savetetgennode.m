@@ -31,5 +31,5 @@ if (size(node, 2) >= 4)
     markers = '%d';
 end
 fprintf(fid, '%d %d %d %d\n', size(node, 1), 3, hasprop, size(node, 2) >= 4);
-fprintf(fid, ['%d %e %e %e ' attrstr markers '\n'], [(1:size(node, 1))' - 1 node]');
+fprintf(fid, ['%d %.16g %.16g %.16g ' attrstr markers '\n'], [(1:size(node, 1))' - 1 node]');
 fclose(fid);

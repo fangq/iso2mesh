@@ -26,7 +26,7 @@ else
     error('invalid input');
 end
 
-[ufaces, idx, jdx] = unique(sort(faces, 2), 'rows');
+[ufaces, idx, jdx] = unique(sort(faces, 2), 'rows', 'first');
 faces = faces(idx, :);
 if (nargout > 2)
     facemap = reshape(jdx, [size(elem, 1) nchoosek(size(elem, 2), 3)]);
