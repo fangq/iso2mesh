@@ -6,9 +6,10 @@ jobs:
   octave_test:
     name: Octave tests
     strategy:
-      # provided octave versions: ubuntu-20.04 = 5.2, ubuntu-22.04 = 6.4, ubuntu-24.04 = 8.4, macos-13/14 = 9.2, windows-2019 = 7.3
+      fail-fast: false
+      # provided octave versions: ubuntu-20.04 = 5.2, ubuntu-22.04 = 6.4, ubuntu-24.04 = 8.4, macos-15-intel/14 = brew, windows-2019 = 7.3
       matrix:
-        os: [ubuntu-22.04, ubuntu-24.04, macos-13, macos-14, windows-2022]
+        os: [ubuntu-22.04, ubuntu-24.04, macos-15-intel, macos-14, windows-2022]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -68,8 +69,9 @@ jobs:
   matlab_test:
     name: MATLAB test
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-13, macos-14, windows-2022]
+        os: [ubuntu-24.04, macos-15-intel, macos-14, windows-2022]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
