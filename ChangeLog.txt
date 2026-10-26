@@ -6,6 +6,107 @@
 
 Iso2Mesh ChangeLog (key features marked by *):
 
+2026/10/25  (unreleased)
+
+ 2026-10-25 [8b287f7] [doc] update the author's title to Professor
+ 2026-08-30 [4a0ca5b] [test] add file round-trip and invariant tests, fix readnirfast on absolute paths
+ 2026-08-30 [e0f8d06] [misc] add a .gitignore for build and demo artifacts
+ 2026-08-30 [fc910ce] [oct-hdf5] point the install instructions at tag git20260830
+ 2026-08-30 [af2b039] [easyh5] sync the loadh5 fix for transposed complex and sparse arrays
+ 2026-08-30 [9beaa75] [easyh5] sync saveh5/loadh5 from easyh5, their upstream home
+ 2026-08-29 [6e8971f] [pkg] fix DESCRIPTION fields that block an Octave package build
+ 2026-08-29 [8113ae4] [test] make failing assertions fail the test run, fix laplacefill seeded solve
+ 2026-08-29 [1ac8641] [jsonlab] sync bundled jsonlab units, add yaml and jsonschema functions
+ 2026-08-29 [ab61b3c] [bug] fix silent mesh corruption and crashes in core units, add 'bugs' tests
+ 2026-08-28 [9124f85] [meshfix] update meshfix submodule to upstream tip b60c03d
+ 2026-08-28 [876ef26] [submodule] bump meshfix, tetgen and PoissonRecon pointers to local checkouts
+ 2026-08-26 [917f9e4] [cork] update cork submodule to 6fca275
+ 2026-06-11 [f85ad14] [jsonlab] sync with the latest version of jsonlab 3.0.pre
+ 2025-11-13 [ac3087d] [point] add pt2surf, add facedihedral, circumradius, removenode
+ 2025-11-12 [04adeda] [brain2meseh] fix inconsistent loop marker in maxloop
+ 2025-11-11 [a859360] [brain2mesh] update brain2mesh related functions for more robust brain1020
+ 2025-08-17 [b37f97f] [bug] close #87, close #88, use simplier patch, use mh_style
+ 2025-07-29 [d55d732] [ci] remove macos-14 debug info
+ 2025-07-29 [2119036] [ci] install matlab R2023b on macos-14
+ 2025-07-29 [3b088af] [ci] debug macos-14 suffix
+ 2025-07-29 [e4ddee7] [ci] fix macos-14 test error
+ 2025-07-29 [b6eceb7] [ci] update all matlab run-command action to v2
+ 2025-07-29 [0ece250] [ci] update matlab action to v2 to support macos-14
+ 2025-07-29 [380cb8a] [ci] add test for matlab on macos-14
+ 2025-07-29 [9a3987d] [ci] remove retired windows-2019 runner
+ 2025-07-29 [c8bfd7a] [ci] fix failed ci demo, speed up vol2surf significantly
+ 2025-07-28 [68292e6] [bug] fix meshrefine -m flag with .vol input bug, fix flipped elem in jmeshlib
+ 2025-06-29 [722bbc3] [bug] enable sizing field based refinement
+ 2025-06-21 [6c3e1c2] [feat] update mesheuler to report open-edge b and genus g
+ 2025-06-18 [4d75728] [format] reformat units using misshit
+ 2025-06-18 [9ee89c5] [feat] meshacylinder supports elliptic cylinder
+ 2025-06-02 [f7ce169] [io] support // in obj face data
+ 2025-05-29 [e39893d] [bug] fix #85, but it won't do anything as cgalsurf always returns 0
+ 2025-05-29 [9a31573] [bug] fix debian bug#1104839, fix #86
+ 2025-05-29 [0dc2eb1] [ci] remove ubuntu-20.04
+ 2025-05-29 [04a5b6b] [ci] fix octave error
+ 2025-03-30 [cb0bfea] [jsonlab] sync with the latest jsonlab, with NeuroJSON client neuroj.m
+ 2025-03-30 [f9047fe] [jsnirfy] update with the latest jsnirfy toolbox
+ 2025-03-12 [48330e2] [feat] integrate isosurface with binsurface
+ 2025-03-12 [cb8a6c8] [bug] matlab isosurface transpose x/y and shift by 0.5
+ 2025-02-24 [7279fd0] [feat] add built-in base64decode support for octave
+ 2025-02-24 [e79454f] [ci] test windows ci
+ 2025-02-23 [067bbaa] [sync] update jsonlab to the latest
+ 2025-02-23 [8eec27c] [bug] fix stalled isosurface in octave 4 and 5
+ 2025-02-23 [aff56c4] [bug] fix octave failed test
+ 2025-02-23 [51c60f1] [feat] significantly speed up elemvolume using vectorization
+ 2025-02-23 [015a070] [feat] accelerate vol2surf by switching from binsurface to isosurface
+ 2025-02-05 [898a672] [bug] cast indices to double to avoid error on older octave, #83
+ 2025-02-05 [ba2645c] Fixed bug in 'int16' data reading.
+ 2024-12-24 [6462e20] [feat] support keyword=value input for matlab R2021 or newer
+ 2024-12-24 [d7cdefb] [ci] improve precision for meshasphere and meshanellip
+ 2024-12-24 [dbda605] [ci] fix macos extremely slow demo_directplc_ex1 test
+ 2024-12-23 [c373bfc] [test] add binary volume function tests
+ 2024-12-23 [4f19094] [bug] fix volgrow and volshrink, flip mask for convn, fix laplacefill
+ 2024-12-23 [9caffba] [ci] remove mexglx test, use mexa64
+ 2024-12-23 [5775263] [ci] use 64bit mex on linux, fix yml
+ 2024-12-23 [dc2d217] [ci] use 64bit mex on linux
+ 2024-12-23 [4ac42b9] [ci] debug cork missing error
+ 2024-12-22 [a247e20] [test] add unit tests for surfboolean
+ 2024-12-22 [62c1c6a] [test] add unit tests for surfboolean
+ 2024-12-22 [f11665b] [test] add unit tests for surfboolean
+ 2024-12-22 [eec4594] [test] add surface function unit tests
+ 2024-12-22 [35cbf66] [test] add unit tests for utility functions
+ 2024-12-22 [e4b12ed] [ci] debug windows cylinder test
+ 2024-12-22 [2da6701] [ci] test windows 2022
+ 2024-12-21 [2f2fb33] [feat] remove all imfill dependency, drop octave-image in ci
+ 2024-12-21 [96e0880] [feat] add laplacefill.m
+ 2024-12-18 [e37057a] [feat] allow fillholes3d to perform floodfill
+ 2024-12-18 [11c106b] [feat] drop image proc toolbox dep. self-implement volgrow,shrink,close,open
+ 2024-12-08 [2f2d2c6] [ci] retest windows octave-image buil;d
+ 2024-12-01 [7d7079b] [feat] support integer typed elem
+ 2024-10-27 [7d62780] [gui] fix errdlg typo
+ 2024-10-27 [2bf959c] [gui] add try/except for meshing tasks,pgup/pgdown to slice z
+ 2024-10-26 [7f19e13] [i2m] update i2m gui, works after deploytool build
+ 2024-10-26 [5b7526c] [ci] downgrade octave-image package version on win
+ 2024-10-26 [c8f40f3] [ci] downgrade octave-image package version on win
+ 2024-10-26 [cd544a0] [ci] debug windows pkg install image
+ 2024-10-26 [05b71ea] [ci] debug windows curl
+ 2024-10-26 [55d5fc1] [ci] use selfhosted octave-image source
+ 2024-10-26 [8e91772] [ci] switch to octave 4.4 on windows
+ 2024-10-25 [d9855aa] [ci] switch to octave 4.4 on windows
+ 2024-10-25 [a784dc8] [ci] switch to octave 9.2 on windows
+ 2024-10-25 [aab06bd] [ci] switch to octave 6.4 on windows
+ 2024-10-25 [615fd77] [ci] switch to octave 7.3 as 8.4 windows can not install image
+ 2024-10-24 [17a6608] [ci] use octave 8.4 on windows runners
+ 2024-10-24 [ba7f8e4] [ci] create round_to_digits to a separate unit
+ 2024-10-24 [2a73b0c] [ci] add rounddigits for octave, code reformat
+ 2024-10-24 [f731a8a] [ci] add initial unit tests
+ 2024-10-24 [194694f] [ci] set default shell to bash in matlab tests
+ 2024-10-24 [ea32d63] [ci] add missing dll for win32 binaries, restore win32 test
+ 2024-10-24 [6d4f70a] [ci] restore 64bit windows binary as default
+ 2024-10-24 [9bbaffd] [ci] fix ci errors
+ 2024-10-24 [a250ad5] [ci] test 32bit binaries
+ 2024-10-23 [a4009b6] [octave] workaround for octave bug https://savannah.gnu.org/bugs/?66161
+ 2024-10-22 [7839201] [tools] update meshfix to fix implicit-function warning when building meshfix in Debian with -Werror=implicit-function-declaration enabled in CFLAGS, this fails to build iso2mesh package, see https://www.mail-archive.com/debian-bugs-rc@lists.debian.org/msg673548.html
+ 2024-10-22 [d979f6a] [ci] add ubuntu-24.04 runner
+ 2024-10-21 [8e6b284] [os] remove macos PowerPC/intel32 and RaspberryPi mexarmhf support
+
 2024/10/20  (1.9.8, codename: Pot Stickers)
 
  2024-10-19 [a3d12dc] [ci] add macos-14, break into smaller steps
